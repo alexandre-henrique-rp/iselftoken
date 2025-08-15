@@ -18,7 +18,7 @@ export function TestimonialCard({ data }: TestimonialCardProps) {
   return (
     <div className="bg-black rounded-xl border border-zinc-800">
       <div className="p-6">
-        <p className="text-zinc-400 italic">"{data.testimonial}"</p>
+        <p className="text-zinc-400 italic">&quot;{data.testimonial}&quot;</p>
       </div>
       <div className="flex items-center p-6 pt-0">
         <div className="h-12 w-12 rounded-full bg-zinc-800 mr-4" />

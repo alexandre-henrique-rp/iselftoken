@@ -1,7 +1,8 @@
 import * as React from "react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
-export interface AvatarProps extends React.HTMLAttributes<HTMLSpanElement> {}
+export type AvatarProps = React.HTMLAttributes<HTMLSpanElement>;
 
 export function Avatar({ className, ...props }: AvatarProps) {
   return (
@@ -16,19 +17,22 @@ export function Avatar({ className, ...props }: AvatarProps) {
   );
 }
 
-export interface AvatarImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {}
+export type AvatarImageProps = React.ComponentProps<typeof Image> & {
+  className?: string;
+};
 
-export function AvatarImage({ className, ...props }: AvatarImageProps) {
+export function AvatarImage({ className, alt = "Avatar", ...props }: AvatarImageProps) {
   return (
-    <img
+    <Image
       data-slot="avatar-image"
-      className={cn("aspect-square h-full w-full", className)}
+      className={cn("aspect-square h-full w-full object-cover", className)}
+      alt={alt}
       {...props}
     />
   );
 }
 
-export interface AvatarFallbackProps extends React.HTMLAttributes<HTMLSpanElement> {}
+export type AvatarFallbackProps = React.HTMLAttributes<HTMLSpanElement>;
 
 export function AvatarFallback({ className, ...props }: AvatarFallbackProps) {
   return (
