@@ -7,6 +7,7 @@ import { ExploreOpportunities, type OpportunityData } from "@/components/explore
 import { TestimonialCard, type TestimonialData } from "@/components/testimonial-card";
 import { StartupTestimonialCard, type StartupTestimonialData } from "@/components/startup-testimonial-card";
 import { Star } from "lucide-react";
+import { redirect } from "next/navigation";
 
 export default function Home() {
   // Dados das oportunidades de investimento (exigem origem na própria page.tsx)
@@ -226,10 +227,11 @@ export default function Home() {
                 <Button
                   variant="outline"
                   className="inline-flex bg-transparent items-center justify-center rounded-md border border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white transition-colors p-6 text-base font-medium"
+                  onClick={() => redirect("/login")}
                 >
                   Explorar Oportunidades
                 </Button>
-                <Button className="inline-flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-600/90 transition-colors p-6 text-base font-medium">
+                <Button className="inline-flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-600/90 transition-colors p-6 text-base font-medium" onClick={() => redirect("/login")}>
                   Comece a Investir
                 </Button>
               </div>
