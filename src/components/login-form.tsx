@@ -1,35 +1,49 @@
+"use client"
+
+import { z } from "zod"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
-  const schema = z.object({
-    email: z.string().email("Informe um e-mail válido"),
-    password: z.string().min(6, "A senha deve ter ao menos 6 caracteres"),
+  // Definir schema de validação com zod
+  const loginSchema = z.object({
+    email: z.string().email("Email inválido").min(1, "Email é obrigatório"),
+    password: z.string().min(1, "Senha é obrigatória"),
+  })
+  
+  type LoginFormInputs = z.infer<typeof loginSchema>
+  
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormInputs>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
   })
 
-  type FormData = z.infer<typeof schema>
-
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
-    resolver: zodResolver(schema),
-    mode: "onBlur",
-  })
-
-  function enviarFormulario(data: FormData) {
-    // TODO: integrar com sua API de login
-    console.log("[LOGIN] payload", data)
+  function handleLogin(data: LoginFormInputs) {
+    console.log("Login com:", data)
+    // TODO: Chamar API de login
   }
 
   return (
-    <form className={cn("flex flex-col gap-6", className)} onSubmit={handleSubmit(enviarFormulario)} {...props}>
+    <form
+      onSubmit={handleSubmit(handleLogin)}
+      className={cn("flex flex-col gap-6", className)}
+      {...props}
+    >
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold">Acesse sua conta</h1>
         <p className="text-muted-foreground text-sm text-balance">
@@ -39,9 +53,15 @@ export function LoginForm({
       <div className="grid gap-6">
         <div className="grid gap-3">
           <Label htmlFor="email">E-mail</Label>
-          <Input id="email" type="email" placeholder="seu@email.com" {...register("email")} />
+          <Input
+            id="email"
+            type="email"
+            placeholder="seu@email.com"
+            required
+            {...register("email")}
+          />
           {errors.email && (
-            <span className="text-xs text-red-500">{errors.email.message}</span>
+            <p className="text-sm text-red-500">{errors.email.message}</p>
           )}
         </div>
         <div className="grid gap-3">
@@ -54,12 +74,17 @@ export function LoginForm({
               Esqueceu sua senha?
             </a>
           </div>
-          <Input id="password" type="password" {...register("password")} />
+          <Input
+            id="password"
+            type="password"
+            required
+            {...register("password")}
+          />
           {errors.password && (
-            <span className="text-xs text-red-500">{errors.password.message}</span>
+            <p className="text-sm text-red-500">{errors.password.message}</p>
           )}
         </div>
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
+        <Button type="submit" className="w-full">
           Entrar
         </Button>
         <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
@@ -67,8 +92,8 @@ export function LoginForm({
             Não tem uma conta?
           </span>
         </div>
-        <Button asChild variant="outline" className="w-full">
-          <Link href="/register">Cadastre-se</Link>
+        <Button variant="outline" className="w-full">
+          Cadastre-se
         </Button>
       </div>
       <div className="text-center text-sm">

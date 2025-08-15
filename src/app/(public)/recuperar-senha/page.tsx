@@ -8,22 +8,41 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { z } from "zod"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 
 // Conjunto de imagens em escopo de módulo para estabilidade entre SSR/CSR
 const tema = ["/image-01.jpg", "/image-02.jpg", "/image-03.jpg", "/image-04.jpg"]
 
 export default function RecoverPasswordPage() {
   const router = useRouter()
-  const [email, setEmail] = useState("")
   const [heroImage, setHeroImage] = useState<string>(tema[0])
   useEffect(() => {
     setHeroImage(tema[Math.floor(Math.random() * tema.length)])
   }, [])
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    if (!email) return
-    // TODO: Chamar API para solicitar recuperação de senha
+  // Schema de validação para o email
+  const recoverPasswordSchema = z.object({
+    email: z.string().email("Email inválido").min(1, "Email é obrigatório"),
+  })
+
+  type RecoverPasswordInputs = z.infer<typeof recoverPasswordSchema>
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RecoverPasswordInputs>({
+    resolver: zodResolver(recoverPasswordSchema),
+    defaultValues: {
+      email: "",
+    },
+  })
+
+  function onSubmit(data: RecoverPasswordInputs) {
+    console.log("Solicitação de recuperação de senha para:", data.email)
+    // TODO: Chamar API de solicitação de recuperação de senha
     router.push("/login")
   }
 
@@ -40,35 +59,40 @@ export default function RecoverPasswordPage() {
           <div className="w-full max-w-sm">
             <Card>
               <CardHeader>
-                <CardTitle>Recuperar Senha</CardTitle>
+                <CardTitle>Recuperar senha</CardTitle>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="mb-6 text-sm text-muted-foreground">
+                  Informe seu e-mail para receber um link de redefinição de senha.
+                </div>
+                <form onSubmit={handleSubmit(onSubmit)}>
                   <div className="grid gap-2">
-                    <Label htmlFor="email">E-mail</Label>
+                    <Label htmlFor="email">Email</Label>
                     <Input
                       id="email"
                       type="email"
-                      placeholder="seu@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
+                      placeholder="m@example.com"
+                      {...register("email")}
                     />
+                    {errors.email && (
+                      <p className="text-sm text-red-500">{errors.email.message}</p>
+                    )}
                   </div>
-
-                  <Button type="submit" className="w-full">Solicitar recuperação</Button>
-
-                  <div className="text-center text-sm">
-                    <Link href="/login" className="text-primary underline-offset-4 hover:underline">
-                      ← Voltar para o login
-                    </Link>
-                  </div>
+                  <Button type="submit" className="w-full mt-6">
+                    Enviar link de recuperação
+                  </Button>
                 </form>
+                <div className="mt-4 text-center text-sm">
+                  <Link href="/login" className="text-primary underline-offset-4 hover:underline">
+                    ← Voltar para o login
+                  </Link>
+                </div>
               </CardContent>
             </Card>
           </div>
         </div>
       </div>
+
       {/* Imagem à direita */}
       <div className="bg-muted relative hidden lg:block">
         <Image

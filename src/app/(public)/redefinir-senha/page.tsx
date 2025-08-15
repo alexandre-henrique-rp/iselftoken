@@ -8,23 +8,46 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { z } from "zod"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 
 // Conjunto de imagens em escopo de módulo para estabilidade entre SSR/CSR
 const tema = ["/image-01.jpg", "/image-02.jpg", "/image-03.jpg", "/image-04.jpg"]
 
 export default function ResetPasswordPage() {
   const router = useRouter()
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
   const [heroImage, setHeroImage] = useState<string>(tema[0])
   useEffect(() => {
     setHeroImage(tema[Math.floor(Math.random() * tema.length)])
   }, [])
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    if (!password || password !== confirmPassword) return
-    // TODO: Chamar API para redefinir senha
+  // Schema de validação para a redefinição de senha
+  const resetPasswordSchema = z.object({
+    password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+    confirmPassword: z.string(),
+  }).refine((data) => data.password === data.confirmPassword, {
+    message: "As senhas não coincidem",
+    path: ["confirmPassword"],
+  })
+
+  type ResetPasswordInputs = z.infer<typeof resetPasswordSchema>
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ResetPasswordInputs>({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: {
+      password: "",
+      confirmPassword: "",
+    },
+  })
+
+  function onSubmit(data: ResetPasswordInputs) {
+    console.log("Redefinindo senha para:", { password: data.password })
+    // TODO: Chamar API de redefinição de senha
     router.push("/login")
   }
 
@@ -50,39 +73,44 @@ export default function ResetPasswordPage() {
           <div className="w-full max-w-sm">
             <Card>
               <CardHeader>
-                <CardTitle>Redefinir Senha</CardTitle>
+                <CardTitle>Redefinir senha</CardTitle>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="mb-6 text-sm text-muted-foreground">
+                  Informe sua nova senha e confirme-a.
+                </div>
+                <form onSubmit={handleSubmit(onSubmit)}>
                   <div className="grid gap-2">
-                    <Label htmlFor="senha">Nova Senha</Label>
+                    <Label htmlFor="password">Nova senha</Label>
                     <Input
-                      id="senha"
+                      id="password"
                       type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
+                      {...register("password")}
                     />
+                    {errors.password && (
+                      <p className="text-sm text-red-500">{errors.password.message}</p>
+                    )}
                   </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="confirmacao">Confirmar Nova Senha</Label>
+                  <div className="grid gap-2 mt-4">
+                    <Label htmlFor="confirmPassword">Confirmar senha</Label>
                     <Input
-                      id="confirmacao"
+                      id="confirmPassword"
                       type="password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      required
+                      {...register("confirmPassword")}
                     />
+                    {errors.confirmPassword && (
+                      <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
+                    )}
                   </div>
-
-                  <Button type="submit" className="w-full">Salvar nova senha</Button>
-
-                  <div className="text-center text-sm">
-                    <Link href="/login" className="text-primary underline-offset-4 hover:underline">
-                      ← Voltar para o login
-                    </Link>
-                  </div>
+                  <Button type="submit" className="w-full mt-6">
+                    Redefinir senha
+                  </Button>
                 </form>
+                <div className="mt-4 text-center text-sm">
+                  <Link href="/login" className="text-primary underline-offset-4 hover:underline">
+                    ← Voltar para o login
+                  </Link>
+                </div>
               </CardContent>
             </Card>
           </div>

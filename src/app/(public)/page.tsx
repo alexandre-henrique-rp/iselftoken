@@ -7,7 +7,6 @@ import { ExploreOpportunities, type OpportunityData } from "@/components/explore
 import { TestimonialCard, type TestimonialData } from "@/components/testimonial-card";
 import { StartupTestimonialCard, type StartupTestimonialData } from "@/components/startup-testimonial-card";
 import { Star } from "lucide-react";
-import { redirect } from "next/navigation";
 
 export default function Home() {
   // Dados das oportunidades de investimento (exigem origem na própria page.tsx)
