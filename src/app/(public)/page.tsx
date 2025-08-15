@@ -3,9 +3,80 @@ import Image from "next/image";
 import Link from "next/link";
 import { ProfileCard, type ProfileCardData } from "@/components/profile-card";
 import { CarouselNav, CarouselItem } from "@/components/carousel-nav";
+import { ExploreOpportunities, type OpportunityData } from "@/components/explore-opportunities";
+import { TestimonialCard, type TestimonialData } from "@/components/testimonial-card";
+import { StartupTestimonialCard, type StartupTestimonialData } from "@/components/startup-testimonial-card";
 import { Star } from "lucide-react";
 
 export default function Home() {
+  // Dados das oportunidades de investimento (exigem origem na própria page.tsx)
+  const opportunitiesData: OpportunityData[] = [
+    { name: "Thape", subName: "Tintacp", category: "Fintech", icon: "fintech" },
+    { name: "AI Abs", subName: "Stracp Carfgus", category: "AI", icon: "ai" },
+    { name: "Edtech", subName: "Avcle Getterer", category: "EdTech", icon: "education" },
+    { name: "CF Shimap", subName: "Conp Pctns", category: "SaaS", icon: "saas" },
+    { name: "FinPulse", subName: "Credit Solutions", category: "Fintech", icon: "fintech" },
+    { name: "AgroGrowth", subName: "Smart Farming", category: "AI", icon: "ai" },
+    { name: "CloudBase", subName: "API Services", category: "SaaS", icon: "saas" },
+    { name: "CareConnect", subName: "Patient Management", category: "Healthtech", icon: "health" },
+    { name: "TutorMe", subName: "Peer-to-peer learning", category: "EdTech", icon: "education" },
+    { name: "BioGen", subName: "Synthetic Biology", category: "Biotech", icon: "biotech" },
+    { name: "AIVision", subName: "Image Recognition", category: "AI", icon: "ai" },
+    { name: "DataFlow", subName: "ETL Platform", category: "SaaS", icon: "saas" },
+    { name: "MedTech", subName: "Diagnostic Tools", category: "Healthtech", icon: "health" },
+    { name: "EduSmart", subName: "Learning Analytics", category: "EdTech", icon: "education" },
+    { name: "GreenTech", subName: "Carbon Tracking", category: "Biotech", icon: "biotech" },
+    { name: "PayFlow", subName: "Payment Gateway", category: "Fintech", icon: "fintech" },
+  ];
+
+  const categoriesData = ["All", "Fintech", "AI", "SaaS", "Healthtech", "EdTech", "Biotech"];
+
+  // Dados dos depoimentos de investidores (exigem origem na própria page.tsx)
+  const investorTestimonials: TestimonialData[] = [
+    {
+      name: "Ana Silva",
+      testimonial: "A iSelfToken abriu portas para investimentos que eu não teria acesso. Curadoria impecável!",
+      role: "Investidora"
+    },
+    {
+      name: "Carlos Pereira",
+      testimonial: "Plataforma confiável e transparente. Já obtive excelentes retornos nos meus investimentos.",
+      role: "Investidor"
+    },
+    {
+      name: "Juliana Costa",
+      testimonial: "Interface intuitiva e suporte excepcional. Recomendo para quem quer diversificar a carteira.",
+      role: "Investidora"
+    }
+  ];
+
+  // Dados dos depoimentos de startups (exigem origem na própria page.tsx)
+  const startupTestimonials: StartupTestimonialData[] = [
+    {
+      name: "Roberto Santos",
+      testimonial: "A iSelfToken nos ajudou a captar recursos de forma rápida e eficiente. Processo transparente e investidores qualificados.",
+      role: "CEO, TechFlow",
+      linkedinUrl: "https://linkedin.com/in/roberto-santos",
+      youtubeUrl: "https://youtube.com/@techflow",
+      websiteUrl: "https://techflow.com.br"
+    },
+    {
+      name: "Marina Oliveira",
+      testimonial: "Excelente plataforma para startups em crescimento. O suporte da equipe fez toda a diferença no nosso processo de captação.",
+      role: "Fundadora, GreenTech Solutions",
+      linkedinUrl: "https://linkedin.com/in/marina-oliveira",
+      websiteUrl: "https://greentech.solutions"
+    },
+    {
+      name: "Felipe Costa",
+      testimonial: "Conseguimos conectar com investidores alinhados com nossa visão. A iSelfToken é essencial para o ecossistema de inovação.",
+      role: "CTO, FinanceAI",
+      linkedinUrl: "https://linkedin.com/in/felipe-costa",
+      youtubeUrl: "https://youtube.com/@financeai",
+      websiteUrl: "https://financeai.com"
+    }
+  ];
+
   // Dados dos cards (exigem origem na própria page.tsx)
   const profileCards: ProfileCardData[] = [
     {
@@ -66,50 +137,45 @@ export default function Home() {
       investorsCount: 203,
     },
     {
-      id: "edtech-pro",
-      name: "EdTech Pro",
-      categoryLabel: "Educação",
-      stageLabel: "Série B",
-      trending: false,
-      endingSoon: true,
+      id: "fintech-plus",
+      name: "FinTech Plus",
+      categoryLabel: "Fintech",
+      stageLabel: "Série A",
+      trending: true,
+      endingSoon: false,
       description:
-        "Ferramentas de aprendizagem adaptativa para escolas públicas.",
+        "Plataforma de pagamentos digitais para pequenas empresas.",
       image:
-        "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1600&auto=format&fit=crop",
-      raisedLabel: "R$ 2.1M",
-      goalLabel: "R$ 3.0M",
-      percent: 70,
-      collectedLabel: "70% arrecadado",
-      timeLeftLabel: "5 dias restantes",
-      valuationLabel: "R$ 22M",
-      investorsCount: 203,
+        "https://images.unsplash.com/photo-1563013544-824ae1b704d3?q=80&w=1600&auto=format&fit=crop",
+      raisedLabel: "R$ 1.2M",
+      goalLabel: "R$ 2.0M",
+      percent: 60,
+      collectedLabel: "60% arrecadado",
+      timeLeftLabel: "12 dias restantes",
+      valuationLabel: "R$ 18M",
+      investorsCount: 156,
     },
     {
-      id: "edtech-pro",
-      name: "EdTech Pro",
-      categoryLabel: "Educação",
-      stageLabel: "Série B",
-      trending: false,
-      endingSoon: true,
+      id: "biotech-innovations",
+      name: "BioTech Innovations",
+      categoryLabel: "Biotech",
+      stageLabel: "Seed",
+      trending: true,
+      endingSoon: false,
       description:
-        "Ferramentas de aprendizagem adaptativa para escolas públicas.",
+        "Desenvolvimento de terapias genéticas para doenças raras.",
       image:
-        "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1600&auto=format&fit=crop",
-      raisedLabel: "R$ 2.1M",
-      goalLabel: "R$ 3.0M",
-      percent: 70,
-      collectedLabel: "70% arrecadado",
-      timeLeftLabel: "5 dias restantes",
-      valuationLabel: "R$ 22M",
-      investorsCount: 203,
+        "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?q=80&w=1600&auto=format&fit=crop",
+      raisedLabel: "R$ 800K",
+      goalLabel: "R$ 1.5M",
+      percent: 53,
+      collectedLabel: "53% arrecadado",
+      timeLeftLabel: "18 dias restantes",
+      valuationLabel: "R$ 12M",
+      investorsCount: 89,
     },
   ];
 
-  const recentInvestments = [
-    { startup: "EcoTech Solutions", amount: "R$ 50.000", date: "15 Jan 2025", status: "Ativo", roi: "+15%" },
-    { startup: "HealthAI", amount: "R$ 75.000", date: "8 Jan 2025", status: "Ativo", roi: "+8%" },
-    { startup: "EdTech Pro", amount: "R$ 100.000", date: "22 Dez 2024", status: "Ativo", roi: "+22%" },
-  ];
 
   return (
     <div className="min-h-screen bg-[#000000] text-zinc-200">
@@ -150,7 +216,7 @@ export default function Home() {
                 height={512}
                 priority
                 sizes="(max-width: 768px) 90vw, (max-width: 1280px) 800px, 1024px"
-                className="w-full max-w-xl h-auto"
+                className="w-full max-w-2xl h-auto"
               />
               <p className="max-w-2xl text-zinc-400 text-lg md:text-xl">
                 A iSelfToken conecta investidores a ativos digitais inovadores
@@ -237,32 +303,36 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Depoimentos */}
-        <section className="bg-zinc-950 py-16">
+        {/* Explore Opportunities */}
+        <ExploreOpportunities
+          opportunities={opportunitiesData}
+          categories={categoriesData}
+          selectedCategory="All"
+        />
+
+        {/* Depoimentos de Investidores */}
+        <section className="bg-black py-16">
           <div className="container mx-auto px-6">
             <h2 className="text-3xl font-bold tracking-tight text-center mb-10">
-              O que Nossos Investidores Dizem
+              Depoimentos de quem já investe
             </h2>
             <div className="grid gap-6 lg:grid-cols-3">
-              {["Ana Silva", "Carlos Pereira", "Juliana Costa"].map((name) => (
-                <div
-                  key={name}
-                  className="bg-black rounded-xl border border-zinc-800"
-                >
-                  <div className="p-6">
-                    <p className="text-zinc-400 italic">
-                      A iSelfToken abriu portas para investimentos que eu não
-                      teria acesso. Curadoria impecável!
-                    </p>
-                  </div>
-                  <div className="flex items-center p-6 pt-0">
-                    <div className="h-12 w-12 rounded-full bg-zinc-800 mr-4" />
-                    <div>
-                      <p className="font-semibold text-zinc-100">{name}</p>
-                      <p className="text-sm text-blue-400">Investidor(a)</p>
-                    </div>
-                  </div>
-                </div>
+              {investorTestimonials.map((testimonial, idx) => (
+                <TestimonialCard key={idx} data={testimonial} />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Depoimentos de Startups */}
+        <section className="bg-black py-16">
+          <div className="container mx-auto px-6">
+            <h2 className="text-3xl font-bold tracking-tight text-center mb-10">
+              O que os fundadores de startups falam sobre nós
+            </h2>
+            <div className="grid gap-6 lg:grid-cols-3">
+              {startupTestimonials.map((testimonial, idx) => (
+                <StartupTestimonialCard key={idx} data={testimonial} />
               ))}
             </div>
           </div>
