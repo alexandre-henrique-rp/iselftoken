@@ -195,9 +195,11 @@ export default function Home() {
             >
               iSelfToken Education
             </Link>
+            <Link href="/login">
             <Button className="inline-flex items-center justify-center rounded-md bg-blue-600 text-white px-5 py-2 text-sm font-medium hover:bg-blue-600/90 transition-colors">
               Entrar
             </Button>
+            </Link>
           </nav>
           <div className="md:hidden">
             <span className="text-sm text-zinc-400">Menu</span>
@@ -224,16 +226,19 @@ export default function Home() {
                 com alto potencial de crescimento.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                <Link href="/login">
                 <Button
                   variant="outline"
                   className="inline-flex bg-transparent items-center justify-center rounded-md border border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white transition-colors p-6 text-base font-medium"
-                  onClick={() => redirect("/login")}
                 >
                   Explorar Oportunidades
                 </Button>
-                <Button className="inline-flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-600/90 transition-colors p-6 text-base font-medium" onClick={() => redirect("/login")}>
+                </Link>
+                <Link href="/login">
+                <Button className="inline-flex items-center justify-center rounded-md bg-blue-600 text-white hover:bg-blue-600/90 transition-colors p-6 text-base font-medium" >
                   Comece a Investir
                 </Button>
+                </Link>
               </div>
             </div>
           </div>
