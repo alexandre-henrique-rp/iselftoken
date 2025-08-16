@@ -92,9 +92,11 @@ export function LoginForm({
             Não tem uma conta?
           </span>
         </div>
-        <Button variant="outline" className="w-full">
-          Cadastre-se
-        </Button>
+        <Link href="/register" className="w-full">
+          <Button variant="outline" className="w-full">
+            Cadastre-se
+          </Button>
+        </Link>
       </div>
       <div className="text-center text-sm">
         Leia os{" "}

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Image from "next/image"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -17,7 +17,9 @@ const tema = ["/image-01.jpg", "/image-02.jpg", "/image-03.jpg", "/image-04.jpg"
 
 export default function ResetPasswordPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [heroImage, setHeroImage] = useState<string>(tema[0])
+  const token = searchParams.get("token") ?? ""
   useEffect(() => {
     setHeroImage(tema[Math.floor(Math.random() * tema.length)])
   }, [])
@@ -46,8 +48,10 @@ export default function ResetPasswordPage() {
   })
 
   function onSubmit(data: ResetPasswordInputs) {
-    console.log("Redefinindo senha para:", { password: data.password })
-    // TODO: Chamar API de redefinição de senha
+    // Envia nova senha juntamente com o token recebido pela URL (?token=...)
+    console.log("Redefinindo senha:", { password: data.password, token })
+    // TODO: Chamar API real de redefinição de senha
+    // fetch('/api/auth/reset-password', { method: 'POST', body: JSON.stringify({ token, password: data.password }) })
     router.push("/login")
   }
 
@@ -102,9 +106,14 @@ export default function ResetPasswordPage() {
                       <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
                     )}
                   </div>
-                  <Button type="submit" className="w-full mt-6">
+                  <Button type="submit" className="w-full mt-6" disabled={!token}>
                     Redefinir senha
                   </Button>
+                  {!token && (
+                    <p className="mt-2 text-sm text-red-500" aria-live="polite">
+                      Link inválido: token ausente. Solicite um novo e-mail de redefinição.
+                    </p>
+                  )}
                 </form>
                 <div className="mt-4 text-center text-sm">
                   <Link href="/login" className="text-primary underline-offset-4 hover:underline">

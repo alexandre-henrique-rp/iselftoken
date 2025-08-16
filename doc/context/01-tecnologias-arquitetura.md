@@ -8,10 +8,13 @@ Descrição: Tecnologias e Arquitetura do Frontend
 - React 19.1.0
 - TypeScript
 - UI: componentes customizados em `src/components/ui/*` (inspirados em shadcn)
-- Validação: Zod + `@hookform/resolvers/zod`
-- Formulários: `react-hook-form`
-- Máscaras: `react-input-mask`
-- Ícones: Lucide React
+- Validação: Zod 4.0.17 + `@hookform/resolvers/zod`
+- Formulários: `react-hook-form` 7.62.0
+- Máscaras: `remask` 1.2.2 + utilitários em `src/lib/mask-utils.ts`
+- Ícones: Lucide React 0.539.0
+- Styling: Tailwind CSS 4 + class-variance-authority + clsx + tailwind-merge
+- Radix UI: Dialog, Label, Slot para componentes primitivos
+- Ferramentas: ESLint 9, Prettier 3.6.2, PostCSS
 
 # Padrões e Boas Práticas
 
