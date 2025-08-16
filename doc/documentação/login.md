@@ -60,6 +60,7 @@ Responses (JSON):
       "role": "investidor|startup"
     },
     "token": "jwt_access_token",
+    "refresh_token": "jwt_refresh_token"
   }
 }
 ```

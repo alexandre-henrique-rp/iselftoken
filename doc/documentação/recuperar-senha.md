@@ -3,11 +3,13 @@
 
 ## ** descrição:** 
 - Página pública para solicitar um link de redefinição de senha por e-mail.
+- Após envio, o frontend redireciona para `/`.
+- O backend enviará um e-mail contendo a URL de redefinição no formato `/redefinir-senha?token=...`.
 - Layout em duas colunas com imagem temática.
 
 ## ** funcionalidades embarcadas:** 
 - Formulário com validação Zod para e-mail.
-- Envio da solicitação (placeholder) e redirecionamento para login.
+- Envio da solicitação (placeholder) e redirecionamento para `/`.
 - Link para retornar ao login.
 
 ## ** componentes e arquivos relacionados:**
@@ -24,6 +26,7 @@
 ## ** restrições:** 
 - Sem integração real com backend (TODO: integrar endpoint de recuperação).
 - Sem controle de tentativa/rate limit no frontend.
+- A validade do token é controlada pelo backend (tempo médio sugerido: 30 minutos).
 
 ## ** Request:** 
 
@@ -38,22 +41,28 @@ Request (JSON):
 Responses (JSON):
 - Sucesso (200):
 ```json
-{ "status": "success", "message": "Email de recuperação enviado" }
+{ "status": "success", "message": "E-mail de recuperação enviado" }
 ```
 - Erro (404):
 ```json
 { "status": "error", "message": "Email não encontrado" }
 ```
 
+Email enviado (conteúdo esperado):
+- Assunto: "Redefinição de senha"
+- Corpo: Incluir link de redefinição apontando para `/redefinir-senha?token=<TOKEN>`
+- Validade do token: ~30 minutos (após expirar, solicitar novo e-mail)
+
 ## ** Fluxo atual (frontend): **
 1. Usuário informa o e-mail.
 2. Validação com `zod` e `react-hook-form`.
-3. Submit executa `onSubmit` com `console.log` (placeholder) e redireciona para `/login`.
-4. Link “Voltar para o login”.
+3. Submit executa `onSubmit` (placeholder), dispara a solicitação ao backend e redireciona para `/`.
+4. Backend envia e-mail com `/redefinir-senha?token=...` (token válido por ~30 min).
+5. Link “Voltar para o login”.
 
 ## ** Melhorias sugeridas (próximos passos): **
-- Tratar loading/erro no submit.
-- Mensagem de confirmação persistente pós-submit.
+- Tratar loading/erro no submit e alerta de confirmação.
+- Mensagem de confirmação persistente pós-submit (ex.: toast/banner ao voltar para `/`).
 - Testes TDD do schema Zod e do fluxo de submit.
 
 ## ** Observações de UI:**

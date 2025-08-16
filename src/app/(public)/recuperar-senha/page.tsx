@@ -43,7 +43,8 @@ export default function RecoverPasswordPage() {
   function onSubmit(data: RecoverPasswordInputs) {
     console.log("Solicitação de recuperação de senha para:", data.email)
     // TODO: Chamar API de solicitação de recuperação de senha
-    router.push("/login")
+    // Após solicitar no backend, redirecionar para a home
+    router.push("/")
   }
 
   return (
