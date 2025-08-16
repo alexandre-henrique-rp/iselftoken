@@ -1,65 +1,97 @@
-// Dados extraídos do exemplo doc/exemplo/profile.tsx
-// Mantidos aqui como fonte única de verdade para uso na UI
+import { ProfileCardData } from "@/components/profile-card";
 
-export type RecentInvestment = {
-  startup: string;
-  amount: string;
-  date: string;
-  status: string;
-  roi: string;
-};
-
-export type InvestmentStats = {
-  totalInvestments: number;
-  totalAmount: string;
-  activeInvestments: number;
-  successfulExits: number;
-  averageROI: string;
-  portfolioValue: string;
-};
-
-export const investmentStats: InvestmentStats = {
-  totalInvestments: 12,
-  totalAmount: "R$ 850.000",
-  activeInvestments: 8,
-  successfulExits: 2,
-  averageROI: "23.5%",
-  portfolioValue: "R$ 1.2M",
-};
-
-export const recentInvestments: RecentInvestment[] = [
-  {
-    startup: "EcoTech Solutions",
-    amount: "R$ 50.000",
-    date: "15 Jan 2025",
-    status: "Ativo",
-    roi: "+15%",
-  },
-  {
-    startup: "HealthAI",
-    amount: "R$ 75.000",
-    date: "8 Jan 2025",
-    status: "Ativo",
-    roi: "+8%",
-  },
-  {
-    startup: "EdTech Pro",
-    amount: "R$ 100.000",
-    date: "22 Dez 2024",
-    status: "Ativo",
-    roi: "+22%",
-  },
-];
-
-export type ProfileUser = {
-  name: string;
-  email: string;
-  company: string;
-  avatar?: string;
-};
-
-export const demoUser: ProfileUser = {
-  name: "João Silva",
-  email: "joao@exemplo.com",
-  company: "Tech Ventures",
-};
+export const ProfileCards: ProfileCardData[] = [
+    {
+      id: 'eco-tech',
+      name: 'EcoTech Solutions',
+      categoryLabel: 'Sustentabilidade',
+      stageLabel: 'Série A',
+      trending: true,
+      endingSoon: true,
+      description:
+        'Soluções inovadoras para energia renovável e sustentabilidade urbana.',
+      image:
+        'https://images.unsplash.com/photo-1522199755839-a2bacb67c546?q=80&w=1600&auto=format&fit=crop',
+      raisedLabel: 'R$ 1.8M',
+      goalLabel: 'R$ 2.5M',
+      percent: 72,
+      collectedLabel: '72% arrecadado',
+      timeLeftLabel: '3 dias restantes',
+      valuationLabel: 'R$ 15M',
+      investorsCount: 142,
+    },
+    {
+      id: 'health-ai',
+      name: 'HealthAI',
+      categoryLabel: 'Saúde',
+      stageLabel: 'Seed',
+      trending: true,
+      endingSoon: false,
+      description:
+        'Plataforma de IA para triagem e acompanhamento de pacientes.',
+      image:
+        'https://images.unsplash.com/photo-1581092921461-eab62e97a780?q=80&w=1600&auto=format&fit=crop',
+      raisedLabel: 'R$ 900k',
+      goalLabel: 'R$ 1.6M',
+      percent: 56,
+      collectedLabel: '56% arrecadado',
+      timeLeftLabel: '12 dias restantes',
+      valuationLabel: 'R$ 8M',
+      investorsCount: 89,
+    },
+    {
+      id: 'edtech-pro',
+      name: 'EdTech Pro',
+      categoryLabel: 'Educação',
+      stageLabel: 'Série B',
+      trending: false,
+      endingSoon: true,
+      description:
+        'Ferramentas de aprendizagem adaptativa para escolas públicas.',
+      image:
+        'https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1600&auto=format&fit=crop',
+      raisedLabel: 'R$ 2.1M',
+      goalLabel: 'R$ 3.0M',
+      percent: 70,
+      collectedLabel: '70% arrecadado',
+      timeLeftLabel: '5 dias restantes',
+      valuationLabel: 'R$ 22M',
+      investorsCount: 203,
+    },
+    {
+      id: 'fintech-plus',
+      name: 'FinTech Plus',
+      categoryLabel: 'Fintech',
+      stageLabel: 'Série A',
+      trending: true,
+      endingSoon: false,
+      description: 'Plataforma de pagamentos digitais para pequenas empresas.',
+      image:
+        'https://images.unsplash.com/photo-1563013544-824ae1b704d3?q=80&w=1600&auto=format&fit=crop',
+      raisedLabel: 'R$ 1.2M',
+      goalLabel: 'R$ 2.0M',
+      percent: 60,
+      collectedLabel: '60% arrecadado',
+      timeLeftLabel: '12 dias restantes',
+      valuationLabel: 'R$ 18M',
+      investorsCount: 156,
+    },
+    {
+      id: 'biotech-innovations',
+      name: 'BioTech Innovations',
+      categoryLabel: 'Biotech',
+      stageLabel: 'Seed',
+      trending: true,
+      endingSoon: false,
+      description: 'Desenvolvimento de terapias genéticas para doenças raras.',
+      image:
+        'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?q=80&w=1600&auto=format&fit=crop',
+      raisedLabel: 'R$ 800K',
+      goalLabel: 'R$ 1.5M',
+      percent: 53,
+      collectedLabel: '53% arrecadado',
+      timeLeftLabel: '18 dias restantes',
+      valuationLabel: 'R$ 12M',
+      investorsCount: 89,
+    },
+  ];

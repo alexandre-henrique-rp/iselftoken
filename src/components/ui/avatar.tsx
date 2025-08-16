@@ -1,48 +1,53 @@
-import * as React from "react";
-import Image from "next/image";
-import { cn } from "@/lib/utils";
+"use client"
 
-export type AvatarProps = React.HTMLAttributes<HTMLSpanElement>;
+import * as React from "react"
+import * as AvatarPrimitive from "@radix-ui/react-avatar"
 
-export function Avatar({ className, ...props }: AvatarProps) {
+import { cn } from "@/lib/utils"
+
+function Avatar({
+  className,
+  ...props
+}: React.ComponentProps<typeof AvatarPrimitive.Root>) {
   return (
-    <span
+    <AvatarPrimitive.Root
       data-slot="avatar"
       className={cn(
-        "relative inline-flex h-10 w-10 shrink-0 overflow-hidden rounded-full border border-zinc-800",
+        "relative flex size-8 shrink-0 overflow-hidden rounded-full",
         className
       )}
       {...props}
     />
-  );
+  )
 }
 
-export type AvatarImageProps = React.ComponentProps<typeof Image> & {
-  className?: string;
-};
-
-export function AvatarImage({ className, alt = "Avatar", ...props }: AvatarImageProps) {
+function AvatarImage({
+  className,
+  ...props
+}: React.ComponentProps<typeof AvatarPrimitive.Image>) {
   return (
-    <Image
+    <AvatarPrimitive.Image
       data-slot="avatar-image"
-      className={cn("aspect-square h-full w-full object-cover", className)}
-      alt={alt}
+      className={cn("aspect-square size-full", className)}
       {...props}
     />
-  );
+  )
 }
 
-export type AvatarFallbackProps = React.HTMLAttributes<HTMLSpanElement>;
-
-export function AvatarFallback({ className, ...props }: AvatarFallbackProps) {
+function AvatarFallback({
+  className,
+  ...props
+}: React.ComponentProps<typeof AvatarPrimitive.Fallback>) {
   return (
-    <span
+    <AvatarPrimitive.Fallback
       data-slot="avatar-fallback"
       className={cn(
-        "flex h-full w-full items-center justify-center bg-zinc-800 text-zinc-200",
+        "bg-muted flex size-full items-center justify-center rounded-full",
         className
       )}
       {...props}
     />
-  );
+  )
 }
+
+export { Avatar, AvatarImage, AvatarFallback }

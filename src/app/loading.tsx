@@ -1,5 +1,5 @@
-import { Loading } from '../components/ui/Loading';
+import { FourSquareLoader } from "@/components/ui/four-square-loader";
 
 export default function LoadingPage() {
-  return <Loading />;
+  return <FourSquareLoader className="h-full w-full" />;
 }
