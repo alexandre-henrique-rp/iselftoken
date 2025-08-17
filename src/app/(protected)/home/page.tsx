@@ -2,7 +2,6 @@ import InvestorHome from '@/components/investidorHome';
 import StartupHome from '@/components/startupHome';
 import { FourSquareLoader } from '@/components/ui/four-square-loader';
 import { GetSessionServer } from '@/context/auth';
-import dados from '@/data/data.json';
 
 // Busca dados do investidor com controle de cache e headers
 async function getInvestor(session: SessionNext.Session) {
@@ -48,9 +47,10 @@ export default async function Home() {
   // Busca somente os dados necessários conforme o perfil do usuário
   // if (session.user?.role === 'investidor') {
   //   const data = await getInvestor(session);
-  //   return <InvestorHome data={data} />;
+  //   return <InvestorHome />;
   // }
 
   // const data = await getStartup(session);
-  return <StartupHome data={dados} />;
+  // return <StartupHome data={dados} />;
+  return <InvestorHome />;
 }
