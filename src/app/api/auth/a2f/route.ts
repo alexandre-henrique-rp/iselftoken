@@ -15,7 +15,7 @@ export async function POST(request: Request) {
 
     const body = await request.json().catch(() => ({})) as { email?: string }
 
-    const sessionEmail = (session as any)?.user?.email ?? (session as any)?.email
+    const sessionEmail = (session)?.user?.email
     const email = body?.email ?? sessionEmail
 
     if (!email || typeof email !== "string") {

@@ -1,9 +1,14 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import type { RecentInvestment } from "@/data/profile";
 
 interface InvestmentCardProps {
-  investment: RecentInvestment;
+  investment: {
+    startup: string;
+    date: string;
+    amount: string;
+    roi: string;
+    status: string;
+  };
 }
 
 // Card simples para exibir um investimento recente, alinhado ao estilo do profile.tsx

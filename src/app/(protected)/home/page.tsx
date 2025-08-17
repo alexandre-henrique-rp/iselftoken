@@ -1,37 +1,37 @@
 import InvestorHome from '@/components/investidorHome';
-import StartupHome from '@/components/startupHome';
-import { FourSquareLoader } from '@/components/ui/four-square-loader';
-import { GetSessionServer } from '@/context/auth';
+// import StartupHome from '@/components/startupHome';
+// import { FourSquareLoader } from '@/components/ui/four-square-loader';
+// import { GetSessionServer } from '@/context/auth';
 
-// Busca dados do investidor com controle de cache e headers
-async function getInvestor(session: SessionNext.Session) {
-  const response = await fetch('/api/investidor', {
-    cache: 'no-store',
-    headers: {
-      Authorization: `Bearer ${session.refreshToken}`,
-    },
-  });
-  if (!response.ok) {
-    throw new Error('Falha ao carregar investidor');
-  }
-  const data = await response.json();
-  return data as { name: string };
-}
+// // Busca dados do investidor com controle de cache e headers
+// async function getInvestor(session: SessionNext.Session) {
+//   const response = await fetch('/api/investidor', {
+//     cache: 'no-store',
+//     headers: {
+//       Authorization: `Bearer ${session.refreshToken}`,
+//     },
+//   });
+//   if (!response.ok) {
+//     throw new Error('Falha ao carregar investidor');
+//   }
+//   const data = await response.json();
+//   return data as { name: string };
+// }
 
-// Busca dados da startup com controle de cache e headers
-async function getStartup(session: SessionNext.Session) {
-  const response = await fetch('/api/startup', {
-    cache: 'no-store',
-    headers: {
-      Authorization: `Bearer ${session.refreshToken}`,
-    },
-  });
-  if (!response.ok) {
-    throw new Error('Falha ao carregar startup');
-  }
-  const data = await response.json();
-  return data as { name: string };
-}
+// // Busca dados da startup com controle de cache e headers
+// async function getStartup(session: SessionNext.Session) {
+//   const response = await fetch('/api/startup', {
+//     cache: 'no-store',
+//     headers: {
+//       Authorization: `Bearer ${session.refreshToken}`,
+//     },
+//   });
+//   if (!response.ok) {
+//     throw new Error('Falha ao carregar startup');
+//   }
+//   const data = await response.json();
+//   return data as { name: string };
+// }
 
 export default async function Home() {
   // const session = await GetSessionServer();

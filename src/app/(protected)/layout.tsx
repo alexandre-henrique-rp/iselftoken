@@ -2,7 +2,7 @@
 // import { redirect } from "next/navigation"
 import { AppSidebar } from '@/components/app-sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
- 
+import { WhatsappHelpButton } from '@/components/WhatsappHelpButton';
 
 interface Props {
   children: React.ReactNode;
@@ -20,7 +20,11 @@ export default async function ProtectedLayout({ children }: Props) {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset>{children}</SidebarInset>
+      <SidebarInset>
+        {children}
+        {/* Botão flutuante de ajuda/WhatsApp */}
+        <WhatsappHelpButton />
+      </SidebarInset>
     </SidebarProvider>
   );
 }

@@ -1,12 +1,6 @@
 "use client"
 
-import {
-  IconCreditCard,
-  IconDotsVertical,
-  IconLogout,
-  IconNotification,
-  IconUserCircle,
-} from "@tabler/icons-react"
+import { IconDotsVertical, IconLogout, IconSettings } from "@tabler/icons-react"
 
 import {
   Avatar,
@@ -28,6 +22,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { useRouter } from "next/navigation"
 
 export function NavUser({
   user,
@@ -39,6 +34,19 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+  const router = useRouter()
+
+  async function handleLogout() {
+    try {
+      await fetch("/api/auth", { method: "DELETE" })
+    } catch {
+      // noop: mesmo em erro, tentamos seguir com o redirect
+    } finally {
+      // Garante saída da área protegida
+      router.push("/login")
+      router.refresh()
+    }
+  }
 
   return (
     <SidebarMenu>
@@ -85,20 +93,12 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
-                <IconUserCircle />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <IconCreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <IconNotification />
-                Notifications
+                <IconSettings />
+                Perfil
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout} aria-label="Fazer logout">
               <IconLogout />
               Log out
             </DropdownMenuItem>
