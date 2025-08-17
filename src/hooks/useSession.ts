@@ -47,7 +47,7 @@ export function useSession(): UseSessionResult {
       await fetch("/api/auth", { method: "DELETE", credentials: "include" })
     } catch {}
     // garante que não fica preso em histórico
-    router.replace("/login")
+    // router.replace("/login")
   }, [PUBLIC_ROUTES, pathname, router])
 
   const fetchSession = useCallback(async () => {

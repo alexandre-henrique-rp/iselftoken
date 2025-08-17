@@ -1,10 +1,11 @@
 // import { GetSessionServer } from "@/context/auth"
 // import { redirect } from "next/navigation"
-import { AppSidebar } from "@/components/app-sidebar"
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
+import { AppSidebar } from '@/components/app-sidebar';
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+ 
 
 interface Props {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 // Layout protegido: valida a sessão no servidor para evitar loading no client
 export default async function ProtectedLayout({ children }: Props) {
@@ -19,9 +20,7 @@ export default async function ProtectedLayout({ children }: Props) {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset>
-        {children}
-      </SidebarInset>
+      <SidebarInset>{children}</SidebarInset>
     </SidebarProvider>
-  )
+  );
 }
