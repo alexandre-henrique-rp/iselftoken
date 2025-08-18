@@ -1,3 +1,23 @@
+# iSelfToken – Frontend
+
+Aplicação web para conectar investidores e startups. Construída com Next.js (App Router), React, TypeScript e componentes UI customizados. Segue Clean Architecture, Clean Code, SOLID e prioriza validações com Zod e formulários com react-hook-form.
+
+## Stack
+
+- Next.js 15.4.6 (App Router), React 19.1.0, TypeScript 5
+- Tailwind CSS 4, componentes UI custom (inspirados em shadcn), Radix UI (Dialog, Label, Slot)
+- Formulários: react-hook-form 7.62 + zod 4.0.17
+- Máscaras: remask 1.2.2 com handlers em `src/lib/mask-utils.ts`
+- Utilitários: class-variance-authority, clsx, tailwind-merge
+- Dev: ESLint 9, Prettier 3.6.2, PostCSS
+
+## Documentação
+
+- Tecnologias e Arquitetura: `doc/context/01-tecnologias-arquitetura.md`
+- Visão geral, princípios e regras: `doc/context/02-visao-geral-principios-regras.md`
+- Páginas públicas: `doc/context/frontend-login.md`, `frontend-register.md`, `frontend-a2f.md`, `frontend-recuperar-redefinir-senha.md`
+- Checklist de implementações: `doc/todo/checklist-implementacoes.md`
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

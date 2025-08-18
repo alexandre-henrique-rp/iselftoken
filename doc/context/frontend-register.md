@@ -12,13 +12,13 @@ Descrição: Página Pública /register
 
 - `InvestorForm`: `src/components/register/InvestorForm.tsx`
   - Campos: nome, cpf, telefone, cep, endereco, bairro, cidade, uf, numero, senha, confirmacaoSenha
-  - Máscaras: CPF, telefone, CEP via `react-input-mask`
+  - Máscaras: CPF, telefone, CEP via `remask` 1.2.2 + handlers em `src/lib/mask-utils.ts`
   - Validação: Zod no schema definido em `page.tsx` (resolver no `useForm`)
   - Limpeza: remoção de caracteres não numéricos antes do envio
 
 - `StartupForm`: `src/components/register/StartupForm.tsx`
   - Campos: cnpj, razaoSocial, fantasia, telefone, cep, endereco, bairro, cidade, uf, numero, senha, confirmacaoSenha
-  - Máscaras: CNPJ, telefone, CEP
+  - Máscaras: CNPJ, telefone, CEP via `remask` 1.2.2 + handlers em `src/lib/mask-utils.ts`
   - Validação: Zod no schema definido em `page.tsx`
   - Limpeza: remoção de caracteres não numéricos antes do envio
 
@@ -33,9 +33,9 @@ Descrição: Página Pública /register
 ## Decisões de Implementação
 
 - Componentização para isolar JSX e regras de cada formulário, evitando erros de parsing e duplicações.
-- Máscaras ficam nos componentes; schema e `useForm` ficam na página, mantendo single source of truth.
+- Máscaras ficam nos componentes com `remask` (via utilitários `createCpfHandler`, `createCnpjHandler`, `createPhoneHandler`, `createCepHandler` em `src/lib/mask-utils.ts`); schema e `useForm` ficam na página, mantendo single source of truth.
 - Correções de JSX e imports (ex.: `Card`, `CardContent`, `CardHeader`, `CardTitle`).
-- Remoção de `any` em render props de `InputMask` usando `React.InputHTMLAttributes<HTMLInputElement>`.
+- Remoção de `any` e adequação dos tipos dos handlers para inputs controlados com `react-hook-form`.
 
 ## Testes Recomendados
 

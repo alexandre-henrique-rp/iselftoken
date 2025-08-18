@@ -1,104 +1,82 @@
-# ** nome:** Login
-# ** rota:** /login
+# **nome:** Login
+# **rota:** [/login]
 
-## ** descrição:** 
-- Página pública para autenticação de usuários (investidores e startups).
-- Exibe formulário de login com validação e links auxiliares (recuperação de senha e cadastro).
-- Layout em duas colunas com imagem temática aleatória à direita.
+## **descrição:**
+- Página de autenticação de usuários, permitindo acesso à plataforma iSelfToken mediante inserção de credenciais (e-mail e senha).
 
-## ** funcionalidades embarcadas:** 
-- Formulário com validação via Zod (e-mail e senha obrigatórios).
-- Link para recuperar senha (`/recuperar-senha`).
-- Link para cadastro (`/register`).
-- Link para termos de uso (`/termos-de-uso`).
-- Exibição de imagem randômica na coluna direita para melhor UX visual.
+## **tipo de acesso:**
+- público
 
-## ** componentes e arquivos relacionados:**
-- Página: `src/app/(public)/login/page.tsx`
-  - Renderiza o grid 2 colunas e o `<LoginForm />`.
-  - Seleciona uma imagem aleatória de `tema` para o lado direito.
-- Componente: `src/components/login-form.tsx`
-  - Campos: `email`, `password`.
-  - Validação: `zod` + `react-hook-form`.
-  - Ações: submit (console.log placeholder), links auxiliares.
+## **funcionalidades embarcadas:**
+- Formulário de login com campos para e-mail e senha.
+- Validação de entrada de dados.
+- Redirecionamento para autenticação de dois fatores (A2F) ou página inicial após login bem-sucedido.
+- Links para recuperação de senha e registro de novos usuários.
 
-## ** UX/Validações:**
-- Mensagens de erro exibidas abaixo dos campos quando inválidos.
-- Email válido (formato) e obrigatório.
-- Senha obrigatória.
-- Botão "Entrar" desabilitado apenas pelo HTML5 quando campos inválidos (nenhuma lógica adicional de loading ainda).
+## **restrições:**
+- Usuários já autenticados com A2F verificado são redirecionados para a página inicial (`/`).
+- Usuários autenticados sem A2F verificado são redirecionados para `/auth`.
+- Validação de formato de e-mail e obrigatoriedade de senha.
 
-## ** restrições:** 
-- Sem integração de backend no momento (TODO: integrar API de autenticação).
-- Sem persistência de sessão/token ainda (área protegida pendente).
+## **dependências:**
+- Componentes: `LoginForm` (`src/components/login-form.tsx`).
+- Hooks customizados: `useSession` (`src/hooks/useSession.ts`) para verificar estado de autenticação.
+- Bibliotecas externas: `react-hook-form` e `zod` para validação de formulário.
 
-## ** Request:** 
+## **APIs utilizadas:**
 
-### ** POST **
-- Autenticação de usuário
-- Endpoint sugerido (backend): `/api/auth/login`
-
-Request (JSON):
+### **API Interna:**
+- **Endpoint:** `POST /api/auth`
+- **Autenticação:** Não
+- **Request:**
 ```json
 {
-  "email": "string",
-  "password": "string"
+  "email": "string (endereço de e-mail do usuário)",
+  "password": "string (senha do usuário)"
 }
 ```
-
-Responses (JSON):
-- Sucesso (200):
+- **Response:**
 ```json
 {
   "status": "success",
-  "message": "Login efetuado com sucesso",
+  "message": "Autenticado com sucesso",
   "data": {
     "user": {
-      "id": 0,
-      "name": "string",
+      "id": "string",
       "email": "string",
-      "role": "investidor|startup"
-    },
-    "token": "jwt_access_token",
-    "refresh_token": "jwt_refresh_token"
-  }
-}
-```
-- Erro (401 | 400):
-```json
-{
-  "status": "error",
-  "message": "Credenciais inválidas"
-}
-```
-- Erro de validação (422):
-```json
-{
-  "status": "error",
-  "message": "Campos inválidos",
-  "errors": {
-    "email": "Email inválido",
-    "password": "Senha é obrigatória"
+      "role": "string (investidor, startup, admin, afiliado)"
+    }
   }
 }
 ```
 
-## ** Fluxo atual (frontend): **
-1. Usuário preenche email e senha.
-2. `react-hook-form` valida com `zod` e exibe erros.
-3. No submit, executa `handleLogin` (placeholder com `console.log`).
-4. Links auxiliares:
-   - "Esqueceu sua senha?" → `/recuperar-senha`
-   - "Cadastre-se" → `/register`
-   - "Termos de Uso" → `/termos-de-uso`
+## **Navegação:**
+- **Links de entrada:** `/` (home), `/register`.
+- **Links de saída:** `/auth` (para A2F), `/` (após login bem-sucedido), `/recuperar-senha` (para recuperação de senha), `/register` (para novos usuários).
+- **Parâmetros de rota:** Nenhum, rota estática.
 
-## ** Melhorias sugeridas (próximos passos): **
-- Integrar chamada real à API com tratativa de loading e erro.
-- Armazenar tokens com segurança (HTTP-only cookies preferencialmente) e gerenciar sessão.
-- Redirecionar para área protegida após sucesso.
-- Exibir feedback de erro de credenciais com banner/alert.
-- Testes (TDD): unitários do schema Zod e integração do formulário.
+## **Estados e Dados:**
+- **Estados locais:** Estado de carregamento (`loading`) gerenciado pelo hook `useSession`.
+- **Estados globais:** Estado de sessão obtido via `useSession`.
+- **Cache:** Não utiliza cache específico.
+- **Persistência:** Não há persistência de dados local.
 
-## ** Observações de UI:**
-- Imagem de fundo randômica carregada a partir de: `/image-01.jpg`, `/image-02.jpg`, `/image-03.jpg`, `/image-04.jpg`.
-- Logo exibida no topo da coluna esquerda: `/logo.png`.
+## **Validações:**
+- **Formulários:** Schema `zod` valida `email` (formato de e-mail válido) e `password` (campo obrigatório).
+- **Inputs:** Regras de obrigatoriedade e formato aplicadas via `react-hook-form` e `zod`.
+- **Permissões:** Middleware redireciona usuários já autenticados.
+
+## **Tratamento de Erros:**
+- **Errors boundaries:** Não há tratamento específico de erro de renderização.
+- **Try/catch:** Não há operações assíncronas diretas na página.
+- **Fallbacks:** Mensagens de erro de validação exibidas no formulário.
+
+## **Performance:**
+- **Loading states:** Estado de carregamento (`loading`) exibido enquanto a sessão é verificada.
+- **Lazy loading:** Não implementado.
+- **Memoization:** Não há uso de `useMemo` ou `useCallback`.
+
+## **SEO/Meta:**
+- **Title:** 'Login - iSelfToken'
+- **Description:** Não especificado.
+- **Keywords:** Não especificado.

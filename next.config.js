@@ -2,6 +2,12 @@ module.exports = {
   images: {
     unoptimized: true, // Para evitar otimizações que causem erros 404 em produção
   },
+  // Permite carregar recursos _next/* quando acessando o dev server a partir de outro dispositivo na rede (LAN)
+  // Leia mais: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+  allowedDevOrigins: [
+    "http://192.168.1.9:3000",
+    "http://localhost:3000",
+  ],
   webpack: (config) => {
     config.module.rules.push({
       test: /\.(png|jpe?g|gif|svg)$/i,

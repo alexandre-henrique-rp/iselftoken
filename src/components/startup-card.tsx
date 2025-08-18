@@ -76,8 +76,11 @@ export function StartupCard({ startup }: StartupCardProps) {
           <Button asChild variant="outline" className="border-zinc-700 text-zinc-300 hover:bg-zinc-800">
             <Link href="#">Ver detalhes</Link>
           </Button>
-          <Button asChild className="bg-red-600 hover:bg-red-600/90">
+          {/* <Button asChild className="bg-red-600 hover:bg-red-600/90">
             <Link href="/login">Login para Investir</Link>
+          </Button> */}
+          <Button className="bg-gray-100 hover:bg-gray-500/90">
+            Comprar token
           </Button>
         </div>
       </CardContent>

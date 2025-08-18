@@ -1,6 +1,5 @@
 "use client"
 
-import * as React from "react"
 import {
   IconCamera,
   IconChartBar,
@@ -12,10 +11,9 @@ import {
   IconFolder,
   IconHelp,
   IconReport,
-  IconSearch,
-  IconSettings,
   IconUsers,
   IconHome2,
+  IconBell,
 } from "@tabler/icons-react"
 
 import { NavDocuments } from "@/components/nav-documents"
@@ -32,6 +30,7 @@ import {
 } from "@/components/ui/sidebar"
 import Link from "next/link"
 import Image from "next/image"
+import { NavSecondary } from "./nav-secondary"
  
 
 const data = {
@@ -125,19 +124,14 @@ const data = {
   ],
   navSecondary: [
     {
-      title: "Settings",
+      title: "Notificações",
       url: "#",
-      icon: IconSettings,
+      icon: IconBell,
     },
     {
-      title: "Get Help",
+      title: "Ajuda",
       url: "#",
       icon: IconHelp,
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: IconSearch,
     },
   ],
   documents: [
@@ -162,7 +156,11 @@ const data = {
   ],
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+interface Props extends React.ComponentProps<typeof Sidebar> {
+  role: string;
+}
+
+export function AppSidebar({ role, ...props }: Props) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -180,9 +178,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={data.navMain} role={role} />
         <NavDocuments items={data.documents} />
-        {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
+        <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />
