@@ -30,7 +30,7 @@ export async function middleware(req: NextRequest) {
   }
 
   // Regras especiais para A2F devem vir antes de liberar rotas públicas
-  if (!a2fVerified && pathname === '/login') {
+  if (session && !a2fVerified && pathname === '/login') {
     return NextResponse.redirect(new URL('/auth', req.url));
   }
   if (pathname === '/auth') {
