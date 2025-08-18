@@ -2,14 +2,14 @@
 
 import { IconArrowRight } from '@tabler/icons-react';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { HeroSearch } from '@/components/investidor/HeroSearch';
 import { AppList } from '@/components/investidor/AppList';
 import { EmptyState } from '@/components/investidor/EmptyState';
-import type { AppItem, ProductItem } from '@/components/investidor/types';
 import { StartupCard } from './startup-card';
 import { ProfileCards } from '@/data/profile';
 import type { ProfileCardData } from '@/components/profile-card';
+import { AppItem } from './investidor/types';
 
 // Tipos importados de '@/components/investidor/types'
 

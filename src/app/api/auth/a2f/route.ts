@@ -10,7 +10,7 @@ import generateA2fCode from '@/modules/codigo/a2f';
  * Lê a sessão no servidor e envia (simulado) um código A2F para o e-mail do usuário.
  * Body opcional: { email?: string }
  */
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const session = await GetSessionServer();
     if (!session) {

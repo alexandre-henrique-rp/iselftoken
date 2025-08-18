@@ -15,7 +15,7 @@ export default async function ProtectedLayout({ children }: Props) {
 
   return (
     <SidebarProvider>
-      <AppSidebar role={role} />
+      <AppSidebar role={role ?? ""} />
       <SidebarInset>
         {children}
         {/* Botão flutuante de ajuda/WhatsApp */}

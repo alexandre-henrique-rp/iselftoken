@@ -1,7 +1,7 @@
 import { GetSessionServer } from "@/context/auth"
 import { NextResponse } from "next/server"
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const session = await GetSessionServer()
     if (!session) {
