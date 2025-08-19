@@ -1,0 +1,82 @@
+{
+  "title": "iSelfToken - Conectando Inversores y Startups",
+  "description": "Plataforma digital para conectar inversores y startups en Brasil.",
+  "keywords": "inversión, startups, inversores, Brasil, tecnología",
+  "welcome": "Bienvenido a iSelfToken",
+  "home": {
+    "hero": {
+      "subtitle": "iSelfToken conecta a los inversores con activos digitales innovadores con alto potencial de crecimiento.",
+      "cta": {
+        "raise": "Captar inversión",
+        "invest": "Comenzar a Invertir"
+      }
+    },
+    "sections": {
+      "raising_title": "Rondas de financiación"
+    },
+    "cta": {
+      "title": "¿Listo para empezar a invertir?",
+      "subtitle": "Crea tu cuenta gratuita y accede a las mejores oportunidades de inversión en startups.",
+      "bullets": {
+        "verified": "Startups verificadas",
+        "low_minimum": "Inversión mínima baja"
+      },
+      "button": "Crear Cuenta Gratis"
+    },
+    "testimonials": {
+      "investors_title": "Testimonios de quienes ya invierten",
+      "startups_title": "Lo que dicen los fundadores de startups sobre nosotros"
+    },
+    "footer": {
+      "description": "Conectando inversores con activos digitales innovadores.",
+      "platform": "Plataforma",
+      "for_investors": "Para Inversores",
+      "for_projects": "Para Proyectos",
+      "legal": "Legal",
+      "education": "iSelfToken Education",
+      "terms": "Términos de Uso",
+      "privacy": "Privacidad",
+      "contact": "Contacto",
+      "email": "Email",
+      "phone": "Teléfono",
+      "rights": "Todos los derechos reservados."
+    }
+  }
+  ,
+  "testimonials": {
+    "investor": {
+      "1": {
+        "name": "Ana Silva",
+        "quote": "iSelfToken me abrió puertas a inversiones a las que no tendría acceso. ¡Curaduría impecable!",
+        "role": "Inversora"
+      },
+      "2": {
+        "name": "Carlos Pereira",
+        "quote": "Plataforma confiable y transparente. Ya obtuve excelentes rendimientos en mis inversiones.",
+        "role": "Inversor"
+      },
+      "3": {
+        "name": "Juliana Costa",
+        "quote": "Interfaz intuitiva y soporte excepcional. Lo recomiendo para quienes quieren diversificar su cartera.",
+        "role": "Inversora"
+      }
+    },
+    "startup": {
+      "1": {
+        "name": "Roberto Santos",
+        "quote": "iSelfToken nos ayudó a recaudar fondos de manera rápida y eficiente. Proceso transparente e inversores calificados.",
+        "role": "CEO, TechFlow"
+      },
+      "2": {
+        "name": "Marina Oliveira",
+        "quote": "Excelente plataforma para startups en crecimiento. El apoyo del equipo marcó la diferencia en nuestro proceso de recaudación.",
+        "role": "Fundadora, GreenTech Solutions"
+      },
+      "3": {
+        "name": "Felipe Costa",
+        "quote": "Logramos conectar con inversores alineados con nuestra visión. iSelfToken es esencial para el ecosistema de innovación.",
+        "role": "CTO, FinanceAI"
+      }
+    }
+  }
+}

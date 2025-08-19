@@ -39,9 +39,9 @@ Descrição: Página Pública /register
 ## Decisões de Implementação
 
 - Componentização para isolar JSX e regras de cada formulário, evitando erros de parsing e duplicações.
-- Máscaras ficam nos componentes; schema e `useForm` ficam na página, mantendo single source of truth.
+- Máscaras ficam nos componentes com `remask` (via utilitários `createCpfHandler`, `createCnpjHandler`, `createPhoneHandler`, `createCepHandler` em `src/lib/mask-utils.ts`); schema e `useForm` ficam na página, mantendo single source of truth.
 - Correções de JSX e imports (ex.: `Card`, `CardContent`, `CardHeader`, `CardTitle`).
-- Remoção de `any` em render props de `InputMask` usando `React.InputHTMLAttributes<HTMLInputElement>`.
+- Remoção de `any` e adequação dos tipos dos handlers para inputs controlados com `react-hook-form`.
 
 ## Testes Recomendados
 

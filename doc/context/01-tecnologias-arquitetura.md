@@ -14,6 +14,7 @@ Descrição: Tecnologias e Arquitetura do Frontend
 - Ícones: Lucide React 0.539.0
 - Styling: Tailwind CSS 4 + class-variance-authority + clsx + tailwind-merge
 - Radix UI: Dialog, Label, Slot para componentes primitivos
+- E-mail: `nodemailer` 7 para envio de códigos A2F
 - Ferramentas: ESLint 9, Prettier 3.6.2, PostCSS
 
 # Padrões e Boas Práticas
@@ -28,6 +29,10 @@ Descrição: Tecnologias e Arquitetura do Frontend
 - `src/app/` páginas (App Router)
 - `src/components/` componentes reutilizáveis
   - `src/components/register/` componentes de formulários públicos de registro
+- `src/modules/` módulos utilitários
+  - `src/modules/email/` módulo para envio de e-mails
+  - `src/modules/codigo/` módulo para geração de códigos (ex.: A2F)
+- `src/model/email/` templates de e-mail (HTML e texto) para A2F
 - `doc/` documentação do projeto
   - `doc/context/` contexto e visão geral
 

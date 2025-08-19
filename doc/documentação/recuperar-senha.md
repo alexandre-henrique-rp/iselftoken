@@ -1,70 +1,66 @@
-# ** nome:** Recuperar Senha
-# ** rota:** /recuperar-senha
+# **nome:** Recuperação de Senha
+# **rota:** [/recuperar-senha]
 
-## ** descrição:** 
-- Página pública para solicitar um link de redefinição de senha por e-mail.
-- Após envio, o frontend redireciona para `/`.
-- O backend enviará um e-mail contendo a URL de redefinição no formato `/redefinir-senha?token=...`.
-- Layout em duas colunas com imagem temática.
+## **descrição:**
+- Página para recuperação de senha na plataforma iSelfToken, permitindo que usuários solicitem um link de redefinição de senha via e-mail.
 
-## ** funcionalidades embarcadas:** 
-- Formulário com validação Zod para e-mail.
-- Envio da solicitação (placeholder) e redirecionamento para `/`.
-- Link para retornar ao login.
+## **tipo de acesso:**
+- público
 
-## ** componentes e arquivos relacionados:**
-- Página: `src/app/(public)/recuperar-senha/page.tsx`
-  - Renderiza formulário com `react-hook-form` + `zod`.
-  - Usa `Card`, `Label`, `Input`, `Button` e `Image`.
-  - Seleciona imagem randômica em `tema` no client-side.
+## **funcionalidades embarcadas:**
+- Formulário com campo para inserção de e-mail.
+- Validação de formato de e-mail.
+- Feedback visual sobre o envio do e-mail de recuperação.
+- Redirecionamento para login após solicitação bem-sucedida.
 
-## ** UX/Validações:**
-- E-mail obrigatório e em formato válido.
-- Mensagem de ajuda explicando o fluxo de recuperação.
-- Mensagens de erro abaixo do campo.
+## **restrições:**
+- Usuários já autenticados com A2F verificado são redirecionados para a página inicial (`/`).
+- Usuários autenticados sem A2F verificado são redirecionados para `/auth`.
+- Campo de e-mail deve seguir formato válido.
 
-## ** restrições:** 
-- Sem integração real com backend (TODO: integrar endpoint de recuperação).
-- Sem controle de tentativa/rate limit no frontend.
-- A validade do token é controlada pelo backend (tempo médio sugerido: 30 minutos).
+## **dependências:**
+- Componentes: `Input` (`src/components/ui/input.tsx`), `Button` (`src/components/ui/button.tsx`), `Card` (`src/components/ui/card.tsx`).
+- Hooks customizados: `useSession` (`src/hooks/useSession.ts`) para verificar estado de autenticação.
+- Bibliotecas externas: `react-hook-form`, `zod`, `sonner` (para mensagens toast).
 
-## ** Request:** 
+## **APIs utilizadas:**
+- Nenhuma API é chamada diretamente nesta página. A integração com o backend para envio de e-mail de recuperação está pendente de implementação.
 
-### ** POST **
-- Solicitação de recuperação: `/api/auth/recover`
+## **Navegação:**
+- **Links de entrada:** `/login`.
+- **Links de saída:** `/login` (após solicitação de recuperação), `/` (se já autenticado com A2F), `/auth` (se autenticado sem A2F).
+- **Parâmetros de rota:** Nenhum, rota estática.
 
-Request (JSON):
-```json
-{ "email": "string" }
-```
+## **Estados e Dados:**
+- **Estados locais:** `loading` (controla estado de carregamento da sessão), `isSubmitted` (indica se o formulário foi enviado).
+- **Estados globais:** Estado de sessão obtido via `useSession`.
+- **Cache:** Não utiliza cache específico.
+- **Persistência:** Não há persistência de dados local.
 
-Responses (JSON):
-- Sucesso (200):
-```json
-{ "status": "success", "message": "E-mail de recuperação enviado" }
-```
-- Erro (404):
-```json
-{ "status": "error", "message": "Email não encontrado" }
-```
+## **Validações:**
+- **Formulários:** Schema `zod` valida `email` como string com formato de e-mail válido.
+- **Inputs:** Campo de e-mail é obrigatório e deve seguir formato correto.
+- **Permissões:** Middleware redireciona usuários já autenticados.
 
-Email enviado (conteúdo esperado):
-- Assunto: "Redefinição de senha"
-- Corpo: Incluir link de redefinição apontando para `/redefinir-senha?token=<TOKEN>`
-- Validade do token: ~30 minutos (após expirar, solicitar novo e-mail)
+## **Tratamento de Erros:**
+- **Errors boundaries:** Não há tratamento específico de erro de renderização.
+- **Try/catch:** Não há operações assíncronas diretas na página.
+- **Fallbacks:** Mensagens de erro de validação exibidas inline no formulário.
 
-## ** Fluxo atual (frontend): **
-1. Usuário informa o e-mail.
-2. Validação com `zod` e `react-hook-form`.
-3. Submit executa `onSubmit` (placeholder), dispara a solicitação ao backend e redireciona para `/`.
-4. Backend envia e-mail com `/redefinir-senha?token=...` (token válido por ~30 min).
-5. Link “Voltar para o login”.
+## **Performance:**
+- **Loading states:** Estado de carregamento (`loading`) exibido enquanto a sessão é verificada.
+- **Lazy loading:** Não implementado.
+- **Memoization:** Não há uso de `useMemo` ou `useCallback`.
 
-## ** Melhorias sugeridas (próximos passos): **
-- Tratar loading/erro no submit e alerta de confirmação.
-- Mensagem de confirmação persistente pós-submit (ex.: toast/banner ao voltar para `/`).
-- Testes TDD do schema Zod e do fluxo de submit.
+## **SEO/Meta:**
+- **Title:** 'Recuperar Senha - iSelfToken'
+- **Description:** Não especificado.
+- **Keywords:** Não especificado.
 
-## ** Observações de UI:**
-- Imagem de fundo randômica: `/image-01.jpg`…`/image-04.jpg`.
-- Logo no topo: `/logo.png`.
+## **Observações sobre Implementação:**
+- A integração com o backend para envio de e-mail de recuperação de senha ainda não foi implementada. Atualmente, a página apenas simula o envio com um atraso de 1 segundo e exibe uma mensagem de sucesso.
+
+## **Melhorias Sugeridas:**
+- Implementar integração com API para envio de e-mail de recuperação.
+- Adicionar tratamento de erro para casos em que o e-mail não está registrado na base de dados (sem revelar se o e-mail existe por segurança).
+- Melhorar UX com estado de carregamento real durante o envio do e-mail.

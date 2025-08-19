@@ -1,38 +1,73 @@
-import { CreateSessionToken, GetSessionServer, DeleteSession } from "@/context/auth"
-import { NextResponse } from "next/server"
-
-
+import {
+  CreateSessionToken,
+  DeleteSession,
+  GetSessionServer,
+} from '@/context/auth';
+import { mockLogin } from '@/mock/mock-login';
+import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
-    try {
-      const body = await request.json()
-      console.log(body)
-      await CreateSessionToken(body)
-      return NextResponse.json({ message: "Autenticado com sucesso" }, { status: 200 })
-    } catch (error) {
-      console.log(error)
-      return NextResponse.json({ error: "Erro ao autenticar" }, { status: 500 })
+  try {
+    const body = await request.json();
+    const { email, password } = body;
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      return NextResponse.json(
+        { error: data.message || 'Erro ao autenticar' },
+        { status: 500 },
+      );
     }
+    await CreateSessionToken({
+      user: {
+        ...data.user,
+        id: Number(data.user.id),
+      },
+      token: data.token,
+      refreshToken: data.refreshToken,
+    });
+
+    return NextResponse.json(
+      { message: 'Autenticado com sucesso' },
+      { status: 200 },
+    );
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json({ error: 'Erro ao autenticar' }, { status: 500 });
+  }
 }
 
 // GET /api/auth -> retorna a sessão atual (payload do JWT) ou null
 export async function GET() {
   try {
-    const session = await GetSessionServer()
-    return NextResponse.json({ session: session ?? null }, { status: 200 })
+    const session = await GetSessionServer();
+    return NextResponse.json({ session: session ?? null }, { status: 200 });
   } catch (error) {
-    console.log(error)
-    return NextResponse.json({ error: "Erro ao obter sessão" }, { status: 500 })
+    console.log(error);
+    return NextResponse.json(
+      { error: 'Erro ao obter sessão' },
+      { status: 500 },
+    );
   }
 }
 
 // DELETE /api/auth -> destrói a sessão (deleta cookie)
 export async function DELETE() {
   try {
-    await DeleteSession()
-    return NextResponse.json({ message: "Sessão finalizada" }, { status: 200 })
+    await DeleteSession();
+    return NextResponse.json({ message: 'Sessão finalizada' }, { status: 200 });
   } catch (error) {
-    console.log(error)
-    return NextResponse.json({ error: "Erro ao finalizar sessão" }, { status: 500 })
+    console.log(error);
+    return NextResponse.json(
+      { error: 'Erro ao finalizar sessão' },
+      { status: 500 },
+    );
   }
 }

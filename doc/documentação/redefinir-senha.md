@@ -1,69 +1,69 @@
-# ** nome:** Redefinir Senha
-# ** rota:** /redefinir-senha
+# **nome:** Redefinição de Senha
+# **rota:** [/redefinir-senha]
 
-## ** descrição:** 
-- Página pública para definir uma nova senha após solicitar recuperação.
-- Recebe um `token` via URL (`/redefinir-senha?token=...`) que deve ser reenviado ao backend junto com a nova senha.
-- Layout em duas colunas com imagem à esquerda.
+## **descrição:**
+- Página para redefinição de senha na plataforma iSelfToken, acessível via link temporário enviado por e-mail, permitindo que usuários criem uma nova senha.
 
-## ** funcionalidades embarcadas:** 
-- Captura do `token` pela query string com `useSearchParams()`.
-- Formulário com validação Zod: senha mínima 6 e confirmação igual.
-- Botão desabilitado quando não há `token` válido na URL.
-- Link para retornar ao login.
+## **tipo de acesso:**
+- público
 
-## ** componentes e arquivos relacionados:**
-- Página: `src/app/(public)/redefinir-senha/page.tsx`
-  - Renderiza formulário com `react-hook-form` + `zod`.
-  - Usa `Card`, `Label`, `Input`, `Button`, `Image`.
-  - Seleciona imagem randômica em `tema` no client-side.
+## **funcionalidades embarcadas:**
+- Formulário com campos para nova senha e confirmação de senha.
+- Validação de senha quanto a tamanho mínimo e correspondência entre os campos.
+- Feedback visual sobre o sucesso ou falha na redefinição.
+- Redirecionamento para login após redefinição bem-sucedida.
 
-## ** UX/Validações:**
-- `password`: mínimo 6 caracteres.
-- `confirmPassword`: deve ser igual à `password` (refine do Zod).
-- Mensagens de erro abaixo dos campos.
+## **restrições:**
+- Usuários já autenticados com A2F verificado são redirecionados para a página inicial (`/`).
+- Usuários autenticados sem A2F verificado são redirecionados para `/auth`.
+- Nova senha deve ter pelo menos 8 caracteres.
+- Campos de senha e confirmação devem corresponder.
 
-## ** restrições:** 
-- Sem integração real com backend (TODO: endpoint de redefinição com token).
-- Token de redefinição não está sendo validado no frontend (a definir fluxo com backend).
-- Sem verificação de expiração do token no frontend.
+## **dependências:**
+- Componentes: `Input` (`src/components/ui/input.tsx`), `Button` (`src/components/ui/button.tsx`), `Card` (`src/components/ui/card.tsx`).
+- Hooks customizados: `useSession` (`src/hooks/useSession.ts`) para verificar estado de autenticação.
+- Bibliotecas externas: `react-hook-form`, `zod`, `sonner` (para mensagens toast).
 
-## ** Request:** 
+## **APIs utilizadas:**
+- Nenhuma API é chamada diretamente nesta página. A integração com o backend para validação do token e atualização da senha está pendente de implementação.
 
-### ** POST **
-- Redefinição de senha: `/api/auth/reset-password`
-- O token é recebido via URL (`/redefinir-senha?token=...`) e enviado no corpo da requisição de reset.
+## **Navegação:**
+- **Links de entrada:** Acessível via link temporário enviado por e-mail (de `/recuperar-senha`).
+- **Links de saída:** `/login` (após redefinição bem-sucedida), `/` (se já autenticado com A2F), `/auth` (se autenticado sem A2F).
+- **Parâmetros de rota:** Nenhum, rota estática (token deve ser gerenciado via query ou backend).
 
-Request (JSON):
-```json
-{ "token": "string", "password": "string" }
-```
+## **Estados e Dados:**
+- **Estados locais:** `loading` (controla estado de carregamento da sessão), `isSubmitted` (indica se o formulário foi enviado).
+- **Estados globais:** Estado de sessão obtido via `useSession`.
+- **Cache:** Não utiliza cache específico.
+- **Persistência:** Não há persistência de dados local.
 
-Responses (JSON):
-- Sucesso (200):
-```json
-{ "status": "success", "message": "Senha redefinida com sucesso" }
-```
-- Erro (400): token ausente
-```json
-{ "status": "error", "message": "Token é obrigatório" }
-```
-- Erro (401): token inválido/expirado
-```json
-{ "status": "error", "message": "Token inválido ou expirado" }
-```
+## **Validações:**
+- **Formulários:** Schema `zod` valida `password` (mínimo de 8 caracteres) e `confirmPassword` (deve corresponder a `password`).
+- **Inputs:** Campos são obrigatórios com regras de tamanho e correspondência.
+- **Permissões:** Middleware redireciona usuários já autenticados.
 
-## ** Fluxo atual (frontend): **
-1. Usuário acessa o link recebido por e-mail: `/redefinir-senha?token=...`.
-2. Usuário informa nova senha e confirmação.
-3. Validação com `zod` e `react-hook-form`.
-4. Submit envia `{ token, password }` para o backend e, em caso de sucesso, redireciona para `/login`.
+## **Tratamento de Erros:**
+- **Errors boundaries:** Não há tratamento específico de erro de renderização.
+- **Try/catch:** Não há operações assíncronas diretas na página.
+- **Fallbacks:** Mensagens de erro de validação exibidas inline no formulário.
 
-## ** Melhorias sugeridas (próximos passos): **
-- Integração real com backend (incluindo captura do token via query string).
-- Estado de loading e feedback de sucesso/erro.
-- Testes TDD de validação e fluxo de submit.
+## **Performance:**
+- **Loading states:** Estado de carregamento (`loading`) exibido enquanto a sessão é verificada.
+- **Lazy loading:** Não implementado.
+- **Memoization:** Não há uso de `useMemo` ou `useCallback`.
 
-## ** Observações de UI:**
-- Imagem randômica: `/image-01.jpg`…`/image-04.jpg`.
-- Logo no topo: `/logo.png`.
+## **SEO/Meta:**
+- **Title:** 'Redefinir Senha - iSelfToken'
+- **Description:** Não especificado.
+- **Keywords:** Não especificado.
+
+## **Observações sobre Implementação:**
+- A integração com o backend para validação do token de redefinição e atualização da senha ainda não foi implementada. Atualmente, a página apenas simula a redefinição com um atraso de 1 segundo e exibe uma mensagem de sucesso.
+- O token de redefinição deve ser passado via query parameter ou gerenciado pelo backend, mas isso não está implementado.
+
+## **Melhorias Sugeridas:**
+- Implementar integração com API para validar token de redefinição e atualizar senha.
+- Adicionar tratamento de erro para tokens inválidos ou expirados.
+- Melhorar UX com estado de carregamento real durante a redefinição.
+- Implementar verificação de força da senha com feedback visual (ex.: barra de força).

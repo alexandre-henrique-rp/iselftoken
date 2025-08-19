@@ -1,0 +1,46 @@
+[
+  {
+    "email": "alice@startup.com",
+    "senha": "123456"
+  },
+  {
+    "email": "bruno@invest.com",
+    "senha": "123456"
+  },
+  {
+    "email": "carla@juridico.com",
+    "senha": "123456"
+  },
+  {
+    "email": "diego@admin.com",
+    "senha": "123456"
+  },
+  {
+    "email": "fernanda@financeiro.com",
+    "senha": "123456"
+  },
+  {
+    "email": "gustavo@consultor.com",
+    "senha": "123456"
+  },
+  {
+    "email": "helena@auditor.com",
+    "senha": "123456"
+  },
+  {
+    "email": "startup@teste.com",
+    "senha": "123456"
+  },
+  {
+    "email": "investidor@teste.com",
+    "senha": "123456"
+  },
+  {
+    "email": "admin@teste.com",
+    "senha": "123456"
+  },
+  {
+    "email": "afiliado@teste.com",
+    "senha": "123456"
+  }
+]

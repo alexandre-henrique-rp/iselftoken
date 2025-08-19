@@ -104,11 +104,46 @@
 
 ## 🚧 Pendências Identificadas
 
+### Frontend
+- [ ] Implementar registro de investidor
+- [ ] Implementar registro de startup
+- [ ] Implementar registro de admin
+- [ ] Implementar registro de afiliado
+- [ ] Implementar login
+- [x] Implementar envio de código A2F
+- [x] Implementar validação de código A2F
+- [x] Implementar tratamento de erros de envio de código A2F
+- [x] Implementar tratamento de erros de validação de código A2F
+- [ ] Implementar tratamento de erros de envio de email
+- [ ] Implementar tratamento de erros de validação de email
+- [ ] Implementar integração com api recuperação de senha
+- [ ] Implementar tratamento de erros de validação de recuperação de senha
+- [ ] Implementar integração com api redefinição de senha
+- [ ] Implementar tratamento de erros de validação de redefinição de senha
+
+### Fluxo do Investidor
+- [ ] Implementar página de perfil
+- [ ] Implementar página home
+- [ ] Implementar página de configurações
+### Fluxo do Startup
+- [ ] Implementar página de perfil
+- [ ] Implementar página de dashboard
+- [ ] Implementar página de configurações
+### Fluxo do Admin
+- [ ] Implementar página de perfil
+- [ ] Implementar página admin
+- [ ] Implementar página de configurações
+### Fluxo do Afiliado
+- [ ] Implementar página de perfil
+- [ ] Implementar página de painel
+- [ ] Implementar página de configurações
+
+
 ### Backend Integration
 - [ ] Conectar formulários de registro ao backend
 - [ ] Implementar autenticação real no login
 - [ ] Implementar envio de email para recuperação de senha
-- [ ] Implementar envio de código A2F
+- [x] Implementar envio de código A2F
 - [ ] Implementar persistência de dados
 
 ### Testes (TDD)

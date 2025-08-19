@@ -10,7 +10,7 @@ import { AppItem } from "./types";
  */
 export function AppList({ items }: { items: AppItem[] }) {
   return (
-    <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+    <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
       {items.map((item) => (
         <AppListItem key={item.id} item={item} />
       ))}

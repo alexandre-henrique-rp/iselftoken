@@ -10,6 +10,12 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Permite requisitar recursos _next/* a partir de outro dispositivo na rede (durante o desenvolvimento)
+  // https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+  allowedDevOrigins: [
+    "http://192.168.1.9:3000",
+    "http://localhost:3000",
+  ],
 };
 
 export default nextConfig;

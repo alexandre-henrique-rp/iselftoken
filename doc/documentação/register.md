@@ -1,93 +1,58 @@
-# ** nome:** Cadastro
-# ** rota:** /register
+# **nome:** Registro
+# **rota:** [/register]
 
-## ** descrição:** 
-- Página pública para criação de contas de investidores ou startups.
-- Ao abrir, exibe um modal para escolha do tipo de cadastro. Após a escolha, mostra o formulário correspondente.
-- Layout em duas colunas com imagem ilustrativa à direita.
+## **descrição:**
+- Página de cadastro de novos usuários na plataforma iSelfToken, permitindo a escolha entre perfis de investidor ou startup, com formulários específicos para cada tipo.
 
-## ** funcionalidades embarcadas:** 
-- Modal para selecionar tipo de cadastro (Investidor ou Startup).
-- Formulário de Investidor (`InvestorForm`) com validação Zod, máscaras (CPF, telefone, CEP) e busca automática de endereço pelo ViaCEP.
-- Formulário de Startup (`StartupForm`) com validação Zod, máscaras (CNPJ/CPF quando aplicável, telefone, CEP) e ViaCEP.
-- Senha e confirmação com validação (mín. 6 caracteres) e alerta de não coincidência.
-- Máscaras com `remask` e handlers em `src/lib/mask-utils.ts`.
-- Spinner de carregamento durante a busca de CEP.
-- Link para voltar ao login.
+## **tipo de acesso:**
+- público
 
-## ** componentes e arquivos relacionados:**
-- Página: `src/app/(public)/register/page.tsx`
-  - Renderiza o grid, modal de escolha e o formulário selecionado (`InvestorForm` ou `StartupForm`).
-  - Usa componentes `Dialog`, `Card`, `Button` e `Image`.
-- Formulário Investidor: `src/components/register/InvestorForm.tsx`
-  - Integração ViaCEP ao atingir 8 dígitos (onChange) e no onBlur do CEP.
-  - Campos endereço auto-preenchidos: `endereco`, `bairro`, `cidade`, `uf`.
-  - Senha e confirmação lado a lado, validação mínima de 6.
-- Formulário Startup: `src/components/register/StartupForm.tsx`
-  - Mesmo comportamento do CEP e validações.
-- Utilitários de máscara: `src/lib/mask-utils.ts`
-  - `MASK_PATTERNS.CEP = '99999-999'`, handlers desmascaram antes de aplicar máscara.
+## **funcionalidades embarcadas:**
+- Modal de seleção de perfil (investidor ou startup).
+- Formulários específicos para cada tipo de perfil (`InvestorForm` e `StartupForm`).
+- Validação de dados em tempo real com feedback visual.
+- Redirecionamento para login após conclusão do cadastro.
 
-## ** UX/Validações:**
-- CEP: dispara busca quando completar 8 dígitos numéricos e ao perder o foco.
-- Spinner “Buscando CEP...” com aria-live durante requisições.
-- `UF` normalizada para 2 caracteres (pode ser forçada para maiúsculas futuramente).
-- Mensagens de erro exibidas abaixo dos campos.
+## **restrições:**
+- Usuários já autenticados com A2F verificado são redirecionados para a página inicial (`/`).
+- Usuários autenticados sem A2F verificado são redirecionados para `/auth`.
+- Validações rigorosas de formato para campos como CPF, CNPJ, telefone e CEP.
 
-## ** restrições:** 
-- Sem envio real para backend ainda (TODO: integrar APIs de cadastro).
-- Submissão deve ser bloqueada caso a busca de CEP esteja em andamento (sugerido).
+## **dependências:**
+- Componentes: `InvestorForm` (`src/components/register/InvestorForm.tsx`), `StartupForm` (`src/components/register/StartupForm.tsx`), `Dialog` (de `@radix-ui/react-dialog`).
+- Hooks customizados: `useSession` (`src/hooks/useSession.ts`) para verificar estado de autenticação.
+- Bibliotecas externas: `react-hook-form`, `zod`, `remask` (para máscaras de entrada).
 
-## ** Request:** 
+## **APIs utilizadas:**
+- Nenhuma API é chamada diretamente nesta página. Os dados do formulário serão enviados ao backend em uma etapa futura (pendente de implementação).
 
-### ** POST **
-- Cadastro de investidor (sugerido): `/api/auth/register/investor`
-```json
-{
-  "nome": "string",
-  "cpf": "string",
-  "email": "string",
-  "telefone": "string",
-  "cep": "string",
-  "endereco": "string",
-  "bairro": "string",
-  "cidade": "string",
-  "uf": "string",
-  "senha": "string",
-  "confirmacaoSenha": "string"
-}
-```
+## **Navegação:**
+- **Links de entrada:** `/` (home), `/login`.
+- **Links de saída:** `/login` (após conclusão do cadastro), `/` (se já autenticado com A2F).
+- **Parâmetros de rota:** Nenhum, rota estática.
 
-- Cadastro de startup (sugerido): `/api/auth/register/startup`
-```json
-{
-  "razaoSocial": "string",
-  "nomeFantasia": "string",
-  "cnpj": "string",
-  "email": "string",
-  "telefone": "string",
-  "cep": "string",
-  "endereco": "string",
-  "bairro": "string",
-  "cidade": "string",
-  "uf": "string",
-  "senha": "string",
-  "confirmacaoSenha": "string"
-}
-```
+## **Estados e Dados:**
+- **Estados locais:** `selectedProfile` (controla o perfil escolhido), `open` (controla o modal de seleção).
+- **Estados globais:** Estado de sessão obtido via `useSession`.
+- **Cache:** Não utiliza cache específico.
+- **Persistência:** Não há persistência de dados local.
 
-Responses comuns:
-- Sucesso (201):
-```json
-{
-  "status": "success",
-  "message": "Cadastro criado com sucesso",
-  "data": { "id": 0 }
-}
-```
-- Erro (409): e-mail já cadastrado.
-- Erro de validação (422): mensagens por campo.
+## **Validações:**
+- **Formulários:** Schemas `zod` específicos para investidor (`investorSchema`) e startup (`startupSchema`), com validações de obrigatoriedade, formato (CPF, CNPJ, telefone, CEP) e correspondência de senha.
+- **Inputs:** Máscaras aplicadas via `remask` e sanitização de dados antes do envio.
+- **Permissões:** Middleware redireciona usuários já autenticados.
 
-## ** Observações de UI:**
-- Imagem lateral direita fixa: `/image-05.jpg`.
-- Logo no topo da coluna esquerda: `/logo.png`.
+## **Tratamento de Erros:**
+- **Errors boundaries:** Não há tratamento específico de erro de renderização.
+- **Try/catch:** Não há operações assíncronas diretas na página.
+- **Fallbacks:** Mensagens de erro de validação exibidas inline nos formulários.
+
+## **Performance:**
+- **Loading states:** Estado de carregamento (`loading`) exibido enquanto a sessão é verificada.
+- **Lazy loading:** Não implementado.
+- **Memoization:** Não há uso de `useMemo` ou `useCallback`.
+
+## **SEO/Meta:**
+- **Title:** 'Registro - iSelfToken'
+- **Description:** Não especificado.
+- **Keywords:** Não especificado.

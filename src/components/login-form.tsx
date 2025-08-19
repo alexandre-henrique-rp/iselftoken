@@ -8,11 +8,14 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
+import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
+  const router = useRouter()
   // Definir schema de validação com zod
   const loginSchema = z.object({
     email: z.string().email("Email inválido").min(1, "Email é obrigatório"),
@@ -33,9 +36,30 @@ export function LoginForm({
     },
   })
 
-  function handleLogin(data: LoginFormInputs) {
+  async function handleLogin(data: LoginFormInputs) {
     console.log("Login com:", data)
-    // TODO: Chamar API de login
+    try {
+      const response = await fetch("/api/auth", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      })
+      const result = await response.json()
+      console.log("Login result:", result)
+      if (response.ok) {
+        toast("Login realizado com sucesso", {
+          description: "No seu email foi enviado um código de verificação",
+        })
+        router.push("/auth")
+      }
+    } catch (error) {
+      console.error("Erro ao fazer login:", error)
+      toast("Erro ao fazer login", {
+        description: "Tente novamente mais tarde",
+      })
+    }
   }
 
   return (

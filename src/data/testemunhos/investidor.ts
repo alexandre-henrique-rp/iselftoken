@@ -1,22 +1,19 @@
 import { TestimonialData } from "@/components/testimonial-card";
 
 export const InvestorTestimonials: TestimonialData[] = [
-    {
-      name: 'Ana Silva',
-      testimonial:
-        'A iSelfToken abriu portas para investimentos que eu não teria acesso. Curadoria impecável!',
-      role: 'Investidora',
-    },
-    {
-      name: 'Carlos Pereira',
-      testimonial:
-        'Plataforma confiável e transparente. Já obtive excelentes retornos nos meus investimentos.',
-      role: 'Investidor',
-    },
-    {
-      name: 'Juliana Costa',
-      testimonial:
-        'Interface intuitiva e suporte excepcional. Recomendo para quem quer diversificar a carteira.',
-      role: 'Investidora',
-    },
-  ];
+  {
+    nameKey: 'testimonials.investor.1.name',
+    testimonialKey: 'testimonials.investor.1.quote',
+    roleKey: 'testimonials.investor.1.role',
+  },
+  {
+    nameKey: 'testimonials.investor.2.name',
+    testimonialKey: 'testimonials.investor.2.quote',
+    roleKey: 'testimonials.investor.2.role',
+  },
+  {
+    nameKey: 'testimonials.investor.3.name',
+    testimonialKey: 'testimonials.investor.3.quote',
+    roleKey: 'testimonials.investor.3.role',
+  },
+];
