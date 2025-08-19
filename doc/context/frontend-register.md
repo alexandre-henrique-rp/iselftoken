@@ -11,15 +11,21 @@ Descrição: Página Pública /register
 ## Componentes
 
 - `InvestorForm`: `src/components/register/InvestorForm.tsx`
-  - Campos: nome, cpf, telefone, cep, endereco, bairro, cidade, uf, numero, senha, confirmacaoSenha
+  - Campos: nome, cpf, telefone, cep, endereco, bairro, cidade, uf, numero, e-mail, senha, confirmacaoSenha
   - Máscaras: CPF, telefone, CEP via `react-input-mask`
   - Validação: Zod no schema definido em `page.tsx` (resolver no `useForm`)
   - Limpeza: remoção de caracteres não numéricos antes do envio
 
 - `StartupForm`: `src/components/register/StartupForm.tsx`
-  - Campos: cnpj, razaoSocial, fantasia, telefone, cep, endereco, bairro, cidade, uf, numero, senha, confirmacaoSenha
+  - Campos: cnpj, razaoSocial, fantasia, telefone, cep, endereco, bairro, cidade, uf, numero, e-mail, senha, confirmacaoSenha
   - Máscaras: CNPJ, telefone, CEP
   - Validação: Zod no schema definido em `page.tsx`
+  - Limpeza: remoção de caracteres não numéricos antes do envio
+
+- `AffiliateForm`: `src/components/register/AffiliateForm.tsx`
+  - Campos: nome, cpf, telefone, cep, endereco, bairro, cidade, uf, numero, e-mail, senha, confirmacaoSenha
+  - Máscaras: CPF, telefone, CEP via `react-input-mask`
+  - Validação: Zod no schema definido em `page.tsx` (resolver no `useForm`)
   - Limpeza: remoção de caracteres não numéricos antes do envio
 
 ## Lógica Principal
