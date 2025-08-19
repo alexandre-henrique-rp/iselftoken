@@ -10,7 +10,8 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { email, password } = body;
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
+    const url = `${process.env.NEXTAUTH_API_URL}/login`
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -19,16 +20,17 @@ export async function POST(request: Request) {
       body: JSON.stringify({ email, password }),
     });
     const data = await response.json();
+    console.log("🚀 ~ POST ~ data:", data)
     if (!response.ok) {
       return NextResponse.json(
         { error: data.message || 'Erro ao autenticar' },
         { status: 500 },
       );
     }
+
     await CreateSessionToken({
       user: {
         ...data.user,
-        id: Number(data.user.id),
       },
       token: data.token,
       refreshToken: data.refreshToken,
