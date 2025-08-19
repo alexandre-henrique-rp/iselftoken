@@ -37,6 +37,7 @@ export async function GET() {
 
     // Gera código A2F de 6 dígitos
     const code = generateA2fCode();
+    console.log("🚀 ~ GET ~ code:", code)
     const appName = process.env.APP_NAME ?? 'iSelfToken';
 
     // Envia e-mail com template HTML

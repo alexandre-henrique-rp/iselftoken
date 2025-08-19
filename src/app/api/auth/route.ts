@@ -20,7 +20,6 @@ export async function POST(request: Request) {
       body: JSON.stringify({ email, password }),
     });
     const data = await response.json();
-    console.log("🚀 ~ POST ~ data:", data)
     if (!response.ok) {
       return NextResponse.json(
         { error: data.message || 'Erro ao autenticar' },
