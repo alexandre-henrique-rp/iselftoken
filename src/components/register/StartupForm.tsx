@@ -21,6 +21,7 @@ export type StartupInputs = {
   cidade: string
   uf: string
   numero: string
+  email: string
   senha: string
   confirmacaoSenha: string
 }
@@ -36,6 +37,7 @@ const startupSchema = z.object({
   cidade: z.string().min(1, 'Cidade é obrigatória'),
   uf: z.string().min(1, 'UF é obrigatória'),
   numero: z.string().min(1, 'Número é obrigatório'),
+  email: z.string().min(1, 'Email é obrigatório'),
   senha: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
   confirmacaoSenha: z.string().min(6, 'Confirmação deve ter no mínimo 6 caracteres'),
 }).refine((data) => data.senha === data.confirmacaoSenha, { message: 'As senhas não coincidem', path: ['confirmacaoSenha'] })
@@ -167,6 +169,18 @@ export const StartupForm: FC = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div className="grid gap-2">
+          <Label htmlFor="senha">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            minLength={6}
+            {...register('email')}
+          />
+          {errors.email && (
+            <p className="text-sm text-red-500">{errors.email.message}</p>
+          )}
+        </div>
         <div className="grid gap-2">
           <Label htmlFor="senha">Senha</Label>
           <Input id="senha" type="password" minLength={6} {...register("senha")} />

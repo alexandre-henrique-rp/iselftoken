@@ -14,7 +14,7 @@ import {
 } from '@/lib/mask-utils';
 import { useRouter } from 'next/navigation';
 
-export type InvestorInputs = {
+export type AffiliateInputs = {
   nome: string;
   cpf: string;
   telefone: string;
@@ -29,7 +29,7 @@ export type InvestorInputs = {
   confirmacaoSenha: string;
 };
 
-const investorSchema = z
+const affiliateSchema = z
   .object({
     nome: z.string().min(1, 'Nome é obrigatório'),
     cpf: z
@@ -57,7 +57,7 @@ const investorSchema = z
     path: ['confirmacaoSenha'],
   });
 
-export const InvestorForm: FC = () => {
+export const AffiliateForm: FC = () => {
   const router = useRouter();
   const {
     register,
@@ -66,23 +66,21 @@ export const InvestorForm: FC = () => {
     setValue,
     setError,
     clearErrors,
-  } = useForm<InvestorInputs>({ resolver: zodResolver(investorSchema) });
+  } = useForm<AffiliateInputs>({ resolver: zodResolver(affiliateSchema) });
 
   const [buscandoCep, setBuscandoCep] = useState(false);
   const [ultimoCepBuscado, setUltimoCepBuscado] = useState<string | null>(null);
 
-  const onSubmit: SubmitHandler<InvestorInputs> = (data) => {
-    console.log('Registro de investidor:', data);
-    // TODO: Chamar API de registro de investidor
+  const onSubmit: SubmitHandler<AffiliateInputs> = (data) => {
+    console.log('Registro de afiliado:', data);
+    // TODO: Chamar API de registro de afiliado
     router.push('/login');
   };
 
-  // Busca ViaCEP sob demanda (onBlur ou ao completar 8 dígitos numéricos)
+// Busca ViaCEP sob demanda (onBlur ou ao completar 8 dígitos numéricos)
   const buscarCep = async (raw: string) => {
     if (raw.length !== 8) return;
-    // Permite nova busca se a anterior falhou (errors.cep existe)
-    if ((ultimoCepBuscado === raw && !errors.cep) || buscandoCep) return;
-    if ((ultimoCepBuscado === raw && !errors.cep) || buscandoCep) return;
+    if (ultimoCepBuscado === raw || buscandoCep) return;
     setUltimoCepBuscado(raw);
     setBuscandoCep(true);
     try {
@@ -105,7 +103,7 @@ export const InvestorForm: FC = () => {
     }
   };
 
-  return (
+return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="grid gap-2">
         <Label htmlFor="nome">Nome</Label>
@@ -263,10 +261,10 @@ export const InvestorForm: FC = () => {
       <p className="text-xs text-muted-foreground">A senha deve ter no mínimo 6 caracteres.</p>
 
       <Button type="submit" className="w-full">
-        Cadastrar como Investidor
+        Cadastrar como Afiliado
       </Button>
     </form>
   );
 };
 
-export default InvestorForm;
+export default AffiliateForm;

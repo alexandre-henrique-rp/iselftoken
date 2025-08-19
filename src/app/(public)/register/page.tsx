@@ -14,8 +14,9 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import InvestorForm from '@/components/register/InvestorForm';
 import { StartupForm } from '@/components/register/StartupForm';
+import AffiliateForm from '@/components/register/AffiliateForm';
 
-type TipoCadastro = 'investidor' | 'startup';
+type TipoCadastro = 'investidor' | 'startup' | 'afiliado';
 
 export default function RegisterPage() {
   const [openModal, setOpenModal] = useState(true);
@@ -62,6 +63,10 @@ export default function RegisterPage() {
                   <StartupForm />
                 )}
 
+                {tipo === 'afiliado' && (
+                  <AffiliateForm />
+                )}
+
                 {tipo && (
                   <>
                     <div className="pt-4 text-center text-sm">
@@ -88,10 +93,9 @@ export default function RegisterPage() {
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-3 sm:grid-cols-2">
-              <Button variant="outline" onClick={() => escolher('investidor')}>
-                Sou Investidor
-              </Button>
+              <Button variant="outline" onClick={() => escolher('investidor')}> Sou Investidor </Button>
               <Button onClick={() => escolher('startup')}>Sou Startup</Button>
+              <Button onClick={() => escolher('afiliado')}>Sou Afiliado</Button>
             </div>
           </DialogContent>
         </Dialog>
