@@ -27,12 +27,11 @@ export async function POST(request: Request) {
       );
     }
 
+    console.log("🚀 ~ POST ~ data:", data)
     await CreateSessionToken({
-      user: {
-        ...data.user,
-      },
-      token: data.token,
-      refreshToken: data.refreshToken,
+      user: data.data.user,
+      token: data.data.token,
+      refreshToken: data.data.refreshToken,
     });
 
     return NextResponse.json(

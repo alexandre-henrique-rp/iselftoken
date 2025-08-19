@@ -23,6 +23,7 @@ const tema = [
 
 export default function A2FPage() {
   const { user, loading } = useSession();
+  console.log("🚀 ~ A2FPage ~ user:", user)
   const requestedRef = useRef(false);
   const [Code, setCode] = useState('');
 
@@ -31,6 +32,7 @@ export default function A2FPage() {
   useEffect(() => {
     if (loading) return;
     const email = user?.email ?? undefined;
+    console.log("🚀 ~ A2FPage ~ email:", email)
     if (!email) return;
     if (requestedRef.current) return;
     requestedRef.current = true;

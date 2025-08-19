@@ -10,6 +10,7 @@ export async function openSessionToken<T = jose.JWTPayload>(token: string): Prom
 
 // createSession responsável por criar o session
 export async function CreateSessionToken(payload: SessionNext.Session) {
+  console.log("🚀 ~ CreateSessionToken ~ payload:", payload)
   const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET)
   const token = await new jose.SignJWT(payload as unknown as jose.JWTPayload)
     .setProtectedHeader({ alg: "HS256" })
