@@ -21,7 +21,6 @@ export async function GET() {
     const email = sessionEmail;
 
     // Query params (para testes): cc e bcc
-
     const cc = [
       'Marcos <marcoslacerda@iselftoken.net>',
       'Niashi <niashi_dev@iselftoken.net>',

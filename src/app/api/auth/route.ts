@@ -9,30 +9,29 @@ import { NextResponse } from 'next/server';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-
-    // Substituído mockLogin por chamada ao adaptador de autenticação
-    const response = await mockLogin({
-      email: body.email,
-      password: body.password,
+    const { email, password } = body;
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
     });
-    // Garante que só prosseguimos quando a resposta for de sucesso e com dados presentes
-    if (!response || response.status !== 'success' || !response.data) {
+    const data = await response.json();
+    if (!response.ok) {
       return NextResponse.json(
-        { error: response.message || 'Erro ao autenticar' },
+        { error: data.message || 'Erro ao autenticar' },
         { status: 500 },
       );
     }
-
-    const { user, token, refresh_token } = response.data;
-
-    // Mapeia para o tipo SessionNext.Session esperado por CreateSessionToken
     await CreateSessionToken({
       user: {
-        ...user,
-        id: Number(user.id), // Conversão de string para number para compatibilidade com o tipo esperado
+        ...data.user,
+        id: Number(data.user.id),
       },
-      token,
-      refreshToken: refresh_token,
+      token: data.token,
+      refreshToken: data.refreshToken,
     });
 
     return NextResponse.json(
