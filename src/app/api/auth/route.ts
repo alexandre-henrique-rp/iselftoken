@@ -26,8 +26,6 @@ export async function POST(request: Request) {
         { status: 500 },
       );
     }
-
-    console.log("🚀 ~ POST ~ data:", data)
     await CreateSessionToken({
       user: data.data.user,
       token: data.data.token,

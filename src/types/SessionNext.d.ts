@@ -11,5 +11,5 @@ interface User {
   id: number
   name: string
   email: string
-  role: "investidor" | "startup" | "admin" | "afiliado"
+  role: "investidor" | "fundador" | "admin" | "afiliado"
 }

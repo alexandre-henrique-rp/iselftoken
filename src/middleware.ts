@@ -16,6 +16,10 @@ const StartupRoutes = ['/dashboard', '/config'];
 
 const InvestorRoutes = ['/home', '/perfil'];
 
+const AdminRoutes = ['/admin'];
+
+const AfiliadoRoutes = ['/afiliado'];
+
 export async function middleware(req: NextRequest) {
   const session = await GetSessionServer();
   const a2fVerified = await GetA2fVerified();
@@ -62,18 +66,25 @@ export async function middleware(req: NextRequest) {
   if (pathname === '/') {
     if (session) {
       const role = session.user.role;
-      if (role === 'startup') {
+      if (role === 'fundador') {
         return NextResponse.redirect(new URL('/dashboard', req.url));
       }
       if (role === 'investidor') {
         return NextResponse.redirect(new URL('/home', req.url));
+      }
+      if (role === 'admin') {
+        return NextResponse.redirect(new URL('/admin', req.url));
+      }
+      if (role === 'afiliado') {
+        return NextResponse.redirect(new URL('/afiliado', req.url));
       }
     }
   }
 
   if (session) {
     const role = session.user.role;
-    if (role === 'startup') {
+    // "investidor" | "startup" | "admin" | "afiliado"
+    if (role === 'fundador') {
       const allowed = StartupRoutes.some((base) => pathname === base || pathname.startsWith(base + '/'));
       if (allowed) {
         return NextResponse.next();
@@ -81,6 +92,18 @@ export async function middleware(req: NextRequest) {
     }
     if (role === 'investidor') {
       const allowed = InvestorRoutes.some((base) => pathname === base || pathname.startsWith(base + '/'));
+      if (allowed) {
+        return NextResponse.next();
+      }
+    }
+    if (role === 'admin') {
+      const allowed = AdminRoutes.some((base) => pathname === base || pathname.startsWith(base + '/'));
+      if (allowed) {
+        return NextResponse.next();
+      }
+    }
+    if (role === 'afiliado') {
+      const allowed = AfiliadoRoutes.some((base) => pathname === base || pathname.startsWith(base + '/'));
       if (allowed) {
         return NextResponse.next();
       }

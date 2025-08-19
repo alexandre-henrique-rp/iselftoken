@@ -10,7 +10,6 @@ import * as z from 'zod';
 import {
   cpfMaskHandler,
   phoneMaskHandler,
-  cepMaskHandler,
 } from '@/lib/mask-utils';
 import { useRouter } from 'next/navigation';
 
@@ -47,10 +46,10 @@ const investorSchema = z
     uf: z.string().min(1, 'UF é obrigatória'),
     numero: z.string().min(1, 'Número é obrigatório'),
     email: z.string().min(1, 'Email e obrigatório'),
-    senha: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
+    senha: z.string().min(12, 'Senha deve ter no mínimo 12 caracteres'),
     confirmacaoSenha: z
       .string()
-      .min(6, 'Confirmação deve ter no mínimo 6 caracteres'),
+      .min(12, 'Confirmação deve ter no mínimo 12 caracteres'),
   })
   .refine((data) => data.senha === data.confirmacaoSenha, {
     message: 'As senhas não coincidem',
@@ -238,7 +237,7 @@ export const InvestorForm: FC = () => {
           <Input
             id="senha"
             type="password"
-            minLength={6}
+            minLength={12}
             {...register('senha')}
           />
           {errors.senha && (
@@ -250,7 +249,7 @@ export const InvestorForm: FC = () => {
           <Input
             id="confirmacaoSenha"
             type="password"
-            minLength={6}
+            minLength={12}
             {...register('confirmacaoSenha')}
           />
           {errors.confirmacaoSenha && (
@@ -260,7 +259,7 @@ export const InvestorForm: FC = () => {
           )}
         </div>
       </div>
-      <p className="text-xs text-muted-foreground">A senha deve ter no mínimo 6 caracteres.</p>
+      <p className="text-xs text-muted-foreground">A senha deve ter no mínimo 12 caracteres.</p>
 
       <Button type="submit" className="w-full">
         Cadastrar como Investidor

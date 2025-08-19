@@ -38,8 +38,8 @@ const startupSchema = z.object({
   uf: z.string().min(1, 'UF é obrigatória'),
   numero: z.string().min(1, 'Número é obrigatório'),
   email: z.string().min(1, 'Email é obrigatório'),
-  senha: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
-  confirmacaoSenha: z.string().min(6, 'Confirmação deve ter no mínimo 6 caracteres'),
+  senha: z.string().min(12, 'Senha deve ter no mínimo 12 caracteres'),
+  confirmacaoSenha: z.string().min(12, 'Confirmação deve ter no mínimo 12 caracteres'),
 }).refine((data) => data.senha === data.confirmacaoSenha, { message: 'As senhas não coincidem', path: ['confirmacaoSenha'] })
 
 export const StartupForm: FC = () => {
@@ -183,16 +183,16 @@ export const StartupForm: FC = () => {
         </div>
         <div className="grid gap-2">
           <Label htmlFor="senha">Senha</Label>
-          <Input id="senha" type="password" minLength={6} {...register("senha")} />
+          <Input id="senha" type="password" minLength={12} {...register("senha")} />
           {errors.senha && <p className="text-sm text-red-500">{errors.senha.message}</p>}
         </div>
         <div className="grid gap-2">
           <Label htmlFor="confirmacaoSenha">Confirmar Senha</Label>
-          <Input id="confirmacaoSenha" type="password" minLength={6} {...register("confirmacaoSenha")} />
+          <Input id="confirmacaoSenha" type="password" minLength={12} {...register("confirmacaoSenha")} />
           {errors.confirmacaoSenha && <p className="text-sm text-red-500">{errors.confirmacaoSenha.message}</p>}
         </div>
       </div>
-      <p className="text-xs text-muted-foreground">A senha deve ter no mínimo 6 caracteres.</p>
+      <p className="text-xs text-muted-foreground">A senha deve ter no mínimo 12 caracteres.</p>
 
       <Button type="submit" className="w-full">Cadastrar como Startup</Button>
     </form>

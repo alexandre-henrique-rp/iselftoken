@@ -11,7 +11,9 @@ interface Props {
 // Layout protegido: valida a sessão no servidor para evitar loading no client
 export default async function ProtectedLayout({ children }: Props) {
  const session = await GetSessionServer()
+ console.log("🚀 ~ ProtectedLayout ~ session:", session)
  const role = session?.user?.role
+ console.log("🚀 ~ ProtectedLayout ~ role:", role)
 
   return (
     <SidebarProvider>
