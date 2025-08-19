@@ -57,7 +57,7 @@ export async function GET() {
         // Não retornamos o código por segurança
         provider: result.provider,
         messageId: result.messageId,
-        // codigo: code,
+        codigo: code,
       },
       { status: 200 },
     );
