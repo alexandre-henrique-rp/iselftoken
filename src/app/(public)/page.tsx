@@ -65,11 +65,6 @@ export default function Home() {
               />
               <HeaderTr />
               <TrText
-                k="home.hero.title"
-                as="p"
-                className="max-w-2xl text-lg text-zinc-400 md:text-xl mb-1"
-              />
-              <TrText
                 k="home.hero.subtitle"
                 as="p"
                 className="max-w-2xl text-lg text-zinc-400 md:text-xl"
@@ -119,7 +114,8 @@ export default function Home() {
                 <h3 className="mb-3 text-2xl font-bold text-white">
                   <TrText k="home.cta.title" />
                 </h3>
-                <TrText k="home.cta.subtitle" as="p" className="mb-6 text-zinc-400" />
+                <TrText k="home.cta.subtitle1" as="p" className="mb-6 text-zinc-400" />
+                <TrText k="home.cta.subtitle2" as="p" className="mb-6 text-zinc-400" />
                 <div className="flex flex-col gap-4 sm:flex-row">
                   <div className="flex items-center gap-1 text-sm text-zinc-300">
                     <Star className="mr-2 h-4 w-4 text-yellow-500" />

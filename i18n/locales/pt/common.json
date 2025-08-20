@@ -2,11 +2,10 @@
   "title": "iSelfToken - Conectando Investidores e Startups",
   "description": "Plataforma digital para conectar investidores e startups no Brasil.",
   "keywords": "investimento, startups, investidores, Brasil, tecnologia",
-  "welcome": "Bem-vindo ao iSelfToken",
+  "welcome": "Invista em startups promissoras via tokenização de equity",
   "home": {
     "hero": {
-      "title": "Para Fundadores: Capte investimento para sua startup com uma solução segura, rápida e 100% digital.",
-      "subtitle": "Para Investidores: Invista em startups promissoras com liquidez via tokenização de equity.","cta": {
+      "subtitle": "A iSelfToken conecta investidores e fundadores de startups em uma plataforma segura e acessível.","cta": {
         "raise": "Captar investimento",
         "invest": "Comece a Investir"
       }
@@ -16,7 +15,8 @@
     },
     "cta": {
       "title": "Pronto para começar a investir?",
-      "subtitle": "Crie sua conta gratuita e tenha acesso às melhores oportunidades de investimento em startups.",
+      "subtitle1": "Para Fundadores: Capte investimento para sua startup com uma solução segura, rápida e 100% digital.",
+      "subtitle2": "Para Investidores: Invista em startups promissoras com liquidez via tokenização de equity.",
       "bullets": {
         "verified": "Startups verificadas",
         "low_minimum": "Investimento mínimo baixo"

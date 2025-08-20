@@ -5,27 +5,28 @@
   "welcome": "Welcome to iSelfToken",
   "home": {
     "hero": {
-      "subtitle": "iSelfToken connects investors to innovative digital assets with high growth potential.",
+      "subtitle": "iSelfToken connects investors and founders of startups in a secure and accessible platform.",
       "cta": {
-        "raise": "Raise funding",
+        "raise": "Raise Investment",
         "invest": "Start Investing"
       }
     },
     "sections": {
-      "raising_title": "Fundraising rounds"
+      "raising_title": "Fundraising Rounds"
     },
     "cta": {
       "title": "Ready to start investing?",
-      "subtitle": "Create your free account and get access to the best startup investment opportunities.",
+      "subtitle1": "For Founders: Raise investment for your startup with a secure, fast, and 100% digital solution.",
+      "subtitle2": "For Investors: Invest in promising startups with liquidity via equity tokenization.",
       "bullets": {
-        "verified": "Verified startups",
-        "low_minimum": "Low minimum investment"
+        "verified": "Verified Startups",
+        "low_minimum": "Low Minimum Investment"
       },
       "button": "Create Free Account"
     },
     "testimonials": {
-      "investors_title": "Testimonials from investors",
-      "startups_title": "What startup founders say about us"
+      "investors_title": "Testimonials from Investors",
+      "startups_title": "What Startup Founders Say About Us"
     },
     "footer": {
       "description": "Connecting investors to innovative digital assets.",
@@ -41,8 +42,7 @@
       "phone": "Phone",
       "rights": "All rights reserved."
     }
-  }
-  ,
+  },
   "testimonials": {
     "investor": {
       "1": {
