@@ -5,8 +5,8 @@
   "welcome": "Bem-vindo ao iSelfToken",
   "home": {
     "hero": {
-      "subtitle": "A iSelfToken conecta investidores a ativos digitais inovadores com alto potencial de crescimento.",
-      "cta": {
+      "title": "Para Fundadores: Capte investimento para sua startup com uma solução segura, rápida e 100% digital.",
+      "subtitle": "Para Investidores: Invista em startups promissoras com liquidez via tokenização de equity.","cta": {
         "raise": "Captar investimento",
         "invest": "Comece a Investir"
       }
@@ -41,8 +41,7 @@
       "phone": "Telefone",
       "rights": "Todos os direitos reservados."
     }
-  }
-  ,
+  },
   "testimonials": {
     "investor": {
       "1": {

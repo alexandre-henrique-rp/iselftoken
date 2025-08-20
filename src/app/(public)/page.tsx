@@ -65,6 +65,11 @@ export default function Home() {
               />
               <HeaderTr />
               <TrText
+                k="home.hero.title"
+                as="p"
+                className="max-w-2xl text-lg text-zinc-400 md:text-xl mb-1"
+              />
+              <TrText
                 k="home.hero.subtitle"
                 as="p"
                 className="max-w-2xl text-lg text-zinc-400 md:text-xl"
