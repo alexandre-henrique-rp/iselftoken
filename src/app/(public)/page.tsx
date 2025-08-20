@@ -127,6 +127,8 @@ export default function Home() {
                   </div>
                 </div>
               </div>
+              <div className="flex flex-col items-center gap-4">
+
               <Button
                 asChild
                 className="bg-white px-6 py-3 font-medium text-black hover:bg-gray-100"
@@ -145,9 +147,31 @@ export default function Home() {
                       d="M17 8l4 4m0 0l-4 4m4-4H3"
                     />
                   </svg>
-                  <TrText k="home.cta.button" />
+                  <TrText k="home.cta.button1" />
                 </Link>
               </Button>
+              <Button
+                asChild
+                className="bg-white px-6 py-3 font-medium text-black hover:bg-gray-100"
+              >
+                <Link href="/register">
+                  <svg
+                    className="mr-2 h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 8l4 4m0 0l-4 4m4-4H3"
+                    />
+                  </svg>
+                  <TrText k="home.cta.button2" />
+                </Link>
+              </Button>
+              </div>
             </div>
           </div>
         </section>
@@ -205,11 +229,6 @@ export default function Home() {
                 <li>
                   <a href="#" className="hover:text-blue-400"><TrText k="home.footer.for_projects" /></a>
                 </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="mb-4 font-semibold text-white"><TrText k="home.footer.legal" /></h4>
-              <ul className="space-y-2 text-sm">
                 <li>
                   <Link
                     className="transition-colors hover:text-blue-400"
@@ -218,6 +237,12 @@ export default function Home() {
                     <TrText k="home.footer.education" />
                   </Link>
                 </li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="mb-4 font-semibold text-white"><TrText k="home.footer.legal" /></h4>
+              <ul className="space-y-2 text-sm">
+               
                 <li>
                   <Link href="#" className="hover:text-blue-400"><TrText k="home.footer.terms" /></Link>
                 </li>

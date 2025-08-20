@@ -22,7 +22,8 @@
         "verified": "Verified Startups",
         "low_minimum": "Low Minimum Investment"
       },
-      "button": "Create Free Account"
+      "button1": "Start Raising Now",
+      "button2": "Start Investing Now"
     },
     "testimonials": {
       "investors_title": "Testimonials from Investors",

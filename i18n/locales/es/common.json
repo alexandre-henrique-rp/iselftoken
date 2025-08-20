@@ -22,7 +22,8 @@
         "verified": "Startups Verificadas",
         "low_minimum": "Inversión Mínima Baja"
       },
-      "button": "Crear Cuenta Gratis"
+      "button1": "Empieza a captar ahora",
+      "button2": "Empieza a invertir ahora"
     },
     "testimonials": {
       "investors_title": "Testimonios de Inversores",

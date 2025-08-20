@@ -60,7 +60,10 @@ export async function middleware(req: NextRequest) {
 
   // Guarda global: usuário logado sem A2F verificado vai para /auth
   if (session && !a2fVerified && pathname !== '/auth') {
-    return NextResponse.redirect(new URL('/auth', req.url));
+    // so redirecionar se for diferente de public route
+    if (!publicRoutes.includes(pathname)) {
+      return NextResponse.redirect(new URL('/auth', req.url));
+    }
   }
 
   if (pathname === '/') {
