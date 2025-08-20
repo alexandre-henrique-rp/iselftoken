@@ -3,7 +3,6 @@ import {
   DeleteSession,
   GetSessionServer,
 } from '@/context/auth';
-import { mockLogin } from '@/mock/mock-login';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
