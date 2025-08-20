@@ -23,6 +23,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { useRouter } from "next/navigation"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export function NavUser({
   user,
@@ -95,6 +96,12 @@ export function NavUser({
               <DropdownMenuItem>
                 <IconSettings />
                 Perfil
+              </DropdownMenuItem>
+              <DropdownMenuItem aria-label="Alternar tema">
+                <div className="flex w-full items-center justify-between">
+                  <span className="text-sm">Tema</span>
+                  <ThemeToggle />
+                </div>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

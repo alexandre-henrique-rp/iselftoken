@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { Lock, Users } from 'lucide-react';
+import { Users } from 'lucide-react';
 
 export type ProfileCardData = {
   id: string;
@@ -27,9 +27,9 @@ export type ProfileCardData = {
 // ProfileCard alinhado ao layout do exemplo fornecido
 export function ProfileCard({ data }: { data: ProfileCardData }) {
   return (
-    <Card className="overflow-hidden border-zinc-800 bg-black">
+    <Card className="overflow-hidden border border-gray-400 bg-gray-300 text-card-foreground shadow-sm dark:bg-background dark:border-border">
       <CardHeader className="p-0">
-        <div className="relative aspect-[16/6] bg-zinc-800">
+        <div className="relative aspect-[16/6] bg-muted">
           <Image
             src={data.image}
             alt={data.name}
@@ -39,7 +39,7 @@ export function ProfileCard({ data }: { data: ProfileCardData }) {
           />
           {/* Badges topo-esquerda */}
           <div className="absolute top-3 left-3 flex gap-2">
-            <Badge className="border-zinc-700 bg-black/70 text-white">
+            <Badge className="border-border bg-background/70 text-foreground">
               {data.stageLabel}
             </Badge>
             {data.trending && (
@@ -53,7 +53,7 @@ export function ProfileCard({ data }: { data: ProfileCardData }) {
           <div className="absolute top-3 right-3">
             <Badge
               variant="outline"
-              className="border-zinc-700 bg-black/60 text-xs text-zinc-200"
+              className="border-border bg-background/60 text-xs text-muted-foreground"
             >
               {data.categoryLabel}
             </Badge>
@@ -64,21 +64,21 @@ export function ProfileCard({ data }: { data: ProfileCardData }) {
       <CardContent className="p-5">
         {/* Título e descrição */}
         <div className="flex items-start justify-between">
-          <h3 className="text-xl font-semibold text-zinc-100">{data.name}</h3>
+          <h3 className="text-xl font-semibold text-foreground">{data.name}</h3>
         </div>
-        <p className="mt-1 text-sm text-zinc-400">{data.description}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{data.description}</p>
 
         {/* Progresso */}
         <div className="mt-5 space-y-2">
-          <div className="flex justify-between text-xs text-zinc-400">
+          <div className="flex justify-between text-xs text-muted-foreground">
             <span>Progresso</span>
-            <span className="font-medium text-zinc-100">
+            <span className="font-medium text-foreground">
               {data.raisedLabel} de {data.goalLabel}
             </span>
           </div>
           <Progress value={data.percent} className="[&>div]:bg-blue-600" />
           <div className="mt-1 flex items-center justify-between text-xs">
-            <span className="text-zinc-300">{data.collectedLabel}</span>
+            <span className="text-muted-foreground">{data.collectedLabel}</span>
             <span className="text-red-400">{data.timeLeftLabel}</span>
           </div>
         </div>
@@ -86,16 +86,16 @@ export function ProfileCard({ data }: { data: ProfileCardData }) {
         {/* Métricas */}
         <div className="mt-5 grid grid-cols-2 gap-4">
           <div className="space-y-1">
-            <p className="text-xs text-zinc-400">Valuation</p>
-            <p className="text-sm font-medium text-zinc-100">
+            <p className="text-xs text-muted-foreground">Valuation</p>
+            <p className="text-sm font-medium text-foreground">
               {data.valuationLabel}
             </p>
           </div>
           <div className="space-y-1">
-            <p className="flex items-center gap-1 text-xs text-zinc-400">
+            <p className="flex items-center gap-1 text-xs text-muted-foreground">
               <Users className="h-3.5 w-3.5" /> Investidores
             </p>
-            <p className="text-sm font-medium text-zinc-100">
+            <p className="text-sm font-medium text-foreground">
               {data.investorsCount}
             </p>
           </div>
@@ -106,7 +106,7 @@ export function ProfileCard({ data }: { data: ProfileCardData }) {
           <Button
             asChild
             variant="outline"
-            className="border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-500"
+            className="border-border bg-background text-foreground hover:bg-muted"
           >
             <Link href="#">Ver detalhes</Link>
           </Button>

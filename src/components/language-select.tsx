@@ -39,7 +39,7 @@ export function LanguageSelect({ defaultLocale = "pt" }: LanguageSelectProps) {
   return (
     <div className="relative">
       <select
-        className="appearance-none bg-black text-zinc-200 border border-zinc-800 rounded-md py-2 pl-3 pr-8 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+        className="appearance-none rounded-md border border-border bg-muted py-2 pl-3 pr-8 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors"
         value={value}
         onChange={handleChange}
       >
@@ -47,7 +47,7 @@ export function LanguageSelect({ defaultLocale = "pt" }: LanguageSelectProps) {
         <option value="en">EN 🇺🇸</option>
         <option value="es">ES 🇪🇸</option>
       </select>
-      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-zinc-200">
+      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-muted-foreground">
         <svg
           className="w-4 h-4"
           fill="none"

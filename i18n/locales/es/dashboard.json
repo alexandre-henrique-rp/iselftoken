@@ -1,0 +1,88 @@
+{
+  "nav": {
+    "home": "Inicio",
+    "dashboard": "Panel",
+    "portfolio": "Portafolio",
+    "investments": "Inversiones",
+    "profile": "Perfil",
+    "settings": "Configuración",
+    "logout": "Cerrar Sesión"
+  },
+  "home": {
+    "welcome": "Bienvenido de vuelta",
+    "title": "Tu Panel",
+    "stats": {
+      "total_invested": "Total Invertido",
+      "active_investments": "Inversiones Activas",
+      "portfolio_value": "Valor del Portafolio",
+      "monthly_return": "Retorno Mensual"
+    },
+    "recent_activities": {
+      "title": "Actividades Recientes",
+      "no_activities": "No hay actividades recientes",
+      "view_all": "Ver todas"
+    },
+    "quick_actions": {
+      "title": "Acciones Rápidas",
+      "explore_startups": "Explorar Startups",
+      "view_portfolio": "Ver Portafolio",
+      "add_funds": "Agregar Fondos"
+    }
+  },
+  "portfolio": {
+    "title": "Mi Portafolio",
+    "empty": "Tu portafolio está vacío",
+    "empty_description": "Comienza invirtiendo en startups prometedoras",
+    "total_value": "Valor Total",
+    "total_invested": "Total Invertido",
+    "unrealized_gains": "Ganancias No Realizadas",
+    "filters": {
+      "all": "Todos",
+      "active": "Activos",
+      "exited": "Salidas"
+    }
+  },
+  "settings": {
+    "title": "Configuración",
+    "profile": {
+      "title": "Perfil",
+      "description": "Gestiona tu información personal"
+    },
+    "security": {
+      "title": "Seguridad",
+      "description": "Configura tus preferencias de seguridad"
+    },
+    "notifications": {
+      "title": "Notificaciones",
+      "description": "Gestiona tus preferencias de notificación"
+    },
+    "language": {
+      "title": "Idioma",
+      "description": "Elige tu idioma preferido"
+    },
+    "theme": {
+      "title": "Tema",
+      "description": "Personaliza la apariencia de la app",
+      "light": "Claro",
+      "dark": "Oscuro",
+      "system": "Sistema"
+    }
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "view": "Ver",
+    "back": "Volver",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "sort": "Ordenar"
+  }
+}

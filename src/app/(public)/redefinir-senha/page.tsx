@@ -11,6 +11,7 @@ import Link from "next/link"
 import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useTranslation } from "react-i18next"
 
 // Conjunto de imagens em escopo de módulo para estabilidade entre SSR/CSR
 const tema = ["/image-01.jpg", "/image-02.jpg", "/image-03.jpg", "/image-04.jpg"]
@@ -20,16 +21,17 @@ export default function ResetPasswordPage() {
   const searchParams = useSearchParams()
   const [heroImage, setHeroImage] = useState<string>(tema[0])
   const token = searchParams.get("token") ?? ""
+  const { t } = useTranslation('auth')
   useEffect(() => {
     setHeroImage(tema[Math.floor(Math.random() * tema.length)])
   }, [])
 
   // Schema de validação para a redefinição de senha
   const resetPasswordSchema = z.object({
-    password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+    password: z.string().min(6, t('reset_password.form.password.min')),
     confirmPassword: z.string(),
   }).refine((data) => data.password === data.confirmPassword, {
-    message: "As senhas não coincidem",
+    message: t('reset_password.form.confirm_password.mismatch'),
     path: ["confirmPassword"],
   })
 
@@ -77,15 +79,15 @@ export default function ResetPasswordPage() {
           <div className="w-full max-w-sm">
             <Card>
               <CardHeader>
-                <CardTitle>Redefinir senha</CardTitle>
+                <CardTitle>{t('reset_password.title')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="mb-6 text-sm text-muted-foreground">
-                  Informe sua nova senha e confirme-a.
+                  {t('reset_password.subtitle')}
                 </div>
                 <form onSubmit={handleSubmit(onSubmit)}>
                   <div className="grid gap-2">
-                    <Label htmlFor="password">Nova senha</Label>
+                    <Label htmlFor="password">{t('reset_password.form.password.label')}</Label>
                     <Input
                       id="password"
                       type="password"
@@ -96,7 +98,7 @@ export default function ResetPasswordPage() {
                     )}
                   </div>
                   <div className="grid gap-2 mt-4">
-                    <Label htmlFor="confirmPassword">Confirmar senha</Label>
+                    <Label htmlFor="confirmPassword">{t('reset_password.form.confirm_password.label')}</Label>
                     <Input
                       id="confirmPassword"
                       type="password"
@@ -107,17 +109,17 @@ export default function ResetPasswordPage() {
                     )}
                   </div>
                   <Button type="submit" className="w-full mt-6" disabled={!token}>
-                    Redefinir senha
+                    {t('reset_password.form.submit')}
                   </Button>
                   {!token && (
                     <p className="mt-2 text-sm text-red-500" aria-live="polite">
-                      Link inválido: token ausente. Solicite um novo e-mail de redefinição.
+                      {t('reset_password.missing_token')}
                     </p>
                   )}
                 </form>
                 <div className="mt-4 text-center text-sm">
                   <Link href="/login" className="text-primary underline-offset-4 hover:underline">
-                    ← Voltar para o login
+                    {t('register.login.button')}
                   </Link>
                 </div>
               </CardContent>

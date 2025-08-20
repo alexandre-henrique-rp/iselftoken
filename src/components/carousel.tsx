@@ -56,7 +56,10 @@ export function CarouselItem({ className, ariaLabel, ...props }: CarouselItemPro
       className={cn(
         // Larguras responsivas por item (1 / 1,2 / 2,2 / 3)
         "snap-start",
-        "min-w-[85%] sm:min-w-[70%] md:min-w-[45%] lg:min-w-[32%] xl:min-w-[28%]",
+        // Mobile: 1 card por vez (sem espremimento)
+        "min-w-full sm:min-w-full",
+        // md: ~2 cards por tela; lg+: ~3 cards
+        "md:min-w-[50%] lg:min-w-[33.3333%] xl:min-w-[33.3333%]",
         className
       )}
       role="group"

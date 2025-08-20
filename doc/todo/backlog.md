@@ -5,8 +5,8 @@
 **Valor de negócio:** Segurança e conformidade
 **Estimativa:** 20 pts
 
-- [ ] Expiração de código A2F e limite de tentativas - prioridade: alta
-- [ ] Remover código A2F da resposta em produção - prioridade: alta
+- [x] Expiração de código A2F e limite de tentativas - prioridade: alta
+- [x] Remover código A2F da resposta em produção - prioridade: alta
 
 ### Épico: Internacionalização
 **Valor de negócio:** Alcance global
@@ -21,3 +21,11 @@
 ## Melhorias Técnicas
 - [ ] Automatizar verificação de chaves i18n faltantes em CI
 - [ ] Storybook para componentes UI
+
+### Épico: alternar entre temas
+**Valor de negócio:** Experiência do usuário
+**Estimativa:** 15 pts
+
+- [ ] Botão de mudança de tema (dark/light) na rota / ao lado do seletor de idioma - prioridade: média - estimativa: 2h
+
+- [ ] botão de mudança de tema (dark/light) dentro do navuser

@@ -15,12 +15,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import InvestorForm from '@/components/register/InvestorForm';
 import { StartupForm } from '@/components/register/StartupForm';
 import AffiliateForm from '@/components/register/AffiliateForm';
+import { useTranslation } from 'react-i18next';
+import '@/i18n';
 
 type TipoCadastro = 'investidor' | 'startup' | 'afiliado';
 
 export default function RegisterPage() {
   const [openModal, setOpenModal] = useState(true);
   const [tipo, setTipo] = useState<TipoCadastro | null>(null);
+  const { t } = useTranslation('auth');
 
   function escolher(tipoEscolhido: TipoCadastro) {
     setTipo(tipoEscolhido);
@@ -46,7 +49,7 @@ export default function RegisterPage() {
           <div className="w-full max-w-lg">
             <Card>
               <CardHeader>
-                <CardTitle>Crie sua conta</CardTitle>
+                <CardTitle>{t('register.title')}</CardTitle>
               </CardHeader>
               <CardContent>
                 {!tipo && (
@@ -74,7 +77,7 @@ export default function RegisterPage() {
                         href="/login"
                         className="text-primary underline-offset-4 hover:underline"
                       >
-                        ← Voltar para o login
+                        {t('register.login.button')}
                       </Link>
                     </div>
                   </>
@@ -93,7 +96,7 @@ export default function RegisterPage() {
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-3 sm:grid-cols-2">
-              <Button variant="outline" onClick={() => escolher('investidor')}> Sou Investidor </Button>
+              <Button variant="outline" onClick={() => escolher('investidor')}>Sou Investidor</Button>
               <Button onClick={() => escolher('startup')}>Sou Startup</Button>
               <Button onClick={() => escolher('afiliado')}>Sou Afiliado</Button>
             </div>

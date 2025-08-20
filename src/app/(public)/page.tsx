@@ -1,21 +1,22 @@
-import { Button } from '@/components/ui/button';
-import Image from 'next/image';
-import Link from 'next/link';
-import { ProfileCard } from '@/components/profile-card';
-import { CarouselNav, CarouselItem } from '@/components/carousel-nav';
+import { EmblaCarousel, EmblaSlide } from '@/components/ui/carousel-embla';
+import { MobileMenu } from '@/components/mobile-menu';
 import { ExploreOpportunities } from '@/components/explore-opportunities';
-import { TestimonialCard } from '@/components/testimonial-card';
+import { HeaderTr } from '@/components/header-tr';
+import { LanguageSelect } from '@/components/language-select';
+import { ProfileCard } from '@/components/profile-card';
 import { StartupTestimonialCard } from '@/components/startup-testimonial-card';
-import { Star } from 'lucide-react';
-import { OpportunitiesData } from '@/data/oportunidades';
+import { TestimonialCard } from '@/components/testimonial-card';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { TrText } from '@/components/tr-text';
+import { Button } from '@/components/ui/button';
 import { Categories } from '@/data/categoria';
+import { OpportunitiesData } from '@/data/oportunidades';
+import { ProfileCards } from '@/data/profile';
 import { InvestorTestimonials } from '@/data/testemunhos/investidor';
 import { StartupTestimonials } from '@/data/testemunhos/startup';
-import { ProfileCards } from '@/data/profile';
-import { LanguageSelect } from '@/components/language-select';
-import { HeaderTr } from '@/components/header-tr';
-import { TrText } from '@/components/tr-text';
-
+import { Star } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
 
 export default function Home() {
   const opportunitiesData = OpportunitiesData;
@@ -25,9 +26,9 @@ export default function Home() {
   const profileCards = ProfileCards;
 
   return (
-    <div className="min-h-screen bg-[#000000] text-zinc-200">
+    <div className="bg-background text-foreground min-h-screen">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-zinc-800 bg-black/80 backdrop-blur">
+      <header className="border-border bg-background/80 sticky top-0 z-50 border-b backdrop-blur">
         <div className="container mx-auto flex h-16 items-center justify-between px-6">
           <div className="flex items-center gap-2">
             <span className="text-xl font-bold tracking-tight text-blue-500">
@@ -37,23 +38,25 @@ export default function Home() {
           <nav className="hidden items-center gap-4 md:flex">
             {/* Seletor de idioma (Client Component) */}
             <LanguageSelect defaultLocale="pt" />
+            <ThemeToggle />
             <Link href="/login">
               <Button className="inline-flex items-center justify-center rounded-md bg-blue-600 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600/90">
-                Entrar
+                <TrText k="home.header.login" />
               </Button>
             </Link>
           </nav>
           <div className="md:hidden">
-            <span className="text-sm text-zinc-400">Menu</span>
+            <MobileMenu />
           </div>
         </div>
       </header>
 
       <main>
         {/* Hero */}
-        <section className="bg-black">
+        <section className="bg-background">
           <div className="container mx-auto px-6 pt-20 pb-16 md:pt-28">
             <div className="flex flex-col items-center gap-8 text-center">
+              {/* Imagem para tema escuro */}
               <Image
                 src="/hero.png"
                 alt="iSelfToken"
@@ -61,13 +64,23 @@ export default function Home() {
                 height={512}
                 priority
                 sizes="(max-width: 768px) 90vw, (max-width: 1280px) 800px, 1024px"
-                className="h-auto w-full max-w-2xl"
+                className="hidden h-auto w-full max-w-2xl dark:block"
+              />
+              {/* Imagem para tema claro */}
+              <Image
+                src="/hero_light.png"
+                alt="iSelfToken"
+                width={1024}
+                height={512}
+                priority
+                sizes="(max-width: 768px) 90vw, (max-width: 1280px) 800px, 1024px"
+                className="h-auto w-full max-w-2xl dark:hidden"
               />
               <HeaderTr />
               <TrText
                 k="home.hero.subtitle"
                 as="p"
-                className="max-w-2xl text-lg text-zinc-400 md:text-xl"
+                className="text-muted-foreground max-w-2xl text-lg md:text-xl"
               />
               <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
                 <Link href="/login">
@@ -89,88 +102,95 @@ export default function Home() {
         </section>
 
         {/* Destaques (ProfileCard) */}
-        <section id="explorar" className="bg-black py-12">
+        <section id="explorar" className="bg-background py-12">
           <div className="container mx-auto px-6">
             <div className="mb-6 flex items-center justify-between">
               <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
                 <TrText k="home.sections.raising_title" />
               </h2>
             </div>
-            <CarouselNav>
+            <EmblaCarousel>
               {profileCards.map((item) => (
-                <CarouselItem key={item.id} aria-label={`Card ${item.name}`}>
+                <EmblaSlide key={item.id}>
                   <ProfileCard data={item} />
-                </CarouselItem>
+                </EmblaSlide>
               ))}
-            </CarouselNav>
+            </EmblaCarousel>
           </div>
         </section>
 
         {/* CTA */}
-        <section className="border-black/20 bg-black py-16">
+        <section className="border-border/20 bg-background py-16">
           <div className="container mx-auto px-6">
-            <div className="flex flex-col items-start justify-between gap-6 rounded-xl border border-zinc-800 bg-gradient-to-l from-black/10 to-zinc-200/10 p-8 md:flex-row md:items-center">
+            <div className="flex flex-col items-start justify-between gap-6 rounded-xl border border-border bg-gradient-to-r from-blue-300 to-gray-600 p-8 md:flex-row md:items-center dark:border-zinc-800 dark:bg-gradient-to-l dark:from-black/10 dark:to-zinc-200/10">
               <div className="flex-1">
-                <h3 className="mb-3 text-2xl font-bold text-white">
+                <h3 className="text-foreground mb-3 text-2xl font-bold">
                   <TrText k="home.cta.title" />
                 </h3>
-                <TrText k="home.cta.subtitle1" as="p" className="mb-6 text-zinc-400" />
-                <TrText k="home.cta.subtitle2" as="p" className="mb-6 text-zinc-400" />
+                <TrText
+                  k="home.cta.subtitle1"
+                  as="p"
+                  className="text-white mb-6"
+                />
+                <TrText
+                  k="home.cta.subtitle2"
+                  as="p"
+                  className="text-white mb-6"
+                />
                 <div className="flex flex-col gap-4 sm:flex-row">
-                  <div className="flex items-center gap-1 text-sm text-zinc-300">
+                  <div className="text-white flex items-center gap-1 text-sm">
                     <Star className="mr-2 h-4 w-4 text-yellow-500" />
                     <TrText k="home.cta.bullets.verified" />
                   </div>
-                  <div className="flex items-center gap-1 text-sm text-zinc-300">
+                  <div className="text-white flex items-center gap-1 text-sm">
                     <Star className="mr-2 h-4 w-4 text-yellow-500" />
                     <TrText k="home.cta.bullets.low_minimum" />
                   </div>
                 </div>
               </div>
               <div className="flex flex-col items-center gap-4">
-
-              <Button
-                asChild
-                className="bg-white px-6 py-3 font-medium text-black hover:bg-gray-100"
-              >
-                <Link href="/register">
-                  <svg
-                    className="mr-2 h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17 8l4 4m0 0l-4 4m4-4H3"
-                    />
-                  </svg>
-                  <TrText k="home.cta.button1" />
-                </Link>
-              </Button>
-              <Button
-                asChild
-                className="bg-white px-6 py-3 font-medium text-black hover:bg-gray-100"
-              >
-                <Link href="/register">
-                  <svg
-                    className="mr-2 h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17 8l4 4m0 0l-4 4m4-4H3"
-                    />
-                  </svg>
-                  <TrText k="home.cta.button2" />
-                </Link>
-              </Button>
+                <Button
+                  asChild
+                  className="bg-foreground text-background px-6 py-3 font-medium hover:opacity-90"
+                >
+                  <Link href="/register">
+                    <svg
+                      className="mr-2 h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17 8l4 4m0 0l-4 4m4-4H3"
+                      />
+                    </svg>
+                    <TrText k="home.cta.button1" />
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  className="bg-foreground text-background px-6 py-3 font-medium hover:opacity-90"
+                >
+                  <Link href="/register">
+                    <svg
+                      className="mr-2 h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17 8l4 4m0 0l-4 4m4-4H3"
+                      />
+                    </svg>
+                    <TrText k="home.cta.button2" />
+                  </Link>
+                </Button>
               </div>
             </div>
           </div>
@@ -184,9 +204,9 @@ export default function Home() {
         />
 
         {/* Depoimentos de Investidores */}
-        <section className="bg-black py-16">
+        <section className="bg-background py-16">
           <div className="container mx-auto px-6">
-            <h2 className="mb-10 text-center text-3xl font-bold tracking-tight">
+            <h2 className="text-foreground mb-10 text-center text-3xl font-bold tracking-tight">
               <TrText k="home.testimonials.investors_title" />
             </h2>
             <div className="grid gap-6 lg:grid-cols-3">
@@ -198,9 +218,9 @@ export default function Home() {
         </section>
 
         {/* Depoimentos de Startups */}
-        <section className="bg-black py-16">
+        <section className="bg-background py-16">
           <div className="container mx-auto px-6">
-            <h2 className="mb-10 text-center text-3xl font-bold tracking-tight">
+            <h2 className="text-foreground mb-10 text-center text-3xl font-bold tracking-tight">
               <TrText k="home.testimonials.startups_title" />
             </h2>
             <div className="grid gap-6 lg:grid-cols-3">
@@ -213,25 +233,35 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-zinc-900 text-zinc-300">
-        <div className="container mx-auto border-t border-zinc-800 px-6 py-12">
+      <footer className="bg-zinc-700 dark:bg-background text-muted-foreground">
+        <div className="border-border container mx-auto border-t px-6 py-12">
           <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
             <div className="col-span-2 md:col-span-1">
-              <div className="mb-4 font-bold text-white">iSelfToken</div>
-              <TrText k="home.footer.description" as="p" className="text-sm text-zinc-400" />
+              <div className="text-white mb-4 font-bold">iSelfToken</div>
+              <TrText
+                k="home.footer.description"
+                as="p"
+                className="text-white text-sm"
+              />
             </div>
             <div>
-              <h4 className="mb-4 font-semibold text-white"><TrText k="home.footer.platform" /></h4>
+              <h4 className="text-white mb-4 font-semibold">
+                <TrText k="home.footer.platform" />
+              </h4>
               <ul className="space-y-2 text-sm">
                 <li>
-                  <a href="#" className="hover:text-blue-400"><TrText k="home.footer.for_investors" /></a>
+                  <a href="#" className="text-white hover:text-blue-500">
+                    <TrText k="home.footer.for_investors" />
+                  </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-blue-400"><TrText k="home.footer.for_projects" /></a>
+                  <a href="#" className="text-white hover:text-blue-500">
+                    <TrText k="home.footer.for_projects" />
+                  </a>
                 </li>
                 <li>
                   <Link
-                    className="transition-colors hover:text-blue-400"
+                    className="transition-colors text-white hover:text-blue-500"
                     href="#"
                   >
                     <TrText k="home.footer.education" />
@@ -240,28 +270,40 @@ export default function Home() {
               </ul>
             </div>
             <div>
-              <h4 className="mb-4 font-semibold text-white"><TrText k="home.footer.legal" /></h4>
+              <h4 className="text-white mb-4 font-semibold">
+                <TrText k="home.footer.legal" />
+              </h4>
               <ul className="space-y-2 text-sm">
-               
                 <li>
-                  <Link href="#" className="hover:text-blue-400"><TrText k="home.footer.terms" /></Link>
+                  <Link href="#" className="text-white hover:text-blue-500">
+                    <TrText k="home.footer.terms" />
+                  </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-blue-400"><TrText k="home.footer.privacy" /></Link>
+                  <Link href="#" className="text-white hover:text-blue-500">
+                    <TrText k="home.footer.privacy" />
+                  </Link>
                 </li>
               </ul>
             </div>
             <div>
-              <h4 className="mb-4 font-semibold text-white"><TrText k="home.footer.contact" /></h4>
-              <ul className="space-y-2 text-sm">
-                <li><TrText k="home.footer.email" /></li>
-                <li><TrText k="home.footer.phone" /></li>
+              <h4 className="text-white mb-4 font-semibold">
+                <TrText k="home.footer.contact" />
+              </h4>
+              <ul className="space-y-2 text-white text-sm">
+                <li>
+                  <TrText k="home.footer.email" />
+                </li>
+                <li>
+                  <TrText k="home.footer.phone" />
+                </li>
               </ul>
             </div>
           </div>
-          <div className="mt-12 border-t border-zinc-800 pt-8 text-center text-sm text-zinc-400">
+          <div className="border-border text-white mt-12 border-t pt-8 text-center text-sm">
             <p>
-              &copy; {new Date().getFullYear()} iSelfToken. <TrText k="home.footer.rights" />
+              &copy; {new Date().getFullYear()} iSelfToken.{' '}
+              <TrText k="home.footer.rights" />
             </p>
           </div>
         </div>

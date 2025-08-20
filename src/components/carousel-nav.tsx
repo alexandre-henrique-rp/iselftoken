@@ -14,7 +14,8 @@ export function CarouselNav({ className, children, ...props }: CarouselNavProps)
   const scrollBy = (dir: -1 | 1) => {
     const el = viewportRef.current;
     if (!el) return;
-    const amount = el.clientWidth * 0.9;
+    // Rola exatamente a largura do viewport para alinhar 1 card por vez no mobile
+    const amount = el.clientWidth;
     el.scrollBy({ left: amount * dir, behavior: "smooth" });
   };
 
@@ -29,14 +30,15 @@ export function CarouselNav({ className, children, ...props }: CarouselNavProps)
         role="region"
         aria-roledescription="carrossel"
       >
-        <div className="flex gap-4 px-20">
+        {/* No mobile, sem gap para não vazar próximo card; no md+ reintroduz gap */}
+        <div className="flex gap-0 md:gap-4 px-0 md:px-12">
           {children}
         </div>
       </div>
 
       {/* Left gradient fade with progressive blur */}
       <div className="absolute left-0 top-0 bottom-0 w-20 pointer-events-none z-10">
-        <div className="h-full w-full bg-gradient-to-r from-black/95 via-black/60 to-transparent backdrop-blur-[4px]" 
+        <div className="h-full w-full bg-gradient-to-r from-white/95 via-white/60 to-transparent backdrop-blur-[4px] dark:bg-gradient-to-r dark:from-black/95 dark:via-black/60 dark:to-transparent" 
              style={{
                maskImage: 'linear-gradient(to right, black 0%, rgba(0,0,0,0.8) 25%, rgba(0,0,0,0.4) 50%, transparent 100%)',
                WebkitMaskImage: 'linear-gradient(to right, black 0%, rgba(0,0,0,0.8) 25%, rgba(0,0,0,0.4) 50%, transparent 100%)'
@@ -47,9 +49,10 @@ export function CarouselNav({ className, children, ...props }: CarouselNavProps)
         aria-label="Anterior"
         onClick={() => scrollBy(-1)}
         className={cn(
-          "absolute left-2 top-1/2 -translate-y-1/2 z-20",
-          "inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/80 border border-zinc-700",
-          "text-zinc-200 hover:bg-black/90 backdrop-blur-sm shadow-lg"
+          "absolute left-1 top-1/2 -translate-y-1/2 z-20",
+          "inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/80 border border-gray-300 text-gray-700 hover:bg-white/90",
+          "dark:bg-black/80 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-black/90",
+          "backdrop-blur-sm shadow-lg"
         )}
       >
         <ChevronLeft className="h-5 w-5" />
@@ -57,7 +60,7 @@ export function CarouselNav({ className, children, ...props }: CarouselNavProps)
 
       {/* Right gradient fade with progressive blur */}
       <div className="absolute right-0 top-0 bottom-0 w-20 pointer-events-none z-10">
-        <div className="h-full w-full bg-gradient-to-l from-black/95 via-black/60 to-transparent backdrop-blur-[4px]"
+        <div className="h-full w-full bg-gradient-to-l from-white/95 via-white/60 to-transparent backdrop-blur-[4px] dark:bg-gradient-to-l dark:from-black/95 dark:via-black/60 dark:to-transparent"
              style={{
                maskImage: 'linear-gradient(to left, black 0%, rgba(0,0,0,0.8) 25%, rgba(0,0,0,0.4) 50%, transparent 100%)',
                WebkitMaskImage: 'linear-gradient(to left, black 0%, rgba(0,0,0,0.8) 25%, rgba(0,0,0,0.4) 50%, transparent 100%)'
@@ -68,9 +71,10 @@ export function CarouselNav({ className, children, ...props }: CarouselNavProps)
         aria-label="Próximo"
         onClick={() => scrollBy(1)}
         className={cn(
-          "absolute right-2 top-1/2 -translate-y-1/2 z-20",
-          "inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/80 border border-zinc-700",
-          "text-zinc-200 hover:bg-black/90 backdrop-blur-sm shadow-lg"
+          "absolute right-1 top-1/2 -translate-y-1/2 z-20",
+          "inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/80 border border-gray-300 text-gray-700 hover:bg-white/90",
+          "dark:bg-black/80 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-black/90",
+          "backdrop-blur-sm shadow-lg"
         )}
       >
         <ChevronRight className="h-5 w-5" />
@@ -84,7 +88,12 @@ export function CarouselItem({ className, ...props }: React.HTMLAttributes<HTMLD
     <div
       className={cn(
         "snap-start",
-        "min-w-[92%] sm:min-w-[80%] md:min-w-[65%] lg:min-w-[60%] xl:min-w-[55%]",
+        // Mobile: 1 card por vez (sem espremimento)
+        "min-w-full sm:min-w-full",
+        // md: ~2 cards; lg+: ~3 cards
+        "md:min-w-[50%] lg:min-w-[33.3333%] xl:min-w-[33.3333%]",
+        // Espaçamento interno apenas no mobile para simular gap sem quebrar largura total
+        "px-4 md:px-0",
         className
       )}
       {...props}

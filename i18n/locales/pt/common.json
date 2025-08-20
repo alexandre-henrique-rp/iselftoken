@@ -4,6 +4,9 @@
   "keywords": "investimento, startups, investidores, Brasil, tecnologia",
   "welcome": "Invista em startups promissoras via tokenização de equity",
   "home": {
+    "header": {
+      "login": "Entrar"
+    },
     "hero": {
       "subtitle": "A iSelfToken conecta investidores e fundadores de startups em uma plataforma segura e acessível.","cta": {
         "raise": "Captar investimento",
@@ -29,7 +32,7 @@
       "startups_title": "O que os fundadores de startups falam sobre nós"
     },
     "footer": {
-      "description": "Conectando investidores a ativos digitais inovadores.",
+      "description": "Conecta investidores e fundadores de startups em uma plataforma segura e acessível.",
       "platform": "Plataforma",
       "for_investors": "Para Investidores",
       "for_projects": "Para Projetos",

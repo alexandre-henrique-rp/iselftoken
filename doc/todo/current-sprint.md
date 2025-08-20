@@ -2,10 +2,10 @@
 
 ## Em Progresso
 - [ ] Propagar traduções para rotas login/register/auth e internas - prioridade: alta - estimativa: 4h
+- [ ] Testes de registro (form + validações) - prioridade: alta - estimativa: 3h
 
 ## Para Fazer
 - [ ] Revisar componente ProfileCard para i18n e acessibilidade - prioridade: média - estimativa: 2h
-- [ ] Testes de registro (form + validações) - prioridade: alta - estimativa: 3h
 - [ ] Botão de mudança de tema (dark/light) - prioridade: média - estimativa: 2h
 
 ## Bloqueadores

@@ -10,8 +10,10 @@ import * as z from 'zod';
 import {
   cpfMaskHandler,
   phoneMaskHandler,
+  cepMaskHandler,
 } from '@/lib/mask-utils';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
 
 export type AffiliateInputs = {
   nome: string;
@@ -28,36 +30,38 @@ export type AffiliateInputs = {
   confirmacaoSenha: string;
 };
 
-const affiliateSchema = z
-  .object({
-    nome: z.string().min(1, 'Nome é obrigatório'),
-    cpf: z
-      .string()
-      .transform((v) => String(v).replace(/\D/g, ''))
-      .pipe(z.string().length(11, 'CPF deve ter 11 dígitos')),
-    telefone: z.string().min(1, 'Telefone é obrigatório'),
-    cep: z
-      .string()
-      .transform((v) => String(v).replace(/\D/g, ''))
-      .pipe(z.string().length(8, 'CEP deve ter 8 dígitos')),
-    endereco: z.string().min(1, 'Endereço é obrigatório'),
-    bairro: z.string().min(1, 'Bairro é obrigatório'),
-    cidade: z.string().min(1, 'Cidade é obrigatória'),
-    uf: z.string().min(1, 'UF é obrigatória'),
-    numero: z.string().min(1, 'Número é obrigatório'),
-    email: z.string().min(1, 'Email e obrigatório'),
-    senha: z.string().min(12, 'Senha deve ter no mínimo 12 caracteres'),
-    confirmacaoSenha: z
-      .string()
-      .min(12, 'Confirmação deve ter no mínimo 12 caracteres'),
-  })
-  .refine((data) => data.senha === data.confirmacaoSenha, {
-    message: 'As senhas não coincidem',
-    path: ['confirmacaoSenha'],
-  });
-
 export const AffiliateForm: FC = () => {
   const router = useRouter();
+  const { t } = useTranslation('auth');
+
+  // Schema dinâmico com traduções
+  const affiliateSchema = z
+    .object({
+      nome: z.string().min(1, t('register.affiliate.name.required')),
+      cpf: z
+        .string()
+        .transform((v) => String(v).replace(/\D/g, ''))
+        .pipe(z.string().length(11, t('register.form.cpf.length_error'))),
+      telefone: z.string().min(1, t('register.form.phone.required')),
+      cep: z
+        .string()
+        .transform((v) => String(v).replace(/\D/g, ''))
+        .pipe(z.string().length(8, t('register.form.cep.length_error'))),
+      endereco: z.string().min(1, t('register.form.address.required')),
+      bairro: z.string().min(1, t('register.form.neighborhood.required')),
+      cidade: z.string().min(1, t('register.form.city.required')),
+      uf: z.string().min(1, t('register.form.state.required')),
+      numero: z.string().min(1, t('register.form.number.required')),
+      email: z.string().min(1, t('register.form.email.required')),
+      senha: z.string().min(12, t('register.form.password.min_length')),
+      confirmacaoSenha: z
+        .string()
+        .min(12, t('register.form.confirm_password.min_length')),
+    })
+    .refine((data) => data.senha === data.confirmacaoSenha, {
+      message: t('register.form.password.mismatch'),
+      path: ['confirmacaoSenha'],
+    });
   const {
     register,
     handleSubmit,
@@ -86,7 +90,7 @@ export const AffiliateForm: FC = () => {
       const res = await fetch(`https://viacep.com.br/ws/${raw}/json/`);
       const data = await res.json();
       if (data?.erro) {
-        setError('cep', { type: 'manual', message: 'CEP não encontrado' });
+        setError('cep', { type: 'manual', message: t('register.form.cep.not_found') });
         return;
       }
       clearErrors('cep');
@@ -96,7 +100,7 @@ export const AffiliateForm: FC = () => {
       setValue('uf', (data?.uf || '').slice(0, 2));
       clearErrors(['endereco', 'bairro', 'cidade', 'uf']);
     } catch {
-      setError('cep', { type: 'manual', message: 'Falha ao buscar CEP' });
+      setError('cep', { type: 'manual', message: t('register.form.cep.search_error') });
     } finally {
       setBuscandoCep(false);
     }
@@ -105,21 +109,21 @@ export const AffiliateForm: FC = () => {
 return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="grid gap-2">
-        <Label htmlFor="nome">Nome</Label>
-        <Input id="nome" {...register('nome')} />
+        <Label htmlFor="nome">{t('register.affiliate.name.label')}</Label>
+        <Input id="nome" placeholder={t('register.affiliate.name.placeholder')} {...register('nome')} />
         {errors.nome && (
           <p className="text-sm text-red-500">{errors.nome.message}</p>
         )}
       </div>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
         <div className="grid gap-2">
-          <Label htmlFor="cpf">CPF</Label>
+          <Label htmlFor="cpf">{t('register.form.cpf.label')}</Label>
           <Input
             id="cpf"
             {...register('cpf')}
             onChange={(e: ChangeEvent<HTMLInputElement>) => cpfMaskHandler(e)}
             maxLength={14}
-            placeholder="000.000.000-00"
+            placeholder={t('register.form.cpf.placeholder')}
           />
           {errors.cpf && (
             <p className="text-sm text-red-500">{errors.cpf.message}</p>
@@ -127,13 +131,13 @@ return (
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="telefone">Telefone</Label>
+          <Label htmlFor="telefone">{t('register.form.phone.label')}</Label>
           <Input
             id="telefone"
             {...register('telefone')}
             onChange={(e: ChangeEvent<HTMLInputElement>) => phoneMaskHandler(e)}
             maxLength={15}
-            placeholder="(00) 00000-0000"
+            placeholder={t('register.form.phone.placeholder')}
           />
           {errors.telefone && (
             <p className="text-sm text-red-500">{errors.telefone.message}</p>
@@ -141,14 +145,13 @@ return (
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="cep">CEP</Label>
+          <Label htmlFor="cep">{t('register.form.cep.label')}</Label>
           <Input
             id="cep"
             {...register('cep')}
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
-              const maskedValue = e.target.value;
-              setValue('cep', maskedValue, { shouldValidate: true });
-              const rawValue = maskedValue.replace(/\D/g, '');
+              cepMaskHandler(e);
+              const rawValue = e.target.value.replace(/\D/g, '');
               if (rawValue.length === 8) {
                 buscarCep(rawValue);
               }
@@ -158,7 +161,7 @@ return (
               buscarCep(raw);
             }}
             maxLength={9}
-            placeholder="00000-000"
+            placeholder={t('register.form.cep.placeholder')}
           />
           {errors.cep && (
             <p className="text-sm text-red-500">{errors.cep.message}</p>
@@ -169,14 +172,14 @@ return (
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
               </svg>
-              <span>Buscando CEP...</span>
+              <span>{t('register.form.cep.searching')}</span>
             </div>
           )}
         </div>
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="endereco">Endereço</Label>
+        <Label htmlFor="endereco">{t('register.form.address.label')}</Label>
         <Input id="endereco" {...register('endereco')} />
         {errors.endereco && (
           <p className="text-sm text-red-500">{errors.endereco.message}</p>
@@ -185,14 +188,14 @@ return (
 
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <div className="grid gap-2">
-          <Label htmlFor="bairro">Bairro</Label>
+          <Label htmlFor="bairro">{t('register.form.neighborhood.label')}</Label>
           <Input id="bairro" {...register('bairro')} />
           {errors.bairro && (
             <p className="text-sm text-red-500">{errors.bairro.message}</p>
           )}
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="cidade">Cidade</Label>
+          <Label htmlFor="cidade">{t('register.form.city.label')}</Label>
           <Input id="cidade" {...register('cidade')} />
           {errors.cidade && (
             <p className="text-sm text-red-500">{errors.cidade.message}</p>
@@ -202,14 +205,14 @@ return (
 
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <div className="grid gap-2">
-          <Label htmlFor="uf">UF</Label>
+          <Label htmlFor="uf">{t('register.form.state.label')}</Label>
           <Input id="uf" maxLength={2} {...register('uf')} />
           {errors.uf && (
             <p className="text-sm text-red-500">{errors.uf.message}</p>
           )}
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="numero">Número</Label>
+          <Label htmlFor="numero">{t('register.form.number.label')}</Label>
           <Input id="numero" {...register('numero')} />
           {errors.numero && (
             <p className="text-sm text-red-500">{errors.numero.message}</p>
@@ -219,10 +222,11 @@ return (
 
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <div className="grid gap-2">
-          <Label htmlFor="senha">Email</Label>
+          <Label htmlFor="email">{t('register.form.email.label')}</Label>
           <Input
             id="email"
             type="email"
+            placeholder={t('register.form.email.placeholder')}
             minLength={6}
             {...register('email')}
           />
@@ -231,10 +235,11 @@ return (
           )}
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="senha">Senha</Label>
+          <Label htmlFor="senha">{t('register.form.password.label')}</Label>
           <Input
             id="senha"
             type="password"
+            placeholder={t('register.form.password.placeholder')}
             minLength={12}
             {...register('senha')}
           />
@@ -243,10 +248,11 @@ return (
           )}
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="confirmacaoSenha">Confirmação de Senha</Label>
+          <Label htmlFor="confirmacaoSenha">{t('register.form.confirm_password.label')}</Label>
           <Input
             id="confirmacaoSenha"
             type="password"
+            placeholder={t('register.form.confirm_password.placeholder')}
             minLength={12}
             {...register('confirmacaoSenha')}
           />
@@ -257,10 +263,10 @@ return (
           )}
         </div>
       </div>
-      <p className="text-xs text-muted-foreground">A senha deve ter no mínimo 12 caracteres.</p>
+      <p className="text-xs text-muted-foreground">{t('register.form.password.help')}</p>
 
       <Button type="submit" className="w-full">
-        Cadastrar como Afiliado
+        {t('register.affiliate.submit_button')}
       </Button>
     </form>
   );

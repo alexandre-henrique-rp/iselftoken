@@ -11,7 +11,7 @@ import '@/i18n';
 export function HeaderTr() {
   const { t } = useTranslation('common');
   return (
-    <h1 className="text-3xl font-bold tracking-tight text-white">
+    <h1 className="text-3xl font-bold tracking-tight text-foreground">
       {t('welcome')}
     </h1>
   );

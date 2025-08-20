@@ -6,12 +6,31 @@ import { initReactI18next } from 'react-i18next';
 import ptCommon from '@/../i18n/locales/pt/common.json';
 import enCommon from '@/../i18n/locales/en/common.json';
 import esCommon from '@/../i18n/locales/es/common.json';
-// 'es' ainda não possui arquivo; usaremos fallback para 'pt'
+
+import ptAuth from '@/../i18n/locales/pt/auth.json';
+import enAuth from '@/../i18n/locales/en/auth.json';
+import esAuth from '@/../i18n/locales/es/auth.json';
+
+import ptDashboard from '@/../i18n/locales/pt/dashboard.json';
+import enDashboard from '@/../i18n/locales/en/dashboard.json';
+import esDashboard from '@/../i18n/locales/es/dashboard.json';
 
 const resources = {
-  pt: { common: ptCommon },
-  en: { common: enCommon },
-  es: { common: esCommon },
+  pt: { 
+    common: ptCommon,
+    auth: ptAuth,
+    dashboard: ptDashboard
+  },
+  en: { 
+    common: enCommon,
+    auth: enAuth,
+    dashboard: enDashboard
+  },
+  es: { 
+    common: esCommon,
+    auth: esAuth,
+    dashboard: esDashboard
+  },
 } as const;
 
 // Inicializa i18next somente uma vez
@@ -23,7 +42,7 @@ if (!i18n.isInitialized) {
       lng: 'pt',
       fallbackLng: 'pt',
       debug: process.env.NODE_ENV !== 'production',
-      ns: ['common'],
+      ns: ['common', 'auth', 'dashboard'],
       defaultNS: 'common',
       interpolation: {
         escapeValue: false, // React já faz escaping

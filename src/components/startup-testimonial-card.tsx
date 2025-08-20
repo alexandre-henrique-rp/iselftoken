@@ -31,18 +31,30 @@ export function StartupTestimonialCard({ data }: StartupTestimonialCardProps) {
   const quote = data.testimonialKey ? t(data.testimonialKey) : data.testimonial;
   const name = data.nameKey ? t(data.nameKey) : data.name;
   const role = data.roleKey ? t(data.roleKey) : data.role;
+  // Função para extrair iniciais do nome (máx. 2 letras)
+  const getInitials = (fullName?: string): string => {
+    if (!fullName) return "";
+    return fullName
+      .trim()
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((n) => (n[0] ? n[0].toUpperCase() : ""))
+      .join("");
+  };
   return (
-    <div className="bg-black rounded-xl border border-zinc-800">
+    <div className="rounded-xl border border-zinc-300 dark:border-border bg-card text-card-foreground shadow-sm">
       <div className="p-6">
-        <p className="text-zinc-400 italic">&quot;{quote}&quot;</p>
+        <p className="italic text-muted-foreground">&quot;{quote}&quot;</p>
       </div>
       <div className="p-6 pt-0">
-        <div className="flex items-center mb-4">
-          <div className="h-12 w-12 rounded-full bg-zinc-800 mr-4" />
+        <div className="mb-4 flex items-center">
+          <div className="mr-4 h-12 w-12 rounded-full bg-zinc-600 dark:bg-muted text-white flex items-center justify-center font-semibold uppercase select-none">
+            {getInitials(name)}
+          </div>
           <div>
-            <p className="font-semibold text-zinc-100">{name}</p>
+            <p className="font-semibold text-foreground">{name}</p>
             {role && (
-              <p className="text-sm text-blue-400">{role}</p>
+              <p className="text-sm text-blue-600 dark:text-muted-foreground">{role}</p>
             )}
           </div>
         </div>
@@ -52,7 +64,7 @@ export function StartupTestimonialCard({ data }: StartupTestimonialCardProps) {
               href={data.linkedinUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-zinc-400 hover:text-blue-400 transition-colors"
+              className="text-[#0A66C2] transition-colors hover:text-[#004182]"
             >
               <Linkedin className="h-5 w-5" />
             </Link>
@@ -62,7 +74,7 @@ export function StartupTestimonialCard({ data }: StartupTestimonialCardProps) {
               href={data.youtubeUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-zinc-400 hover:text-red-400 transition-colors"
+              className="text-red-600 transition-colors hover:text-red-700"
             >
               <Youtube className="h-5 w-5" />
             </Link>
@@ -72,7 +84,7 @@ export function StartupTestimonialCard({ data }: StartupTestimonialCardProps) {
               href={data.websiteUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-zinc-400 hover:text-green-400 transition-colors"
+              className="text-green-500 transition-colors hover:text-green-600"
             >
               <Globe className="h-5 w-5" />
             </Link>
