@@ -13,20 +13,11 @@ export async function PUT(request: Request) {
     console.log("🚀 ~ PUT ~ body:", body)
 
     const email = session?.user?.email
+    console.log("🚀 ~ PUT ~ email:", email)
     if (!email) {
       return NextResponse.json({ error: "E-mail da sessão não encontrado" }, { status: 400 })
     }
-
-    const rec = A2fMemory.get(email)
-    if (!rec) {
-      return NextResponse.json({ error: "Código A2F não solicitado. Reenvie o código." }, { status: 400 })
-    }
-
-   
-
     await SetA2fVerified(Boolean(body.status))
-    // Após sucesso, limpar registro
-    A2fMemory.delete(email)
     return NextResponse.json({ ok: true, message: "A2F verificado" }, { status: 200 })
   } catch (error) {
     console.log(error)
