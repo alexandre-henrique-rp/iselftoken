@@ -4,6 +4,7 @@ import SendEmailModule from '@/modules/email';
 import buildA2fHtmlTemplate from '@/model/email/html/auth-a2f';
 import buildA2fTextTemplate from '@/model/email/text/auth-a2f';
 import generateA2fCode from '@/modules/codigo/a2f';
+import { A2fMemory } from '@/modules/codigo/a2f-memory';
 
 /*
  * POST /api/auth/a2f
@@ -46,9 +47,10 @@ export async function GET() {
       code,
       expiration: expirationTime,
       attempts: 0,
-      maxAttempts: 3
+      maxAttempts: 3,
     };
-    // Simulação de armazenamento (em produção, usar banco de dados ou cache)
+    // Armazenamento em memória (substituir por cache/DB em produção)
+    A2fMemory.set(email, a2fData);
     console.log("🚀 ~ GET ~ a2fData:", a2fData);
     
     // Envia e-mail com template HTML
@@ -69,6 +71,9 @@ export async function GET() {
         provider: result.provider,
         messageId: result.messageId,
         codigo: code,
+        expiration: expirationTime,
+        attempts: a2fData.attempts,
+        maxAttempts: a2fData.maxAttempts,
       },
       { status: 200 },
     );

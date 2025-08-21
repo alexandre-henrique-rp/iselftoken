@@ -23,7 +23,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { useRouter } from "next/navigation"
-import { ThemeToggle } from "@/components/theme-toggle"
+import { AnimatedThemeToggler } from "./magicui/animated-theme-toggler"
 
 export function NavUser({
   user,
@@ -100,7 +100,7 @@ export function NavUser({
               <DropdownMenuItem aria-label="Alternar tema">
                 <div className="flex w-full items-center justify-between">
                   <span className="text-sm">Tema</span>
-                  <ThemeToggle />
+                  <AnimatedThemeToggler className="h-9 w-9 inline-flex items-center justify-center rounded-md hover:bg-muted" />
                 </div>
               </DropdownMenuItem>
             </DropdownMenuGroup>

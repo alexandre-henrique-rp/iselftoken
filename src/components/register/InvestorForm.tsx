@@ -1,19 +1,18 @@
 'use client';
 
-import { FC, ChangeEvent, useState } from 'react';
+import { FC, ChangeEvent, useEffect, useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import {
-  cpfMaskHandler,
-  phoneMaskHandler,
-} from '@/lib/mask-utils';
+import { cpfMaskHandler, phoneMaskHandler } from '@/lib/mask-utils';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import '@/i18n';
+import { toast } from 'sonner';
+
 
 export type InvestorInputs = {
   nome: string;
@@ -24,15 +23,34 @@ export type InvestorInputs = {
   bairro: string;
   cidade: string;
   uf: string;
+  pais: string;
   numero: string;
   email: string;
   senha: string;
   confirmacaoSenha: string;
+  termo: boolean;
 };
 
 // Schema de validação será criado dinamicamente dentro do componente para usar traduções
 
-export const InvestorForm: FC = () => {
+// Props para pré-preencher cidade/UF (e país, se necessário futuramente)
+export type InvestorFormProps = {
+  /** Cidade inicial selecionada no modal de localização */
+  cidadeInicial?: string;
+  /** UF/estado inicial selecionado no modal de localização */
+  ufInicial?: string;
+  /** País inicial selecionado no modal de localização (não mapeado em campo visível) */
+  paisInicial?: string;
+  /** Termo de aceitação inicial selecionado no modal de localização (não mapeado em campo visível) */
+  termo?: boolean;
+};
+
+export const InvestorForm: FC<InvestorFormProps> = ({
+  cidadeInicial,
+  ufInicial,
+  paisInicial,
+  termo,
+}) => {
   const router = useRouter();
   const { t } = useTranslation('auth');
 
@@ -53,12 +71,18 @@ export const InvestorForm: FC = () => {
       bairro: z.string().min(1, t('register.form.neighborhood.required')),
       cidade: z.string().min(1, t('register.form.city.required')),
       uf: z.string().min(1, t('register.form.state.required')),
+      pais: z.string().min(1, 'País é obrigatório'),
       numero: z.string().min(1, t('register.form.number.required')),
       email: z.string().min(1, t('register.form.email.required')),
       senha: z.string().min(12, t('register.form.password.min')),
       confirmacaoSenha: z
         .string()
         .min(12, t('register.form.confirm_password.min')),
+      termo: z
+        .boolean()
+        .refine((v) => v === true, {
+          message: t('register.form.terms.required'),
+        }),
     })
     .refine((data) => data.senha === data.confirmacaoSenha, {
       message: t('register.form.confirm_password.mismatch'),
@@ -72,15 +96,60 @@ export const InvestorForm: FC = () => {
     setValue,
     setError,
     clearErrors,
-  } = useForm<InvestorInputs>({ resolver: zodResolver(investorSchema) });
+  } = useForm<InvestorInputs>({
+    resolver: zodResolver(investorSchema),
+    defaultValues: {
+      cidade: cidadeInicial || '',
+      uf: ufInicial || '',
+      pais: paisInicial || '',
+      termo: termo || false,
+    },
+  });
 
   const [buscandoCep, setBuscandoCep] = useState(false);
   const [ultimoCepBuscado, setUltimoCepBuscado] = useState<string | null>(null);
 
-  const onSubmit: SubmitHandler<InvestorInputs> = (data) => {
+  // Sincroniza quando as props mudarem (ex.: usuário volta ao modal e altera a localização)
+  useEffect(() => {
+    if (cidadeInicial)
+      setValue('cidade', cidadeInicial, { shouldValidate: true });
+    if (termo)
+      setValue('termo', termo, { shouldValidate: true });
+    if (ufInicial) setValue('uf', ufInicial, { shouldValidate: true });
+    if (paisInicial) setValue('pais', paisInicial, { shouldValidate: true });
+  }, [cidadeInicial, ufInicial, paisInicial, setValue, termo]);
+
+  const onSubmit: SubmitHandler<InvestorInputs> = async (data) => {
     console.log('Registro de investidor:', data);
+    try {
+      const response = await fetch(`/api/register/investidor`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      const result = await response.json();
+      console.log(result);
+      if (!response.ok) {
+        toast('Erro ao registrar investidor',{
+          description: result.message || 'Erro ao registrar investidor',
+          duration: 5000,
+        })
+      }
+      toast('Investidor registrado com sucesso', {
+        duration: 5000,
+      })
+    } catch (error) {
+      console.log(error);
+      toast('Erro ao registrar investidor', {
+        duration: 5000,
+        description: 'Erro ao registrar investidor'
+      })
+    }
     // TODO: Chamar API de registro de investidor
-    router.push('/login');
+    // router.push('/login');
   };
 
   // Busca ViaCEP sob demanda (onBlur ou ao completar 8 dígitos numéricos)
@@ -95,17 +164,21 @@ export const InvestorForm: FC = () => {
       const res = await fetch(`https://viacep.com.br/ws/${raw}/json/`);
       const data = await res.json();
       if (data?.erro) {
-        setError('cep', { type: 'manual', message: t('register.form.cep.not_found') });
+        setError('cep', {
+          type: 'manual',
+          message: t('register.form.cep.not_found'),
+        });
         return;
       }
       clearErrors('cep');
       setValue('endereco', data?.logradouro || '');
       setValue('bairro', data?.bairro || '');
-      setValue('cidade', data?.localidade || '');
-      setValue('uf', (data?.uf || '').slice(0, 2));
-      clearErrors(['endereco', 'bairro', 'cidade', 'uf']);
+      clearErrors(['endereco', 'bairro']);
     } catch {
-      setError('cep', { type: 'manual', message: t('register.form.cep.search_error') });
+      setError('cep', {
+        type: 'manual',
+        message: t('register.form.cep.search_error'),
+      });
     } finally {
       setBuscandoCep(false);
     }
@@ -113,6 +186,8 @@ export const InvestorForm: FC = () => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      {/* Campo oculto para enviar o país no submit */}
+      <input type="hidden" {...register('pais')} />
       <div className="grid gap-2">
         <Label htmlFor="nome">{t('register.form.name.label')}</Label>
         <Input id="nome" {...register('nome')} />
@@ -173,10 +248,29 @@ export const InvestorForm: FC = () => {
             <p className="text-sm text-red-500">{errors.cep.message}</p>
           )}
           {buscandoCep && (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground" aria-live="polite">
-              <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" aria-hidden="true">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+            <div
+              className="text-muted-foreground flex items-center gap-2 text-xs"
+              aria-live="polite"
+            >
+              <svg
+                className="h-4 w-4 animate-spin"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                  fill="none"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                />
               </svg>
               <span>{t('register.form.cep.searching')}</span>
             </div>
@@ -194,7 +288,9 @@ export const InvestorForm: FC = () => {
 
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <div className="grid gap-2">
-          <Label htmlFor="bairro">{t('register.form.neighborhood.label')}</Label>
+          <Label htmlFor="bairro">
+            {t('register.form.neighborhood.label')}
+          </Label>
           <Input id="bairro" {...register('bairro')} />
           {errors.bairro && (
             <p className="text-sm text-red-500">{errors.bairro.message}</p>
@@ -202,7 +298,7 @@ export const InvestorForm: FC = () => {
         </div>
         <div className="grid gap-2">
           <Label htmlFor="cidade">{t('register.form.city.label')}</Label>
-          <Input id="cidade" {...register('cidade')} />
+          <Input id="cidade" readOnly aria-readonly {...register('cidade')} />
           {errors.cidade && (
             <p className="text-sm text-red-500">{errors.cidade.message}</p>
           )}
@@ -212,7 +308,13 @@ export const InvestorForm: FC = () => {
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <div className="grid gap-2">
           <Label htmlFor="uf">{t('register.form.state.label')}</Label>
-          <Input id="uf" maxLength={2} {...register('uf')} />
+          <Input
+            id="uf"
+            maxLength={2}
+            readOnly
+            aria-readonly
+            {...register('uf')}
+          />
           {errors.uf && (
             <p className="text-sm text-red-500">{errors.uf.message}</p>
           )}
@@ -226,7 +328,7 @@ export const InvestorForm: FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+      <div className="grid grid-cols-1">
         <div className="grid gap-2">
           <Label htmlFor="email">{t('register.form.email.label')}</Label>
           <Input
@@ -240,6 +342,9 @@ export const InvestorForm: FC = () => {
             <p className="text-sm text-red-500">{errors.email.message}</p>
           )}
         </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <div className="grid gap-2">
           <Label htmlFor="senha">{t('register.form.password.label')}</Label>
           <Input
@@ -254,7 +359,9 @@ export const InvestorForm: FC = () => {
           )}
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="confirmacaoSenha">{t('register.form.confirm_password.label')}</Label>
+          <Label htmlFor="confirmacaoSenha">
+            {t('register.form.confirm_password.label')}
+          </Label>
           <Input
             id="confirmacaoSenha"
             type="password"
@@ -269,7 +376,12 @@ export const InvestorForm: FC = () => {
           )}
         </div>
       </div>
-      <p className="text-xs text-muted-foreground">{t('register.form.password.min')}</p>
+      {errors.termo && (
+        <p className="text-sm text-red-500">{String(errors.termo.message)}</p>
+      )}
+      <p className="text-muted-foreground text-xs">
+        {t('register.form.password.min')}
+      </p>
 
       <Button type="submit" className="w-full">
         {t('register.form.submit')}

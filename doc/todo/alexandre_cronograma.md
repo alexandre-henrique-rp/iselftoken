@@ -15,37 +15,37 @@ dashboard para fundadores de startups onde ele tem acesso as rodadas de captaç�
   - **Exemplo de body de requisição (GET /api/rounds):**
     ```json
     {
-      "status": "active", // ou "inactive", "completed"
-      "startupId": "12345",
-      "userId": "founder_67890"
+      "status": "active", // ou "inactive", "completed" ou "true" , "false"
+      "startupId": "12345", // id da startup
+      "userId": "founder_67890" // id do fundador
     }
     ```
   - **Exemplo de resposta (GET /api/rounds):**
     ```json
     {
-      "rounds": [
+      "rounds": [ //rodadas de captação
         {
-          "id": "round_001",
-          "status": "active",
-          "expectedValue": 500000.00,
-          "startDate": "2025-01-01",
-          "endDate": "2025-12-31",
-          "totalReceived": 250000.00,
-          "totalTokensAvailable": 100000,
-          "investors": [
+          "id": "round_001", //id da rodada
+          "status": "active", //status da rodada ativa/inativa/concluída true/false
+          "expectedValue": 500000.00, //valor esperado
+          "startDate": "2025-01-01", //data de inicio
+          "endDate": "2025-12-31", //data de fim
+          "totalReceived": 250000.00, //valor recebido
+          "totalTokensAvailable": 100000, //tokens disponíveis
+          "investors": [ //investidores
             {
-              "id": "inv_001",
-              "name": "João Silva",
-              "investmentDate": "2025-03-15",
-              "tokensPurchased": 5000,
-              "amountReceived": 25000.00
+              "id": "inv_001", //id do investidor
+              "name": "João Silva", //nome do investidor
+              "investmentDate": "2025-03-15", //data de investimento
+              "tokensPurchased": 5000, //tokens comprados
+              "amountReceived": 25000.00 //valor recebido
             },
             {
-              "id": "inv_002",
-              "name": "Maria Oliveira",
-              "investmentDate": "2025-04-10",
-              "tokensPurchased": 3000,
-              "amountReceived": 15000.00
+              "id": "inv_002", //id do investidor
+              "name": "Maria Oliveira", //nome do investidor
+              "investmentDate": "2025-04-10", //data de investimento
+              "tokensPurchased": 3000, //tokens comprados
+              "amountReceived": 15000.00 //valor recebido
             }
           ]
         }

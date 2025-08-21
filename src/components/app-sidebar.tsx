@@ -170,7 +170,7 @@ export function AppSidebar({ role, ...props }: Props) {
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <Link href="/home" className="w-full flex justify-center gap-2 bg-black">
+              <Link href="/home" className="w-full flex justify-center gap-2 bg-zinc-300 hover:bg-zinc-400 dark:bg-zinc-600 dark:hover:bg-zinc-700">
                <Image src="/logo.png" alt="Logo" width={100} height={100} />
               </Link>
             </SidebarMenuButton>

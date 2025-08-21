@@ -1,19 +1,16 @@
 'use client';
 
-import { FC, ChangeEvent, useState } from 'react';
+import { FC, ChangeEvent, useEffect, useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import {
-  cpfMaskHandler,
-  phoneMaskHandler,
-  cepMaskHandler,
-} from '@/lib/mask-utils';
+import { cpfMaskHandler, phoneMaskHandler } from '@/lib/mask-utils';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
+
 
 export type AffiliateInputs = {
   nome: string;
@@ -24,13 +21,27 @@ export type AffiliateInputs = {
   bairro: string;
   cidade: string;
   uf: string;
+  pais: string;
   numero: string;
   email: string;
   senha: string;
   confirmacaoSenha: string;
+  termo: boolean;
 };
 
-export const AffiliateForm: FC = () => {
+export type AffiliateFormProps = {
+  cidadeInicial?: string;
+  ufInicial?: string;
+  paisInicial?: string;
+  termo?: boolean;
+};
+
+export const AffiliateForm: FC<AffiliateFormProps> = ({
+  cidadeInicial,
+  ufInicial,
+  paisInicial,
+  termo,
+}) => {
   const router = useRouter();
   const { t } = useTranslation('auth');
 
@@ -51,12 +62,18 @@ export const AffiliateForm: FC = () => {
       bairro: z.string().min(1, t('register.form.neighborhood.required')),
       cidade: z.string().min(1, t('register.form.city.required')),
       uf: z.string().min(1, t('register.form.state.required')),
+      pais: z.string().min(1, 'País é obrigatório'),
       numero: z.string().min(1, t('register.form.number.required')),
       email: z.string().min(1, t('register.form.email.required')),
       senha: z.string().min(12, t('register.form.password.min_length')),
       confirmacaoSenha: z
         .string()
         .min(12, t('register.form.confirm_password.min_length')),
+      termo: z
+        .boolean()
+        .refine((v) => v === true, {
+          message: t('register.form.terms.required'),
+        }),
     })
     .refine((data) => data.senha === data.confirmacaoSenha, {
       message: t('register.form.password.mismatch'),
@@ -69,18 +86,36 @@ export const AffiliateForm: FC = () => {
     setValue,
     setError,
     clearErrors,
-  } = useForm<AffiliateInputs>({ resolver: zodResolver(affiliateSchema) });
+  } = useForm<AffiliateInputs>({
+    resolver: zodResolver(affiliateSchema),
+    defaultValues: {
+      cidade: cidadeInicial || '',
+      uf: ufInicial || '',
+      pais: paisInicial || '',
+      termo: termo || false,
+    },
+  });
 
   const [buscandoCep, setBuscandoCep] = useState(false);
   const [ultimoCepBuscado, setUltimoCepBuscado] = useState<string | null>(null);
 
+  // Sincroniza mudanças vindas do modal
+  useEffect(() => {
+    if (cidadeInicial)
+      setValue('cidade', cidadeInicial, { shouldValidate: true });
+    if (termo)
+      setValue('termo', termo, { shouldValidate: true });
+    if (ufInicial) setValue('uf', ufInicial, { shouldValidate: true });
+    if (paisInicial) setValue('pais', paisInicial, { shouldValidate: true });
+  }, [cidadeInicial, ufInicial, paisInicial, setValue, termo]);
+
   const onSubmit: SubmitHandler<AffiliateInputs> = (data) => {
     console.log('Registro de afiliado:', data);
     // TODO: Chamar API de registro de afiliado
-    router.push('/login');
+    // router.push('/login');
   };
 
-// Busca ViaCEP sob demanda (onBlur ou ao completar 8 dígitos numéricos)
+  // Busca ViaCEP sob demanda (onBlur ou ao completar 8 dígitos numéricos)
   const buscarCep = async (raw: string) => {
     if (raw.length !== 8) return;
     if (ultimoCepBuscado === raw || buscandoCep) return;
@@ -90,27 +125,33 @@ export const AffiliateForm: FC = () => {
       const res = await fetch(`https://viacep.com.br/ws/${raw}/json/`);
       const data = await res.json();
       if (data?.erro) {
-        setError('cep', { type: 'manual', message: t('register.form.cep.not_found') });
+        setError('cep', {
+          type: 'manual',
+          message: t('register.form.cep.not_found'),
+        });
         return;
       }
       clearErrors('cep');
       setValue('endereco', data?.logradouro || '');
       setValue('bairro', data?.bairro || '');
-      setValue('cidade', data?.localidade || '');
-      setValue('uf', (data?.uf || '').slice(0, 2));
-      clearErrors(['endereco', 'bairro', 'cidade', 'uf']);
+      clearErrors(['endereco', 'bairro']);
     } catch {
-      setError('cep', { type: 'manual', message: t('register.form.cep.search_error') });
+      setError('cep', {
+        type: 'manual',
+        message: t('register.form.cep.search_error'),
+      });
     } finally {
       setBuscandoCep(false);
     }
   };
 
-return (
+  return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      {/* Campo oculto para enviar o país no submit */}
+      <input type="hidden" {...register('pais')} />
       <div className="grid gap-2">
-        <Label htmlFor="nome">{t('register.affiliate.name.label')}</Label>
-        <Input id="nome" placeholder={t('register.affiliate.name.placeholder')} {...register('nome')} />
+        <Label htmlFor="nome">{t('register.form.name.label')}</Label>
+        <Input id="nome" {...register('nome')} />
         {errors.nome && (
           <p className="text-sm text-red-500">{errors.nome.message}</p>
         )}
@@ -150,8 +191,9 @@ return (
             id="cep"
             {...register('cep')}
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
-              cepMaskHandler(e);
-              const rawValue = e.target.value.replace(/\D/g, '');
+              const maskedValue = e.target.value;
+              setValue('cep', maskedValue, { shouldValidate: true });
+              const rawValue = maskedValue.replace(/\D/g, '');
               if (rawValue.length === 8) {
                 buscarCep(rawValue);
               }
@@ -167,10 +209,29 @@ return (
             <p className="text-sm text-red-500">{errors.cep.message}</p>
           )}
           {buscandoCep && (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground" aria-live="polite">
-              <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" aria-hidden="true">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+            <div
+              className="text-muted-foreground flex items-center gap-2 text-xs"
+              aria-live="polite"
+            >
+              <svg
+                className="h-4 w-4 animate-spin"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                  fill="none"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                />
               </svg>
               <span>{t('register.form.cep.searching')}</span>
             </div>
@@ -188,7 +249,9 @@ return (
 
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <div className="grid gap-2">
-          <Label htmlFor="bairro">{t('register.form.neighborhood.label')}</Label>
+          <Label htmlFor="bairro">
+            {t('register.form.neighborhood.label')}
+          </Label>
           <Input id="bairro" {...register('bairro')} />
           {errors.bairro && (
             <p className="text-sm text-red-500">{errors.bairro.message}</p>
@@ -196,7 +259,7 @@ return (
         </div>
         <div className="grid gap-2">
           <Label htmlFor="cidade">{t('register.form.city.label')}</Label>
-          <Input id="cidade" {...register('cidade')} />
+          <Input id="cidade" readOnly aria-readonly {...register('cidade')} />
           {errors.cidade && (
             <p className="text-sm text-red-500">{errors.cidade.message}</p>
           )}
@@ -206,7 +269,13 @@ return (
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <div className="grid gap-2">
           <Label htmlFor="uf">{t('register.form.state.label')}</Label>
-          <Input id="uf" maxLength={2} {...register('uf')} />
+          <Input
+            id="uf"
+            maxLength={2}
+            readOnly
+            aria-readonly
+            {...register('uf')}
+          />
           {errors.uf && (
             <p className="text-sm text-red-500">{errors.uf.message}</p>
           )}
@@ -220,7 +289,7 @@ return (
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+      <div className="grid grid-cols-1">
         <div className="grid gap-2">
           <Label htmlFor="email">{t('register.form.email.label')}</Label>
           <Input
@@ -234,6 +303,9 @@ return (
             <p className="text-sm text-red-500">{errors.email.message}</p>
           )}
         </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <div className="grid gap-2">
           <Label htmlFor="senha">{t('register.form.password.label')}</Label>
           <Input
@@ -248,7 +320,9 @@ return (
           )}
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="confirmacaoSenha">{t('register.form.confirm_password.label')}</Label>
+          <Label htmlFor="confirmacaoSenha">
+            {t('register.form.confirm_password.label')}
+          </Label>
           <Input
             id="confirmacaoSenha"
             type="password"
@@ -263,10 +337,15 @@ return (
           )}
         </div>
       </div>
-      <p className="text-xs text-muted-foreground">{t('register.form.password.help')}</p>
+      {errors.termo && (
+        <p className="text-sm text-red-500">{String(errors.termo.message)}</p>
+      )}
+      <p className="text-muted-foreground text-xs">
+        {t('register.form.password.min')}
+      </p>
 
       <Button type="submit" className="w-full">
-        {t('register.affiliate.submit_button')}
+        {t('register.form.submit')}
       </Button>
     </form>
   );

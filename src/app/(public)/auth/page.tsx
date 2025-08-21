@@ -23,11 +23,65 @@ const tema = [
 
 export default function A2FPage() {
   const { user, loading } = useSession();
-  console.log("🚀 ~ A2FPage ~ user:", user)
   const requestedRef = useRef(false);
   const [Code, setCode] = useState('');
+  const [expirationIso, setExpirationIso] = useState<string | null>(null);
+  const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
 
   const heroImage = tema[Math.floor(Math.random() * tema.length)];
+  // Função reutilizável para solicitar/envio do código A2F
+  const solicitarCodigo = async () => {
+    try {
+      const res = await fetch('/api/auth/a2f', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+      });
+      if (!res.ok) {
+        const txt = await res.text();
+        console.error('Falha ao solicitar código A2F', txt);
+        toast('Não foi possível enviar o código A2F', {
+          description: 'Tente novamente em alguns instantes.',
+        });
+        return;
+      }
+      const data = await res.json();
+      console.log('🚀 ~ solicitarCodigo ~ data:', data);
+      setCode(data.codigo);
+      if (data.expiration) {
+        setExpirationIso(String(data.expiration));
+      } else {
+        setExpirationIso(null);
+        setRemainingSeconds(null);
+      }
+      toast('Código A2F enviado', { description: 'Verifique seu e-mail.' });
+    } catch (err) {
+      console.error('Erro ao solicitar código A2F', err);
+      toast('Erro ao enviar código A2F');
+    }
+  };
+
+  // Atualiza countdown com base na expiration recebida do backend
+  useEffect(() => {
+    if (!expirationIso) return;
+    const update = () => {
+      const exp = Date.parse(expirationIso);
+      if (Number.isNaN(exp)) {
+        setRemainingSeconds(null);
+        return;
+      }
+      const now = Date.now();
+      const diffMs = exp - now;
+      const secs = Math.max(0, Math.floor(diffMs / 1000));
+      setRemainingSeconds(secs);
+    };
+    update();
+    const id = setInterval(update, 1000);
+    return () => clearInterval(id);
+  }, [expirationIso]);
+
   // Quando houver sessão e email disponível, dispara solicitação para enviar código A2F
   useEffect(() => {
     if (loading) return;
@@ -36,27 +90,7 @@ export default function A2FPage() {
     if (!email) return;
     if (requestedRef.current) return;
     requestedRef.current = true;
-
-    const sendCode = async () => {
-      try {
-        const res = await fetch('/api/auth/a2f', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-        });
-        if (!res.ok) {
-          console.error('Falha ao solicitar código A2F', await res.text());
-        }
-        const data = await res.json();
-        console.log('🚀 ~ sendCode ~ data:', data);
-        setCode(data.codigo);
-      } catch (err) {
-        console.error('Erro ao solicitar código A2F', err);
-      }
-    };
-    sendCode();
+    solicitarCodigo();
   }, [loading, user]);
 
   // Schema de validação para o código A2F
@@ -137,6 +171,10 @@ export default function A2FPage() {
 
   async function onSubmit(data: A2FInputs) {
     // Garante que já recebemos o código do servidor
+    console.log("🚀 ~ onSubmit ~ Code:", Code)
+    console.log("🚀 ~ onSubmit ~ data:", data)
+    console.log("🚀 ~ onSubmit ~ data.code:", data.code)
+    console.log("🚀 ~ onSubmit ~ capara:", data.code === Code)
     if (!Code || Code.length !== 6) {
       toast('Código ainda não disponível. Tente novamente.');
       return;
@@ -153,14 +191,36 @@ export default function A2FPage() {
           'Content-Type': 'application/json',
           Accept: 'application/json',
         },
-        body: JSON.stringify({ status: true }),
+        body: JSON.stringify({ status: true, code: data.code }),
       });
       if (!req.ok) {
-        const err = await req.text();
-        console.error('Falha na verificação A2F:', err);
+        // Tenta interpretar o erro para mensagem amigável
+        let message = 'Falha na verificação do código.';
+        try {
+          const contentType = req.headers.get('content-type') || '';
+          if (contentType.includes('application/json')) {
+            const j = await req.json();
+            message = j?.error || j?.message || message;
+          } else {
+            const txt = await req.text();
+            // Heurística simples para expiração
+            if (/expir/i.test(txt)) {
+              message = 'Código A2F expirado. Reenvie um novo código.';
+            } else {
+              message = txt || message;
+            }
+          }
+        } catch {
+          console.warn('Não foi possível interpretar o erro da verificação A2F');
+        }
+        console.error('Falha na verificação A2F');
         toast('Falha na verificação', {
           duration: 5000,
-          description: JSON.stringify(err),
+          description: message,
+          action: {
+            label: 'Reenviar código',
+            onClick: solicitarCodigo,
+          },
         });
         return;
       }
@@ -169,10 +229,12 @@ export default function A2FPage() {
       toast('Código válido');
       setTimeout(() => {
         window.location.reload();
-      }, 1000);
+      }, 500);
     } catch (error) {
       console.error('Erro na requisição A2F:', error);
-      toast('Erro ao verificar código');
+      toast('Erro ao verificar código', {
+        action: { label: 'Reenviar código', onClick: solicitarCodigo },
+      });
     }
   }
 
@@ -216,6 +278,11 @@ export default function A2FPage() {
                     <div className="text-muted-foreground mb-6 text-sm">
                       Informe o código de 6 dígitos enviado para o seu e-mail.
                     </div>
+                    {typeof remainingSeconds === 'number' && (
+                      <div className="mb-4 text-xs text-muted-foreground">
+                        Expira em: {Math.floor(remainingSeconds / 60)}:{String(remainingSeconds % 60).padStart(2, '0')}
+                      </div>
+                    )}
                     <form onSubmit={handleSubmit(onSubmit)}>
                       <div className="mb-6 flex justify-center gap-3">
                         {Array.from({ length: 6 }).map((_, index) => (

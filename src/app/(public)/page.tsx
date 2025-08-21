@@ -6,7 +6,7 @@ import { LanguageSelect } from '@/components/language-select';
 import { ProfileCard } from '@/components/profile-card';
 import { StartupTestimonialCard } from '@/components/startup-testimonial-card';
 import { TestimonialCard } from '@/components/testimonial-card';
-import { ThemeToggle } from '@/components/theme-toggle';
+import { AnimatedThemeToggler } from '@/components/magicui/animated-theme-toggler';
 import { TrText } from '@/components/tr-text';
 import { Button } from '@/components/ui/button';
 import { Categories } from '@/data/categoria';
@@ -38,7 +38,7 @@ export default function Home() {
           <nav className="hidden items-center gap-4 md:flex">
             {/* Seletor de idioma (Client Component) */}
             <LanguageSelect defaultLocale="pt" />
-            <ThemeToggle />
+            <AnimatedThemeToggler />
             <Link href="/login">
               <Button className="inline-flex items-center justify-center rounded-md bg-blue-600 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600/90">
                 <TrText k="home.header.login" />
