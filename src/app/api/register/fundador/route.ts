@@ -20,23 +20,23 @@ export async function POST(request: Request) {
       termo,
     } = body;
     const data = {
-      nome: nome,
-      cpf: cpf,
-      email: email,
-      telefone: telefone,
-      cep: cep,
-      endereco: endereco,
-      bairro: bairro,
-      cidade: cidade,
-      numero: numero,
-      pais: pais,
-      uf: uf,
-      senha: senha,
-      confirmacaoSenha: confirmacaoSenha,
+      nome: nome.trim(),
+      cpf: cpf.replace(/\D/g, '').trim(),
+      email: email.trim(),
+      telefone: telefone.replace(/\D/g, '').trim(),
+      cep: cep.replace(/\D/g, '').trim(),
+      endereco: endereco.trim(),
+      bairro: bairro.trim(),
+      cidade: cidade.trim(),
+      numero: numero.trim(),
+      pais: pais.trim(),
+      uf: uf.trim(),
+      senha: senha.trim(),
+      confirmacaoSenha: confirmacaoSenha.trim(),
       termo: termo,
     };
     const response = await fetch(
-      `${process.env.NEXTAUTH_API_URL}/register-startup`,
+      `${process.env.NEXTAUTH_API_URL}/register/fundador`,
       {
         method: 'POST',
         headers: {

@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
 import '@/i18n';
+import { toast } from 'sonner';
 
 export type StartupInputs = {
   nome: string;
@@ -36,6 +37,7 @@ export type StartupFormProps = {
   ufInicial?: string;
   paisInicial?: string;
   termo?: boolean;
+  ddi?: string;
 };
 
 export const StartupForm: FC<StartupFormProps> = ({
@@ -43,6 +45,7 @@ export const StartupForm: FC<StartupFormProps> = ({
   ufInicial,
   paisInicial,
   termo,
+  ddi,
 }) => {
   const router = useRouter();
   const { t } = useTranslation('auth');
@@ -110,11 +113,40 @@ export const StartupForm: FC<StartupFormProps> = ({
     if (paisInicial) setValue('pais', paisInicial, { shouldValidate: true });
   }, [cidadeInicial, ufInicial, paisInicial, setValue, termo]);
 
-  const onSubmit: SubmitHandler<StartupInputs> = (data) => {
+  const onSubmit: SubmitHandler<StartupInputs> = async(data) => {
     console.log('Registro de startup:', data);
-    // TODO: Chamar API de registro de startup
-    
-    // router.push('/login');
+    const dados = {
+      ...data,
+      telefone: `${ddi}${data.telefone}`,
+    }
+    try {
+      const response = await fetch(`/api/register/fundador`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify(dados),
+      });
+      const result = await response.json();
+      console.log(result);
+      if (!response.ok) {
+        toast('Erro ao registrar startup',{
+          description: result.message || 'Erro ao registrar startup',
+          duration: 5000,
+        })
+      }
+      toast('Startup registrada com sucesso', {
+        duration: 5000,
+      })
+      router.push('/login');
+    } catch (error) {
+      console.log(error);
+      toast('Erro ao registrar startup', {
+        duration: 5000,
+        description: 'Erro ao registrar startup'
+      })
+    }
   };
 
   // Busca ViaCEP sob demanda (onBlur ou ao completar 8 dígitos numéricos)

@@ -10,6 +10,7 @@ import * as z from 'zod';
 import { cpfMaskHandler, phoneMaskHandler } from '@/lib/mask-utils';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
 
 export type AffiliateInputs = {
@@ -34,6 +35,7 @@ export type AffiliateFormProps = {
   ufInicial?: string;
   paisInicial?: string;
   termo?: boolean;
+  ddi?: string;
 };
 
 export const AffiliateForm: FC<AffiliateFormProps> = ({
@@ -41,6 +43,7 @@ export const AffiliateForm: FC<AffiliateFormProps> = ({
   ufInicial,
   paisInicial,
   termo,
+  ddi,
 }) => {
   const router = useRouter();
   const { t } = useTranslation('auth');
@@ -109,10 +112,40 @@ export const AffiliateForm: FC<AffiliateFormProps> = ({
     if (paisInicial) setValue('pais', paisInicial, { shouldValidate: true });
   }, [cidadeInicial, ufInicial, paisInicial, setValue, termo]);
 
-  const onSubmit: SubmitHandler<AffiliateInputs> = (data) => {
+  const onSubmit: SubmitHandler<AffiliateInputs> = async (data) => {
     console.log('Registro de afiliado:', data);
-    // TODO: Chamar API de registro de afiliado
-    // router.push('/login');
+    const dados = {
+      ...data,
+      telefone: `${ddi}${data.telefone.replace(/\D/g, '')}`,
+    }
+    try {
+      const response = await fetch(`/api/register/afiliado`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify(dados),
+      });
+      const result = await response.json();
+      console.log(result);
+      if (!response.ok) {
+        toast('Erro ao registrar afiliado',{ 
+          description: result.message || 'Erro ao registrar afiliado',
+          duration: 5000,
+        })
+      }
+      toast('Afiliado registrado com sucesso', {
+        duration: 5000,
+      })
+      router.push('/login');
+    } catch (error) {
+      console.log(error);
+      toast('Erro ao registrar afiliado', {
+        duration: 5000,
+        description: 'Erro ao registrar afiliado'
+      })
+    }
   };
 
   // Busca ViaCEP sob demanda (onBlur ou ao completar 8 dígitos numéricos)

@@ -43,6 +43,8 @@ export type InvestorFormProps = {
   paisInicial?: string;
   /** Termo de aceitação inicial selecionado no modal de localização (não mapeado em campo visível) */
   termo?: boolean;
+  /** DDI inicial selecionado no modal de localização (não mapeado em campo visível) */
+  ddi?: string;
 };
 
 export const InvestorForm: FC<InvestorFormProps> = ({
@@ -50,6 +52,7 @@ export const InvestorForm: FC<InvestorFormProps> = ({
   ufInicial,
   paisInicial,
   termo,
+  ddi,
 }) => {
   const router = useRouter();
   const { t } = useTranslation('auth');
@@ -128,7 +131,10 @@ export const InvestorForm: FC<InvestorFormProps> = ({
           'Content-Type': 'application/json',
           Accept: 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          telefone: `${ddi}${data.telefone}`,
+        }),
       });
       const result = await response.json();
       console.log(result);
@@ -141,6 +147,7 @@ export const InvestorForm: FC<InvestorFormProps> = ({
       toast('Investidor registrado com sucesso', {
         duration: 5000,
       })
+      router.push('/login');
     } catch (error) {
       console.log(error);
       toast('Erro ao registrar investidor', {

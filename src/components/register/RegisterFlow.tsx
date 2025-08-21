@@ -32,6 +32,7 @@ export default function RegisterFlow() {
 
   // Estados do Modal 1
   const [pais, setPais] = useState<string>('');
+  const [DDI, setDDI] = useState<string>('');
   const [uf, setUf] = useState<string>('');
   const [cidade, setCidade] = useState<string>('');
   const [aceitouTermos, setAceitouTermos] = useState<boolean>(false);
@@ -46,7 +47,7 @@ export default function RegisterFlow() {
   }
 
   // Tipos locais para evitar importar do módulo no client
-  type Country = { code: string; name: string };
+  type Country = { code: string; name: string; phone_code: string };
   type StateItem = { code: string; name: string };
   type CityItem = { name: string };
 
@@ -64,6 +65,11 @@ export default function RegisterFlow() {
   // Carrega países ao abrir
   useEffect(() => {
     let mounted = true;
+    if(pais && paisesLista){
+      const paisSelecionado = paisesLista.find((p) => p.code === pais);
+      const codigoDDI = paisSelecionado?.phone_code || '';
+      setDDI(codigoDDI);
+    }
     (async () => {
       try {
         setLoadingPaises(true);
@@ -80,7 +86,8 @@ export default function RegisterFlow() {
       }
     })();
     return () => { mounted = false; };
-  }, []);
+  
+  }, [pais, paisesLista]);
 
   // Carrega estados ao escolher país
   useEffect(() => {
@@ -184,15 +191,15 @@ export default function RegisterFlow() {
                 )}
 
                 {tipo === 'investidor' && (
-                  <InvestorForm cidadeInicial={cidade} ufInicial={uf} paisInicial={pais} termo={aceitouTermos} />
+                  <InvestorForm cidadeInicial={cidade} ufInicial={uf} paisInicial={pais} termo={aceitouTermos} ddi={DDI} />
                 )}
 
                 {tipo === 'startup' && (
-                  <StartupForm cidadeInicial={cidade} ufInicial={uf} paisInicial={pais} termo={aceitouTermos} />
+                  <StartupForm cidadeInicial={cidade} ufInicial={uf} paisInicial={pais} termo={aceitouTermos} ddi={DDI} />
                 )}
 
                 {tipo === 'afiliado' && (
-                  <AffiliateForm cidadeInicial={cidade} ufInicial={uf} paisInicial={pais} termo={aceitouTermos} />
+                  <AffiliateForm cidadeInicial={cidade} ufInicial={uf} paisInicial={pais} termo={aceitouTermos} ddi={DDI} />
                 )}
 
                 {tipo && (
