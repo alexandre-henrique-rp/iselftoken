@@ -14,6 +14,7 @@ import {
   IconUsers,
   IconHome2,
   IconBell,
+  IconUser,
 } from "@tabler/icons-react"
 
 import { NavDocuments } from "@/components/nav-documents"

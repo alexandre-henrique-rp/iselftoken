@@ -1,12 +1,12 @@
-"use client"
-
-import { IconDotsVertical, IconLogout, IconSettings } from "@tabler/icons-react"
+'use client';
 
 import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar"
+  IconDotsVertical,
+  IconLogout,
+  IconUser,
+} from '@tabler/icons-react';
+
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,37 +15,37 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from '@/components/ui/dropdown-menu';
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar"
-import { useRouter } from "next/navigation"
-import { AnimatedThemeToggler } from "./magicui/animated-theme-toggler"
+} from '@/components/ui/sidebar';
+import { useRouter } from 'next/navigation';
+import { AnimatedThemeToggler } from './magicui/animated-theme-toggler';
 
 export function NavUser({
   user,
 }: {
   user: {
-    name: string
-    email: string
-    avatar: string
-  }
+    name: string;
+    email: string;
+    avatar: string;
+  };
 }) {
-  const { isMobile } = useSidebar()
-  const router = useRouter()
+  const { isMobile } = useSidebar();
+  const router = useRouter();
 
   async function handleLogout() {
     try {
-      await fetch("/api/auth", { method: "DELETE" })
+      await fetch('/api/auth', { method: 'DELETE' });
     } catch {
       // noop: mesmo em erro, tentamos seguir com o redirect
     } finally {
       // Garante saída da área protegida
-      router.push("/login")
-      router.refresh()
+      router.push('/login');
+      router.refresh();
     }
   }
 
@@ -59,7 +59,10 @@ export function NavUser({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg grayscale">
-                <AvatarImage src="https://ui.shadcn.com/avatars/shadcn.jpg" alt={user.name} />
+                <AvatarImage
+                  src="https://ui.shadcn.com/avatars/shadcn.jpg"
+                  alt={user.name}
+                />
                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
@@ -73,14 +76,17 @@ export function NavUser({
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-            side={isMobile ? "bottom" : "right"}
+            side={isMobile ? 'bottom' : 'right'}
             align="end"
             sideOffset={4}
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src="https://ui.shadcn.com/avatars/shadcn.jpg" alt={user.name} />
+                  <AvatarImage
+                    src="https://ui.shadcn.com/avatars/shadcn.jpg"
+                    alt={user.name}
+                  />
                   <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
@@ -93,14 +99,14 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <IconSettings />
+              <DropdownMenuItem onClick={() => router.push('/perfil')} aria-label="Perfil">
+                <IconUser />
                 Perfil
               </DropdownMenuItem>
               <DropdownMenuItem aria-label="Alternar tema">
                 <div className="flex w-full items-center justify-between">
                   <span className="text-sm">Tema</span>
-                  <AnimatedThemeToggler className="h-9 w-9 inline-flex items-center justify-center rounded-md hover:bg-muted" />
+                  <AnimatedThemeToggler className="hover:bg-muted inline-flex h-9 w-9 items-center justify-center rounded-md" />
                 </div>
               </DropdownMenuItem>
             </DropdownMenuGroup>
@@ -113,5 +119,5 @@ export function NavUser({
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
-  )
+  );
 }

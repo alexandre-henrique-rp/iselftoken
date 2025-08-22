@@ -12,13 +12,13 @@ const publicRoutes = [
   '/termos/uso',
 ];
 
-const StartupRoutes = ['/dashboard', '/config'];
+const StartupRoutes = ['/dashboard', '/config', '/perfil'];
 
 const InvestorRoutes = ['/home', '/perfil'];
 
-const AdminRoutes = ['/admin'];
+const AdminRoutes = ['/admin', '/perfil'];
 
-const AfiliadoRoutes = ['/afiliado'];
+const AfiliadoRoutes = ['/afiliado', '/perfil'];
 
 export async function middleware(req: NextRequest) {
   const session = await GetSessionServer();

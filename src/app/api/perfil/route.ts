@@ -1,12 +1,28 @@
+import { GetSessionServer } from "@/context/auth";
 import { NextResponse } from "next/server";
 
 
 
 export async function GET(request: Request) {
   try {
-   console.log("🚀 ~ GET ~:", "aki")
+    const session = await GetSessionServer();
+    console.log("🚀 ~ GET ~ session:", session)
+    if (!session) {
+      return NextResponse.json({ error: "Não autenticado" }, { status: 401 })
+    }
+    
+    const user = await fetch(`${process.env.NEXTAUTH_API_URL}/startup/${session.user.id}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Authorization: `Bearer ${session.refreshToken}`,
+      },
+    });
+    const userData = await user.json();
+    console.log("🚀 ~ GET ~ userData:", userData)
     return NextResponse.json({
-      message: 'Perfil buscado com sucesso'
+      message: 'Perfil buscado com sucesso',
+      data: userData
     });
   } catch (error) {
     console.log(error);

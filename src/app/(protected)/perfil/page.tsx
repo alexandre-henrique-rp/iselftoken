@@ -1,6 +1,6 @@
 
 const request = async () => {
-  const response = await fetch('/api/perfil');
+  const response = await fetch('http://localhost:3000/api/perfil');
   const data = await response.json();
   return data;
 }
