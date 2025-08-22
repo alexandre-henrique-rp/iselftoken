@@ -1,148 +1,154 @@
 ---
-Descrição: Página Pública /register
+Descrição: Página Privada /perfil
 ---
 
-# Página `/register`
+# Página `/perfil`
 
-- Arquivo: `src/app/(public)/register/page.tsx`
-- Objetivo: Cadastro público para dois perfis: investidor e startup.
-- Modal inicial solicitando o usuario marcar a checkbox referente ao pais, então dever todo os países, depois de ter selecionado o pais o usuario deve selecionar o estado ou província, as opções deve ser carregadas conforme o pais selecionado, depois de selecionar o estado ou província o usuario deve selecionar a cidade, as opções deve ser carregadas conforme o estado ou província selecionado, depois um checkbox para confirmar que o usuario leu e aceita os termos de uso, e por ultimo um botão de cancelar que leva para / e um botão para proximo modal ou tela do modal, lembrando de respeitar o idioma do usuario, esse modal deve ser obrigatório.
-- o proximo modal dee conter se a pessoa é investidor, afiliado ou Fundador de Startup, se selecionado investidor deve fechar o modal e carregar o componente de registro de investidor, se selecionado startup deve fechar o modal e carregar o componente de registro de startup, se selecionado afiliado deve fechar o modal e carregar o componente de registro de afiliado, e por ultimo um botão de cancelar que leva para / e um botão para proximo modal ou tela do modal, lembrando de respeitar o idioma do usuario, esse modal deve ser obrigatório.
-- se clicar em termos de uso deve abrir uma janela modal com o termos de uso, e por ultimo um botão li os termos fecha a janela modal retornando para o modal anterior.
-- se clicar em politica de privacidade deve abrir uma janela modal com a politica de privacidade, e por ultimo um botão li a politica fecha a janela modal retornando para o modal anterior.
-- cada caompomente (investidor, startup, afiliado) deve utilizar e rect-form com zod para validação dos inputs, e tambem cada um deve ter seu proprio handlesubmit para dar um console log nas informaçoes preenchidas.
+- Arquivo: `src/app/(protected)/perfil/page.tsx`
+- Objetivo: Página de perfil do usuário, exibe os dados do usuário logado.
 
-** inputs **
+
+** inputs (completos) **
 
 - investor ou fundador ou afiliado
-  - nome
-  - cpf
-  - telefone
-  - cep
-  - endereco
-  - bairro
-  - cidade - deve ser preenchido conforme selecionado no modal 
-  - uf - deve ser preenchido conforme selecionado no modal 
-  - pais - deve ser preenchido conforme selecionado no modal 
-  - numero
-  - email
-  - senha
-  - confirmacaoSenha
-  - termos
-  - politica
+  - Dados Pessoais
+    - nome completo
+    - apelido/nome social (opcional)
+    - genero (Masculino, Feminino, Outro)
+    - data de nascimento
+    - nacionalidade (ex.: BR, AR, US)
+    - naturalidade (cidade/estado de nascimento) (opcional)
+    - estado civil (opcional)
+  - Contato
+    - email
+    - telefone (com DDI/DDD)
+  - Endereço
+    - cep
+    - endereco (logradouro)
+    - numero
+    - complemento (opcional)
+    - bairro
+    - cidade
+    - uf (estado/província)
+    - pais
+  - Documento de Identificação
+    - tipoDeDocumento (checkbox múltipla escolha: CPF, RG, DNI, Passport)
+    - numeroDocumento (conforme tipo)
+    - orgaoEmissor (para RG, opcional)
+    - ufDocumento (para RG, opcional)
+    - dataEmissaoDocumento (opcional)
+    - arquivoDocumento (upload: PDF/IMG)
+  - Biometria e Avatar
+    - iselfBio (captura via webcam)
+    - avatar (upload de imagem)
+  - Startups (somente `role = fundador`)
+    - tabela de startups (id, fantasia, cnpj)
+    - ações: adicionar (modal), editar (navega /startup/:id), deletar (modal confirmação)
+
 
 ** atenção **
-- o modal deve ser obrigatório
-- o modal deve ser fechado ao clicar em cancelar e redirecionar para /
-- o modal deve ir para modal anterior ao clicar em voltar
-- o modal deve ir para modal seguinte ao clicar em proximo
-- o modal deve ser fechado ao clicar em finalizar
-- respeitar o idioma do usuario
-- respeitar tema do usuario
-
+- o campo 'Documento' deve suar o componente `FileUpload`, utilizando o 'npx shadcn@latest add https://originui.com/r/comp-545.json'
+- o campo 'IselfBio' deve suar o componente `WebcamCapture`, deve ser um botão que abrira um modal para capturar a foto via webcam
+- o campo 'Tipo de documento' deve ser um checkbox com as opções (CPF, RG, DNI ou Passport)
+- o campo 'Gênero' deve ser um select com as opções (Masculino, Feminino, Outro)
+- o campo 'avatar' deve ser um upload de imagem utilizando 'npx shadcn@latest add https://originui.com/r/comp-543.json'
+- o campo 'startup' deve ser um tabela contendo as startups relacionadas ao usuario, contendo as colunas (id, fantasia, cnpj, botão de ação (editar e deletar))
+- o campo 'startup' deve aparecer se a role do usuario for 'fundador'
+- o campo 'startup' deve ter um botão de adicionar startup que abre um modal para adicionar uma startup, esse modal deve conter os campos (fantasia, cnpj)
+- o campo 'startup' deve ter um botão de editar startup que redireciona para a rota /startup/:id
+- o campo 'startup' deve ter um botão de deletar startup que abre um modal de confirmação
 
 ## Components
 
-### **ModalSelecaoPaisEstadoCidade**
-- **Descrição**: Modal inicial para seleção de país, estado/província e cidade.
-- **Objetivo**: Capturar a localização do usuário de forma estruturada, respeitando o idioma e tema do usuário.
-- **Lógica**: 
-  - Exibe uma lista de países para seleção.
-  - Carrega dinamicamente estados/províncias com base no país selecionado.
-  - Carrega dinamicamente cidades com base no estado/província selecionado.
-  - Inclui checkbox para aceitação dos termos de uso.
-  - Botões de navegação: 'Cancelar' (redireciona para '/') e 'Próximo' (avança para o próximo modal).
-- **Implementação**: Utiliza componentes de UI como `Dialog` e `Select` do Radix UI para seleção dinâmica. Integração com i18n para suporte multilíngue.
+### Componentização da página de Perfil
+- Caminhos dos componentes:
+  - `src/components/business/perfil/perfil-resumo.tsx` — resumo do usuário (nome, email, role, localização, país, telefone)
+  - `src/components/business/perfil/tabela-startups-do-usuario.tsx` — tabela de startups (somente fundador)
+  - (planejado) `src/components/business/perfil/perfil-form.tsx` — formulário completo com RHF+Zod e máscaras
+  - (planejado) `src/components/business/perfil/campo-avatar-upload.tsx` — upload de avatar (shadcn comp-543)
+  - (planejado) `src/components/business/perfil/campo-documento-upload.tsx` — upload de documento (shadcn comp-545)
+  - (planejado) `src/components/business/perfil/botao-iselfbio-webcam.tsx` — botão que abre modal de webcam
+  - (planejado) `src/components/business/perfil/modal-cadastro-startup.tsx`
+  - (planejado) `src/components/business/perfil/modal-confirmacao-excluir-startup.tsx`
 
-### **ModalSelecaoPerfil**
-- **Descrição**: Modal para escolha do tipo de perfil do usuário.
-- **Objetivo**: Direcionar o usuário para o formulário de registro correto com base no perfil selecionado (Investidor, Afiliado ou Fundador de Startup).
-- **Lógica**: 
-  - Exibe opções de perfil para seleção.
-  - Fecha o modal e carrega o componente de registro correspondente ao perfil selecionado.
-  - Botões de navegação: 'Cancelar' (redireciona para '/') e 'Próximo' (carrega formulário).
-- **Implementação**: Utiliza estado local para gerenciar a seleção e redirecionamento com `useRouter` do Next.js.
+### Uso na página `page.tsx`
+- A página `src/app/(protected)/perfil/page.tsx` deve:
+  - Manter o fetch server-side (`GET /api/perfil`) e passar dados para componentes.
+  - Renderizar `PerfilResumo` e, se `role = fundador`, `TabelaStartupsDoUsuario`.
+  - No futuro, importar `PerfilForm` (client) para edição e submissão (`PUT /api/perfil`).
 
-### **ModalTermosDeUso**
-- **Descrição**: Modal para exibição dos Termos de Uso.
-- **Objetivo**: Permitir que o usuário leia os Termos de Uso antes de prosseguir com o registro.
-- **Lógica**: 
-  - Exibe o conteúdo dos Termos de Uso.
-  - Botão 'Li os Termos' fecha o modal e retorna ao modal anterior.
-- **Implementação**: Conteúdo carregado de um arquivo estático ou API, renderizado em um componente `Dialog`.
+## Discussão Técnica (Dev Frontend Sênior × Arquiteto de Soluções)
+- __Dev__: Formulário único com campos comuns e condicionais por role. RHF + Zod. Máscaras via `src/lib/mask-utils.ts` (remask). Avatar/Documento com shadcn. IselfBio via modal webcam.
+- __Arq__: Separar UI de serviços (Clean Architecture). Usar `src/app/api/perfil/route.ts` (GET/PUT) para persistir. Startups apenas se `role='fundador'`, com tabela e modais. Evitar acoplamento a backend específico.
 
-### **ModalPoliticaPrivacidade**
-- **Descrição**: Modal para exibição da Política de Privacidade.
-- **Objetivo**: Permitir que o usuário leia a Política de Privacidade antes de prosseguir.
-- **Lógica**: 
-  - Exibe o conteúdo da Política de Privacidade.
-  - Botão 'Li a Política' fecha o modal e retorna ao modal anterior.
-- **Implementação**: Similar ao `ModalTermosDeUso`, com conteúdo específico da política.
+### Conclusões
+- Formulário principal tipado e validado (RHF+Zod), com máscaras reutilizáveis.
+- Uploads (avatar/documento) com componentes shadcn e validações.
+- Webcam em modal para IselfBio.
+- Tabela CRUD de startups (fundador) com adicionar/editar/deletar.
 
-### **InvestorForm**
-- **Descrição**: Formulário de registro para investidores.
-- **Objetivo**: Capturar informações pessoais e de contato do investidor.
-- **Lógica**: 
-  - Campos: Nome, CPF, Telefone, CEP, Endereço, Bairro, Cidade, UF, País, Número, Email, Senha, Confirmação de Senha, Termos, Política.
-  - Validação com Zod para garantir formato correto (ex.: CPF válido, senhas iguais).
-  - `handleSubmit` exibe dados no console para testes.
-- **Implementação**: Utiliza `react-hook-form` para gerenciamento de formulários e `Zod` para validação. Máscaras para CPF, telefone e CEP com `remask`.
+## Plano de Ação
+- 1) Definir schemas Zod (Perfil e StartupMin).
+- 2) Montar `PerfilForm` com campos e condicionais por role.
+- 3) Integrar uploads (avatar/documento) e webcam.
+- 4) Implementar `TabelaStartupsDoUsuario` + modais (cadastro/confirmar exclusão).
+- 5) Integrar `GET/PUT /api/perfil` mantendo padrão `status/message/data`.
+- 6) Escrever testes (unidade/integr./UI/acessibilidade).
 
-### **StartupForm**
-- **Descrição**: Formulário de registro para fundadores de startups.
-- **Objetivo**: Capturar informações do fundador e da startup.
-- **Lógica**: 
-  - Campos semelhantes ao `InvestorForm`, com possíveis campos adicionais para dados da startup.
-  - Validação rigorosa com Zod.
-  - `handleSubmit` exibe dados no console.
-- **Implementação**: Similar ao `InvestorForm`, com ajustes para campos específicos de startup.
+## Especificação Detalhada (modelo baseado em `doc/context/frontend-register.md`)
 
-### **AfiliadoForm**
-- **Descrição**: Formulário de registro para afiliados.
-- **Objetivo**: Capturar informações do afiliado.
-- **Lógica**: 
-  - Campos semelhantes aos outros formulários.
-  - Validação com Zod.
-  - `handleSubmit` exibe dados no console.
-- **Implementação**: Similar aos outros formulários, adaptado para afiliados.
+### PerfilForm
+- __Descrição__: Formulário principal do perfil.
+- __Objetivo__: Exibir/editar dados do usuário autenticado com validação.
+- __Lógica__:
+  - Carrega valores via `GET /api/perfil`.
+  - Campos: nome, cpf, telefone, cep, endereco, bairro, cidade, uf, pais, numero, email, tipoDeDocumento (checkbox: CPF/RG/DNI/Passport), documento (upload), dataNascimento, genero (select), iselfBio (webcam), avatar (upload).
+  - Condicional: seção Startups visível apenas para `role='fundador'`.
+  - Envio: `PUT /api/perfil` com payload tipado. Exibir toast de sucesso/erro.
 
-## Lógica Principal
+### CampoAvatarUpload (shadcn comp-543)
+- Upload com pré-visualização, validação de tipo/tamanho, integrado ao RHF via Controller.
 
-- **Fluxo de Registro**: 
-  1. Usuário acessa `/register` e é apresentado ao `ModalSelecaoPaisEstadoCidade`.
-  2. Após selecionar localização e aceitar termos, avança para `ModalSelecaoPerfil`.
-  3. Escolhe o perfil e é direcionado ao formulário correspondente (`InvestorForm`, `StartupForm` ou `AfiliadoForm`).
-  4. Preenche o formulário, que é validado e submetido (atualmente, apenas console.log).
-  5. Modais de Termos de Uso e Política de Privacidade podem ser acessados a qualquer momento.
-- **Redirecionamentos**: 
-  - 'Cancelar' em qualquer modal redireciona para '/'.
-  - 'Voltar' retorna ao modal anterior.
-  - 'Próximo' avança no fluxo.
-- **Internacionalização**: Todo o conteúdo respeita o idioma do usuário via i18n.
-- **Tema**: Interface adapta-se ao tema claro/escuro do usuário.
+### CampoDocumentoUpload (shadcn comp-545)
+- Upload de documento (PDF/IMG). Associa com `tipoDeDocumento`. Validação de tamanho/formatos.
+
+### BotaoIselfBioWebcam
+- Abre modal `WebcamCapture`. Retorna imagem (base64/Blob) para o RHF.
+
+### TabelaStartupsDoUsuario (somente fundador)
+- Colunas: id, fantasia, cnpj, ações (Editar → `/startup/:id`, Deletar → modal).
+- Botão “Adicionar Startup” → `ModalCadastroStartup` (campos: fantasia, cnpj, validação Zod + máscara CNPJ).
+- Fonte de dados: sessão/estado ou mock local até haver endpoints dedicados.
+
+### ModalCadastroStartup
+- RHF + Zod. Ao confirmar: atualiza lista local ou chama endpoint futuro.
+
+### ModalConfirmacaoExcluirStartup
+- Confirma remoção. Ao confirmar: remove da lista local ou chama endpoint futuro.
+
+## Lógica Principal e Fluxos
+- Carregar → exibir formulário → editar → validar → salvar (PUT) → feedback.
+- Renderização condicional por role. i18n e tema respeitados.
+
+## Integração com API
+- Existente: `src/app/api/perfil/route.ts` (GET/PUT). Responder no padrão `doc/documentação/index.md` (status/message/data).
+- Futuro (proposta): endpoints para startups do usuário (listar/criar/deletar). Enquanto não existir, usar mock local documentado.
 
 ## Decisões de Implementação
+- Clean Architecture: UI em `src/components/`; serviços/adaptadores em `src/modules/` ou `src/infrastructure/`.
+- SOLID/DDD: responsabilidade única; tipos explícitos; validações com Zod no domínio.
+- Acessibilidade: labels/aria, foco em modais.
 
-- **Clean Architecture**: Componentes separados por responsabilidade (UI, formulários, modais), respeitando DDD ao modelar perfis como entidades distintas.
-- **React Hook Form + Zod**: Escolhidos para validação robusta e integração com TypeScript, garantindo formulários tipados e reutilizáveis.
-- **Remask**: Utilizado para máscaras de entrada (CPF, CEP, telefone), substituindo `react-input-mask` devido a compatibilidade com React 19.
-- **Modais Obrigatórios**: Garantem que o usuário complete todas as etapas antes de prosseguir, melhorando a experiência e conformidade.
-- **i18n**: Suporte a múltiplos idiomas para atender a uma base de usuários global.
-- **Componentization**: Cada modal e formulário é um componente independente, promovendo reutilização e manutenção.
+## Testes Recomendados (TDD)
+- Unidade: schemas Zod; máscaras CPF/CEP/telefone/CNPJ.
+- Integração: fluxo GET→edição→PUT; visibilidade de startups por role; modais.
+- UI: responsividade, tema, i18n; uploads com pré-visualização.
+- Acessibilidade: navegação por teclado, leitores de tela.
 
-## Testes Recomendados
-
-- **Testes de Unidade**: 
-  - Validação de schemas Zod para cada formulário.
-  - Funcionalidade de máscaras com `remask` para CPF, telefone, CEP.
-  - Comportamento de `handleSubmit` em cada formulário.
-- **Testes de Integração**: 
-  - Fluxo completo de registro, desde a seleção de país até a submissão do formulário.
-  - Interação entre modais (abertura, fechamento, navegação).
-  - Redirecionamentos e comportamento de botões (Cancelar, Voltar, Próximo).
-- **Testes de UI**: 
-  - Responsividade dos modais e formulários em diferentes dispositivos.
-  - Adaptação ao tema claro/escuro.
-  - Tradução de textos via i18n em diferentes idiomas.
-- **Testes de Acessibilidade**: 
-  - Garantir que todos os campos e modais sejam acessíveis via teclado e leitores de tela.
+## Roteiro de Implementação
+1) Schemas e testes.
+2) `PerfilForm` com condicionais + máscaras.
+3) Uploads e webcam.
+4) Tabela e modais de startups.
+5) Integração GET/PUT.
+6) Cobertura de testes e revisão.

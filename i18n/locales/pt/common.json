@@ -81,5 +81,29 @@
         "role": "CTO, FinanceAI"
       }
     }
+  },
+  "perfil": {
+    "title": "Perfil",
+    "summary": {
+      "name": "Nome",
+      "email": "Email",
+      "role": "Perfil",
+      "city_state": "Cidade/UF",
+      "country": "País",
+      "phone": "Telefone"
+    },
+    "startups": {
+      "title": "Minhas Startups",
+      "add": "Adicionar Startup",
+      "table": {
+        "id": "ID",
+        "fantasia": "Fantasia",
+        "cnpj": "CNPJ",
+        "actions": "Ações",
+        "edit": "Editar",
+        "delete": "Deletar",
+        "empty": "Nenhuma startup encontrada."
+      }
+    }
   }
 }
