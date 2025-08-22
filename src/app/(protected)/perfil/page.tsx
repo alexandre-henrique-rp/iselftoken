@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic';
 import { TrText } from '@/components/tr-text';
 import { PerfilResumo } from '@/components/business/perfil/perfil-resumo';
 import { TabelaStartupsDoUsuario } from '@/components/business/perfil/tabela-startups-do-usuario';
+import { PerfilForm } from '@/components/business/perfil/perfil-form';
 
 const request = async () => {
   const response = await fetch('http://localhost:3000/api/perfil');
@@ -86,7 +87,18 @@ export default async function Perfil() {
         <TabelaStartupsDoUsuario startups={startups} disabledActions />
       )}
 
-      {/* Observação: Formulário completo (RHF+Zod) e modais serão implementados em componentes client-side, conforme doc/context/frontend-perfil.md */}
+      {/* Formulário de edição do perfil (client-side: RHF + Zod) */}
+      <PerfilForm
+        perfil={{
+          id: perfil?.id,
+          nome: perfil?.nome,
+          email: perfil?.email,
+          telefone: perfil?.telefone,
+          cidade: perfil?.cidade,
+          uf: perfil?.uf,
+          pais: perfil?.pais,
+        }}
+      />
     </section>
   );
 }
