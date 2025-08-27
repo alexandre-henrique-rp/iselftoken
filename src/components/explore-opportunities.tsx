@@ -179,14 +179,14 @@ export function ExploreOpportunities({
           {opportunities.map((startup, idx) => (
             <div
               key={idx}
-              className="bg-gray-300 dark:bg-zinc-900 border border-border rounded-lg p-4 flex flex-col items-start text-left h-full shadow-sm"
+              className="bg-zinc-700 dark:bg-zinc-900 border border-border rounded-lg p-4 flex flex-col items-start text-left h-full shadow-sm"
             >
               <div className="text-blue-600 mb-3">{getIcon(startup.icon)}</div>
               <h4 className="font-bold text-lg text-blue-600 dark:text-white">{startup.name}</h4>
-              <p className="text-sm text-muted-foreground mb-4 flex-grow">
+              <p className="text-sm text-white dark:text-muted-foreground mb-4 flex-grow">
                 {startup.subName}
               </p>
-              <button className="border border-transparent text-black dark:text-white bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors w-full mt-auto py-2">
+              <button className="border border-transparent text-white dark:text-white bg-white/20 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors w-full mt-auto py-2">
                 View Details
               </button>
             </div>

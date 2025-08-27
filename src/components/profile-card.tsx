@@ -1,14 +1,14 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Button } from '@/components/ui/button';
-import { Users } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Users, DollarSign, PieChart } from "lucide-react";
 
 export type ProfileCardData = {
   id: string;
   name: string;
+  logo: string; // Logo da empresa
   categoryLabel: string; // ex: Sustentabilidade
   stageLabel: string; // ex: Série A
   trending?: boolean;
@@ -22,6 +22,12 @@ export type ProfileCardData = {
   timeLeftLabel: string; // ex: 3 dias restantes
   valuationLabel: string; // ex: R$ 15M
   investorsCount: number; // ex: 142
+  equityOfferedLabel: string; // ex: 15%
+  selos: {
+    id: string; // ex: 1
+    label: string; // ex: Sustentabilidade
+    image: string; // ex: string base64
+  }[];
 };
 
 // ProfileCard alinhado ao layout do exemplo fornecido
@@ -37,36 +43,52 @@ export function ProfileCard({ data }: { data: ProfileCardData }) {
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 70vw, 60vw"
             className="object-cover"
           />
-          {/* Badges topo-esquerda */}
-          <div className="absolute top-3 left-3 flex gap-2">
-            <Badge className="border-border bg-background/70 text-foreground">
-              {data.stageLabel}
-            </Badge>
-            {data.trending && (
-              <Badge className="bg-green-600 text-white">Trending</Badge>
-            )}
-            {data.endingSoon && (
-              <Badge className="bg-red-700 text-white">Encerrando</Badge>
-            )}
-          </div>
-          {/* Badge topo-direita */}
-          <div className="absolute top-3 right-3">
-            <Badge
-              variant="outline"
-              className="border-border bg-background/60 text-xs text-muted-foreground"
-            >
-              {data.categoryLabel}
-            </Badge>
-          </div>
         </div>
       </CardHeader>
 
       <CardContent className="p-5">
         {/* Título e descrição */}
-        <div className="flex items-start justify-between">
-          <h3 className="text-xl font-semibold text-foreground">{data.name}</h3>
+        <div className="flex items-center gap-3">
+          <div className="flex-shrink-0 w-12 h-12 rounded-lg border border-border bg-background p-1">
+            <Image 
+              src={data.logo} 
+              alt={`Logo da ${data.name}`}
+              width={48} 
+              height={48} 
+              className="w-full h-full object-contain"
+            />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-lg font-semibold text-foreground truncate">{data.name}</h3>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                {data.categoryLabel}
+              </span>
+              <span className="text-xs px-2 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300">
+                {data.stageLabel}
+              </span>
+            </div>
+          </div>
         </div>
-        <p className="mt-1 text-sm text-muted-foreground">{data.description}</p>
+        <p className="mt-1 text-sm text-muted-foreground h-10 leading-5 line-clamp-2 overflow-hidden">
+          {data.description}
+        </p>
+
+        {/* selos */}
+        <div className="flex items-center gap-1.5 mt-2 h-10 overflow-x-auto scrollbar-hide">
+          {data.selos.map((selo) => (
+            <div key={selo.id} className="flex-shrink-0">
+              <Image 
+                src={selo.image} 
+                alt={selo.label} 
+                width={32} 
+                height={32} 
+                className="object-contain rounded-md bg-muted/20 p-1 hover:bg-muted/40 transition-colors"
+                title={selo.label}
+              />
+            </div>
+          ))}
+        </div>
 
         {/* Progresso */}
         <div className="mt-5 space-y-2">
@@ -84,20 +106,39 @@ export function ProfileCard({ data }: { data: ProfileCardData }) {
         </div>
 
         {/* Métricas */}
-        <div className="mt-5 grid grid-cols-2 gap-4">
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Valuation</p>
-            <p className="text-sm font-medium text-foreground">
+        <div className="mt-5 space-y-4">
+          {/* Valuation - Destaque principal */}
+          <div className="rounded-lg border border-border bg-muted/30 p-3">
+            <div className="flex items-center gap-2 mb-1">
+              <DollarSign className="h-4 w-4 text-green-600" />
+              <span className="text-xs font-medium text-muted-foreground">Valuation</span>
+            </div>
+            <p className="text-lg font-bold text-foreground">
               {data.valuationLabel}
             </p>
           </div>
-          <div className="space-y-1">
-            <p className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Users className="h-3.5 w-3.5" /> Investidores
-            </p>
-            <p className="text-sm font-medium text-foreground">
-              {data.investorsCount}
-            </p>
+
+          {/* Grid 2x1 para Tokens e Equity */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-lg border border-border bg-muted/20 p-3">
+              <div className="flex items-center gap-2 mb-2">
+                <Users className="h-4 w-4 text-blue-600" />
+                <span className="text-xs font-medium text-muted-foreground">Investidores</span>
+              </div>
+              <p className="text-sm font-semibold text-foreground">
+                {data.investorsCount}
+              </p>
+            </div>
+            
+            <div className="rounded-lg border border-border bg-muted/20 p-3">
+              <div className="flex items-center gap-2 mb-2">
+                <PieChart className="h-4 w-4 text-orange-600" />
+                <span className="text-xs font-medium text-muted-foreground">Equity</span>
+              </div>
+              <p className="text-sm font-semibold text-foreground">
+                {data.equityOfferedLabel}
+              </p>
+            </div>
           </div>
         </div>
 

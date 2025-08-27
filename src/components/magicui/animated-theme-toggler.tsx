@@ -67,6 +67,21 @@ export const AnimatedThemeToggler = ({ className }: props) => {
 
   const isDarkMode = resolvedTheme === "dark";
 
+  // Evita hidratação mismatch renderizando conteúdo neutro até montar
+  if (!mounted) {
+    return (
+      <button
+        ref={buttonRef}
+        className={cn("inline-flex h-10 w-10 items-center justify-center", className)}
+        aria-label="Alternar tema"
+        title="Alternar tema"
+        disabled={true}
+      >
+        <SunDim className="h-5 w-5 opacity-0" />
+      </button>
+    );
+  }
+
   return (
     <button
       ref={buttonRef}
