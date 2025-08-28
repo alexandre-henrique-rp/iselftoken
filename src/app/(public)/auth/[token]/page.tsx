@@ -21,42 +21,42 @@ const tema = [
   '/image-04.jpg',
 ];
 
-export default function A2FPage() {
-  const { user, loading } = useSession();
-  const requestedRef = useRef(false);
-  const [Code, setCode] = useState('');
-  const [expirationIso, setExpirationIso] = useState<string | null>(null);
+interface AuthParams {
+  params: {
+    token: string;
+  };
+}
+
+export default function A2FPage({ params }: AuthParams) {
+  const [TokenClient, setTokenClient] = useState<string>(params.token);
+  const { loading } = useSession();
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
 
   const heroImage = tema[Math.floor(Math.random() * tema.length)];
+
   // Função reutilizável para solicitar/envio do código A2F
   const solicitarCodigo = async () => {
     try {
       const res = await fetch('/api/auth/a2f', {
-        method: 'GET',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
         },
+        body: JSON.stringify({
+          TokenClient,
+        }),
       });
+      const data = await res.json();
       if (!res.ok) {
-        const txt = await res.text();
-        console.error('Falha ao solicitar código A2F', txt);
         toast('Não foi possível enviar o código A2F', {
-          description: 'Tente novamente em alguns instantes.',
+          description: `${data.message}`,
         });
         return;
       }
-      const data = await res.json();
       console.log('🚀 ~ solicitarCodigo ~ data:', data);
-      setCode(data.codigo);
-      if (data.expiration) {
-        setExpirationIso(String(data.expiration));
-      } else {
-        setExpirationIso(null);
-        setRemainingSeconds(null);
-      }
-      toast('Código A2F enviado', { description: 'Verifique seu e-mail.' });
+      setTokenClient(data.token);
+      toast('Novo código enviado', { description: 'Verifique seu e-mail.' });
     } catch (err) {
       console.error('Erro ao solicitar código A2F', err);
       toast('Erro ao enviar código A2F');
@@ -65,13 +65,9 @@ export default function A2FPage() {
 
   // Atualiza countdown com base na expiration recebida do backend
   useEffect(() => {
-    if (!expirationIso) return;
     const update = () => {
-      const exp = Date.parse(expirationIso);
-      if (Number.isNaN(exp)) {
-        setRemainingSeconds(null);
-        return;
-      }
+      // exp = 20min
+      const exp = Date.now() + 20 * 60 * 1000;
       const now = Date.now();
       const diffMs = exp - now;
       const secs = Math.max(0, Math.floor(diffMs / 1000));
@@ -80,18 +76,7 @@ export default function A2FPage() {
     update();
     const id = setInterval(update, 1000);
     return () => clearInterval(id);
-  }, [expirationIso]);
-
-  // Quando houver sessão e email disponível, dispara solicitação para enviar código A2F
-  useEffect(() => {
-    if (loading) return;
-    const email = user?.email ?? undefined;
-    console.log("🚀 ~ A2FPage ~ email:", email)
-    if (!email) return;
-    if (requestedRef.current) return;
-    requestedRef.current = true;
-    solicitarCodigo();
-  }, [loading, user]);
+  }, []);
 
   // Schema de validação para o código A2F
   const a2fSchema = z.object({
@@ -170,66 +155,25 @@ export default function A2FPage() {
   }
 
   async function onSubmit(data: A2FInputs) {
-    // Garante que já recebemos o código do servidor
-    console.log("🚀 ~ onSubmit ~ Code:", Code)
-    console.log("🚀 ~ onSubmit ~ data:", data)
-    console.log("🚀 ~ onSubmit ~ data.code:", data.code)
-    console.log("🚀 ~ onSubmit ~ capara:", data.code === Code)
-    if (!Code || Code.length !== 6) {
-      toast('Código ainda não disponível. Tente novamente.');
-      return;
-    }
-    // Valida código digitado
-    if (data.code !== Code) {
-      toast('Código inválido');
-      return;
-    }
     try {
-      const req = await fetch('/api/auth/a2f/put', {
+      const req = await fetch('/api/auth/a2f', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
         },
-        body: JSON.stringify({ status: true, code: data.code }),
+        body: JSON.stringify({ token: TokenClient, client_code: data.code }),
       });
+      const res = await req.json();
       if (!req.ok) {
-        // Tenta interpretar o erro para mensagem amigável
-        let message = 'Falha na verificação do código.';
-        try {
-          const contentType = req.headers.get('content-type') || '';
-          if (contentType.includes('application/json')) {
-            const j = await req.json();
-            message = j?.error || j?.message || message;
-          } else {
-            const txt = await req.text();
-            // Heurística simples para expiração
-            if (/expir/i.test(txt)) {
-              message = 'Código A2F expirado. Reenvie um novo código.';
-            } else {
-              message = txt || message;
-            }
-          }
-        } catch {
-          console.warn('Não foi possível interpretar o erro da verificação A2F');
-        }
-        console.error('Falha na verificação A2F');
-        toast('Falha na verificação', {
-          duration: 5000,
-          description: message,
-          action: {
-            label: 'Reenviar código',
-            onClick: solicitarCodigo,
-          },
+        toast('Erro ao verificar código', {
+          description: `${res.message}`,
         });
         return;
       }
-      const res = await req.json();
-      console.log('🚀 ~ onSubmit ~ res:', res);
-      toast('Código válido');
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
+      toast('Código verificado', {
+        description: 'Redirecionando para a página inicial.',
+      });
     } catch (error) {
       console.error('Erro na requisição A2F:', error);
       toast('Erro ao verificar código', {
@@ -279,8 +223,9 @@ export default function A2FPage() {
                       Informe o código de 6 dígitos enviado para o seu e-mail.
                     </div>
                     {typeof remainingSeconds === 'number' && (
-                      <div className="mb-4 text-xs text-muted-foreground">
-                        Expira em: {Math.floor(remainingSeconds / 60)}:{String(remainingSeconds % 60).padStart(2, '0')}
+                      <div className="text-muted-foreground mb-4 text-xs">
+                        Expira em: {Math.floor(remainingSeconds / 60)}:
+                        {String(remainingSeconds % 60).padStart(2, '0')}
                       </div>
                     )}
                     <form onSubmit={handleSubmit(onSubmit)}>

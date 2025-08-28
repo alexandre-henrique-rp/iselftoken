@@ -47,15 +47,17 @@ export function LoginForm({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          redirectPath: "/"
+        }),
       })
       const result = await response.json()
-      console.log("Login result:", result)
       if (response.ok) {
         toast(t('login.messages.success'), {
           description: t('login.messages.success_description'),
         })
-        router.push("/auth")
+        router.push(result.url)
       }
     } catch (error) {
       console.error("Erro ao fazer login:", error)

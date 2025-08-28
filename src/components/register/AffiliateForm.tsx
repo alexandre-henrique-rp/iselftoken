@@ -125,7 +125,10 @@ export const AffiliateForm: FC<AffiliateFormProps> = ({
           'Content-Type': 'application/json',
           Accept: 'application/json',
         },
-        body: JSON.stringify(dados),
+        body: JSON.stringify({
+          ...dados,
+          redirectPath: '/login'
+        }),
       });
       const result = await response.json();
       console.log(result);
@@ -138,7 +141,7 @@ export const AffiliateForm: FC<AffiliateFormProps> = ({
       toast('Afiliado registrado com sucesso', {
         duration: 5000,
       })
-      router.push('/login');
+      router.push(result.url);
     } catch (error) {
       console.log(error);
       toast('Erro ao registrar afiliado', {

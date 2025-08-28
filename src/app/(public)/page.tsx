@@ -17,6 +17,8 @@ import { StartupTestimonials } from '@/data/testemunhos/startup';
 import { Star } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { SectionCards } from '@/components/section-cards';
+import { ProfileCard2 } from '@/components/profile-card2';
 
 export default function Home() {
   const opportunitiesData = OpportunitiesData;
@@ -193,6 +195,60 @@ export default function Home() {
                 </Button>
               </div>
             </div>
+          </div>
+        </section>
+
+          {/* Startups verificadas */}
+          <section id="explorar" className="bg-background py-3">
+          <div className="container mx-auto px-6">
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
+                Startups Verificadas
+              </h2>
+            </div>
+            <EmblaCarousel>
+              {profileCards.map((item) => (
+                <EmblaSlide key={item.id}>
+                  <ProfileCard2 data={item} />
+                </EmblaSlide>
+              ))}
+            </EmblaCarousel>
+          </div>
+        </section>
+
+          {/* Startups aceleradas */}
+          <section id="explorar" className="bg-background py-3">
+          <div className="container mx-auto px-6">
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
+                Startups Aceleradas
+              </h2>
+            </div>
+            <EmblaCarousel>
+              {profileCards.map((item) => (
+                <EmblaSlide key={item.id}>
+                  <ProfileCard2 data={item} />
+                </EmblaSlide>
+              ))}
+            </EmblaCarousel>
+          </div>
+        </section>
+
+          {/* startup em fase de aprovação */}
+          <section id="explorar" className="bg-background py-3">
+          <div className="container mx-auto px-6">
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
+                Startups em Fase de Aprovação
+              </h2>
+            </div>
+            <EmblaCarousel>
+              {profileCards.map((item) => (
+                <EmblaSlide key={item.id}>
+                  <ProfileCard2 data={item} />
+                </EmblaSlide>
+              ))}
+            </EmblaCarousel>
           </div>
         </section>
 

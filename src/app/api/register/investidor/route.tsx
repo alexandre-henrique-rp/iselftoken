@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server";
-
+import generateA2fCode from '@/modules/codigo/a2f';
+import { NextResponse } from 'next/server';
+import * as jose from 'jose';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -18,6 +19,7 @@ export async function POST(request: Request) {
       senha,
       confirmacaoSenha,
       termo,
+      redirectPath,
     } = body;
     const data = {
       nome: nome.trim(),
@@ -35,14 +37,22 @@ export async function POST(request: Request) {
       confirmacaoSenha: confirmacaoSenha.trim(),
       termo: termo,
     };
-    const response = await fetch(`${process.env.NEXTAUTH_API_URL}/register/investor`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
+    const codigo = generateA2fCode();
+
+    const response = await fetch(
+      `${process.env.NEXTAUTH_API_URL}/register/investor`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          ...data,
+          codigo: codigo,
+        }),
       },
-      body: JSON.stringify(data),
-    });
+    );
     const result = await response.json();
     console.log(result);
     if (!response.ok) {
@@ -52,12 +62,31 @@ export async function POST(request: Request) {
         { status: 500 },
       );
     }
+
+    const payload = {
+      codigo: codigo,
+      redirectPath: redirectPath,
+      usuario_id: result.data.usuario_id,
+    };
+    // codificar url com codigo com jwt
+    const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
+    // expirar em 20 minutos
+    const token = await new jose.SignJWT(payload as unknown as jose.JWTPayload)
+      .setProtectedHeader({ alg: 'HS256' })
+      .setIssuedAt()
+      .setExpirationTime('20m')
+      .sign(secret);
+    const url = `/auth/${token}`;
+
     return NextResponse.json(
-      { message: 'Investidor registrado com sucesso' },
+      { message: 'Investidor registrado com sucesso', url: url },
       { status: 200 },
     );
   } catch (error) {
     console.log(error);
-    return NextResponse.json({ error: 'Erro ao registrar investidor' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Erro ao registrar investidor' },
+      { status: 500 },
+    );
   }
 }

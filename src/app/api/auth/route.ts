@@ -3,14 +3,30 @@ import {
   DeleteSession,
   GetSessionServer,
 } from '@/context/auth';
+import generateA2fCode from '@/modules/codigo/a2f';
 import { NextResponse } from 'next/server';
+import * as jose from 'jose';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { email, password } = body;
-    const url = `${process.env.NEXTAUTH_API_URL}/login`
-    const response = await fetch(url, {
+
+    const codigo = generateA2fCode();
+    const payload = {
+      codigo: codigo,
+    };
+    // codificar url com codigo com jwt
+    const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
+    // expirar em 20 minutos
+    const token = await new jose.SignJWT(payload as unknown as jose.JWTPayload)
+      .setProtectedHeader({ alg: 'HS256' })
+      .setIssuedAt()
+      .setExpirationTime('20m')
+      .sign(secret);
+    const url = `/auth/${token}`;
+
+    const response = await fetch(`${process.env.NEXTAUTH_API_URL}/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -19,7 +35,7 @@ export async function POST(request: Request) {
       body: JSON.stringify({ email, password }),
     });
     const data = await response.json();
-    console.log("🚀 ~ POST ~ data:", data)
+
     if (!response.ok) {
       return NextResponse.json(
         { error: data.message || 'Erro ao autenticar' },
@@ -33,7 +49,7 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(
-      { message: 'Autenticado com sucesso' },
+      { message: 'Autenticado com sucesso', url: url },
       { status: 200 },
     );
   } catch (error) {

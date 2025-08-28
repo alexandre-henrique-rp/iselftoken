@@ -126,7 +126,10 @@ export const StartupForm: FC<StartupFormProps> = ({
           'Content-Type': 'application/json',
           Accept: 'application/json',
         },
-        body: JSON.stringify(dados),
+        body: JSON.stringify({
+          ...dados,
+          redirectPath: '/login'
+        }),
       });
       const result = await response.json();
       console.log(result);
@@ -139,7 +142,7 @@ export const StartupForm: FC<StartupFormProps> = ({
       toast('Startup registrada com sucesso', {
         duration: 5000,
       })
-      router.push('/login');
+      router.push(result.url);
     } catch (error) {
       console.log(error);
       toast('Erro ao registrar startup', {

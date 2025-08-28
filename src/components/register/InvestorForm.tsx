@@ -123,7 +123,6 @@ export const InvestorForm: FC<InvestorFormProps> = ({
   }, [cidadeInicial, ufInicial, paisInicial, setValue, termo]);
 
   const onSubmit: SubmitHandler<InvestorInputs> = async (data) => {
-    console.log('Registro de investidor:', data);
     try {
       const response = await fetch(`/api/register/investidor`, {
         method: 'POST',
@@ -134,6 +133,7 @@ export const InvestorForm: FC<InvestorFormProps> = ({
         body: JSON.stringify({
           ...data,
           telefone: `${ddi}${data.telefone}`,
+          redirectPath: '/login'
         }),
       });
       const result = await response.json();
@@ -147,7 +147,7 @@ export const InvestorForm: FC<InvestorFormProps> = ({
       toast('Investidor registrado com sucesso', {
         duration: 5000,
       })
-      router.push('/login');
+      router.push(result.url);
     } catch (error) {
       console.log(error);
       toast('Erro ao registrar investidor', {

@@ -1,80 +1,106 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { GetSessionServer } from '@/context/auth';
-import SendEmailModule from '@/modules/email';
-import buildA2fHtmlTemplate from '@/model/email/html/auth-a2f';
-import buildA2fTextTemplate from '@/model/email/text/auth-a2f';
+import * as jose from 'jose';
 import generateA2fCode from '@/modules/codigo/a2f';
-import { A2fMemory } from '@/modules/codigo/a2f-memory';
 
 /*
  * POST /api/auth/a2f
  * Lê a sessão no servidor e envia (simulado) um código A2F para o e-mail do usuário.
  * Body opcional: { email?: string }
  */
-export async function GET() {
+export async function POST(request: NextRequest) {
   try {
     const session = await GetSessionServer();
     if (!session) {
       return NextResponse.json({ error: 'Não autenticado' }, { status: 401 });
     }
-
-    const sessionEmail = session?.user?.email;
-    const email = sessionEmail;
-
-    // Query params (para testes): cc e bcc
-    const cc = [
-      'Marcos <marcoslacerda@iselftoken.net>',
-      'Niashi <niashi_dev@iselftoken.net>',
-      'Eydi <eydi_dev@iselftoken.net>',
-      'Ronaldo <ronaldo@iselftoken.net>, Alexandre Henrique <alexandre_dev@iselftoken.net>',
-    ];
-
-    if (!email || typeof email !== 'string') {
+    const body = await request.json();
+    const { token, client_code } = body;
+    if (!token) {
       return NextResponse.json(
-        { error: 'E-mail não encontrado na sessão' },
+        { error: 'Token não fornecido' },
         { status: 400 },
       );
     }
+    const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
+    const { payload } = await jose.jwtVerify(token, secret);
+    const { codigo, redirectPath } = payload;
+    if (client_code !== codigo) {
+      return NextResponse.json({ message: 'Código inválido' }, { status: 400 });
+    }
 
-    // Gera código A2F de 6 dígitos
-    const code = generateA2fCode();
-    console.log("🚀 ~ GET ~ code:", code)
-    const appName = process.env.APP_NAME ?? 'iSelfToken';
-    
-    // Armazena código com timestamp de expiração (5 minutos) e contador de tentativas
-    const expirationTime = new Date(Date.now() + 5 * 60 * 1000).toISOString();
-    const a2fData = {
-      code,
-      expiration: expirationTime,
-      attempts: 0,
-      maxAttempts: 3,
-    };
-    // Armazenamento em memória (substituir por cache/DB em produção)
-    A2fMemory.set(email, a2fData);
-    console.log("🚀 ~ GET ~ a2fData:", a2fData);
-    
-    // Envia e-mail com template HTML
-    const result = await SendEmailModule({
-      to: email,
-      template: {
-        html: buildA2fHtmlTemplate({ code, appName }),
-        text: buildA2fTextTemplate({ code, appName }),
+    if (!redirectPath) {
+      const role = session.user.role;
+      if (role === 'fundador') {
+        return NextResponse.redirect(new URL('/dashboard', request.url));
+      }
+      if (role === 'investidor') {
+        return NextResponse.redirect(new URL('/home', request.url));
+      }
+      if (role === 'admin') {
+        return NextResponse.redirect(new URL('/admin', request.url));
+      }
+      if (role === 'afiliado') {
+        return NextResponse.redirect(new URL('/afiliado', request.url));
+      }
+    }
+
+    return NextResponse.redirect(new URL(redirectPath as string, request.url));
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json(
+      { error: 'Erro ao solicitar A2F' },
+      { status: 500 },
+    );
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const session = await GetSessionServer();
+    if (!session) {
+      return NextResponse.json({ error: 'Não autenticado' }, { status: 401 });
+    }
+    const body = await request.json();
+    const { TokenClient } = body;
+    const codigo = generateA2fCode();
+    const { red, id } = await VerifyToken(TokenClient);
+
+    const req = await fetch(`${process.env.NEXTAUTH_API_URL}/retoken`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
       },
-      cc,
+      body: JSON.stringify({
+        codigo: codigo,
+        usuario_id: id,
+      }),
     });
+    const data = await req.json();
+    if (!req.ok) {
+      return NextResponse.json(
+        { error: data.message || 'Erro ao solicitar A2F' },
+        { status: 500 },
+      );
+    }
+
+    const payload = {
+      codigo: codigo,
+      redirectPath: red || '',
+      usuario_id: id,
+    };
+    // codificar url com codigo com jwt
+    const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
+    // expirar em 20 minutos
+    const token = await new jose.SignJWT(payload as unknown as jose.JWTPayload)
+      .setProtectedHeader({ alg: 'HS256' })
+      .setIssuedAt()
+      .setExpirationTime('20m')
+      .sign(secret);
 
     return NextResponse.json(
-      {
-        ok: true,
-        message: 'Código A2F enviado',
-        // Não retornamos o código por segurança
-        provider: result.provider,
-        messageId: result.messageId,
-        codigo: code,
-        expiration: expirationTime,
-        attempts: a2fData.attempts,
-        maxAttempts: a2fData.maxAttempts,
-      },
+      { message: 'Email enviada', token: token },
       { status: 200 },
     );
   } catch (error) {
@@ -84,4 +110,12 @@ export async function GET() {
       { status: 500 },
     );
   }
+}
+
+
+async function VerifyToken(token: string) {
+  const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
+  const { payload } = await jose.jwtVerify(token, secret);
+  const { codigo, redirectPath, usuario_id } = payload;
+  return { cog: codigo, red: redirectPath, id: usuario_id };
 }
