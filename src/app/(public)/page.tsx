@@ -17,7 +17,6 @@ import { StartupTestimonials } from '@/data/testemunhos/startup';
 import { Star } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { SectionCards } from '@/components/section-cards';
 import { ProfileCard2 } from '@/components/profile-card2';
 
 export default function Home() {

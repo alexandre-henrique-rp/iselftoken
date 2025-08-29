@@ -9,6 +9,7 @@ const publicRoutes = [
   '/register',
   '/termos/privacidade',
   '/termos/uso',
+  '/notification',
 ];
 
 const StartupRoutes = ['/dashboard', '/config', '/perfil'];

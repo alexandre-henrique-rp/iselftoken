@@ -1,24 +1,22 @@
 "use client"
 
+import * as React from "react"
 import {
-  IconCamera,
-  IconChartBar,
-  IconDashboard,
-  IconDatabase,
-  IconFileAi,
-  IconFileDescription,
-  IconFileWord,
-  IconFolder,
-  IconHelp,
-  IconReport,
-  IconUsers,
-  IconHome2,
-  IconBell,
-  IconUser,
-} from "@tabler/icons-react"
+  Bell,
+  ChartBar,
+  Home,
+  HelpCircle,
+  Users,
+  Briefcase,
+  TrendingUp,
+  FileText,
+  Database,
+} from "lucide-react"
+import Image from "next/image"
 
-import { NavDocuments } from "@/components/nav-documents"
 import { NavMain } from "@/components/nav-main"
+import { NavProjects } from "@/components/nav-projects"
+import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
 import {
   Sidebar,
@@ -29,158 +27,159 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import Link from "next/link"
-import Image from "next/image"
-import { NavSecondary } from "./nav-secondary"
- 
+
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  role?: string;
+}
 
 const data = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    name: "Usuário",
+    email: "usuario@iselftoken.com",
+    avatar: "/avatars/user.jpg",
   },
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
-      icon: IconDashboard,
-      role: "startup"
+      url: "/dashboard",
+      icon: Home,
+      isActive: true,
+      role: "all",
+      items: [
+        {
+          title: "Visão Geral",
+          url: "/dashboard",
+        },
+        {
+          title: "Métricas",
+          url: "/dashboard/metrics",
+        },
+      ],
     },
     {
-      title: "Lifecycle",
-      url: "#",
-      icon: IconHome2,
-      role: "investidor"
+      title: "Investimentos",
+      url: "/investments",
+      icon: TrendingUp,
+      role: "investidor",
+      items: [
+        {
+          title: "Portfólio",
+          url: "/investments/portfolio",
+        },
+        {
+          title: "Oportunidades",
+          url: "/investments/opportunities",
+        },
+        {
+          title: "Histórico",
+          url: "/investments/history",
+        },
+      ],
+    },
+    {
+      title: "Startups",
+      url: "/startups",
+      icon: Briefcase,
+      role: "startup",
+      items: [
+        {
+          title: "Minha Startup",
+          url: "/startups/profile",
+        },
+        {
+          title: "Captação",
+          url: "/startups/fundraising",
+        },
+        {
+          title: "Relatórios",
+          url: "/startups/reports",
+        },
+      ],
     },
     {
       title: "Analytics",
-      url: "#",
-      icon: IconChartBar,
-      role: "startup"
-    },
-    {
-      title: "Projects",
-      url: "#",
-      icon: IconFolder,
-      role: "investidor"
-    },
-    {
-      title: "Team",
-      url: "#",
-      icon: IconUsers,
-      role: "investidor"
-    },
-  ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: IconCamera,
-      isActive: true,
-      url: "#",
+      url: "/analytics",
+      icon: ChartBar,
+      role: "all",
       items: [
         {
-          title: "Active Proposals",
-          url: "#",
+          title: "Performance",
+          url: "/analytics/performance",
         },
         {
-          title: "Archived",
-          url: "#",
+          title: "Relatórios",
+          url: "/analytics/reports",
         },
       ],
-      role: "startup"
-    },
-    {
-      title: "Proposal",
-      icon: IconFileDescription,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-      role: "investidor"
-    },
-    {
-      title: "Prompts",
-      icon: IconFileAi,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-      role: "investidor"
     },
   ],
   navSecondary: [
     {
       title: "Notificações",
-      url: "#",
-      icon: IconBell,
+      url: "/notification",
+      icon: Bell,
     },
     {
       title: "Ajuda",
-      url: "#",
-      icon: IconHelp,
+      url: "/help",
+      icon: HelpCircle,
     },
   ],
-  documents: [
+  projects: [
     {
-      name: "Data Library",
-      url: "#",
-      icon: IconDatabase,
-      role: "startup"
+      name: "Documentos",
+      url: "/documents",
+      icon: FileText,
     },
     {
-      name: "Reports",
-      url: "#",
-      icon: IconReport,
-      role: "startup"
+      name: "Base de Dados",
+      url: "/database",
+      icon: Database,
     },
     {
-      name: "Word Assistant",
-      url: "#",
-      icon: IconFileWord,
-      role: "investidor"
+      name: "Equipe",
+      url: "/team",
+      icon: Users,
     },
   ],
 }
 
-interface Props extends React.ComponentProps<typeof Sidebar> {
-  role: string;
-}
+export function AppSidebar({ role = "all", ...props }: AppSidebarProps) {
+  // Filtrar itens de navegação baseado no role
+  const filteredNavMain = data.navMain.filter(item => 
+    item.role === "all" || item.role === role
+  );
 
-export function AppSidebar({ role, ...props }: Props) {
   return (
-    <Sidebar collapsible="offcanvas" {...props}>
+    <Sidebar variant="inset" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
-            >
-              <Link href="/home" className="w-full flex justify-center gap-2 bg-zinc-300 hover:bg-zinc-400 dark:bg-zinc-600 dark:hover:bg-zinc-700">
-               <Image src="/logo.png" alt="Logo" width={100} height={100} />
-              </Link>
+            <SidebarMenuButton size="lg" asChild>
+              <a href="/dashboard" className="flex items-center gap-3">
+                <div className="bg-[#014f86] text-white flex aspect-square size-8 items-center justify-center rounded-lg">
+                  <Image 
+                    src="/logo.png" 
+                    alt="iSelfToken" 
+                    width={20} 
+                    height={20} 
+                    className="object-contain"
+                  />
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-medium text-[#014f86] dark:text-blue-400">iSelfToken</span>
+                  <span className="truncate text-xs text-gray-600 dark:text-gray-400">
+                    {role === "investidor" ? "Investidor" : role === "startup" ? "Startup" : "Plataforma"}
+                  </span>
+                </div>
+              </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} role={role} />
-        <NavDocuments items={data.documents} />
+        <NavMain items={filteredNavMain} />
+        <NavProjects projects={data.projects} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
