@@ -36,7 +36,7 @@ export class RapidApiLocationProvider {
     if (!res.ok) throw new Error('Falha ao buscar países');
     const json = await res.json();
     const list = json?.list || json?.data || json || [];
-    const countries: Country[] = list.map((c: any) => ({
+    const countries: Country[] = list.map((c: Record<string, unknown>) => ({
       code: String(c?.iso2 || c?.iso_2 || c?.code || c?.id || ''),
       name: String(c?.name || c?.country || c?.value || ''),
     })).filter((c: Country) => c.code && c.name);
@@ -63,7 +63,7 @@ export class RapidApiLocationProvider {
     if (!res.ok) throw new Error(`Falha ao buscar estados (${countryCode})`);
     const json = await res.json();
     // Ajuste conforme resposta da API (normalizando para {code,name})
-    const states: State[] = (json?.list || json?.data || json?.states || json || []).map((s: any) => ({
+    const states: State[] = (json?.list || json?.data || json?.states || json || []).map((s: Record<string, unknown>) => ({
       code: String(s?.state_code || s?.code || s?.iso2 || s?.iso_2 || s?.id || s?.name),
       name: String(s?.name || s?.state_name || s?.state || s?.value || ''),
     })).filter((s: State) => s.name);
@@ -89,7 +89,7 @@ export class RapidApiLocationProvider {
     });
     if (!res.ok) throw new Error(`Falha ao buscar cidades (${countryCode}-${stateCode})`);
     const json = await res.json();
-    const cities: City[] = (json?.list || json?.data || json?.cities || json || []).map((c: any) => ({
+    const cities: City[] = (json?.list || json?.data || json?.cities || json || []).map((c: Record<string, unknown>) => ({
       name: String(c?.name || c?.city_name || c?.city || c?.value || ''),
     })).filter((c: City) => c.name);
 

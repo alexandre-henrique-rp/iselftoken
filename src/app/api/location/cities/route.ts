@@ -11,7 +11,8 @@ export async function GET(request: Request) {
     }
     const cities = await locationService.getCities(country, state);
     return NextResponse.json({ status: 'success', message: 'ok', data: cities });
-  } catch (error: any) {
-    return NextResponse.json({ status: 'error', message: error?.message || 'Erro ao listar cidades', data: null }, { status: 500 });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Erro ao listar cidades';
+    return NextResponse.json({ status: 'error', message: errorMessage, data: null }, { status: 500 });
   }
 }

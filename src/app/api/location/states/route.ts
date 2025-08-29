@@ -10,7 +10,8 @@ export async function GET(request: Request) {
     }
     const states = await locationService.getStates(country);
     return NextResponse.json({ status: 'success', message: 'ok', data: states });
-  } catch (error: any) {
-    return NextResponse.json({ status: 'error', message: error?.message || 'Erro ao listar estados', data: null }, { status: 500 });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Erro ao listar estados';
+    return NextResponse.json({ status: 'error', message: errorMessage, data: null }, { status: 500 });
   }
 }

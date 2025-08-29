@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const session = await GetSessionServer();
     console.log("🚀 ~ GET ~ session:", session)

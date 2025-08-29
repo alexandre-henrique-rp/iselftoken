@@ -9,16 +9,15 @@ const publicRoutes = [
   '/register',
   '/termos/privacidade',
   '/termos/uso',
-  '/notification',
 ];
 
-const StartupRoutes = ['/dashboard', '/config', '/perfil'];
+const StartupRoutes = ['/dashboard', '/config', '/perfil', '/notification'];
 
-const InvestorRoutes = ['/home', '/perfil'];
+const InvestorRoutes = ['/home', '/perfil', '/notification'];
 
-const AdminRoutes = ['/admin', '/perfil'];
+const AdminRoutes = ['/admin', '/perfil', '/notification'];
 
-const AfiliadoRoutes = ['/afiliado', '/perfil'];
+const AfiliadoRoutes = ['/afiliado', '/perfil', '/notification'];
 
 export async function middleware(req: NextRequest) {
   const session = await GetSessionServer();

@@ -230,7 +230,6 @@ export default function RegisterFlow() {
             className="sm:max-w-lg"
             onEscapeKeyDown={(e) => e.preventDefault()}
             onPointerDownOutside={(e) => e.preventDefault()}
-            overlayClassName="bg-black/70 backdrop-blur-sm sm:backdrop-blur"
             showCloseButton={false}
           >
             <DialogHeader>
@@ -336,7 +335,6 @@ export default function RegisterFlow() {
             className="sm:max-w-md"
             onEscapeKeyDown={(e) => e.preventDefault()}
             onPointerDownOutside={(e) => e.preventDefault()}
-            overlayClassName="bg-black/70 backdrop-blur-sm sm:backdrop-blur"
             showCloseButton={false}
           >
             <DialogHeader>
@@ -359,7 +357,7 @@ export default function RegisterFlow() {
 
         {/* Modal Termos de Uso */}
         <Dialog open={openModalTermos} onOpenChange={setOpenModalTermos}>
-          <DialogContent className="sm:max-w-2xl" overlayClassName="bg-black/70 backdrop-blur-sm sm:backdrop-blur">
+          <DialogContent className="sm:max-w-2xl">
             <DialogHeader>
               <DialogTitle>Termos de Uso</DialogTitle>
             </DialogHeader>
@@ -375,7 +373,7 @@ export default function RegisterFlow() {
 
         {/* Modal Política de Privacidade */}
         <Dialog open={openModalPolitica} onOpenChange={setOpenModalPolitica}>
-          <DialogContent className="sm:max-w-2xl" overlayClassName="bg-black/70 backdrop-blur-sm sm:backdrop-blur">
+          <DialogContent className="sm:max-w-2xl">
             <DialogHeader>
               <DialogTitle>Política de Privacidade</DialogTitle>
             </DialogHeader>
