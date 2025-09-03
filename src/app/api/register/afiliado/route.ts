@@ -56,7 +56,10 @@ export async function POST(request: Request) {
     console.log(result);
     if (!response.ok) {
       return NextResponse.json(
-        { error: result.message || 'Erro ao registrar afiliado' },
+        {
+          message: result.message || 'Erro ao registrar afiliado',
+          error: null,
+        },
         { status: 500 },
       );
     }
@@ -80,9 +83,8 @@ export async function POST(request: Request) {
       { status: 200 },
     );
   } catch (error) {
-    console.log(error);
     return NextResponse.json(
-      { error: 'Erro ao registrar afiliado' },
+      { message: error instanceof Error ? error.message : 'Erro ao registrar afiliado', error: JSON.stringify(error, null, 2) || null },
       { status: 500 },
     );
   }

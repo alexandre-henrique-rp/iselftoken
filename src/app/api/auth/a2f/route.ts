@@ -1,121 +1,93 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GetSessionServer } from '@/context/auth';
 import * as jose from 'jose';
-import generateA2fCode from '@/modules/codigo/a2f';
 
-/*
- * POST /api/auth/a2f
- * Lê a sessão no servidor e envia (simulado) um código A2F para o e-mail do usuário.
- * Body opcional: { email?: string }
- */
-export async function POST(request: NextRequest) {
+
+export async function PUT(request: NextRequest) {
   try {
-    const session = await GetSessionServer();
-    if (!session) {
-      return NextResponse.json({ error: 'Não autenticado' }, { status: 401 });
-    }
+
     const body = await request.json();
-    const { token, client_code } = body;
-    if (!token) {
+    console.log("🚀 ~ PUT ~ body:", body)
+
+    const TokenClient = body.token;
+
+    // Validar se TokenClient foi fornecido
+    if (!TokenClient) {
       return NextResponse.json(
         { error: 'Token não fornecido' },
         { status: 400 },
       );
     }
-    const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
-    const { payload } = await jose.jwtVerify(token, secret);
-    const { codigo, redirectPath } = payload;
-    if (client_code !== codigo) {
-      return NextResponse.json({ message: 'Código inválido' }, { status: 400 });
-    }
 
-    if (!redirectPath) {
-      const role = session.user.role;
-      if (role === 'fundador') {
-        return NextResponse.redirect(new URL('/dashboard', request.url));
-      }
-      if (role === 'investidor') {
-        return NextResponse.redirect(new URL('/home', request.url));
-      }
-      if (role === 'admin') {
-        return NextResponse.redirect(new URL('/admin', request.url));
-      }
-      if (role === 'afiliado') {
-        return NextResponse.redirect(new URL('/afiliado', request.url));
-      }
-    }
+    // Tentar verificar o token com tratamento de erro específico
+    const tokenData = await VerifyToken(TokenClient);
+    console.log('🚀 ~ PUT ~ tokenData:', tokenData);
 
-    return NextResponse.redirect(new URL(redirectPath as string, request.url));
-  } catch (error) {
-    console.log(error);
-    return NextResponse.json(
-      { error: 'Erro ao solicitar A2F' },
-      { status: 500 },
-    );
-  }
-}
+    const { cog, red, id } = tokenData;
 
-export async function PUT(request: NextRequest) {
-  try {
-    const session = await GetSessionServer();
-    if (!session) {
-      return NextResponse.json({ error: 'Não autenticado' }, { status: 401 });
-    }
-    const body = await request.json();
-    const { TokenClient } = body;
-    const codigo = generateA2fCode();
-    const { red, id } = await VerifyToken(TokenClient);
-
-    const req = await fetch(`${process.env.NEXTAUTH_API_URL}/retoken`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      body: JSON.stringify({
-        codigo: codigo,
-        usuario_id: id,
-      }),
-    });
-    const data = await req.json();
-    if (!req.ok) {
+    if (!cog || !red || !id) {
       return NextResponse.json(
-        { error: data.message || 'Erro ao solicitar A2F' },
-        { status: 500 },
+        { error: 'Token inválido' },
+        { status: 400 },
       );
     }
 
-    const payload = {
-      codigo: codigo,
-      redirectPath: red || '',
-      usuario_id: id,
-    };
-    // codificar url com codigo com jwt
-    const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
-    // expirar em 20 minutos
-    const token = await new jose.SignJWT(payload as unknown as jose.JWTPayload)
-      .setProtectedHeader({ alg: 'HS256' })
-      .setIssuedAt()
-      .setExpirationTime('20m')
-      .sign(secret);
+    console.log('🚀 ~ PUT ~ cog:', cog);
+    console.log('🚀 ~ PUT ~ body.codigo:', body.client_code);
 
+    if (cog !== body.client_code) {
+      return NextResponse.json(
+        { error: 'Código inválido' },
+        { status: 400 },
+      );
+    }
+    // Validar se o redirectPath é uma string válida
+    if (!red || typeof red !== 'string') {
+
+      return NextResponse.json(
+        { error: 'Caminho de redirecionamento inválido' },
+        { status: 400 },
+      );
+    }
+    
     return NextResponse.json(
-      { message: 'Email enviada', token: token },
+      { message: 'Código verificado', url: red },
       { status: 200 },
     );
+
   } catch (error) {
-    console.log(error);
+    console.error('Erro geral no PUT A2F:', error);
     return NextResponse.json(
-      { error: 'Erro ao solicitar A2F' },
+      { error: 'Erro interno do servidor' },
       { status: 500 },
     );
   }
 }
 
-
 async function VerifyToken(token: string) {
-  const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
-  const { payload } = await jose.jwtVerify(token, secret);
-  const { codigo, redirectPath, usuario_id } = payload;
-  return { cog: codigo, red: redirectPath, id: usuario_id };
+  // Validar se o token existe e não está vazio
+  if (!token || typeof token !== 'string' || token.trim() === '') {
+    throw new Error('Token inválido ou não fornecido');
+  }
+
+  // Validar se o token tem o formato JWT básico (3 partes separadas por ponto)
+  const tokenParts = token.split('.');
+  if (tokenParts.length !== 3) {
+    throw new Error('Token JWT deve ter 3 partes separadas por ponto');
+  }
+
+  // Validar se o secret existe
+  const secretKey = process.env.NEXTAUTH_SECRET;
+  if (!secretKey) {
+    throw new Error('NEXTAUTH_SECRET não configurado');
+  }
+
+  try {
+    const secret = new TextEncoder().encode(secretKey);
+    const { payload } = await jose.jwtVerify(token, secret);
+    const { codigo, redirectPath, usuario_id } = payload;
+    return { cog: codigo, red: redirectPath, id: usuario_id };
+  } catch (error) {
+    console.error('Erro ao verificar JWT:', error);
+    throw new Error('Token JWT inválido ou expirado');
+  }
 }

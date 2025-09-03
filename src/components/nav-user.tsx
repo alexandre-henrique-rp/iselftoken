@@ -26,6 +26,8 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { AnimatedThemeToggler } from "@/components/magicui/animated-theme-toggler"
+import { useSession } from "@/hooks/useSession"
+import { toast } from "sonner"
 
 export function NavUser({
   user,
@@ -37,6 +39,20 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+  const { logout } = useSession()
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+      toast('Saiu com sucesso')
+    } catch (error) {
+      console.log("🚀 ~ handleLogout ~ error:", error)
+      toast('Erro ao sair', { 
+        description: error instanceof Error ? error.message : 'Erro desconhecido' 
+      })
+    }
+  }
+  
 
   return (
     <SidebarMenu>
@@ -94,7 +110,7 @@ export function NavUser({
             
             <DropdownMenuSeparator />
             
-            <DropdownMenuItem className="text-red-600 dark:text-red-400">
+            <DropdownMenuItem onClick={handleLogout} className="text-red-600 dark:text-red-400">
               <LogOut className="mr-2 h-4 w-4" />
               Sair
             </DropdownMenuItem>

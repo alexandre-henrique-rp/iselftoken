@@ -54,12 +54,13 @@ export async function POST(request: Request) {
       },
     );
     const result = await response.json();
-    console.log(result);
     if (!response.ok) {
-      console.log(result);
       return NextResponse.json(
-        { error: result.message || 'Erro ao registrar investidor' },
-        { status: 500 },
+        {
+          message: result.message || 'Erro ao registrar investidor',
+          error: null,
+        },
+        { status: response.status },
       );
     }
 
@@ -83,9 +84,8 @@ export async function POST(request: Request) {
       { status: 200 },
     );
   } catch (error) {
-    console.log(error);
     return NextResponse.json(
-      { error: 'Erro ao registrar investidor' },
+      { message: error instanceof Error ? error.message : 'Erro ao registrar investidor', error: JSON.stringify(error, null, 2) || null },
       { status: 500 },
     );
   }

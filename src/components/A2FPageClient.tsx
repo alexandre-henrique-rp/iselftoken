@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,6 +12,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useSession } from '@/hooks/useSession';
 import { FourSquareLoader } from '@/components/ui/four-square-loader';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 // Conjunto de imagens em escopo de módulo para estabilidade entre SSR/CSR
 const tema = [
@@ -23,22 +24,25 @@ const tema = [
 
 export function A2FPageClient({ token }: { token: string }) {
   const [TokenClient, setTokenClient] = useState<string>(token);
-  const { loading } = useSession();
+  const { loading, user } = useSession();
+  const router = useRouter();
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
+  const [expirationTime, setExpirationTime] = useState<number | null>(null);
 
   const heroImage = tema[Math.floor(Math.random() * tema.length)];
 
   // Função reutilizável para solicitar/envio do código A2F
-  const solicitarCodigo = async () => {
+  const solicitarCodigo = useCallback(async () => {
     try {
-      const res = await fetch('/api/auth/a2f', {
-        method: 'PUT',
+      const res = await fetch('/api/newcode', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
         },
         body: JSON.stringify({
-          TokenClient,
+          nome: user?.name,
+          email: user?.email,
         }),
       });
       const data = await res.json();
@@ -48,29 +52,51 @@ export function A2FPageClient({ token }: { token: string }) {
         });
         return;
       }
-      console.log('🚀 ~ solicitarCodigo ~ data:', data);
       setTokenClient(data.token);
+      // Atualiza o tempo de expiração com base na resposta do backend
+      if (data.expiration) {
+        setExpirationTime(data.expiration);
+      } else {
+        // Fallback: 5 minutos a partir de agora (padrão do backend)
+        setExpirationTime(Date.now() + 5 * 60 * 1000);
+      }
       toast('Novo código enviado', { description: 'Verifique seu e-mail.' });
     } catch (err) {
       console.error('Erro ao solicitar código A2F', err);
       toast('Erro ao enviar código A2F');
     }
-  };
+  }, [user?.email, user?.name]);
 
-  // Atualiza countdown com base na expiration recebida do backend
+  // Inicializa o tempo de expiração quando o componente monta
   useEffect(() => {
-    const update = () => {
-      // exp = 20min
-      const exp = Date.now() + 20 * 60 * 1000;
+    // Define tempo inicial de 5 minutos (padrão do backend)
+    setExpirationTime(Date.now() + 5 * 60 * 1000);
+  }, []);
+
+  // Atualiza countdown com base no tempo de expiração
+  useEffect(() => {
+    if (!expirationTime) return;
+
+    const updateCountdown = () => {
       const now = Date.now();
-      const diffMs = exp - now;
+      const diffMs = expirationTime - now;
       const secs = Math.max(0, Math.floor(diffMs / 1000));
       setRemainingSeconds(secs);
+      
+      // Se expirou, para o contador
+      if (secs === 0) {
+        toast('Código expirado', { 
+          description: 'Solicite um novo código.',
+          action: { label: 'Reenviar', onClick: solicitarCodigo }
+        });
+      }
     };
-    update();
-    const id = setInterval(update, 1000);
-    return () => clearInterval(id);
-  }, []);
+
+    updateCountdown();
+    const intervalId = setInterval(updateCountdown, 1000);
+    
+    return () => clearInterval(intervalId);
+  }, [expirationTime, solicitarCodigo]);
 
   // Schema de validação para o código A2F
   const a2fSchema = z.object({
@@ -168,6 +194,9 @@ export function A2FPageClient({ token }: { token: string }) {
       toast('Código verificado', {
         description: 'Redirecionando para a página inicial.',
       });
+      setTimeout(() => {
+        router.push(res.url);
+      }, 2000);
     } catch (error) {
       console.error('Erro na requisição A2F:', error);
       toast('Erro ao verificar código', {
@@ -255,10 +284,11 @@ export function A2FPageClient({ token }: { token: string }) {
                     </form>
                     <div className="mt-4 text-center text-sm">
                       <Link
-                        href="/login"
+                        href=""
+                        onClick={() => router.back()}
                         className="text-primary underline-offset-4 hover:underline"
                       >
-                        ← Voltar para o login
+                        ← Voltar
                       </Link>
                     </div>
                   </CardContent>

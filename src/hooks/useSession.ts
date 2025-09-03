@@ -4,6 +4,7 @@
  * Retorna: { user, loading, error, refresh }.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useRouter } from "next/navigation"
 
 export type SessionPayload = Record<string, unknown> & {
   exp?: number
@@ -15,6 +16,7 @@ export type UseSessionResult = {
   loading: boolean
   error: string | null
   refresh: () => Promise<void>
+  logout: () => Promise<void>
 }
 
 export function useSession(): UseSessionResult {
@@ -22,6 +24,7 @@ export function useSession(): UseSessionResult {
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
   const mountedRef = useRef<boolean>(false)
+  const router = useRouter()
 
   const fetchSession = useCallback(async () => {
     setLoading(true)
@@ -67,8 +70,36 @@ export function useSession(): UseSessionResult {
     await fetchSession()
   }, [fetchSession])
 
+  const logout = useCallback(async () => {
+    try {
+      const res = await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+      })
+
+      if (!res.ok) {
+        throw new Error(`Falha ao fazer logout (status ${res.status})`)
+      }
+
+      // Limpa o estado local após logout bem-sucedido
+      if (mountedRef.current) {
+        setUser(null)
+        setError(null)
+      }
+
+      // Redireciona para a página inicial
+      router.push('/')
+    } catch (err) {
+      if (mountedRef.current) {
+        const message = err instanceof Error ? err.message : "Erro ao fazer logout"
+        setError(message)
+      }
+      throw err // Re-throw para permitir tratamento no componente
+    }
+  }, [router])
+
   return useMemo(
-    () => ({ user, loading, error, refresh }),
-    [user, loading, error, refresh]
+    () => ({ user, loading, error, refresh, logout }),
+    [user, loading, error, refresh, logout]
   )
 }

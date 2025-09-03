@@ -88,27 +88,6 @@ export default function InvestorHome() {
       rating: 4.5,
       rank: 6,
     },
-    {
-      id: 'naruto',
-      name: 'Free Fire x NARUTO SHIPPUDEN',
-      categories: ['Ação', 'Tiro tático'],
-      rating: 4.6,
-      rank: 4,
-    },
-    {
-      id: 'avatar-world',
-      name: 'Avatar World',
-      categories: ['RPG', 'Casual'],
-      rating: 4.6,
-      rank: 5,
-    },
-    {
-      id: 'super-bear',
-      name: 'Super Bear Adventure',
-      categories: ['Aventura'],
-      rating: 4.5,
-      rank: 6,
-    },
   ];
 
   return (

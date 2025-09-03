@@ -39,7 +39,7 @@ export async function POST(request: Request) {
       termo: termo,
     };
     const codigo = generateA2fCode();
-   
+
     const response = await fetch(
       `${process.env.NEXTAUTH_API_URL}/register/fundador`,
       {
@@ -55,11 +55,13 @@ export async function POST(request: Request) {
       },
     );
     const result = await response.json();
-    console.log(result);
     if (!response.ok) {
       return NextResponse.json(
-        { error: result.message || 'Erro ao registrar fundador' },
-        { status: 500 },
+        {
+          message: result.message || 'Erro ao registrar fundador',
+          error: null,
+        },
+        { status: response.status },
       );
     }
 
@@ -83,9 +85,12 @@ export async function POST(request: Request) {
       { status: 200 },
     );
   } catch (error) {
-    console.log(error);
     return NextResponse.json(
-      { error: 'Erro ao registrar fundador' },
+      {
+        message:
+          error instanceof Error ? error.message : 'Erro ao registrar fundador',
+        error: JSON.stringify(error, null, 2) || null,
+      },
       { status: 500 },
     );
   }
