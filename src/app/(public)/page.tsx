@@ -123,7 +123,7 @@ export default function Home() {
         {/* CTA */}
         <section className="border-border/20 bg-background py-16">
           <div className="container mx-auto px-6">
-            <div className="flex flex-col items-start justify-between gap-6 rounded-xl border border-border bg-gradient-to-r from-blue-300 to-gray-600 p-8 md:flex-row md:items-center dark:border-zinc-800 dark:bg-gradient-to-l dark:from-black/10 dark:to-zinc-200/10">
+            <div className="border-border flex flex-col items-start justify-between gap-6 rounded-xl border bg-gradient-to-r from-[#d500f9] to-black p-8 md:flex-row md:items-center dark:border-zinc-800 dark:bg-gradient-to-l dark:from-black/10 dark:to-zinc-200/10">
               <div className="flex-1">
                 <h3 className="text-foreground mb-3 text-2xl font-bold">
                   <TrText k="home.cta.title" />
@@ -131,19 +131,19 @@ export default function Home() {
                 <TrText
                   k="home.cta.subtitle1"
                   as="p"
-                  className="text-white mb-6"
+                  className="mb-6 text-white"
                 />
                 <TrText
                   k="home.cta.subtitle2"
                   as="p"
-                  className="text-white mb-6"
+                  className="mb-6 text-white"
                 />
                 <div className="flex flex-col gap-4 sm:flex-row">
-                  <div className="text-white flex items-center gap-1 text-sm">
+                  <div className="flex items-center gap-1 text-sm text-white">
                     <Star className="mr-2 h-4 w-4 text-yellow-500" />
                     <TrText k="home.cta.bullets.verified" />
                   </div>
-                  <div className="text-white flex items-center gap-1 text-sm">
+                  <div className="flex items-center gap-1 text-sm text-white">
                     <Star className="mr-2 h-4 w-4 text-yellow-500" />
                     <TrText k="home.cta.bullets.low_minimum" />
                   </div>
@@ -152,7 +152,7 @@ export default function Home() {
               <div className="flex flex-col items-center gap-4">
                 <Button
                   asChild
-                  className="bg-foreground text-background px-6 py-3 font-medium hover:opacity-90"
+                  className="bg-[#d500f9] text-background px-6 py-3 font-medium hover:opacity-70 dark:bg-white"
                 >
                   <Link href="/register">
                     <svg
@@ -173,7 +173,7 @@ export default function Home() {
                 </Button>
                 <Button
                   asChild
-                  className="bg-foreground text-background px-6 py-3 font-medium hover:opacity-90"
+                  className="bg-[#d500f9] text-background px-6 py-3 font-medium hover:opacity-70 dark:bg-white"
                 >
                   <Link href="/register">
                     <svg
@@ -197,8 +197,8 @@ export default function Home() {
           </div>
         </section>
 
-          {/* Startups verificadas */}
-          <section id="explorar" className="bg-background py-3">
+        {/* Startups verificadas */}
+        <section id="explorar" className="bg-background py-3">
           <div className="container mx-auto px-6">
             <div className="mb-6 flex items-center justify-between">
               <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
@@ -215,8 +215,8 @@ export default function Home() {
           </div>
         </section>
 
-          {/* Startups aceleradas */}
-          <section id="explorar" className="bg-background py-3">
+        {/* Startups aceleradas */}
+        <section id="explorar" className="bg-background py-3">
           <div className="container mx-auto px-6">
             <div className="mb-6 flex items-center justify-between">
               <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
@@ -233,8 +233,8 @@ export default function Home() {
           </div>
         </section>
 
-          {/* startup em fase de aprovação */}
-          <section id="explorar" className="bg-background py-3">
+        {/* startup em fase de aprovação */}
+        <section id="explorar" className="bg-background py-3">
           <div className="container mx-auto px-6">
             <div className="mb-6 flex items-center justify-between">
               <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
@@ -288,19 +288,19 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-zinc-700 dark:bg-background text-muted-foreground">
+      <footer className="dark:bg-background text-muted-foreground bg-zinc-700">
         <div className="border-border container mx-auto border-t px-6 py-12">
           <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
             <div className="col-span-2 md:col-span-1">
-              <div className="text-white mb-4 font-bold">iSelfToken</div>
+              <div className="mb-4 font-bold text-white">iSelfToken</div>
               <TrText
                 k="home.footer.description"
                 as="p"
-                className="text-white text-sm"
+                className="text-sm text-white"
               />
             </div>
             <div>
-              <h4 className="text-white mb-4 font-semibold">
+              <h4 className="mb-4 font-semibold text-white">
                 <TrText k="home.footer.platform" />
               </h4>
               <ul className="space-y-2 text-sm">
@@ -316,7 +316,7 @@ export default function Home() {
                 </li>
                 <li>
                   <Link
-                    className="transition-colors text-white hover:text-blue-500"
+                    className="text-white transition-colors hover:text-blue-500"
                     href="#"
                   >
                     <TrText k="home.footer.education" />
@@ -325,7 +325,7 @@ export default function Home() {
               </ul>
             </div>
             <div>
-              <h4 className="text-white mb-4 font-semibold">
+              <h4 className="mb-4 font-semibold text-white">
                 <TrText k="home.footer.legal" />
               </h4>
               <ul className="space-y-2 text-sm">
@@ -342,10 +342,10 @@ export default function Home() {
               </ul>
             </div>
             <div>
-              <h4 className="text-white mb-4 font-semibold">
+              <h4 className="mb-4 font-semibold text-white">
                 <TrText k="home.footer.contact" />
               </h4>
-              <ul className="space-y-2 text-white text-sm">
+              <ul className="space-y-2 text-sm text-white">
                 <li>
                   <TrText k="home.footer.email" />
                 </li>
@@ -355,7 +355,7 @@ export default function Home() {
               </ul>
             </div>
           </div>
-          <div className="border-border text-white mt-12 border-t pt-8 text-center text-sm">
+          <div className="border-border mt-12 border-t pt-8 text-center text-sm text-white">
             <p>
               &copy; {new Date().getFullYear()} iSelfToken.{' '}
               <TrText k="home.footer.rights" />

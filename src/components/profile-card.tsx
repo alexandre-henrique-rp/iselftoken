@@ -2,8 +2,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Users, DollarSign, PieChart } from "lucide-react";
 
 export type ProfileCardData = {
   id: string;
@@ -23,6 +21,7 @@ export type ProfileCardData = {
   valuationLabel: string; // ex: R$ 15M
   investorsCount: number; // ex: 142
   equityOfferedLabel: string; // ex: 15%
+  tokensRemainingLabel?: string; // ex: 1.200
   selos: {
     id: string; // ex: 1
     label: string; // ex: Sustentabilidade
@@ -33,9 +32,9 @@ export type ProfileCardData = {
 // ProfileCard alinhado ao layout do exemplo fornecido
 export function ProfileCard({ data }: { data: ProfileCardData }) {
   return (
-    <Card className="overflow-hidden border border-gray-400 bg-gray-300 text-card-foreground shadow-sm dark:bg-background dark:border-border">
+    <Card className="overflow-hidden rounded-xl border border-blue-700 bg-zinc-100 dark:bg-card text-card-foreground shadow-sm !gap-3 !py-3">
       <CardHeader className="p-0">
-        <div className="relative aspect-[16/6] bg-muted">
+        <div className="relative aspect-[16/9] bg-muted">
           <Image
             src={data.image}
             alt={data.name}
@@ -46,10 +45,10 @@ export function ProfileCard({ data }: { data: ProfileCardData }) {
         </div>
       </CardHeader>
 
-      <CardContent className="p-5">
+      <CardContent className="px-5 pt-3 pb-5">
         {/* Título e descrição */}
         <div className="flex items-center gap-3">
-          <div className="flex-shrink-0 w-12 h-12 rounded-lg border border-border bg-background p-1">
+          <div className="flex-shrink-0 w-24 h-24 rounded-lg border border-border bg-background p-1">
             <Image 
               src={data.logo} 
               alt={`Logo da ${data.name}`}
@@ -60,14 +59,6 @@ export function ProfileCard({ data }: { data: ProfileCardData }) {
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="text-lg font-semibold text-foreground truncate">{data.name}</h3>
-            <div className="flex items-center gap-2 mt-1">
-              <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-                {data.categoryLabel}
-              </span>
-              <span className="text-xs px-2 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300">
-                {data.stageLabel}
-              </span>
-            </div>
           </div>
         </div>
         <p className="mt-1 text-sm text-muted-foreground h-10 leading-5 line-clamp-2 overflow-hidden">
@@ -90,69 +81,25 @@ export function ProfileCard({ data }: { data: ProfileCardData }) {
           ))}
         </div>
 
-        {/* Progresso */}
-        <div className="mt-5 space-y-2">
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>Progresso</span>
-            <span className="font-medium text-foreground">
-              {data.raisedLabel} de {data.goalLabel}
-            </span>
+        {/* Divisor estético */}
+        <div className="mt-4 pt-4 border-t border-[#d500f9]" />
+
+        {/* Métricas simples */}
+        <div className="mt-4 flex justify-between gap-3 px-4">
+          <div>
+            <span className="text-xs font-medium text-muted-foreground">Equity ofertado</span>
+            <p className="mt-1 text-sm font-semibold text-foreground">{data.equityOfferedLabel}</p>
           </div>
-          <Progress value={data.percent} className="[&>div]:bg-blue-600" />
-          <div className="mt-1 flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">{data.collectedLabel}</span>
-            <span className="text-red-400">{data.timeLeftLabel}</span>
+          <div>
+            <span className="text-xs font-medium text-muted-foreground">Tokens restantes</span>
+            <p className="mt-1 text-sm font-semibold text-foreground">{data.tokensRemainingLabel ?? '—'}</p>
           </div>
         </div>
 
-        {/* Métricas */}
-        <div className="mt-5 space-y-4">
-          {/* Valuation - Destaque principal */}
-          <div className="rounded-lg border border-border bg-muted/30 p-3">
-            <div className="flex items-center gap-2 mb-1">
-              <DollarSign className="h-4 w-4 text-green-600" />
-              <span className="text-xs font-medium text-muted-foreground">Valuation</span>
-            </div>
-            <p className="text-lg font-bold text-foreground">
-              {data.valuationLabel}
-            </p>
-          </div>
-
-          {/* Grid 2x1 para Tokens e Equity */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-lg border border-border bg-muted/20 p-3">
-              <div className="flex items-center gap-2 mb-2">
-                <Users className="h-4 w-4 text-blue-600" />
-                <span className="text-xs font-medium text-muted-foreground">Investidores</span>
-              </div>
-              <p className="text-sm font-semibold text-foreground">
-                {data.investorsCount}
-              </p>
-            </div>
-            
-            <div className="rounded-lg border border-border bg-muted/20 p-3">
-              <div className="flex items-center gap-2 mb-2">
-                <PieChart className="h-4 w-4 text-orange-600" />
-                <span className="text-xs font-medium text-muted-foreground">Equity</span>
-              </div>
-              <p className="text-sm font-semibold text-foreground">
-                {data.equityOfferedLabel}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer de ação */}
-        <div className="mt-6 grid grid-cols-2 gap-3">
-          <Button
-            asChild
-            variant="outline"
-            className="border-border bg-background text-foreground hover:bg-muted"
-          >
-            <Link href="#">Ver detalhes</Link>
-          </Button>
-          <Button asChild className="bg-[#34a853] hover:bg-[#34a853]/95 text-white">
-            <Link href="/login">Investir agora</Link>
+        {/* Ação */}
+        <div className="mt-6">
+          <Button asChild className="w-full bg-[#d500f9] hover:bg-[#d500f9]/90 text-white">
+            <Link href="#">Ver oferta</Link>
           </Button>
         </div>
       </CardContent>

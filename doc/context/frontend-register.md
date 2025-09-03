@@ -10,7 +10,7 @@ Descrição: Página Pública /register
 - o proximo modal dee conter se a pessoa é investidor, afiliado ou Fundador de Startup, se selecionado investidor deve fechar o modal e carregar o componente de registro de investidor, se selecionado startup deve fechar o modal e carregar o componente de registro de startup, se selecionado afiliado deve fechar o modal e carregar o componente de registro de afiliado, e por ultimo um botão de cancelar que leva para / e um botão para proximo modal ou tela do modal, lembrando de respeitar o idioma do usuario, esse modal deve ser obrigatório.
 - se clicar em termos de uso deve abrir uma janela modal com o termos de uso, e por ultimo um botão li os termos fecha a janela modal retornando para o modal anterior.
 - se clicar em politica de privacidade deve abrir uma janela modal com a politica de privacidade, e por ultimo um botão li a politica fecha a janela modal retornando para o modal anterior.
-- cada caompomente (investidor, startup, afiliado) deve utilizar e rect-form com zod para validação dos inputs, e tambem cada um deve ter seu proprio handlesubmit para dar um console log nas informaçoes preenchidas.
+- cada caompomente (investidor, startup, afiliado) deve utilizar e rect-form com zod para validação dos inputs, e tambem cada um deve ter seu próprio handlesubmit para dar um console log nas informaçoes preenchidas.
 
 ** inputs **
 
