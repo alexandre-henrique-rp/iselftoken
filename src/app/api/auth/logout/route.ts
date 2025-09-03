@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { DeleteSession } from '@/context/auth';
 
 /**
@@ -6,7 +6,7 @@ import { DeleteSession } from '@/context/auth';
  * Endpoint para fazer logout do usuário
  * Remove os cookies de sessão e A2F
  */
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     // Remove a sessão e cookies relacionados
     DeleteSession();
