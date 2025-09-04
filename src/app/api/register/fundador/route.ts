@@ -39,9 +39,13 @@ export async function POST(request: Request) {
       termo: termo,
     };
     const codigo = generateA2fCode();
+    console.log("🚀 ~ POST ~ data:", {
+      ...data,
+      codigo: codigo,
+    })
 
     const response = await fetch(
-      `${process.env.NEXTAUTH_API_URL}/register/fundador`,
+      `${process.env.NEXTAUTH_API_URL}/register/founder`,
       {
         method: 'POST',
         headers: {
@@ -55,6 +59,7 @@ export async function POST(request: Request) {
       },
     );
     const result = await response.json();
+    console.log("🚀 ~ POST ~ result:", result)
     if (!response.ok) {
       return NextResponse.json(
         {
@@ -70,6 +75,24 @@ export async function POST(request: Request) {
       redirectPath: redirectPath,
       usuario_id: result.data.usuario_id,
     };
+
+    if (result.data.usuario_id) {
+      const request = await fetch(
+        `${process.env.NEXTAUTH_API_URL}/activate/founder`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({
+            "usuario_id": result.data.usuario_id,
+          }),
+        },
+      );
+      const result2 = await request.json();
+      console.log("🚀 ~ POST ~ result2:", result2)
+    }
     // codificar url com codigo com jwt
     const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
     // expirar em 20 minutos

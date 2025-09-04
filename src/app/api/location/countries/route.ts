@@ -1,12 +1,50 @@
 import { NextResponse } from 'next/server';
-import { locationService } from '@/modules/location/service';
 
 export async function GET() {
   try {
-    const countries = await locationService.getCountries();
-    return NextResponse.json({ status: 'success', message: 'ok', data: countries });
+    // Validação das variáveis de ambiente
+    const rapidApiKey = process.env.RAPIDAPI_KEY;
+    const rapidApiHost = process.env.COUNTRIES_API_HOST;
+    const baseUrl = process.env.COUNTRIES_API_BASE;
+
+    if (!rapidApiKey || !rapidApiHost || !baseUrl) {
+      return NextResponse.json(
+        {
+          error: true,
+          message:
+            'Configuração de API incompleta. Verifique as variáveis de ambiente.',
+          data: null,
+        },
+        { status: 500 },
+      );
+    }
+
+    const url = `${baseUrl}/countries`;
+    const response = await fetch(url, {
+      headers: {
+        'x-rapidapi-key': rapidApiKey,
+        'x-rapidapi-host': rapidApiHost,
+      },
+    });
+    const countries = await response.json();
+    console.log("🚀 ~ GET ~ countries:", countries)
+    if (!response.ok) {
+      return NextResponse.json(
+        {
+          error: true,
+          message: countries.message || 'Erro ao listar países',
+          data: null,
+        },
+        { status: response.status },
+      );
+    }
+    return NextResponse.json({ error: false, message: 'ok', data: countries});
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Erro ao listar países';
-    return NextResponse.json({ status: 'error', message: errorMessage, data: null }, { status: 500 });
+    const errorMessage =
+      error instanceof Error ? error.message : 'Erro ao listar países';
+    return NextResponse.json(
+      { error: true, message: errorMessage, data: null },
+      { status: 500 },
+    );
   }
 }

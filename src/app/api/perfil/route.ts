@@ -8,8 +8,18 @@ export async function GET() {
       return NextResponse.json({ message: 'Não autenticado', error: null }, { status: 401 });
     }
 
+    let URL = ''
+    if (session.user.role === 'investidor') {
+      URL = `${process.env.NEXTAUTH_API_URL}/investidor/${session.user.id}`;
+    } else if (session.user.role === 'fundador') {
+      URL = `${process.env.NEXTAUTH_API_URL}/startup/${session.user.id}`;
+    } else if (session.user.role === 'afiliado') {
+      URL = `${process.env.NEXTAUTH_API_URL}/afiliado/${session.user.id}`;
+    }
+
+    console.log('🚀 ~ GET ~ URL:', URL) ;
     const user = await fetch(
-      `${process.env.NEXTAUTH_API_URL}/startup/${session.user.id}`,
+      `${URL}`,
       {
         headers: {
           'Content-Type': 'application/json',

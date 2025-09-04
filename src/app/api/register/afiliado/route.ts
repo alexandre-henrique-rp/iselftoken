@@ -68,6 +68,24 @@ export async function POST(request: Request) {
       redirectPath: redirectPath,
       usuario_id: result.data.usuario_id,
     };
+
+    if (result.data.usuario_id) {
+      const request = await fetch(
+        `${process.env.NEXTAUTH_API_URL}/activate/afiliado`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({
+            "usuario_id": result.data.usuario_id,
+          }),
+        },
+      );
+      const result2 = await request.json();
+      console.log("🚀 ~ POST ~ result2:", result2)
+    }
     // codificar url com codigo com jwt
     const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
     // expirar em 20 minutos

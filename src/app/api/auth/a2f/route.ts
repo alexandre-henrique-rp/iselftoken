@@ -22,15 +22,15 @@ export async function PUT(request: NextRequest) {
     const tokenData = await VerifyToken(TokenClient);
     console.log('🚀 ~ PUT ~ tokenData:', tokenData);
 
-    const { cog, red, id } = tokenData;
+    const { cog, red, Id } = tokenData;
 
-    if (!cog || !red || !id) {
+    if (!cog || !red || !Id) {
       return NextResponse.json(
         { error: 'Token inválido' },
         { status: 400 },
       );
     }
-
+    
     console.log('🚀 ~ PUT ~ cog:', cog);
     console.log('🚀 ~ PUT ~ body.codigo:', body.client_code);
 
@@ -85,7 +85,7 @@ async function VerifyToken(token: string) {
     const secret = new TextEncoder().encode(secretKey);
     const { payload } = await jose.jwtVerify(token, secret);
     const { codigo, redirectPath, usuario_id } = payload;
-    return { cog: codigo, red: redirectPath, id: usuario_id };
+    return { cog: codigo, red: redirectPath, Id: usuario_id || null };
   } catch (error) {
     console.error('Erro ao verificar JWT:', error);
     throw new Error('Token JWT inválido ou expirado');

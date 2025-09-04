@@ -5,11 +5,30 @@ import { TrText } from '@/components/tr-text';
 import { PerfilResumo } from '@/components/business/perfil/perfil-resumo';
 import { TabelaStartupsDoUsuario } from '@/components/business/perfil/tabela-startups-do-usuario';
 import { PerfilForm } from '@/components/business/perfil/perfil-form';
+import { GetSessionServer } from '@/context/auth';
 
-const request = async () => {
-  const response = await fetch('http://localhost:3000/api/perfil');
-  const data = await response.json();
-  return data;
+const request = async (session: SessionNext.Session) => {
+  let URL = ''
+  if (session.user.role === 'investidor') {
+    URL = `${process.env.NEXTAUTH_API_URL}/investidor/${session.user.id}`;
+  } else if (session.user.role === 'fundador') {
+    URL = `${process.env.NEXTAUTH_API_URL}/startup/${session.user.id}`;
+  } else if (session.user.role === 'afiliado') {
+    URL = `${process.env.NEXTAUTH_API_URL}/afiliado/${session.user.id}`;
+  }
+
+  const user = await fetch(
+    `${URL}`,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Authorization: `Bearer ${session.refreshToken}`,
+      },
+    },
+  );
+  const userData = await user.json();
+  return userData;
 }
 
 type ApiResponse<T = unknown> = {
@@ -46,15 +65,10 @@ type PerfilData = {
 };
 
 export default async function Perfil() {
-  const res: ApiResponse<PerfilData> = await request();
+  const session = await GetSessionServer()
+  const res: ApiResponse<PerfilData> = session && await request(session);
+  console.log("🚀 ~ Perfil ~ res:", res)
   const perfil: PerfilData | undefined = res?.data as PerfilData | undefined;
-
-  // Log apenas no servidor
-  console.log('Perfil - resposta API:', {
-    status: res?.status,
-    message: res?.message,
-    hasData: Boolean(perfil),
-  });
 
   const role = (perfil?.role ?? '').toString();
   const isFundador = role === 'fundador';

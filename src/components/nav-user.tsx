@@ -1,16 +1,8 @@
-"use client"
+'use client';
 
-import {
-  ChevronsUpDown,
-  LogOut,
-  User,
-} from "lucide-react"
+import { ChevronsUpDown, LogOut, User } from 'lucide-react';
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,41 +10,42 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from '@/components/ui/dropdown-menu';
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar"
-import { AnimatedThemeToggler } from "@/components/magicui/animated-theme-toggler"
-import { useSession } from "@/hooks/useSession"
-import { toast } from "sonner"
+} from '@/components/ui/sidebar';
+import { AnimatedThemeToggler } from '@/components/magicui/animated-theme-toggler';
+import { useSession } from '@/hooks/useSession';
+import { toast } from 'sonner';
+import Link from 'next/link';
 
 export function NavUser({
   user,
 }: {
   user: {
-    name: string
-    email: string
-    avatar: string
-  }
+    name: string;
+    email: string;
+    avatar: string;
+  };
 }) {
-  const { isMobile } = useSidebar()
-  const { logout } = useSession()
+  const { isMobile } = useSidebar();
+  const { logout } = useSession();
 
   const handleLogout = async () => {
     try {
-      await logout()
-      toast('Saiu com sucesso')
+      await logout();
+      toast('Saiu com sucesso');
     } catch (error) {
-      console.log("🚀 ~ handleLogout ~ error:", error)
-      toast('Erro ao sair', { 
-        description: error instanceof Error ? error.message : 'Erro desconhecido' 
-      })
+      console.log('🚀 ~ handleLogout ~ error:', error);
+      toast('Erro ao sair', {
+        description:
+          error instanceof Error ? error.message : 'Erro desconhecido',
+      });
     }
-  }
-  
+  };
 
   return (
     <SidebarMenu>
@@ -76,7 +69,7 @@ export function NavUser({
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-            side={isMobile ? "bottom" : "right"}
+            side={isMobile ? 'bottom' : 'right'}
             align="end"
             sideOffset={4}
           >
@@ -95,22 +88,25 @@ export function NavUser({
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            
+
             <DropdownMenuItem>
-              <User className="mr-2 h-4 w-4" />
-              Perfil
+              <Link href="/perfil" className="flex items-center gap-2">
+                <User className="mr-2 h-4 w-4" />
+                Perfil
+              </Link>
             </DropdownMenuItem>
-            
+
             <DropdownMenuItem className="flex items-center justify-between">
-              <span className="flex items-center">
-                Tema
-              </span>
+              <span className="flex items-center">Tema</span>
               <AnimatedThemeToggler className="h-6 w-6" />
             </DropdownMenuItem>
-            
+
             <DropdownMenuSeparator />
-            
-            <DropdownMenuItem onClick={handleLogout} className="text-red-600 dark:text-red-400">
+
+            <DropdownMenuItem
+              onClick={handleLogout}
+              className="text-red-600 dark:text-red-400"
+            >
               <LogOut className="mr-2 h-4 w-4" />
               Sair
             </DropdownMenuItem>
@@ -118,5 +114,5 @@ export function NavUser({
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
-  )
+  );
 }
