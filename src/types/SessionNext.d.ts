@@ -6,13 +6,19 @@ declare namespace SessionNext {
     refreshToken?: string
   }
 
-  interface Client extends User {}
+  interface Client {
+    id: number
+    name: string
+    email: string
+    avatar: string | null
+    role: "investidor" | "fundador" | "admin" | "afiliado"
+  }
 }
     
-interface User {
+type User = {
   id: number
   name: string
   email: string
-  avatar?: string
+  avatar: string | null
   role: "investidor" | "fundador" | "admin" | "afiliado"
 }

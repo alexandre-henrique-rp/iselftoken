@@ -20,7 +20,7 @@ export function NavSecondary({
     url: string;
     isActive: boolean;
     menu: string;
-    icon: LucideIcon
+    icon: LucideIcon | null;
   }[]
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
   return (
@@ -31,7 +31,7 @@ export function NavSecondary({
             <SidebarMenuItem key={item.nome}>
               <SidebarMenuButton asChild size="sm">
                 <a href={item.url}>
-                  <item.icon />
+                  {item.icon && <item.icon />}
                   <span>{item.nome}</span>
                 </a>
               </SidebarMenuButton>

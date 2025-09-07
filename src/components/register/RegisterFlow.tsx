@@ -61,7 +61,7 @@ export default function RegisterFlow({dataPaises, error, message}: PaisesProps) 
 
   // Atualiza DDI quando país ou lista de países mudar
   useEffect(() => {
-    if (pais && dataPaises.length > 0) {
+    if (pais && Array.isArray(dataPaises) && dataPaises.length > 0) {
       const paisSelecionado = dataPaises.find((p) => p.iso3 === pais);
       const codigoDDI = paisSelecionado?.phone_code || '';
       setDDI(codigoDDI);
@@ -259,7 +259,7 @@ export default function RegisterFlow({dataPaises, error, message}: PaisesProps) 
                   <option value="" disabled>
                     Selecione
                   </option>
-                  {dataPaises.map((p) => {
+                  {Array.isArray(dataPaises) && dataPaises.map((p) => {
                     return (
                       <option key={p.id} value={p.iso3}>
                         {p.emoji}

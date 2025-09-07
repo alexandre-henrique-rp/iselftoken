@@ -41,9 +41,11 @@ export default async function ProtectedLayout({ children }: Props) {
               <div className="hidden sm:block">
                 <NavUser
                   user={{
+                    id: session?.user?.id || 0,
                     name: session?.user?.name || 'Usuário',
                     email: session?.user?.email || 'usuario@iselftoken.com',
                     avatar: '/avatars/user.jpg',
+                    role: session?.user?.role || 'investidor',
                   }}
                 />
               </div>

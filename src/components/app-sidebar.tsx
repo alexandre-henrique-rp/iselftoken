@@ -1,21 +1,9 @@
 "use client"
 
 import * as React from "react"
-import {
-  Bell,
-  ChartBar,
-  Home,
-  HelpCircle,
-  Users,
-  Briefcase,
-  TrendingUp,
-  FileText,
-  Database,
-} from "lucide-react"
 import Image from "next/image"
 
 import { NavMain } from "@/components/nav-main"
-import { NavProjects } from "@/components/nav-projects"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
 import {
@@ -35,118 +23,6 @@ import { afiliadoRoutes } from "@/rotas/private/afiliado"
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   role: string;
   session: SessionNext.Client;
-}
-
-const data = {
-  user: {
-    name: "Usuário",
-    email: "usuario@iselftoken.com",
-    avatar: "/avatars/user.jpg",
-  },
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "/dashboard",
-      icon: Home,
-      isActive: true,
-      role: "all",
-      items: [
-        {
-          title: "Visão Geral",
-          url: "/dashboard",
-        },
-        {
-          title: "Métricas",
-          url: "/dashboard/metrics",
-        },
-      ],
-    },
-    {
-      title: "Investimentos",
-      url: "/investments",
-      icon: TrendingUp,
-      role: "investidor",
-      items: [
-        {
-          title: "Portfólio",
-          url: "/investments/portfolio",
-        },
-        {
-          title: "Oportunidades",
-          url: "/investments/opportunities",
-        },
-        {
-          title: "Histórico",
-          url: "/investments/history",
-        },
-      ],
-    },
-    {
-      title: "Startups",
-      url: "/startups",
-      icon: Briefcase,
-      role: "startup",
-      items: [
-        {
-          title: "Minha Startup",
-          url: "/startups/profile",
-        },
-        {
-          title: "Captação",
-          url: "/startups/fundraising",
-        },
-        {
-          title: "Relatórios",
-          url: "/startups/reports",
-        },
-      ],
-    },
-    {
-      title: "Analytics",
-      url: "/analytics",
-      icon: ChartBar,
-      role: "all",
-      items: [
-        {
-          title: "Performance",
-          url: "/analytics/performance",
-        },
-        {
-          title: "Relatórios",
-          url: "/analytics/reports",
-        },
-      ],
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Notificações",
-      url: "/notification",
-      icon: Bell,
-    },
-    {
-      title: "Ajuda",
-      url: "/help",
-      icon: HelpCircle,
-    },
-  ],
-  projects: [
-    {
-      name: "Documentos",
-      url: "/documents",
-      icon: FileText,
-    },
-    {
-      name: "Base de Dados",
-      url: "/database",
-      icon: Database,
-    },
-    {
-      name: "Equipe",
-      url: "/team",
-      icon: Users,
-    },
-  ],
 }
 
 export function AppSidebar({ role, session, ...props }: AppSidebarProps) {
