@@ -27,9 +27,14 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { investorRoutes } from "@/rotas/private/investidor"
+import { fundadorRoutes } from "@/rotas/private/fundador"
+import { adminRoutes } from "@/rotas/private/admin"
+import { afiliadoRoutes } from "@/rotas/private/afiliado"
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
-  role?: string;
+  role: string;
+  session: SessionNext.Client;
 }
 
 const data = {
@@ -144,11 +149,13 @@ const data = {
   ],
 }
 
-export function AppSidebar({ role = "all", ...props }: AppSidebarProps) {
+export function AppSidebar({ role, session, ...props }: AppSidebarProps) {
   // Filtrar itens de navegação baseado no role
-  const filteredNavMain = data.navMain.filter(item => 
-    item.role === "all" || item.role === role
-  );
+  // const filteredNavMain = data.navMain.filter(item => 
+  //   item.role === "all" || item.role === role
+  // );
+
+  const MenuFilter = role === "investidor" ? investorRoutes : role === "fundador" ? fundadorRoutes : role === "admin" ? adminRoutes : role === "afiliado" ? afiliadoRoutes : investorRoutes;
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -157,19 +164,19 @@ export function AppSidebar({ role = "all", ...props }: AppSidebarProps) {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <a href="/dashboard" className="flex items-center gap-3">
-                <div className="bg-[#014f86] text-white flex aspect-square size-8 items-center justify-center rounded-lg">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
                   <Image 
-                    src="/logo.png" 
+                    src="/icon600x600.png" 
                     alt="iSelfToken" 
-                    width={20} 
-                    height={20} 
-                    className="object-contain"
+                    width={30} 
+                    height={30} 
+                    className="object-contain rounded-lg"
                   />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium text-[#014f86] dark:text-blue-400">iSelfToken</span>
-                  <span className="truncate text-xs text-gray-600 dark:text-gray-400">
-                    {role === "investidor" ? "Investidor" : role === "startup" ? "Startup" : "Plataforma"}
+                  <span className="truncate font-medium text-[#303030] dark:text-[#FFFFFF]">iSelfToken</span>
+                  <span className="truncate text-xs text-[#757575] dark:text-[#303030]">
+                    {role === "investidor" ? "Investidor" : role === "fundador" ? "Fundador" : "Afiliado"}
                   </span>
                 </div>
               </a>
@@ -178,12 +185,12 @@ export function AppSidebar({ role = "all", ...props }: AppSidebarProps) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={filteredNavMain} />
-        <NavProjects projects={data.projects} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavMain items={MenuFilter.filter(item => item.menu === "geral")} />
+        {/* <NavProjects projects={data.projects} /> */}
+        <NavSecondary items={MenuFilter.filter(item => item.menu === "config")} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={session} />
       </SidebarFooter>
     </Sidebar>
   )

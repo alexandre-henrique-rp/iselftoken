@@ -1,0 +1,58 @@
+import { Bell, Home, TrendingUp, User } from "lucide-react";
+
+export const investorRoutes = [
+  {
+    "id": 1,
+    "nome": "Home",
+    "path": "/home",
+    "url": "/home",
+    "isActive": true,
+    "menu": "geral",
+    "icon": Home,
+  },
+  {
+    "id": 2,
+    "nome": "Perfil",
+    "path": "/perfil",
+    "isActive": true,
+    "url": "/perfil",
+    "menu": "user",
+    "icon": User,
+  },
+  {
+    "id": 3,
+    "nome": "Notificação",
+    "path": "/notification",
+    "url": "/notification",
+    "isActive": true,
+    "menu": "config",
+    "icon": Bell,
+  },
+  {
+    "id": 4,
+    "nome": "Startup by id",
+    "path": "/startup/",
+    "url": "/startup/",
+    "isActive": true,
+    "menu": "private",
+    "icon": null,
+  },
+  {
+    "id": 5,
+    "nome": "Painel Financeiro",
+    "path": "/painel-financeiro",
+    "url": "/painel-financeiro",
+    "isActive": true,
+    "menu": "geral",
+    "icon": TrendingUp,
+  },
+  {
+    "id": 6,
+    "nome": "Treinamento",
+    "path": "/treinamento",
+    "url": "/treinamento",
+    "isActive": true,
+    "menu": "geral",
+    "icon": null,
+  }
+]

@@ -53,14 +53,36 @@ export async function POST(request: Request) {
         }),
       },
     );
-    const result = await response.json();
-    if (!response.ok) {
+
+    // Captura a resposta como texto primeiro para debug
+    const responseText = await response.text();
+    console.log("🚀 ~ POST ~ responseText:", responseText);
+    console.log("🚀 ~ POST ~ response.status:", response.status);
+    console.log("🚀 ~ POST ~ response.headers:", Object.fromEntries(response.headers.entries()));
+
+    let result;
+    try {
+      result = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error("🚀 ~ POST ~ JSON Parse Error:", parseError);
+      console.error("🚀 ~ POST ~ Raw response:", responseText);
+      return NextResponse.json(
+        {
+          message: 'Erro na resposta da API externa',
+          error: `Resposta inválida: ${responseText.substring(0, 200)}...`,
+        },
+        { status: 500 },
+      );
+    }
+    console.log("🚀 ~ POST ~ result:", result)
+
+    if (!response.ok || result.status === 'error') {
       return NextResponse.json(
         {
           message: result.message || 'Erro ao registrar investidor',
           error: null,
         },
-        { status: response.status },
+        { status: response.ok ? 400 : response.status },
       );
     }
 

@@ -1,0 +1,58 @@
+import { Briefcase, HomeIcon } from 'lucide-react';
+
+export const adminRoutes = [
+  {
+    id: 1,
+    nome: 'Dashboard',
+    path: '/dashboard-admin',
+    url: '/dashboard-admin',
+    isActive: true,
+    menu: 'geral',
+    icon: HomeIcon,
+  },
+  {
+    id: 2,
+    nome: 'Chamados',
+    path: '/chamados',
+    url: '/chamados',
+    isActive: true,
+    menu: 'geral',
+    icon: null,
+  },
+  {
+    id: 3,
+    nome: 'Pagamentos',
+    path: '/pagamentos',
+    url: '/pagamentos',
+    isActive: true,
+    menu: 'geral',
+    icon: null,
+  },
+  {
+    id: 4,
+    nome: 'Startup',
+    path: '/startup-all',
+    url: '/startup-all',
+    isActive: true,
+    menu: 'geral',
+    icon: Briefcase,
+  },
+  {
+    id: 5,
+    nome: 'Usuários',
+    path: '/users',
+    url: '/users',
+    isActive: true,
+    menu: 'geral',
+    icon: null,
+  },
+  {
+    id: 6,
+    nome: 'Comentários',
+    path: '/comments',
+    url: '/comments',
+    isActive: true,
+    menu: 'geral',
+    icon: null,
+  },
+];

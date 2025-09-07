@@ -22,15 +22,11 @@ import { useSession } from '@/hooks/useSession';
 import { toast } from 'sonner';
 import Link from 'next/link';
 
-export function NavUser({
-  user,
-}: {
-  user: {
-    name: string;
-    email: string;
-    avatar: string;
-  };
-}) {
+interface NavUserProps {
+  user: SessionNext.Client;
+}
+
+export function NavUser({ user }: NavUserProps) {
   const { isMobile } = useSidebar();
   const { logout } = useSession();
 
@@ -47,6 +43,22 @@ export function NavUser({
     }
   };
 
+  const IniciaisSession = () => {
+    // verificar quantas palavras tem no nome
+    const words = user.name.split(' ');
+    let initials = '';
+    for (let i = 0; i < words.length; i++) {
+      initials += words[i].charAt(0).toUpperCase();
+    }
+    // retornar no máximo 2 iniciais
+    if (initials.length > 2) {
+      initials = initials.slice(0, 2);
+    }
+    return initials;
+  };
+
+  const iniciais = IniciaisSession();
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -57,8 +69,12 @@ export function NavUser({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                {user.avatar && (
+                  <AvatarImage src={user.avatar} alt={user.name} />
+                )}
+                <AvatarFallback className="rounded-lg">
+                  {iniciais}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
@@ -105,7 +121,7 @@ export function NavUser({
 
             <DropdownMenuItem
               onClick={handleLogout}
-              className="text-red-600 dark:text-red-400"
+              className="text-[#ef4444] dark:text-[#ef4444]"
             >
               <LogOut className="mr-2 h-4 w-4" />
               Sair

@@ -36,7 +36,6 @@ export type StartupFormProps = {
   cidadeInicial?: string;
   ufInicial?: string;
   paisInicial?: string;
-  termo?: boolean;
   ddi?: string;
 };
 
@@ -44,7 +43,6 @@ export const StartupForm: FC<StartupFormProps> = ({
   cidadeInicial,
   ufInicial,
   paisInicial,
-  termo,
   ddi,
 }) => {
   const router = useRouter();
@@ -96,7 +94,7 @@ export const StartupForm: FC<StartupFormProps> = ({
       cidade: cidadeInicial || '',
       uf: ufInicial || '',
       pais: paisInicial || '',
-      termo: termo || false,
+      termo: false,
     },
   });
 
@@ -107,11 +105,9 @@ export const StartupForm: FC<StartupFormProps> = ({
   useEffect(() => {
     if (cidadeInicial)
       setValue('cidade', cidadeInicial, { shouldValidate: true });
-    if (termo)
-      setValue('termo', termo, { shouldValidate: true });
     if (ufInicial) setValue('uf', ufInicial, { shouldValidate: true });
     if (paisInicial) setValue('pais', paisInicial, { shouldValidate: true });
-  }, [cidadeInicial, ufInicial, paisInicial, setValue, termo]);
+  }, [cidadeInicial, ufInicial, paisInicial, setValue]);
 
   const onSubmit: SubmitHandler<StartupInputs> = async(data) => {
     console.log('Registro de startup:', data);
@@ -131,13 +127,25 @@ export const StartupForm: FC<StartupFormProps> = ({
           redirectPath: '/login'
         }),
       });
-      const result = await response.json();
+      
+      let result;
+      try {
+        result = await response.json();
+      } catch {
+        toast('Erro ao registrar startup', {
+          duration: 5000,
+          description: 'Erro na comunicação com o servidor'
+        });
+        return;
+      }
+      
       console.log(result);
       if (!response.ok) {
         toast('Erro ao registrar startup',{
           description: result.message || 'Erro ao registrar startup',
           duration: 5000,
         })
+        return;
       }
       toast('Startup registrada com sucesso', {
         duration: 5000,
@@ -147,7 +155,7 @@ export const StartupForm: FC<StartupFormProps> = ({
       console.log(error);
       toast('Erro ao registrar startup', {
         duration: 5000,
-        description: 'Erro ao registrar startup'
+        description: 'Erro de conexão'
       })
     }
   };
@@ -172,7 +180,7 @@ export const StartupForm: FC<StartupFormProps> = ({
       setValue('endereco', data?.logradouro || '');
       setValue('bairro', data?.bairro || '');
       setValue('cidade', data?.localidade || '');
-      setValue('uf', (data?.uf || '').slice(0, 2));
+      // setValue('uf', data?.uf || '');
       clearErrors(['endereco', 'bairro', 'cidade', 'uf']);
     } catch {
       setError('cep', {
@@ -375,6 +383,32 @@ export const StartupForm: FC<StartupFormProps> = ({
             </p>
           )}
         </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <input
+          id="termo"
+          type="checkbox"
+          {...register('termo')}
+          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+        />
+        <Label htmlFor="termo" className="text-sm">
+          {t('register.form.terms.accept')}{' '}
+          <button
+            type="button"
+            className="text-primary underline hover:no-underline"
+            onClick={() => router.push('/politicas')}
+          >
+            {t('register.form.terms.terms_of_use')}
+          </button>{' '}
+          {t('register.form.terms.and')}{' '}
+          <button
+            type="button"
+            className="text-primary underline hover:no-underline"
+            onClick={() => window.open('https://iselftoken.net/termo-de-uso-para-fundadores-de-startup-iselftoken/', '_blank')}
+          >
+            {t('register.form.terms.privacy_policy')}
+          </button>
+        </Label>
       </div>
       {errors.termo && (
         <p className="text-sm text-red-500">{String(errors.termo.message)}</p>

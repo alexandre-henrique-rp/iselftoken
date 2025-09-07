@@ -1,29 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DeleteSession, GetSessionServer } from './context/auth';
+import { publicRoutes } from './rotas/public';
+import { fundadorRoutes } from './rotas/private/fundador';
+import { investorRoutes } from './rotas/private/investidor';
+import { adminRoutes } from './rotas/private/admin';
+import { afiliadoRoutes } from './rotas/private/afiliado';
 
-const publicRoutes = [
-  '/',
-  '/login',
-  '/recuperar-senha',
-  '/redefinir-senha',
-  '/register',
-  '/termos/privacidade',
-  '/termos/uso',
-];
 
-const StartupRoutes = ['/dashboard', '/config', '/perfil', '/notification'];
+const publicRoutesList = publicRoutes.map((route) => route.path);
 
-const InvestorRoutes = ['/home', '/perfil', '/notification'];
+const StartupRoutesList = fundadorRoutes.map((route) => route.path);
 
-const AdminRoutes = ['/admin', '/perfil', '/notification'];
+const InvestorRoutesList = investorRoutes.map((route) => route.path);
 
-const AfiliadoRoutes = ['/afiliado', '/perfil', '/notification'];
+const AdminRoutesList = adminRoutes.map((route) => route.path);
+
+const AfiliadoRoutesList = afiliadoRoutes.map((route) => route.path);
 
 export async function middleware(req: NextRequest) {
   const session = await GetSessionServer();
 
   const { pathname } = req.nextUrl;
-  const isPublicRoute = publicRoutes.includes(pathname);
+  const isPublicRoute = publicRoutesList.includes(pathname);
 
   // Bypass para qualquer rota de API
   // Evita que chamadas a /api/* sejam redirecionadas pelo middleware
@@ -32,6 +30,14 @@ export async function middleware(req: NextRequest) {
   }
   if (pathname.startsWith('/auth/')) {
     return NextResponse.next();
+  }
+
+  if(!session){
+    // Para demais rotas públicas
+    if (isPublicRoute) {
+      return NextResponse.next();
+    }
+    return NextResponse.redirect(new URL('/', req.url));
   }
 
   // Verificar se a sessão expirou
@@ -46,36 +52,37 @@ export async function middleware(req: NextRequest) {
     const role = session.user.role;
     // "investidor" | "startup" | "admin" | "afiliado"
     if (role === 'fundador') {
-      const allowed = StartupRoutes.some((base) => pathname === base || pathname.startsWith(base + '/'));
+      const allowed = StartupRoutesList.some((base) => pathname === base || pathname.startsWith(base + '/'));
       if (allowed) {
         return NextResponse.next();
       }
     }
     if (role === 'investidor') {
-      const allowed = InvestorRoutes.some((base) => pathname === base || pathname.startsWith(base + '/'));
+      const allowed = InvestorRoutesList.some((base) => pathname === base || pathname.startsWith(base + '/'));
       if (allowed) {
         return NextResponse.next();
       }
     }
     if (role === 'admin') {
-      const allowed = AdminRoutes.some((base) => pathname === base || pathname.startsWith(base + '/'));
+      const allowed = AdminRoutesList.some((base) => pathname === base || pathname.startsWith(base + '/'));
       if (allowed) {
         return NextResponse.next();
       }
     }
     if (role === 'afiliado') {
-      const allowed = AfiliadoRoutes.some((base) => pathname === base || pathname.startsWith(base + '/'));
+      const allowed = AfiliadoRoutesList.some((base) => pathname === base || pathname.startsWith(base + '/'));
       if (allowed) {
         return NextResponse.next();
       }
     }
   }
-  // Para demais rotas públicas
+  
+
+  
   if (isPublicRoute) {
     return NextResponse.next();
   }
-
-  return NextResponse.redirect(new URL('/', req.url));
+ 
 }
 
 export const config = {

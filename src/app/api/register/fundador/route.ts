@@ -39,10 +39,10 @@ export async function POST(request: Request) {
       termo: termo,
     };
     const codigo = generateA2fCode();
-    console.log("🚀 ~ POST ~ data:", {
+    console.log("🚀 ~ POST ~ data:", JSON.stringify({
       ...data,
       codigo: codigo,
-    })
+    }, null, 2))
 
     const response = await fetch(
       `${process.env.NEXTAUTH_API_URL}/register/founder`,
@@ -58,15 +58,18 @@ export async function POST(request: Request) {
         }),
       },
     );
+    
+    // Captura a resposta como texto primeiro para debug
     const result = await response.json();
-    console.log("🚀 ~ POST ~ result:", result)
-    if (!response.ok) {
+    console.log("🚀 ~ POST ~ result:", result);
+    
+    if (!response.ok || result.status === 'error') {
       return NextResponse.json(
         {
           message: result.message || 'Erro ao registrar fundador',
           error: null,
         },
-        { status: response.status },
+        { status: response.ok ? 400 : response.status },
       );
     }
 
@@ -90,8 +93,7 @@ export async function POST(request: Request) {
           }),
         },
       );
-      const result2 = await request.json();
-      console.log("🚀 ~ POST ~ result2:", result2)
+      await request.json();
     }
     // codificar url com codigo com jwt
     const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
@@ -108,6 +110,7 @@ export async function POST(request: Request) {
       { status: 200 },
     );
   } catch (error) {
+    console.log("🚀 ~ POST ~ error:", error)
     return NextResponse.json(
       {
         message:

@@ -21,7 +21,13 @@ import { toast } from 'sonner';
 
 type TipoCadastro = 'investidor' | 'startup' | 'afiliado';
 
-export default function RegisterFlow() {
+interface PaisesProps {
+  error: boolean;
+  message: string;
+  dataPaises: LocationTypes.Country[];
+}
+
+export default function RegisterFlow({dataPaises, error, message}: PaisesProps) {
   // Modal 1 (Localização) e Modal 2 (Perfil)
   const [openModalLocal, setOpenModalLocal] = useState(true);
   const [openModalPerfil, setOpenModalPerfil] = useState(false);
@@ -36,48 +42,31 @@ export default function RegisterFlow() {
   const [DDI, setDDI] = useState<string>('');
   const [uf, setUf] = useState<string>('');
   const [cidade, setCidade] = useState<string>('');
-  const [aceitouTermos, setAceitouTermos] = useState<boolean>(false);
   const { t } = useTranslation('auth');
 
   // Listas carregadas da API interna
-  const [paisesLista, setPaisesLista] = useState<LocationTypes.Country[]>([]);
   const [estadosLista, setEstadosLista] = useState<LocationTypes.StateItem[]>([]);
   const [cidadesLista, setCidadesLista] = useState<LocationTypes.CityItem[]>([]);
 
   // Loading/erro
-  const [loadingPaises, setLoadingPaises] = useState(false);
   const [loadingEstados, setLoadingEstados] = useState(false);
   const [loadingCidades, setLoadingCidades] = useState(false);
 
   // Carrega países ao abrir (apenas uma vez)
   useEffect(() => {
-    (async () => {
-      try {
-        setLoadingPaises(true);
-        const res = await fetch('/api/location/countries');
-        const json = await res.json();
-        console.log('🚀 ~ RegisterFlow ~ json:', json.data.list);
-        if (!res.ok || json?.error)
-          throw new Error(json?.message || 'Falha ao carregar países');
-        setPaisesLista(json.data.list as LocationTypes.Country[]);
-      } catch (e: unknown) {
-        const message =
-          e instanceof Error ? e.message : 'Erro ao carregar países';
-        toast('erro', { description: message });
-      } finally {
-        setLoadingPaises(false);
-      }
-    })();
-  }, []); // Array vazio - executa apenas uma vez
+   if (error) {
+    toast('error', { description: message });
+   }
+  }, [error, message]); // Array vazio - executa apenas uma vez
 
   // Atualiza DDI quando país ou lista de países mudar
   useEffect(() => {
-    if (pais && paisesLista.length > 0) {
-      const paisSelecionado = paisesLista.find((p) => p.iso2 === pais);
+    if (pais && dataPaises.length > 0) {
+      const paisSelecionado = dataPaises.find((p) => p.iso3 === pais);
       const codigoDDI = paisSelecionado?.phone_code || '';
       setDDI(codigoDDI);
     }
-  }, [pais, paisesLista]);
+  }, [dataPaises, pais]);
 
   // Carrega estados ao escolher país
   useEffect(() => {
@@ -94,9 +83,10 @@ export default function RegisterFlow() {
           `/api/location/states?country=${encodeURIComponent(pais)}`,
         );
         const json = await res.json();
+        console.log("🚀 ~ RegisterFlow ~ json:", json.data)
         if (!res.ok || json?.error)
           throw new Error(json?.message || 'Falha ao carregar estados');
-        setEstadosLista(json.data.list as LocationTypes.StateItem[]);
+        setEstadosLista(json.data as LocationTypes.StateItem[]);
       } catch (e: unknown) {
         const message =
           e instanceof Error ? e.message : 'Erro ao carregar estados';
@@ -123,7 +113,7 @@ export default function RegisterFlow() {
         const json = await res.json();
         if (!res.ok || json?.error)
           throw new Error(json?.message || 'Falha ao carregar cidades');
-        setCidadesLista(json.data.list as LocationTypes.CityItem[]);
+        setCidadesLista(json.data as LocationTypes.CityItem[]);
       } catch (e: unknown) {
         const message =
           e instanceof Error ? e.message : 'Erro ao carregar cidades';
@@ -145,7 +135,10 @@ export default function RegisterFlow() {
 
   function avancarParaPerfil() {
     if (!pais || !uf || !cidade) return; // validação simples
-    if (!aceitouTermos) return;
+    const UfState = estadosLista.find((state) => state.name === uf);
+    console.log("🚀 ~ avancarParaPerfil ~ UfState:", UfState)
+    if (!UfState) return;
+    setUf(UfState.iso2);
     setOpenModalLocal(false);
     setOpenModalPerfil(true);
   }
@@ -160,7 +153,6 @@ export default function RegisterFlow() {
   function escolher(tipoEscolhido: TipoCadastro) {
     setTipo(tipoEscolhido);
     setOpenModalPerfil(false);
-    // TODO: Pré-preencher os formulários com { pais, uf, cidade }
   }
 
   return (
@@ -196,7 +188,6 @@ export default function RegisterFlow() {
                     cidadeInicial={cidade}
                     ufInicial={uf}
                     paisInicial={pais}
-                    termo={aceitouTermos}
                     ddi={DDI}
                   />
                 )}
@@ -206,7 +197,6 @@ export default function RegisterFlow() {
                     cidadeInicial={cidade}
                     ufInicial={uf}
                     paisInicial={pais}
-                    termo={aceitouTermos}
                     ddi={DDI}
                   />
                 )}
@@ -216,19 +206,12 @@ export default function RegisterFlow() {
                     cidadeInicial={cidade}
                     ufInicial={uf}
                     paisInicial={pais}
-                    termo={aceitouTermos}
                     ddi={DDI}
                   />
                 )}
 
                 {tipo && (
                   <>
-                    {/* Info da localização selecionada (somente visual por enquanto) */}
-                    {/* <div className="mb-2 text-xs text-muted-foreground">
-                      <span>
-                        Localização: {cidade || '-'} / {uf || '-'} - {pais || '-'}
-                      </span>
-                    </div> */}
                     <div className="pt-4 text-center text-sm">
                       <Link
                         href="/login"
@@ -272,17 +255,16 @@ export default function RegisterFlow() {
                     setUf('');
                     setCidade('');
                   }}
-                  disabled={loadingPaises}
                 >
                   <option value="" disabled>
                     Selecione
                   </option>
-                  {paisesLista.map((p) => {
-                    const flag = p.emoji;
+                  {dataPaises.map((p) => {
                     return (
-                      <option key={p.id} value={p.iso2}>
-                        {flag ? `${flag} ` : ''}
-                        {p.name}
+                      <option key={p.id} value={p.iso3}>
+                        {p.emoji}
+                        {' '}
+                        {p.native || p.name}
                       </option>
                     );
                   })}
@@ -306,7 +288,7 @@ export default function RegisterFlow() {
                     Selecione
                   </option>
                   {estadosLista.map((e) => (
-                    <option key={e.id} value={e.state_code}>
+                    <option key={e.id} value={e.name}>
                       {e.name}
                     </option>
                   ))}
@@ -334,33 +316,6 @@ export default function RegisterFlow() {
                 </select>
               </div>
 
-              <div className="flex items-center gap-2">
-                <input
-                  id="termos"
-                  type="checkbox"
-                  checked={aceitouTermos}
-                  onChange={(e) => setAceitouTermos(e.target.checked)}
-                />
-                <label htmlFor="termos" className="text-sm">
-                  Eu li e aceito os{' '}
-                  <button
-                    type="button"
-                    className="text-primary underline"
-                    onClick={() => setOpenModalTermos(true)}
-                  >
-                    Termos de Uso
-                  </button>{' '}
-                  e a{' '}
-                  <button
-                    type="button"
-                    className="text-primary underline"
-                    onClick={() => setOpenModalPolitica(true)}
-                  >
-                    Política de Privacidade
-                  </button>
-                </label>
-              </div>
-
               <div className="mt-2 flex items-center justify-between gap-2">
                 <Button variant="ghost" onClick={cancelarRegistro}>
                   Cancelar
@@ -369,7 +324,7 @@ export default function RegisterFlow() {
                   {/* Voltar não faz nada aqui pois é o primeiro modal */}
                   <Button
                     onClick={avancarParaPerfil}
-                    disabled={!pais || !uf || !cidade || !aceitouTermos}
+                    disabled={!pais || !uf || !cidade}
                   >
                     Próximo
                   </Button>

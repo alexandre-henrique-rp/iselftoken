@@ -16,30 +16,8 @@ export async function GET(request: Request) {
       );
     }
 
-    // Validação das variáveis de ambiente
-    const rapidApiKey = process.env.RAPIDAPI_KEY;
-    const rapidApiHost = process.env.COUNTRIES_API_HOST;
-    const baseUrl = process.env.COUNTRIES_API_BASE;
-
-    if (!rapidApiKey || !rapidApiHost || !baseUrl) {
-      return NextResponse.json(
-        {
-          error: true,
-          message:
-            'Configuração de API incompleta. Verifique as variáveis de ambiente.',
-          data: null,
-        },
-        { status: 500 },
-      );
-    }
-
-    const url = `${baseUrl}/cities?country=${encodeURIComponent(country)}&state=${encodeURIComponent(state)}`;
-    const response = await fetch(url, {
-      headers: {
-        'x-rapidapi-key': rapidApiKey,
-        'x-rapidapi-host': rapidApiHost,
-      },
-    });
+    const url = `${process.env.NEXTAUTH_API_URL}/countries/cities/${encodeURIComponent(country)}/${encodeURIComponent(state)}`;
+    const response = await fetch(url);
     const cities = await response.json();
     if (!response.ok) {
       return NextResponse.json(
@@ -52,7 +30,7 @@ export async function GET(request: Request) {
       );
     }
 
-    return NextResponse.json({ error: false, message: 'ok', data: cities });
+    return NextResponse.json({ error: false, message: 'ok', data: cities.data });
   } catch (error: unknown) {
     const errorMessage =
       error instanceof Error ? error.message : 'Erro ao listar cidades';

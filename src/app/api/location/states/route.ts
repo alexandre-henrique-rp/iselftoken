@@ -10,30 +10,9 @@ export async function GET(request: Request) {
         { status: 400 },
       );
     }
-    // Validação das variáveis de ambiente
-    const rapidApiKey = process.env.RAPIDAPI_KEY;
-    const rapidApiHost = process.env.COUNTRIES_API_HOST;
-    const baseUrl = process.env.COUNTRIES_API_BASE;
 
-    if (!rapidApiKey || !rapidApiHost || !baseUrl) {
-      return NextResponse.json(
-        {
-          error: true,
-          message:
-            'Configuração de API incompleta. Verifique as variáveis de ambiente.',
-          data: null,
-        },
-        { status: 500 },
-      );
-    }
-
-    const url = `${baseUrl}/states?country=${encodeURIComponent(country)}`;
-    const response = await fetch(url, {
-      headers: {
-        'x-rapidapi-key': rapidApiKey,
-        'x-rapidapi-host': rapidApiHost,
-      },
-    });
+    const url = `${process.env.NEXTAUTH_API_URL}/countries/states/${encodeURIComponent(country)}`;
+    const response = await fetch(url);
     const states = await response.json();
     if (!response.ok) {
       return NextResponse.json(
@@ -45,7 +24,7 @@ export async function GET(request: Request) {
         { status: response.status },
       );
     }
-    return NextResponse.json({ error: false, message: 'ok', data: states });
+    return NextResponse.json({ error: false, message: 'ok', data: states.data });
   } catch (error: unknown) {
     const errorMessage =
       error instanceof Error ? error.message : 'Erro ao listar estados';

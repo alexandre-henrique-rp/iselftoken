@@ -9,7 +9,7 @@ import { DeleteSession } from '@/context/auth';
 export async function POST() {
   try {
     // Remove a sessão e cookies relacionados
-    DeleteSession();
+    await DeleteSession();
 
     return NextResponse.json(
       {

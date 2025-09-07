@@ -34,7 +34,6 @@ export type AffiliateFormProps = {
   cidadeInicial?: string;
   ufInicial?: string;
   paisInicial?: string;
-  termo?: boolean;
   ddi?: string;
 };
 
@@ -42,7 +41,6 @@ export const AffiliateForm: FC<AffiliateFormProps> = ({
   cidadeInicial,
   ufInicial,
   paisInicial,
-  termo,
   ddi,
 }) => {
   const router = useRouter();
@@ -95,7 +93,7 @@ export const AffiliateForm: FC<AffiliateFormProps> = ({
       cidade: cidadeInicial || '',
       uf: ufInicial || '',
       pais: paisInicial || '',
-      termo: termo || false,
+      termo: false,
     },
   });
 
@@ -106,11 +104,9 @@ export const AffiliateForm: FC<AffiliateFormProps> = ({
   useEffect(() => {
     if (cidadeInicial)
       setValue('cidade', cidadeInicial, { shouldValidate: true });
-    if (termo)
-      setValue('termo', termo, { shouldValidate: true });
     if (ufInicial) setValue('uf', ufInicial, { shouldValidate: true });
     if (paisInicial) setValue('pais', paisInicial, { shouldValidate: true });
-  }, [cidadeInicial, ufInicial, paisInicial, setValue, termo]);
+  }, [cidadeInicial, ufInicial, paisInicial, setValue]);
 
   const onSubmit: SubmitHandler<AffiliateInputs> = async (data) => {
     console.log('Registro de afiliado:', data);
@@ -130,13 +126,25 @@ export const AffiliateForm: FC<AffiliateFormProps> = ({
           redirectPath: '/login'
         }),
       });
-      const result = await response.json();
+      
+      let result;
+      try {
+        result = await response.json();
+      } catch {
+        toast('Erro ao registrar afiliado', {
+          duration: 5000,
+          description: 'Erro na comunicação com o servidor'
+        });
+        return;
+      }
+      
       console.log(result);
       if (!response.ok) {
         toast('Erro ao registrar afiliado',{ 
           description: result.message || 'Erro ao registrar afiliado',
           duration: 5000,
         })
+        return;
       }
       toast('Afiliado registrado com sucesso', {
         duration: 5000,
@@ -146,7 +154,7 @@ export const AffiliateForm: FC<AffiliateFormProps> = ({
       console.log(error);
       toast('Erro ao registrar afiliado', {
         duration: 5000,
-        description: 'Erro ao registrar afiliado'
+        description: 'Erro de conexão'
       })
     }
   };
@@ -372,6 +380,32 @@ export const AffiliateForm: FC<AffiliateFormProps> = ({
             </p>
           )}
         </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <input
+          id="termo"
+          type="checkbox"
+          {...register('termo')}
+          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+        />
+        <Label htmlFor="termo" className="text-sm">
+          {t('register.form.terms.accept')}{' '}
+          <button
+            type="button"
+            className="text-primary underline hover:no-underline"
+            onClick={() => router.push('/politicas')}
+          >
+            {t('register.form.terms.terms_of_use')}
+          </button>{' '}
+          {t('register.form.terms.and')}{' '}
+          <button
+            type="button"
+            className="text-primary underline hover:no-underline"
+            onClick={() => window.open('https://iselftoken.net/termo-de-uso-para-consultor-afiliado-iselftoken/', '_blank')}
+          >
+            {t('register.form.terms.privacy_policy')}
+          </button>
+        </Label>
       </div>
       {errors.termo && (
         <p className="text-sm text-red-500">{String(errors.termo.message)}</p>

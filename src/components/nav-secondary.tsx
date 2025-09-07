@@ -14,8 +14,12 @@ export function NavSecondary({
   ...props
 }: {
   items: {
-    title: string
-    url: string
+    id: number;
+    nome: string;
+    path: string;
+    url: string;
+    isActive: boolean;
+    menu: string;
     icon: LucideIcon
   }[]
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
@@ -24,11 +28,11 @@ export function NavSecondary({
       <SidebarGroupContent>
         <SidebarMenu>
           {items.map((item) => (
-            <SidebarMenuItem key={item.title}>
+            <SidebarMenuItem key={item.nome}>
               <SidebarMenuButton asChild size="sm">
                 <a href={item.url}>
                   <item.icon />
-                  <span>{item.title}</span>
+                  <span>{item.nome}</span>
                 </a>
               </SidebarMenuButton>
             </SidebarMenuItem>

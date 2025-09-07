@@ -43,13 +43,20 @@ namespace LocationTypes {
   }
 
   interface StateItem {
-    id: number;
-    name: string;
-    country_id: number;
     country_code: string;
-    state_code: string;
+    country_id: number;
+    country_name: string;
+    fips_code: string;
+    id: number;
+    iso2: string;
+    iso3166_2: string;
     latitude: string;
+    level: string;
     longitude: string;
+    name: string;
+    parent_id: string;
+    timezone: string;
+    type: string;
   }
 
   interface CityItem {
