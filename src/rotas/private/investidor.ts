@@ -1,4 +1,4 @@
-import { Bell, Home, TrendingUp, User } from "lucide-react";
+import { Bell, ChartNoAxesCombined, Home, NotebookPen, User } from "lucide-react";
 
 export const investorRoutes = [
   {
@@ -44,7 +44,7 @@ export const investorRoutes = [
     "url": "/painel-financeiro",
     "isActive": true,
     "menu": "geral",
-    "icon": TrendingUp,
+    "icon": ChartNoAxesCombined,
   },
   {
     "id": 6,
@@ -52,7 +52,7 @@ export const investorRoutes = [
     "path": "/treinamento",
     "url": "/treinamento",
     "isActive": true,
-    "menu": "geral",
-    "icon": null,
+    "menu": "interno",
+    "icon": NotebookPen,
   }
 ]

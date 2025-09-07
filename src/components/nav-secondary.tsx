@@ -1,5 +1,4 @@
 import * as React from "react"
-import { type LucideIcon } from "lucide-react"
 
 import {
   SidebarGroup,
@@ -8,20 +7,13 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { Rotas } from "@/types/rotasTypes"
 
 export function NavSecondary({
   items,
   ...props
 }: {
-  items: {
-    id: number;
-    nome: string;
-    path: string;
-    url: string;
-    isActive: boolean;
-    menu: string;
-    icon: LucideIcon | null;
-  }[]
+  items: Rotas.Types[]
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
   return (
     <SidebarGroup {...props}>

@@ -1,4 +1,4 @@
-import { Briefcase, HomeIcon } from 'lucide-react';
+import { Briefcase, Home, User } from "lucide-react";
 
 export const adminRoutes = [
   {
@@ -8,7 +8,7 @@ export const adminRoutes = [
     url: '/dashboard-admin',
     isActive: true,
     menu: 'geral',
-    icon: HomeIcon,
+    icon: Home,
   },
   {
     id: 2,
@@ -44,7 +44,7 @@ export const adminRoutes = [
     url: '/users',
     isActive: true,
     menu: 'geral',
-    icon: null,
+    icon: User,
   },
   {
     id: 6,

@@ -2,26 +2,8 @@ import RegisterFlow from '@/components/register/RegisterFlow';
 
 const paisesLista = async () => {
   try {
-    // Durante o build, usar dados mock em vez de fetch
-    if (process.env.NODE_ENV === 'production' && !process.env.NEXTAUTH_API_URL) {
-      return {
-        error: false,
-        message: 'Dados mock para build',
-        data: [
-          {
-            id: 1,
-            name: 'Brasil',
-            native: 'Brasil',
-            iso3: 'BRA',
-            phone_code: '+55',
-            emoji: '🇧🇷'
-          }
-        ]
-      };
-    }
-
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
-    const response = await fetch(`${baseUrl}/api/location/countries`);
+    const baseUrl = `${process.env.NEXTAUTH_API_URL}/countries`;
+    const response = await fetch(`${baseUrl}`);
     
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);

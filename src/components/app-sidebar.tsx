@@ -15,10 +15,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { investorRoutes } from "@/rotas/private/investidor"
-import { fundadorRoutes } from "@/rotas/private/fundador"
+import { NavProjects } from "./nav-projects"
 import { adminRoutes } from "@/rotas/private/admin"
+import { fundadorRoutes } from "@/rotas/private/fundador"
 import { afiliadoRoutes } from "@/rotas/private/afiliado"
+import { investorRoutes } from "@/rotas/private/investidor"
+
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   role: string;
@@ -26,12 +28,8 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 }
 
 export function AppSidebar({ role, session, ...props }: AppSidebarProps) {
-  // Filtrar itens de navegação baseado no role
-  // const filteredNavMain = data.navMain.filter(item => 
-  //   item.role === "all" || item.role === role
-  // );
 
-  const MenuFilter = role === "investidor" ? investorRoutes : role === "fundador" ? fundadorRoutes : role === "admin" ? adminRoutes : role === "afiliado" ? afiliadoRoutes : investorRoutes;
+  const MenuFilter = role === "fundador" ? fundadorRoutes : role === "admin" ? adminRoutes : role === "afiliado" ? afiliadoRoutes : investorRoutes;
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -51,7 +49,7 @@ export function AppSidebar({ role, session, ...props }: AppSidebarProps) {
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium text-[#303030] dark:text-[#FFFFFF]">iSelfToken</span>
-                  <span className="truncate text-xs text-[#757575] dark:text-[#303030]">
+                  <span className="truncate text-xs text-[#d500f9]">
                     {role === "investidor" ? "Investidor" : role === "fundador" ? "Fundador" : "Afiliado"}
                   </span>
                 </div>
@@ -62,7 +60,7 @@ export function AppSidebar({ role, session, ...props }: AppSidebarProps) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={MenuFilter.filter(item => item.menu === "geral")} />
-        {/* <NavProjects projects={data.projects} /> */}
+        <NavProjects internal={MenuFilter.filter(item => item.menu === "interno")} />
         <NavSecondary items={MenuFilter.filter(item => item.menu === "config")} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>

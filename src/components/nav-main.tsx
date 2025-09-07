@@ -1,7 +1,5 @@
 'use client';
 
-import { type LucideIcon } from 'lucide-react';
-
 import { Collapsible } from '@/components/ui/collapsible';
 import {
   SidebarGroup,
@@ -10,30 +8,23 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { Rotas } from '@/types/rotasTypes';
 
 export function NavMain({
   items,
 }: {
-  items: {
-    id: number;
-    nome: string;
-    path: string;
-    menu: string;
-    url: string;
-    icon: LucideIcon | null;
-    isActive?: boolean;
-  }[];
+  items: Rotas.Types[];
 }) {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      <SidebarGroupLabel>Menu</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <Collapsible key={item.nome} asChild defaultOpen={item.isActive}>
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip={item.nome}>
                 <a href={item.url}>
-                  {item.icon && <item.icon />}
+                {item.icon && <item.icon />}
                   <span>{item.nome}</span>
                 </a>
               </SidebarMenuButton>

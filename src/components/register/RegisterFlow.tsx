@@ -13,13 +13,9 @@ import {
 } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import InvestorForm from '@/components/register/InvestorForm';
-import { StartupForm } from '@/components/register/StartupForm';
-import AffiliateForm from '@/components/register/AffiliateForm';
 import { useTranslation } from 'react-i18next';
 import '@/i18n';
 import { toast } from 'sonner';
-
-type TipoCadastro = 'investidor' | 'startup' | 'afiliado';
 
 interface PaisesProps {
   error: boolean;
@@ -27,15 +23,16 @@ interface PaisesProps {
   dataPaises: LocationTypes.Country[];
 }
 
-export default function RegisterFlow({dataPaises, error, message}: PaisesProps) {
+export default function RegisterFlow({
+  dataPaises,
+  error,
+  message,
+}: PaisesProps) {
   // Modal 1 (Localização) e Modal 2 (Perfil)
   const [openModalLocal, setOpenModalLocal] = useState(true);
-  const [openModalPerfil, setOpenModalPerfil] = useState(false);
-  const [openModalTermos, setOpenModalTermos] = useState(false);
-  const [openModalPolitica, setOpenModalPolitica] = useState(false);
 
   // Seleção do formulário final
-  const [tipo, setTipo] = useState<TipoCadastro | null>(null);
+  const [Verifique, setVerifique] = useState<boolean>(false);
 
   // Estados do Modal 1
   const [pais, setPais] = useState<string>('');
@@ -45,8 +42,12 @@ export default function RegisterFlow({dataPaises, error, message}: PaisesProps) 
   const { t } = useTranslation('auth');
 
   // Listas carregadas da API interna
-  const [estadosLista, setEstadosLista] = useState<LocationTypes.StateItem[]>([]);
-  const [cidadesLista, setCidadesLista] = useState<LocationTypes.CityItem[]>([]);
+  const [estadosLista, setEstadosLista] = useState<LocationTypes.StateItem[]>(
+    [],
+  );
+  const [cidadesLista, setCidadesLista] = useState<LocationTypes.CityItem[]>(
+    [],
+  );
 
   // Loading/erro
   const [loadingEstados, setLoadingEstados] = useState(false);
@@ -54,9 +55,9 @@ export default function RegisterFlow({dataPaises, error, message}: PaisesProps) 
 
   // Carrega países ao abrir (apenas uma vez)
   useEffect(() => {
-   if (error) {
-    toast('error', { description: message });
-   }
+    if (error) {
+      toast('error', { description: message });
+    }
   }, [error, message]); // Array vazio - executa apenas uma vez
 
   // Atualiza DDI quando país ou lista de países mudar
@@ -83,7 +84,6 @@ export default function RegisterFlow({dataPaises, error, message}: PaisesProps) 
           `/api/location/states?country=${encodeURIComponent(pais)}`,
         );
         const json = await res.json();
-        console.log("🚀 ~ RegisterFlow ~ json:", json.data)
         if (!res.ok || json?.error)
           throw new Error(json?.message || 'Falha ao carregar estados');
         setEstadosLista(json.data as LocationTypes.StateItem[]);
@@ -105,54 +105,45 @@ export default function RegisterFlow({dataPaises, error, message}: PaisesProps) 
         setCidade('');
         return;
       }
-      try {
-        setLoadingCidades(true);
-        const res = await fetch(
-          `/api/location/cities?country=${encodeURIComponent(pais)}&state=${encodeURIComponent(uf)}`,
-        );
-        const json = await res.json();
-        if (!res.ok || json?.error)
-          throw new Error(json?.message || 'Falha ao carregar cidades');
-        setCidadesLista(json.data as LocationTypes.CityItem[]);
-      } catch (e: unknown) {
-        const message =
-          e instanceof Error ? e.message : 'Erro ao carregar cidades';
-        toast('erro', { description: message });
-      } finally {
-        setLoadingCidades(false);
+      if (!Verifique) {
+        try {
+          setLoadingCidades(true);
+          const res = await fetch(
+            `/api/location/cities?country=${encodeURIComponent(pais)}&state=${encodeURIComponent(uf)}`,
+          );
+          const json = await res.json();
+          if (!res.ok || json?.error)
+            throw new Error(json?.message || 'Falha ao carregar cidades');
+          setCidadesLista(json.data as LocationTypes.CityItem[]);
+        } catch (e: unknown) {
+          const message =
+            e instanceof Error ? e.message : 'Erro ao carregar cidades';
+          toast('erro', { description: message });
+        } finally {
+          setLoadingCidades(false);
+        }
       }
     })();
-  }, [pais, uf]);
+  }, [pais, uf, Verifique]);
 
   // Handlers para impedir fechamento dos modais obrigatórios por overlay/Escape
   const handleBlockCloseLocal = (nextOpen: boolean) => {
     if (nextOpen) setOpenModalLocal(true);
   };
 
-  const handleBlockClosePerfil = (nextOpen: boolean) => {
-    if (nextOpen) setOpenModalPerfil(true);
-  };
-
   function avancarParaPerfil() {
     if (!pais || !uf || !cidade) return; // validação simples
     const UfState = estadosLista.find((state) => state.name === uf);
-    console.log("🚀 ~ avancarParaPerfil ~ UfState:", UfState)
     if (!UfState) return;
     setUf(UfState.iso2);
     setOpenModalLocal(false);
-    setOpenModalPerfil(true);
+    setVerifique(true);
   }
 
   function cancelarRegistro() {
     // Fecha modais e volta para home
     setOpenModalLocal(false);
-    setOpenModalPerfil(false);
     window.location.href = '/';
-  }
-
-  function escolher(tipoEscolhido: TipoCadastro) {
-    setTipo(tipoEscolhido);
-    setOpenModalPerfil(false);
   }
 
   return (
@@ -177,13 +168,7 @@ export default function RegisterFlow({dataPaises, error, message}: PaisesProps) 
                 <CardTitle>{t('register.title')}</CardTitle>
               </CardHeader>
               <CardContent>
-                {!tipo && (
-                  <div className="text-muted-foreground text-sm">
-                    Escolha o tipo de cadastro no modal para começar.
-                  </div>
-                )}
-
-                {tipo === 'investidor' && (
+                {Verifique && (
                   <InvestorForm
                     cidadeInicial={cidade}
                     ufInicial={uf}
@@ -192,36 +177,14 @@ export default function RegisterFlow({dataPaises, error, message}: PaisesProps) 
                   />
                 )}
 
-                {tipo === 'startup' && (
-                  <StartupForm
-                    cidadeInicial={cidade}
-                    ufInicial={uf}
-                    paisInicial={pais}
-                    ddi={DDI}
-                  />
-                )}
-
-                {tipo === 'afiliado' && (
-                  <AffiliateForm
-                    cidadeInicial={cidade}
-                    ufInicial={uf}
-                    paisInicial={pais}
-                    ddi={DDI}
-                  />
-                )}
-
-                {tipo && (
-                  <>
-                    <div className="pt-4 text-center text-sm">
-                      <Link
-                        href="/login"
-                        className="text-primary underline-offset-4 hover:underline"
-                      >
-                        {t('register.login.button')}
-                      </Link>
-                    </div>
-                  </>
-                )}
+                <div className="pt-4 text-center text-sm">
+                  <Link
+                    href="/login"
+                    className="text-primary underline-offset-4 hover:underline"
+                  >
+                    {t('register.login.button')}
+                  </Link>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -259,15 +222,14 @@ export default function RegisterFlow({dataPaises, error, message}: PaisesProps) 
                   <option value="" disabled>
                     Selecione
                   </option>
-                  {Array.isArray(dataPaises) && dataPaises.map((p) => {
-                    return (
-                      <option key={p.id} value={p.iso3}>
-                        {p.emoji}
-                        {' '}
-                        {p.native || p.name}
-                      </option>
-                    );
-                  })}
+                  {Array.isArray(dataPaises) &&
+                    dataPaises.map((p) => {
+                      return (
+                        <option key={p.id} value={p.iso3}>
+                          {p.emoji} {p.native || p.name}
+                        </option>
+                      );
+                    })}
                 </select>
               </div>
               <div className="grid gap-1">
@@ -330,88 +292,6 @@ export default function RegisterFlow({dataPaises, error, message}: PaisesProps) 
                   </Button>
                 </div>
               </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* Modal 2: Seleção de Perfil */}
-        <Dialog open={openModalPerfil} onOpenChange={handleBlockClosePerfil}>
-          <DialogContent
-            className="sm:max-w-md"
-            onEscapeKeyDown={(e) => e.preventDefault()}
-            onPointerDownOutside={(e) => e.preventDefault()}
-            showCloseButton={false}
-          >
-            <DialogHeader>
-              <DialogTitle>Como você quer se registrar?</DialogTitle>
-              <DialogDescription>
-                Escolha uma opção para mostrar o formulário adequado.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Button variant="outline" onClick={() => escolher('investidor')}>
-                Sou Investidor
-              </Button>
-              <Button onClick={() => escolher('startup')}>Sou Startup</Button>
-              <Button onClick={() => escolher('afiliado')}>Sou Afiliado</Button>
-            </div>
-            <div className="mt-4 flex items-center justify-between gap-2">
-              <Button variant="ghost" onClick={cancelarRegistro}>
-                Cancelar
-              </Button>
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  setOpenModalPerfil(false);
-                  setOpenModalLocal(true);
-                }}
-              >
-                Voltar
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* Modal Termos de Uso */}
-        <Dialog open={openModalTermos} onOpenChange={setOpenModalTermos}>
-          <DialogContent className="sm:max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Termos de Uso</DialogTitle>
-            </DialogHeader>
-            <div className="max-h-[60vh] space-y-2 overflow-y-auto text-sm">
-              <p>
-                Este é um texto de exemplo para os Termos de Uso. Substituir por
-                conteúdo real ou i18n.
-              </p>
-              <p>Ao continuar, você concorda com as condições descritas.</p>
-            </div>
-            <div className="mt-2 flex justify-end">
-              <Button onClick={() => setOpenModalTermos(false)}>
-                Li os termos
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* Modal Política de Privacidade */}
-        <Dialog open={openModalPolitica} onOpenChange={setOpenModalPolitica}>
-          <DialogContent className="sm:max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Política de Privacidade</DialogTitle>
-            </DialogHeader>
-            <div className="max-h-[60vh] space-y-2 overflow-y-auto text-sm">
-              <p>
-                Este é um texto de exemplo para a Política de Privacidade.
-                Substituir por conteúdo real ou i18n.
-              </p>
-              <p>
-                Detalhes sobre coleta, armazenamento e uso de dados pessoais.
-              </p>
-            </div>
-            <div className="mt-2 flex justify-end">
-              <Button onClick={() => setOpenModalPolitica(false)}>
-                Li a política
-              </Button>
             </div>
           </DialogContent>
         </Dialog>

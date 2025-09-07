@@ -1,4 +1,4 @@
-"use client"
+'use client';
 
 import { usePathname } from 'next/navigation';
 import {
@@ -9,51 +9,49 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import { adminRoutes } from '@/rotas/private/admin';
+import { fundadorRoutes } from '@/rotas/private/fundador';
+import { afiliadoRoutes } from '@/rotas/private/afiliado';
+import { investorRoutes } from '@/rotas/private/investidor';
 
-// Mapeamento de rotas para títulos em português
-const routeMap: Record<string, string> = {
-  '/dashboard': 'Dashboard',
-  '/notification': 'Notificações',
-  '/investments': 'Investimentos',
-  '/investments/portfolio': 'Portfólio',
-  '/investments/opportunities': 'Oportunidades',
-  '/investments/history': 'Histórico',
-  '/startups': 'Startups',
-  '/startups/profile': 'Minha Startup',
-  '/startups/fundraising': 'Captação',
-  '/startups/reports': 'Relatórios',
-  '/analytics': 'Analytics',
-  '/analytics/performance': 'Performance',
-  '/analytics/reports': 'Relatórios',
-  '/documents': 'Documentos',
-  '/database': 'Base de Dados',
-  '/team': 'Equipe',
-  '/help': 'Ajuda',
-  '/settings': 'Configurações',
-};
+interface dynamicBreadcrumbProps {
+  role: string;
+}
 
 /**
  * Componente de breadcrumb dinâmico que identifica automaticamente a página atual
  * baseado na rota e exibe o caminho de navegação apropriado
  */
-export function DynamicBreadcrumb() {
+export function DynamicBreadcrumb({ role }: dynamicBreadcrumbProps) {
   const pathname = usePathname();
-  
+
+  const MenuFilter =
+    role === 'fundador'
+      ? fundadorRoutes
+      : role === 'admin'
+        ? adminRoutes
+        : role === 'afiliado'
+          ? afiliadoRoutes
+          : investorRoutes;
+
+  const routes = MenuFilter;
+
   // Função para obter o título da página baseado na rota
   const getPageTitle = (path: string): string => {
-    return routeMap[path] || 'Página';
+    const route = routes.find((route) => route.path === path);
+    return route?.nome || 'Página';
   };
 
   // Função para gerar breadcrumbs baseado no caminho
   const generateBreadcrumbs = (path: string) => {
     const segments = path.split('/').filter(Boolean);
     const breadcrumbs = [];
-    
+
     // Sempre incluir o home
     breadcrumbs.push({
       title: 'iSelfToken',
       href: '/dashboard',
-      isLast: false
+      isLast: false,
     });
 
     // Construir caminho incrementalmente
@@ -61,11 +59,11 @@ export function DynamicBreadcrumb() {
     segments.forEach((segment, index) => {
       currentPath += `/${segment}`;
       const isLast = index === segments.length - 1;
-      
+
       breadcrumbs.push({
         title: getPageTitle(currentPath),
         href: currentPath,
-        isLast
+        isLast,
       });
     });
 
@@ -79,17 +77,17 @@ export function DynamicBreadcrumb() {
       <BreadcrumbList>
         {breadcrumbs.map((crumb, index) => (
           <div key={crumb.href} className="flex items-center">
-            <BreadcrumbItem className={index === 0 ? "hidden md:block" : ""}>
+            <BreadcrumbItem className={index === 0 ? 'hidden md:block' : ''}>
               {crumb.isLast ? (
                 <BreadcrumbPage>{crumb.title}</BreadcrumbPage>
               ) : (
-                <BreadcrumbLink href={crumb.href}>
-                  {crumb.title}
-                </BreadcrumbLink>
+                <BreadcrumbLink href={crumb.href}>{crumb.title}</BreadcrumbLink>
               )}
             </BreadcrumbItem>
             {!crumb.isLast && (
-              <BreadcrumbSeparator className={index === 0 ? "hidden md:block" : ""} />
+              <BreadcrumbSeparator
+                className={index === 0 ? 'hidden md:block' : ''}
+              />
             )}
           </div>
         ))}

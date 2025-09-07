@@ -162,8 +162,6 @@ export const InvestorForm: FC<InvestorFormProps> = ({
         description: 'Erro de conexão'
       })
     }
-    // TODO: Chamar API de registro de investidor
-    // router.push('/login');
   };
 
   // Busca ViaCEP sob demanda (onBlur ou ao completar 8 dígitos numéricos)
@@ -401,7 +399,7 @@ export const InvestorForm: FC<InvestorFormProps> = ({
           {t('register.form.terms.accept')}{' '}
           <button
             type="button"
-            className="text-primary underline hover:no-underline"
+            className="text-[#d500f9] underline hover:no-underline"
             onClick={() => router.push('/politicas')}
           >
             {t('register.form.terms.terms_of_use')}
@@ -409,7 +407,7 @@ export const InvestorForm: FC<InvestorFormProps> = ({
           {t('register.form.terms.and')}{' '}
           <button
             type="button"
-            className="text-primary underline hover:no-underline"
+            className="text-[#d500f9] underline hover:no-underline"
             // abrir em nova aba
             onClick={() => window.open('https://iselftoken.net/termo-de-uso-para-investidores-iselftoken/', '_blank')}
           >

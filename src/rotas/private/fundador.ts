@@ -1,4 +1,4 @@
-import { Bell, HomeIcon, TrendingUp, User } from 'lucide-react';
+import { Bell, Home, TrendingUp, User } from "lucide-react";
 
 export const fundadorRoutes = [
   {
@@ -8,7 +8,7 @@ export const fundadorRoutes = [
     url: '/home',
     isActive: true,
     menu: 'geral',
-    icon: HomeIcon,
+    icon: Home,
   },
   {
     id: 2,

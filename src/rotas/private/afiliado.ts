@@ -1,4 +1,4 @@
-import { Bell, Home } from 'lucide-react';
+import { Bell, Home, User } from "lucide-react";
 
 export const afiliadoRoutes = [
   {
@@ -35,7 +35,7 @@ export const afiliadoRoutes = [
     url: '/perfil',
     isActive: true,
     menu: 'user',
-    icon: null,
+    icon: User,
   },
   {
     id: 5,
