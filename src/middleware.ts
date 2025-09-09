@@ -31,6 +31,9 @@ export async function middleware(req: NextRequest) {
   if (pathname.startsWith('/auth/')) {
     return NextResponse.next();
   }
+  if (pathname.startsWith('/startup/')) {
+    return NextResponse.next();
+  }
 
   if(!session){
     // Para demais rotas públicas

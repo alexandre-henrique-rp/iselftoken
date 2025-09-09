@@ -40,5 +40,11 @@ export const publicRoutes = [
     "nome": "Termos de Uso",
     "path": "/termos/uso",
     "menu": "public"
+  },
+  {
+    "id": 8,
+    "nome": "Startup by id",
+    "path": "/startup/:id",
+    "menu": "public"
   }
 ]
