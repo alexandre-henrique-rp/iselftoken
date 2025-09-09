@@ -24,8 +24,7 @@ export default function AnalysisVideo({ thumbnailUrl, youtubeVideoId }: Analysis
                 alt="Thumbnail da análise da startup"
                 width={300}
                 height={168} // Proporção 16:9
-                objectFit="cover"
-                className="transition-transform duration-300 group-hover:scale-105"
+                className="object-cover transition-transform duration-300 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-black/20 transition-colors group-hover:bg-black/40"></div>
         </div>

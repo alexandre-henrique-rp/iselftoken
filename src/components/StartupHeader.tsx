@@ -13,8 +13,8 @@ export default function StartupHeader({ logo, name, subtitle }: StartupHeaderPro
         <Image 
           src={logo} 
           alt={`Logo da ${name}`} 
-          layout="fill"
-          objectFit="contain"
+          fill
+          className="object-contain"
         />
       </div>
       <div>

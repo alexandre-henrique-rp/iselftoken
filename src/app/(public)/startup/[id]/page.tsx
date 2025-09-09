@@ -13,8 +13,8 @@ import { GetSessionServer } from '@/context/auth';
 type Startup = (typeof featuredStartups)[0];
 
 interface StartupPageProps {
-  params: { id: string };
-  searchParams: { token?: string };
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ token?: string }> | null;
 }
 
 
@@ -26,7 +26,10 @@ const getStartupData = async (id: string): Promise<Startup | undefined> => {
 };
 
 export default async function StartupPage({ params, searchParams }: StartupPageProps) {
-  const startup = await getStartupData(params.id);
+  const resolvedParams = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : null;
+  
+  const startup = await getStartupData(resolvedParams.id);
   const session = await GetSessionServer();
 
   if (!startup) {
@@ -45,19 +48,19 @@ export default async function StartupPage({ params, searchParams }: StartupPageP
     <div className="container mx-auto px-4 py-8">
       <main className="flex flex-col gap-12">
         {/* Seção 1: Apresentação da Startup */}
-        <StartupHeader 
+        <StartupHeader
           logo={startup.image}
           name={startup.name}
           subtitle={startup.description}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 flex flex-col gap-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+          <div className="flex flex-col gap-8 lg:col-span-2">
             {/* Seção 5: Pitch de Vendas - Usando um ID de vídeo placeholder */}
             <PitchVideo youtubeVideoId="dQw4w9WgXcQ" />
 
             {/* Seção 6: Análise da Startup - Usando um ID de vídeo placeholder */}
-            <AnalysisVideo 
+            <AnalysisVideo
               thumbnailUrl={startup.image}
               youtubeVideoId="L_LUpnjgPso"
             />
@@ -65,14 +68,14 @@ export default async function StartupPage({ params, searchParams }: StartupPageP
 
           <aside className="flex flex-col gap-8">
             {/* Seção 2: Informações Financeiras */}
-            <FinancialInfo 
+            <FinancialInfo
               targetAmount={targetAmount}
               currentAmount={currentAmount}
               percentage={startup.percentage}
             />
 
             {/* Seção 3: Informações de Equity - Card 1 - Usando dados mock */}
-            <EquityCard1 
+            <EquityCard1
               totalEquity={15} // Mock
               remainingTokens={50000} // Mock
               investedEquity={currentAmount} // Mock
@@ -80,20 +83,29 @@ export default async function StartupPage({ params, searchParams }: StartupPageP
             />
 
             {/* Seção 4: Informações de Equity - Card 2 */}
-            <EquityCard2 
-              affiliateToken={searchParams.token}
-              userRole={!session?.user.role ? 'investidor' : (session?.user.role === 'fundador' ? 'startup' : session?.user.role)}
+            <EquityCard2
+              affiliateToken={resolvedSearchParams?.token}
+              userRole={
+                !session?.user.role
+                  ? 'investidor'
+                  : session?.user.role === 'fundador'
+                    ? 'startup'
+                    : session?.user.role
+              }
               isAuthenticated={session?.user ? true : false}
             />
           </aside>
         </div>
 
         {/* Seção 7: Resumo da Startup (Privada) - Usando dados mock */}
-        <StartupSummary 
-          markdownContent={`## Sobre a ${startup.name}\n\n${startup.description}\n\n### Estágio\n${startup.stage}\n\n### Valuation\n${startup.valuation}`}
+        <StartupSummary
+          markdownContent={
+            session?.user
+              ? startup.markdownContent
+              : `## Sobre a ${startup.name}\n\n${startup.description}\n\n### Estágio\n${startup.stage}\n\n### Valuation\n${startup.valuation}\n\n## Sobre a ${startup.name}\n\n${startup.description}\n\n### Estágio\n${startup.stage}\n\n### Valuation\n${startup.valuation}\n\n## Sobre a ${startup.name}\n\n${startup.description}\n\n### Estágio\n${startup.stage}\n\n### Valuation\n${startup.valuation}\n\n## Sobre a ${startup.name}\n\n${startup.description}\n\n### Estágio\n${startup.stage}\n\n### Valuation\n${startup.valuation}\n\n## Sobre a ${startup.name}\n\n${startup.description}\n\n### Estágio\n${startup.stage}\n\n### Valuation\n${startup.valuation}\n\n## Sobre a ${startup.name}\n\n${startup.description}\n\n### Estágio\n${startup.stage}\n\n### Valuation\n${startup.valuation}\n\n## Sobre a ${startup.name}\n\n${startup.description}\n\n### Estágio\n${startup.stage}\n\n### Valuation\n${startup.valuation}\n\n## Sobre a ${startup.name}\n\n${startup.description}\n\n### Estágio\n${startup.stage}\n\n### Valuation\n${startup.valuation}`
+          }
           isAuthenticated={session?.user ? true : false}
         />
-
       </main>
     </div>
   );

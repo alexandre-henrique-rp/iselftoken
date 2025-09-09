@@ -22,9 +22,8 @@ export default function PitchVideo({ youtubeVideoId }: PitchVideoProps) {
         <Image
           src={thumbnailUrl}
           alt="Thumbnail do pitch de vendas"
-          layout="fill"
-          objectFit="cover"
-          className="transition-transform duration-300 group-hover:scale-105"
+          fill
+          className="object-cover transition-transform duration-300 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-black/20 transition-colors group-hover:bg-black/40"></div>
       </div>
