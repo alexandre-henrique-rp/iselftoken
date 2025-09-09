@@ -8,8 +8,8 @@ import { AppList } from '@/components/investidor/AppList';
 import { EmptyState } from '@/components/investidor/EmptyState';
 import { StartupCard } from './startup-card';
 import { ProfileCards } from '@/data/profile';
-import type { ProfileCardData } from '@/components/profile-card';
 import { AppItem } from './investidor/types';
+import { StartupTypes } from '@/types/ProfileTypes';
 
 // Tipos importados de '@/components/investidor/types'
 
@@ -25,24 +25,29 @@ export default function InvestorHome() {
   const dados = ProfileCards;
  
   /**
-   * Converte um objeto do tipo `ProfileCardData` (dados de mock/UI)
-   * para o tipo `Startup` esperado pelo componente `StartupCard`.
-   * Faz o mapeamento dos campos com sufixo "Label" e dos nomes divergentes.
+   * Converte um objeto do tipo `getAllStartups` (dados de mock/UI)
+   * para o tipo `getStartupById` esperado pelo componente `StartupCard`.
+   * Adiciona valores padrão para propriedades que não existem em getAllStartups.
    */
-  const mapearProfileParaStartup = (item: ProfileCardData) => ({
+  const mapearProfileParaStartup = (item: StartupTypes.getAllStartups): StartupTypes.getStartupById => ({
     id: item.id,
     name: item.name,
-    category: item.categoryLabel,
-    stage: item.stageLabel,
-    fundingGoal: item.goalLabel,
-    raised: item.raisedLabel,
-    percentage: item.percent,
-    valuation: item.valuationLabel,
-    investors: item.investorsCount,
-    timeLeft: item.timeLeftLabel,
-    image: item.image,
+    logo: item.logo,
+    category: item.category,
+    selos: item.selos,
     description: item.description,
-    trending: item.trending,
+    image: item.image,
+    equityPercentage: item.equityPercentage,
+    totalTokens: item.totalTokens,
+    tokensRemaining: item.tokensRemaining,
+    fundingGoal: "R$ 1.000.000",
+    raised: "R$ 500.000",
+    percentage: 50,
+    valuation: "R$ 5.000.000",
+    investors: 25,
+    timeLeft: "30 dias",
+    trending: false,
+    markdownContent: `## Sobre a ${item.name}\n\n${item.description}\n\n### Categoria\n${item.category}\n\n### Equity\n${item.equityPercentage}`,
   });
 
   const topFree: AppItem[] = [

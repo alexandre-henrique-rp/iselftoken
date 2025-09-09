@@ -4,25 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-
-export type Startup = {
-  id: string;
-  name: string;
-  category: string;
-  stage: string;
-  fundingGoal: string;
-  raised: string;
-  percentage: number;
-  valuation: string;
-  investors: number;
-  timeLeft: string; // ex: "12 dias"
-  image: string;
-  description: string;
-  trending?: boolean;
-};
+import { StartupTypes } from "@/types/ProfileTypes";
 
 interface StartupCardProps {
-  startup: Startup;
+  startup: StartupTypes.getStartupById;
 }
 
 // Componente de Card de Startup (Server Component, sem interatividade client-side)
@@ -40,9 +25,6 @@ export function StartupCard({ startup }: StartupCardProps) {
             priority={false}
           />
           <div className="absolute top-3 left-3 flex gap-2">
-            <Badge variant="secondary" className="bg-black/60 text-white border-zinc-700">
-              {startup.stage}
-            </Badge>
             {startup.trending ? (
               <Badge className="bg-blue-600 text-white">Em alta</Badge>
             ) : null}
@@ -76,9 +58,6 @@ export function StartupCard({ startup }: StartupCardProps) {
           <Button asChild variant="outline" className="border-zinc-700 text-zinc-300 hover:bg-zinc-800">
             <Link href="#">Ver detalhes</Link>
           </Button>
-          {/* <Button asChild className="bg-red-600 hover:bg-red-600/90">
-            <Link href="/login">Login para Investir</Link>
-          </Button> */}
           <Button className="bg-gray-100 hover:bg-gray-500/90">
             Comprar token
           </Button>

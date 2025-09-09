@@ -3,13 +3,13 @@ import { OpportunitiesData } from '@/data/oportunidades';
 import { ProfileCards } from '@/data/profile';
 import { InvestorTestimonials } from '@/data/testemunhos/investidor';
 import { StartupTestimonials } from '@/data/testemunhos/startup';
-import { StartupTypes } from '@/types/ProfileTypes';
+import { Categorias, StartupTypes } from '@/types/ProfileTypes';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
     const opportunitiesData = OpportunitiesData;
-    const categoriesData = Categories as any;
+    const categoriesData = Categories as Categorias[];
     const investorTestimonials = InvestorTestimonials;
     const startupTestimonials = StartupTestimonials;
     const profileCards = ProfileCards;
@@ -23,10 +23,8 @@ export async function GET() {
       verificado: profileCards,
       acelerado: profileCards,
       aprovadas: profileCards,
-    };
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    
-    return NextResponse.json(data);
+    };    
+    return NextResponse.json(data, { status: 200 });
   } catch (error) {
     console.log(error);
     return NextResponse.json(

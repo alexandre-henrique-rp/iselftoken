@@ -91,7 +91,7 @@ export function ProfileCard({ data }: ProfileCardData) {
             asChild
             className="w-full bg-[#d500f9] text-white hover:bg-[#d500f9]/90"
           >
-            <Link href={`/startup/1`}>Ver oferta</Link>
+            <Link href={`/startup/${data.id}`}>Ver oferta</Link>
           </Button>
         </div>
       </CardContent>

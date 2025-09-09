@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Share2, Copy } from 'lucide-react';
+import { Copy } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import { toast } from 'sonner';
 
@@ -23,6 +23,7 @@ export default function EquityCard2({ affiliateToken, userRole, isAuthenticated 
       // Lógica para redirecionar para a página de compra
       // Se affiliateToken existir, ele será incluído na lógica de compra
       const purchaseUrl = affiliateToken ? `/comprar?token=${affiliateToken}` : '/comprar';
+      console.log("🚀 ~ handleBuyToken ~ purchaseUrl:", purchaseUrl)
       toast.info(`Redirecionando para a compra... Token de afiliado: ${affiliateToken || 'Nenhum'}`);
       // router.push(purchaseUrl); // Descomentar quando a página de compra existir
     }

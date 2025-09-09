@@ -1,4 +1,3 @@
-"use client";
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
@@ -33,27 +32,50 @@ const resources = {
   },
 } as const;
 
-// Inicializa i18next somente uma vez
-if (!i18n.isInitialized) {
+// Verifica se está no ambiente do cliente antes de inicializar
+const isClient = typeof window !== 'undefined';
+
+// Inicializa i18next somente uma vez e apenas no cliente
+if (isClient && !i18n.isInitialized) {
   i18n
     .use(initReactI18next)
     .init({
       resources,
       lng: 'pt',
       fallbackLng: 'pt',
-      debug: process.env.NODE_ENV !== 'production',
+      debug: false,
       ns: ['common', 'auth', 'dashboard'],
       defaultNS: 'common',
       interpolation: {
-        escapeValue: false, // React já faz escaping
+        escapeValue: false,
       },
-      // Evita warnings no SSR
       returnNull: false,
       returnEmptyString: false,
+      react: {
+        useSuspense: false,
+      },
     })
     .catch(() => {
-      // Silencia erro de init em ambiente de build/SSR
+      // Silencia erro de init
     });
+} else if (!isClient) {
+  // Para SSR/build, cria uma instância mock
+  i18n.init({
+    resources,
+    lng: 'pt',
+    fallbackLng: 'pt',
+    debug: false,
+    ns: ['common', 'auth', 'dashboard'],
+    defaultNS: 'common',
+    interpolation: {
+      escapeValue: false,
+    },
+    returnNull: false,
+    returnEmptyString: false,
+    react: {
+      useSuspense: false,
+    },
+  }).catch(() => {});
 }
 
 export function setLanguage(lng: 'pt' | 'en' | 'es') {

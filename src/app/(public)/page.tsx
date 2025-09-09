@@ -16,14 +16,34 @@ import { ProfileCard2 } from '@/components/profile-card2';
 import { StartupTypes } from '@/types/ProfileTypes';
 
 const getAllStartups = async () => {
-  const response = await fetch('http://localhost:3000/api/startup');
-  const data = await response.json();
-  return data;
+  const baseUrl = 'http://localhost:3000';
+  
+  try {
+    const response = await fetch(`${baseUrl}/api/startup`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Erro ao buscar dados das startups:', error);
+    return {
+      oportunidades: [],
+      categorias: [],
+      testemunhosInvestidor: [],
+      testemunhosStartup: [],
+      campeao: [],
+      verificado: [],
+      acelerado: [],
+      aprovadas: [],
+    };
+  }
 };
 
 export default async function Home() {
   const dados: StartupTypes.marketingData = await getAllStartups();
-  console.log("🚀 ~ Home ~ dados:", dados)
 
   return (
     <div className="bg-background text-foreground min-h-screen">
