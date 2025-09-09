@@ -2,35 +2,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { StartupTypes } from '@/types/ProfileTypes';
 
 export type ProfileCardData = {
-  id: string;
-  name: string;
-  logo: string; // Logo da empresa
-  categoryLabel: string; // ex: Sustentabilidade
-  stageLabel: string; // ex: Série A
-  trending?: boolean;
-  endingSoon?: boolean;
-  description: string;
-  image: string;
-  raisedLabel: string; // ex: R$ 1.8M
-  goalLabel: string; // ex: R$ 2.5M
-  percent: number; // 0..100
-  collectedLabel: string; // ex: 72% arrecadado
-  timeLeftLabel: string; // ex: 3 dias restantes
-  valuationLabel: string; // ex: R$ 15M
-  investorsCount: number; // ex: 142
-  equityOfferedLabel: string; // ex: 15%
-  tokensRemainingLabel?: string; // ex: 1.200
-  selos: {
-    id: string; // ex: 1
-    label: string; // ex: Sustentabilidade
-    image: string; // ex: string base64
-  }[];
+  data: StartupTypes.getAllStartups
 };
 
 // ProfileCard alinhado ao layout do exemplo fornecido
-export function ProfileCard2({ data }: { data: ProfileCardData }) {
+export function ProfileCard2({ data }: ProfileCardData ) {
   return (
     <Card className="overflow-hidden rounded-xl border border-blue-700 bg-zinc-100 dark:bg-card text-card-foreground shadow-sm !py-2">
       <CardContent className="px-5 py-4">
@@ -76,18 +55,18 @@ export function ProfileCard2({ data }: { data: ProfileCardData }) {
         <div className="mt-4 flex justify-between gap-3 px-4">
           <div className="">
             <span className="text-xs font-medium text-muted-foreground">Equity ofertado</span>
-            <p className="mt-1 text-sm font-semibold text-foreground">{data.equityOfferedLabel}</p>
+            <p className="mt-1 text-sm font-semibold text-foreground">{data.equityPercentage}</p>
           </div>
           <div className="">
             <span className="text-xs font-medium text-muted-foreground">Tokens restantes</span>
-            <p className="mt-1 text-sm font-semibold text-foreground">{data.tokensRemainingLabel ?? '—'}</p>
+            <p className="mt-1 text-sm font-semibold text-foreground">{data.tokensRemaining ?? '—'}</p>
           </div>
         </div>
 
         {/* Ação */}
         <div className="mt-6">
           <Button asChild className="w-full bg-[#d500f9] hover:bg-[#d500f9]/90 text-white">
-            <Link href="#">Ver oferta</Link>
+            <Link href={`/startup/${data.id}`}>Ver oferta</Link>
           </Button>
         </div>
       </CardContent>

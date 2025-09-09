@@ -9,22 +9,21 @@ import { TestimonialCard } from '@/components/testimonial-card';
 import { AnimatedThemeToggler } from '@/components/magicui/animated-theme-toggler';
 import { TrText } from '@/components/tr-text';
 import { Button } from '@/components/ui/button';
-import { Categories } from '@/data/categoria';
-import { OpportunitiesData } from '@/data/oportunidades';
-import { ProfileCards } from '@/data/profile';
-import { InvestorTestimonials } from '@/data/testemunhos/investidor';
-import { StartupTestimonials } from '@/data/testemunhos/startup';
 import { Star } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ProfileCard2 } from '@/components/profile-card2';
+import { StartupTypes } from '@/types/ProfileTypes';
 
-export default function Home() {
-  const opportunitiesData = OpportunitiesData;
-  const categoriesData = Categories;
-  const investorTestimonials = InvestorTestimonials;
-  const startupTestimonials = StartupTestimonials;
-  const profileCards = ProfileCards;
+const getAllStartups = async () => {
+  const response = await fetch('http://localhost:3000/api/startup');
+  const data = await response.json();
+  return data;
+};
+
+export default async function Home() {
+  const dados: StartupTypes.marketingData = await getAllStartups();
+  console.log("🚀 ~ Home ~ dados:", dados)
 
   return (
     <div className="bg-background text-foreground min-h-screen">
@@ -111,7 +110,7 @@ export default function Home() {
               </h2>
             </div>
             <EmblaCarousel>
-              {profileCards.map((item) => (
+              {dados.campeao.map((item) => (
                 <EmblaSlide key={item.id}>
                   <ProfileCard data={item} />
                 </EmblaSlide>
@@ -206,7 +205,7 @@ export default function Home() {
               </h2>
             </div>
             <EmblaCarousel>
-              {profileCards.map((item) => (
+              {dados.verificado.map((item) => (
                 <EmblaSlide key={item.id}>
                   <ProfileCard2 data={item} />
                 </EmblaSlide>
@@ -224,7 +223,7 @@ export default function Home() {
               </h2>
             </div>
             <EmblaCarousel>
-              {profileCards.map((item) => (
+              {dados.acelerado.map((item) => (
                 <EmblaSlide key={item.id}>
                   <ProfileCard2 data={item} />
                 </EmblaSlide>
@@ -242,7 +241,7 @@ export default function Home() {
               </h2>
             </div>
             <EmblaCarousel>
-              {profileCards.map((item) => (
+              {dados.aprovadas.map((item) => (
                 <EmblaSlide key={item.id}>
                   <ProfileCard2 data={item} />
                 </EmblaSlide>
@@ -253,8 +252,8 @@ export default function Home() {
 
         {/* Explore Opportunities */}
         <ExploreOpportunities
-          opportunities={opportunitiesData}
-          categories={categoriesData}
+          opportunities={dados.oportunidades}
+          categories={dados.categorias}
           selectedCategory="All"
         />
 
@@ -265,7 +264,7 @@ export default function Home() {
               <TrText k="home.testimonials.investors_title" />
             </h2>
             <div className="grid gap-6 lg:grid-cols-3">
-              {investorTestimonials.map((testimonial, idx) => (
+              {dados.testemunhosInvestidor.map((testimonial, idx) => (
                 <TestimonialCard key={idx} data={testimonial} />
               ))}
             </div>
@@ -279,7 +278,7 @@ export default function Home() {
               <TrText k="home.testimonials.startups_title" />
             </h2>
             <div className="grid gap-6 lg:grid-cols-3">
-              {startupTestimonials.map((testimonial, idx) => (
+              {dados.testemunhosStartup.map((testimonial, idx) => (
                 <StartupTestimonialCard key={idx} data={testimonial} />
               ))}
             </div>

@@ -8,6 +8,6 @@ export namespace Rotas {
     url: string,
     isActive: boolean,
     menu: string,
-    icon: any | LucideIcon | null,
+    icon: LucideIcon | null,
   }
 }
