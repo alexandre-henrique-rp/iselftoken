@@ -13,33 +13,55 @@ import { Star } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ProfileCard2 } from '@/components/profile-card2';
-import { StartupTypes } from '@/types/ProfileTypes';
+import { Categorias, StartupTypes } from '@/types/ProfileTypes';
+import { OpportunitiesData } from '@/data/oportunidades';
+import { Categories } from '@/data/categoria';
+import { InvestorTestimonials } from '@/data/testemunhos/investidor';
+import { StartupTestimonials } from '@/data/testemunhos/startup';
+import { ProfileCards } from '@/data/profile';
 
 const getAllStartups = async () => {
-  const baseUrl = 'http://localhost:3000';
+  // const baseUrl = 'http://localhost:3000';
   
-  try {
-    const response = await fetch(`${baseUrl}/api/startup`);
+  // try {
+  //   const response = await fetch(`${baseUrl}/api/startup`);
     
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+  //   if (!response.ok) {
+  //     throw new Error(`HTTP error! status: ${response.status}`);
+  //   }
     
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Erro ao buscar dados das startups:', error);
-    return {
-      oportunidades: [],
-      categorias: [],
-      testemunhosInvestidor: [],
-      testemunhosStartup: [],
-      campeao: [],
-      verificado: [],
-      acelerado: [],
-      aprovadas: [],
-    };
-  }
+  //   const data = await response.json();
+  //   return data;
+  // } catch (error) {
+  //   console.error('Erro ao buscar dados das startups:', error);
+  //   return {
+  //     oportunidades: [],
+  //     categorias: [],
+  //     testemunhosInvestidor: [],
+  //     testemunhosStartup: [],
+  //     campeao: [],
+  //     verificado: [],
+  //     acelerado: [],
+  //     aprovadas: [],
+  //   };
+  // }
+      const opportunitiesData = OpportunitiesData;
+      const categoriesData = Categories as Categorias[];
+      const investorTestimonials = InvestorTestimonials;
+      const startupTestimonials = StartupTestimonials;
+      const profileCards = ProfileCards;
+  
+      const data: StartupTypes.marketingData = {
+        oportunidades: opportunitiesData,
+        categorias: categoriesData,
+        testemunhosInvestidor: investorTestimonials,
+        testemunhosStartup: startupTestimonials,
+        campeao: profileCards,
+        verificado: profileCards,
+        acelerado: profileCards,
+        aprovadas: profileCards,
+      };
+  return data;
 };
 
 export default async function Home() {

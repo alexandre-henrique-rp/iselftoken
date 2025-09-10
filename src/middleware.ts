@@ -53,6 +53,7 @@ export async function middleware(req: NextRequest) {
 
   if (session) {
     const role = session.user.role;
+    console.log("🚀 ~ middleware ~ role:", role)
     // "investidor" | "startup" | "admin" | "afiliado"
     if (role === 'fundador') {
       const allowed = StartupRoutesList.some((base) => pathname === base || pathname.startsWith(base + '/'));
@@ -61,7 +62,9 @@ export async function middleware(req: NextRequest) {
       }
     }
     if (role === 'investidor') {
-      const allowed = InvestorRoutesList.some((base) => pathname === base || pathname.startsWith(base + '/'));
+      const allowed = InvestorRoutesList.some(
+        (base) => pathname === base || pathname.startsWith(base + '/'),
+      );
       if (allowed) {
         return NextResponse.next();
       }
@@ -80,12 +83,32 @@ export async function middleware(req: NextRequest) {
     }
   }
   
+  // Se chegou até aqui, o usuário não tem permissão para acessar a rota
+  // Redirecionar para a rota padrão baseada no role
+  if (session) {
+    const role = session.user.role;
+    
+    if (role === 'investidor') {
+      return NextResponse.redirect(new URL('/home', req.url));
+    }
+    if (role === 'fundador') {
+      return NextResponse.redirect(new URL('/dashboard', req.url));
+    }
+    if (role === 'admin') {
+      return NextResponse.redirect(new URL('/admin', req.url));
+    }
+    if (role === 'afiliado') {
+      return NextResponse.redirect(new URL('/afiliado', req.url));
+    }
+  }
 
-  
+  // Fallback para rotas públicas
   if (isPublicRoute) {
     return NextResponse.next();
   }
- 
+
+  // Último fallback - redirecionar para home
+  return NextResponse.redirect(new URL('/', req.url));
 }
 
 export const config = {
