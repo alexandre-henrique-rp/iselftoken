@@ -20,9 +20,20 @@ export type PerfilMin = {
   email?: string;
   cpf?: string;
   telefone?: string;
+  cep?: string;
+  endereco?: string;
+  numero?: string;
+  complemento?: string;
+  bairro?: string;
   cidade?: string;
   uf?: string;
   pais?: string;
+  genero?: string;
+  dataNascimento?: string;
+  bio_facial?: string;
+  avatar?: string;
+  tipo_documento?: string;
+  reg_documento?: string;
 };
 
 // Schema Zod para validação do formulário de perfil

@@ -63,8 +63,12 @@ namespace StartupTypes {
   type getStartupById = {
     id: number;
     name: string;
+    pais: string;
+    icon: string;
     logo: string;
     category: string;
+    link_video: string;
+    link_analysis: string;
     selos: StartupSelo[];
     description: string;
     image: string;

@@ -6,6 +6,8 @@ export const featuredStartups: StartupTypes.getStartupById[] = [
     name: 'EcoTech Solutions',
     logo: 'https://elements-resized.envatousercontent.com/elements-cover-images/1b61fe0b-8639-4748-aaf1-e0e45f50c8c1?w=2038&cf_fit=scale-down&q=85&format=auto&s=5b368b136e2ed7984c318b0399c1da86d4afd5954fd13ad7ae276d9dec8a6fd6',
     category: 'Sustentabilidade',
+    link_video: 'https://www.youtube.com/watch?v=LkiwmGic4u0',
+    link_analysis: 'https://www.youtube.com/watch?v=EKMqUILm6KA&list=RDEKMqUILm6KA&start_radio=1',
     selos: [
       {
         id: 'eco-tech',
@@ -16,6 +18,8 @@ export const featuredStartups: StartupTypes.getStartupById[] = [
     description: 'Soluções inovadoras para energia renovável e sustentabilidade urbana.',
     image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=200&fit=crop',
     equityPercentage: '30%',
+    pais: 'BRA',
+    icon: '🇧🇷',
     totalTokens: '1000',
     tokensRemaining: '100',
     fundingGoal: 'R$ 2.5M',
@@ -32,6 +36,8 @@ export const featuredStartups: StartupTypes.getStartupById[] = [
     name: 'HealthTech AI',
     logo: 'https://elements-resized.envatousercontent.com/elements-cover-images/721c8410-463a-48fe-9e4d-5e1956941a21?w=2038&cf_fit=scale-down&q=85&format=auto&s=a4b279e82ae5fcb4ab7bdbb4676aa973f4fc56a90e00b1790fedc6931e2f2330',
     category: 'Saúde',
+    link_video: 'https://www.youtube.com/watch?v=Cu6OtZnkd9g&list=RDCu6OtZnkd9g&start_radio=1',
+    link_analysis: 'https://www.youtube.com/watch?v=AGYCpkQHpxk',
     selos: [
       {
         id: 'health-ai',
@@ -42,6 +48,8 @@ export const featuredStartups: StartupTypes.getStartupById[] = [
     description: 'Plataforma de IA para triagem e acompanhamento de pacientes.',
     image: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=200&fit=crop',
     equityPercentage: '15%',
+    pais: 'USA',
+    icon: '🇺🇸',
     totalTokens: '2000',
     tokensRemaining: '1120',
     fundingGoal: 'R$ 1.2M',
@@ -58,6 +66,8 @@ export const featuredStartups: StartupTypes.getStartupById[] = [
     name: 'EduTech Pro',
     logo: 'https://elements-resized.envatousercontent.com/elements-cover-images/b6b1240d-f5fe-43de-a7eb-0794f7781bcc?w=2038&cf_fit=scale-down&q=85&format=auto&s=89522a0e5202f06b779a92601e4b68f5ba83bb7bf61c63f0234733254cbd2f70',
     category: 'Educação',
+    link_video: 'https://www.youtube.com/watch?v=8OkdlJeapak',
+    link_analysis: 'https://www.youtube.com/watch?v=AL5y7l2c5Us',
     selos: [
       {
         id: 'edtech-pro',
@@ -68,6 +78,8 @@ export const featuredStartups: StartupTypes.getStartupById[] = [
     description: 'Ferramentas de aprendizagem adaptativa para escolas públicas.',
     image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=200&fit=crop',
     equityPercentage: '15%',
+    pais: 'PRT',
+    icon: '🇵🇹',
     totalTokens: '5000',
     tokensRemaining: '1500',
     fundingGoal: 'R$ 5M',
@@ -82,8 +94,10 @@ export const featuredStartups: StartupTypes.getStartupById[] = [
   {
     id: 4,
     name: 'FinTech Plus',
-    logo: '/logos/fintech.svg',
+    logo: '/selos/Vector (2).svg',
     category: 'Fintech',
+    link_video: 'https://www.youtube.com/watch?v=9Yx1NEHTwFU',
+    link_analysis: 'https://www.youtube.com/watch?v=bNDE9VYPkkc',
     selos: [
       {
         id: 'fintech-plus',
@@ -94,6 +108,8 @@ export const featuredStartups: StartupTypes.getStartupById[] = [
     description: 'Plataforma de pagamentos digitais para pequenas empresas.',
     image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=200&fit=crop',
     equityPercentage: '15%',
+    pais: 'BRA',
+    icon: '🇧🇷',
     totalTokens: '3000',
     tokensRemaining: '1200',
     fundingGoal: 'R$ 800K',
@@ -108,8 +124,10 @@ export const featuredStartups: StartupTypes.getStartupById[] = [
   {
     id: 5,
     name: 'BioTech Innovations',
-    logo: '/logos/biotech.svg',
+    logo: '/selos/Vector (1).svg',
     category: 'Biotecnologia',
+    link_video: 'https://www.youtube.com/watch?v=aqgPLZIECbk',
+    link_analysis: 'https://www.youtube.com/watch?v=gimU0MUoxPc',
     selos: [
       {
         id: 'biotech-innovations',
@@ -120,6 +138,8 @@ export const featuredStartups: StartupTypes.getStartupById[] = [
     description: 'Desenvolvimento de terapias genéticas para doenças raras.',
     image: 'https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=400&h=200&fit=crop',
     equityPercentage: '15%',
+    pais: 'BRA',
+    icon: '🇧🇷',
     totalTokens: '2500',
     tokensRemaining: '1175',
     fundingGoal: 'R$ 1.5M',
@@ -136,6 +156,8 @@ export const featuredStartups: StartupTypes.getStartupById[] = [
     name: 'MobilityTech',
     logo: 'https://elements-resized.envatousercontent.com/elements-cover-images/mobility-tech-logo.svg',
     category: 'Mobilidade',
+    link_video: 'https://www.youtube.com/watch?v=jO5ZZEGt5Go',
+    link_analysis: 'https://www.youtube.com/watch?v=kaaYkUVnxZM&list=RDkaaYkUVnxZM&start_radio=1',
     selos: [
       {
         id: 'mobility-tech',
@@ -146,6 +168,8 @@ export const featuredStartups: StartupTypes.getStartupById[] = [
     description: 'Soluções de mobilidade urbana sustentável e inteligente.',
     image: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=200&fit=crop',
     equityPercentage: '20%',
+    pais: 'BRA',
+    icon: '🇧🇷',
     totalTokens: '4000',
     tokensRemaining: '1200',
     fundingGoal: 'R$ 3M',

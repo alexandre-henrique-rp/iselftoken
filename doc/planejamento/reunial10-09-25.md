@@ -1,8 +1,4 @@
-Total de Equity => Equity Ofertado
-Equity Investido - retirar
-ícones na home
 
-no nome da startup colocar a bandeira do pais
 emblemas
 
 depois do video de apresentação

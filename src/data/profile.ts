@@ -63,7 +63,7 @@ export const ProfileCards: StartupTypes.getAllStartups[] = [
   {
     id: 4,
     name: 'FinTech Plus',
-    logo: '/logos/fintech.svg',
+    logo: '/selos/Vector (2).svg',
     category: 'Fintech',
     selos: [
       {
@@ -82,7 +82,7 @@ export const ProfileCards: StartupTypes.getAllStartups[] = [
   {
     id: 5,
     name: 'BioTech Innovations',
-    logo: '/logos/biotech.svg',
+    logo: '/selos/Vector (1).svg',
     category: 'Biotecnologia',
     selos: [
       {
