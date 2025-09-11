@@ -48,6 +48,10 @@ export default function InvestorHome() {
     timeLeft: "30 dias",
     trending: false,
     markdownContent: `## Sobre a ${item.name}\n\n${item.description}\n\n### Categoria\n${item.category}\n\n### Equity\n${item.equityPercentage}`,
+    pais: '',
+    icon: '',
+    link_video: '',
+    link_analysis: ''
   });
 
   const topFree: AppItem[] = [
