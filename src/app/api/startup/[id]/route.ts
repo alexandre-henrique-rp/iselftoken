@@ -10,6 +10,6 @@ export async function GET(
     const startup = featuredStartups.find(
     (s: StartupTypes.getStartupById) => s.id === +id,
   );
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+  // await new Promise((resolve) => setTimeout(resolve, 2000));
   return NextResponse.json(startup);
 }

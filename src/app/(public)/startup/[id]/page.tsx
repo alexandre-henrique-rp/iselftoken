@@ -9,6 +9,7 @@ import StartupSummary from '@/components/StartupSummary';
 import { GetSessionServer } from '@/context/auth';
 import { getYouTubeId } from '@/lib/youtube-utils';
 import { StartupTypes } from '@/types/ProfileTypes';
+import { featuredStartups } from '@/data/startups';
 
 interface StartupPageProps {
   params: Promise<{ id: string }>;
@@ -16,12 +17,14 @@ interface StartupPageProps {
 }
 
 // Função para buscar os dados da startup (mock)
-const getStartupData = async (
-  id: string,
-): Promise<StartupTypes.getStartupById | null> => {
-  const request = await fetch(`http://localhost:3000/api/startup/${id}`);
-  const response = await request.json();
-  return response;
+const getStartupData = async (id: string) => {
+  // const request = await fetch(`http://localhost:3000/api/startup/${id}`);
+  // const response = await request.json();
+  // return response;
+  const startup = featuredStartups.find(
+    (s: StartupTypes.getStartupById) => s.id === +id,
+  );
+  return startup;
 };
 
 export default async function StartupPage({
