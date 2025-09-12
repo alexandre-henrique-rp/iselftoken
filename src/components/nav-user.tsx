@@ -20,7 +20,7 @@ import {
 import { AnimatedThemeToggler } from '@/components/magicui/animated-theme-toggler';
 import { useSession } from '@/hooks/useSession';
 import { toast } from 'sonner';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface NavUserProps {
   user: SessionNext.Client;
@@ -29,6 +29,7 @@ interface NavUserProps {
 export function NavUser({ user }: NavUserProps) {
   const { isMobile } = useSidebar();
   const { logout } = useSession();
+  const route = useRouter();
 
   const handleLogout = async () => {
     try {
@@ -59,6 +60,10 @@ export function NavUser({ user }: NavUserProps) {
 
   const iniciais = IniciaisSession();
 
+  const handlePerfil = () => {
+    route.push('/perfil');
+  };
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -66,7 +71,7 @@ export function NavUser({ user }: NavUserProps) {
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700"
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 {user.avatar && (
@@ -84,7 +89,7 @@ export function NavUser({ user }: NavUserProps) {
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg"
+            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800"
             side={isMobile ? 'bottom' : 'right'}
             align="end"
             sideOffset={4}
@@ -92,7 +97,10 @@ export function NavUser({ user }: NavUserProps) {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar || '/avatars/user.jpg'} alt={user.name} />
+                  <AvatarImage
+                    src={user.avatar || '/avatars/user.jpg'}
+                    alt={user.name}
+                  />
                   <AvatarFallback className="rounded-lg">
                     {user.name.charAt(0).toUpperCase()}
                   </AvatarFallback>
@@ -105,11 +113,9 @@ export function NavUser({ user }: NavUserProps) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
 
-            <DropdownMenuItem>
-              <Link href="/perfil" className="flex items-center gap-2">
-                <User className="mr-2 h-4 w-4" />
-                Perfil
-              </Link>
+            <DropdownMenuItem onClick={handlePerfil}>
+              <User className="mr-2 h-4 w-4" />
+              Perfil
             </DropdownMenuItem>
 
             <DropdownMenuItem className="flex items-center justify-between">

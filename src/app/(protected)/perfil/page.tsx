@@ -1,8 +1,6 @@
 // Força renderização dinâmica para evitar problemas com cookies/sessão em SSR
 export const dynamic = 'force-dynamic';
 
-import { TrText } from '@/components/tr-text';
-import { PerfilResumo } from '@/components/business/perfil/perfil-resumo';
 import { TabelaStartupsDoUsuario } from '@/components/business/perfil/tabela-startups-do-usuario';
 import { PerfilForm } from '@/components/business/perfil/perfil-form';
 import { GetSessionServer } from '@/context/auth';
@@ -65,7 +63,16 @@ type PerfilData = {
   avatar?: string;
   tipo_documento?: string;
   reg_documento?: string;
+  documento?: string;
+  naturalidade?: string;
+  termos?: boolean;
+  status?: string;
   startups?: StartupMin[];
+  // Campos adicionais esperados pelo PerfilForm
+  indicados?: unknown[];
+  fundador?: boolean;
+  afiliado?: boolean;
+  persent_ganho?: number;
   [key: string]: unknown;
 };
 
@@ -91,23 +98,12 @@ export default async function Perfil() {
     <section className="container mx-auto max-w-5xl px-4 py-6">
       <header className="mb-6">
         <h1 className="text-2xl font-semibold">
-          <TrText k="perfil.title" />
+          Perfil
         </h1>
         {message && (
           <p className={`mt-1 text-sm ${isSuccess ? 'text-zinc-500' : 'text-red-600'}`}>{message}</p>
         )}
       </header>
-
-      {/* Resumo do usuário (componentizado) */}
-      <PerfilResumo
-        nome={perfil?.nome}
-        email={perfil?.email}
-        role={role}
-        cidade={perfil?.cidade}
-        uf={perfil?.uf}
-        pais={perfil?.pais}
-        telefone={perfil?.telefone}
-      />
 
       {/* Tabela de Startups apenas para fundador, se existir estrutura */}
       {isFundador && (
@@ -120,6 +116,7 @@ export default async function Perfil() {
           id: perfil?.id,
           nome: perfil?.nome,
           email: perfil?.email,
+          role: role as "fundador" | "afiliado" | "admin" | "investidor" | undefined,
           telefone: perfil?.telefone,
           cep: perfil?.cep,
           endereco: perfil?.endereco,
@@ -128,12 +125,19 @@ export default async function Perfil() {
           cidade: perfil?.cidade,
           uf: perfil?.uf,
           pais: perfil?.pais,
-          genero: perfil?.genero,
-          dataNascimento: perfil?.dataNascimento,
+          dt_nascimento: perfil?.dataNascimento,
           bio_facial: perfil?.bio_facial,
           avatar: perfil?.avatar,
           tipo_documento: perfil?.tipo_documento,
           reg_documento: perfil?.reg_documento,
+          documento: perfil?.documento,
+          termos: perfil?.termos,
+          status: perfil?.status,
+          startups: perfil?.startups,
+          indicados: perfil?.indicados,
+          fundador: perfil?.fundador,
+          afiliado: perfil?.afiliado,
+          persent_ganho: perfil?.persent_ganho,
         }}
       />
     </section>

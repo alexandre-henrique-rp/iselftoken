@@ -42,40 +42,40 @@ export interface PerfilUsuario {
 }
 ```
 
-## Inputs (completos)
+## Inputs (conforme PerfilUsuario)
 
 - investidor ou fundador ou afiliado
   - Dados Pessoais
-    - nome completo
-    - apelido/nome social (opcional)
+    - nome (string)
     - gênero (Masculino, Feminino, Outro)
-    - data de nascimento
-    - nacionalidade (ex.: BR, AR, US)
-    - naturalidade (cidade/estado de nascimento) (opcional)
+    - data de nascimento (dt_nascimento, string ISO; UI usa input date)
+    - nacionalidade (pais, ex.: BR, AR, US)
+    - naturalidade (opcional)
+    - role (somente leitura na UI)
   - Contato
-    - email
-    - telefone (com DDI/DDD)
+    - email (string)
+    - telefone (string, máscara com DDI/DDD)
   - Endereço
-    - cep
+    - cep (string, máscara 99999-999)
     - endereco (logradouro)
-    - numero
+    - numero (string)
     - complemento (opcional)
-    - bairro
-    - cidade
-    - uf (estado/província)
-    - pais
+    - bairro (string)
+    - cidade (string)
+    - uf (2 letras)
+    - pais (string)
   - Documento de Identificação
-    - tipoDeDocumento (checkbox múltipla escolha: CPF, RG, DNI, Passport)
-    - numeroDocumento (conforme tipo)
-    - orgaoEmissor (para RG, opcional)
-    - ufDocumento (para RG, opcional)
-    - dataEmissaoDocumento (opcional)
-    - arquivoDocumento (upload: PDF/IMG)
+    - tipo_documento (string única: CPF | RG | DNI | Passport — select/radio)
+    - reg_documento (string — número conforme tipo)
+    - documento (string — URL após upload)
   - Biometria e Avatar
-    - iSelfBio (captura via webcam)
-    - avatar (upload de imagem)
+    - bio_facial (string — URL após captura/upload)
+    - avatar (string — URL após upload)
+  - Outros (conforme PerfilUsuario)
+    - termos (boolean — aceite dos termos)
+    - status (string — somente leitura)
   - Startups (somente `role = fundador`)
-    - tabela de startups (id, fantasia, cnpj)
+    - tabela de startups (id, nome, logo, status, createdAt, updatedAt)
     - ações: adicionar (modal), editar (navega /startup/:id), deletar (modal confirmação)
 
 ### Mapeamento PerfilUsuario -> Campos do Formulário
@@ -86,36 +86,40 @@ export interface PerfilUsuario {
   - data de nascimento ⇄ `dt_nascimento: string` (ISO; exibir como `Date` no form, validar >= 1900 e <= hoje)
   - nacionalidade ⇄ `pais: string` (usar código/label; ex.: BR, AR, US)
   - naturalidade ⇄ `naturalidade?: string` (opcional)
-  - role ⇄ `role: "fundador" | "afiliado" | "admin" | "investidor"` (somente leitura na UI)
+  - role ⇄ `role: "fundador" | "afiliado" | "admin" | "investidor"` (somente leitura)
 
 - Contato
-  - email ⇄ `email: string` (formato e-mail válido; pode ser somente leitura se política exigir)
-  - telefone ⇄ `telefone: string` (máscara telefone com DDI/DDD via `createPhoneHandler`)
+  - email ⇄ `email: string` (formato válido)
+  - telefone ⇄ `telefone: string` (máscara via `applyPhoneMask`)
 
 - Endereço
-  - cep ⇄ `cep: string` (máscara `99999-999` via `createCepHandler`; auto-preencher endereço se possível)
-  - endereco ⇄ `endereco: string` (logradouro)
+  - cep ⇄ `cep: string` (máscara via `applyCepMask`; auto-preencher endereço se possível)
+  - endereco ⇄ `endereco: string`
   - numero ⇄ `numero: string`
-  - complemento ⇄ `complemento?: string` (opcional)
+  - complemento ⇄ `complemento?: string`
   - bairro ⇄ `bairro: string`
   - cidade ⇄ `cidade: string`
-  - uf ⇄ `uf: string` (2 letras; validar contra lista de estados/províncias)
+  - uf ⇄ `uf: string` (2 letras)
   - pais ⇄ `pais: string`
 
 - Documento de Identificação
-  - tipo de documento ⇄ `tipo_documento: string` (checkbox múltipla escolha; exigir ao menos 1)
-  - número do documento ⇄ `reg_documento: string` (validar por tipo selecionado; ex.: CPF/CNPJ se BR)
-  - arquivoDocumento ⇄ `documento: string` (upload; aceitar PDF/JPG/PNG, tamanho máx.)
+  - tipo_documento ⇄ `tipo_documento: string` (único valor)
+  - reg_documento ⇄ `reg_documento: string`
+  - documento ⇄ `documento: string` (URL após upload)
 
 - Biometria e Avatar
-  - iSelfBio ⇄ `bio_facial: string` (imagem capturada Webcam; base64/Blob convertido para URL do backend)
-  - avatar ⇄ `avatar: string` (upload imagem com preview)
+  - bio_facial ⇄ `bio_facial: string` (URL após captura/upload)
+  - avatar ⇄ `avatar: string` (URL após upload)
+
+- Outros
+  - termos ⇄ `termos: boolean`
+  - status ⇄ `status: string` (somente leitura)
 
 - Startups (somente fundador)
   - tabela derivada de `startups: { id, nome, logo, status, createdAt, updatedAt }[]`
   - ações: adicionar/editar/deletar (modais). Não fazem parte do formulário principal de perfil.
 
-### Validações (Zod) — sugestão
+### Validações (Zod) — sugestão (alinhado à interface)
 
 ```ts
 import { z } from "zod";
@@ -125,21 +129,23 @@ export const perfilSchema = z.object({
   genero: z.enum(["Masculino", "Feminino", "Outro"]).optional(),
   dt_nascimento: z.string().refine(v => !Number.isNaN(Date.parse(v)), {
     message: "Data inválida",
-  }),
+  }).optional(),
   email: z.string().email(),
-  telefone: z.string().min(10), // máscara aplicada na UI
-  cep: z.string().min(9), // 99999-999
-  endereco: z.string().min(3),
-  numero: z.string().min(1),
+  telefone: z.string().min(10), // máscara aplicada na UI (applyPhoneMask)
+  cep: z.string().min(9).optional(), // 99999-999 (applyCepMask)
+  endereco: z.string().min(3).optional(),
+  numero: z.string().min(1).optional(),
   complemento: z.string().optional(),
-  bairro: z.string().min(2),
-  cidade: z.string().min(2),
-  uf: z.string().length(2),
-  pais: z.string().min(2),
-  tipo_documento: z.string().min(1),
-  reg_documento: z.string().min(3),
+  bairro: z.string().min(2).optional(),
+  cidade: z.string().min(2).optional(),
+  uf: z.string().length(2).optional(),
+  pais: z.string().min(2).optional(),
+  tipo_documento: z.string().min(1).optional(), // string única
+  reg_documento: z.string().min(3).optional(),
   documento: z.string().url().optional(), // URL após upload
   bio_facial: z.string().url().optional(),
+  termos: z.boolean().optional(),
+  status: z.string().optional(),
 });
 
 export type PerfilFormValues = z.infer<typeof perfilSchema>;
@@ -147,8 +153,8 @@ export type PerfilFormValues = z.infer<typeof perfilSchema>;
 
 ### Máscaras e componentes sugeridos
 
-- Telefone: `createPhoneHandler` de `src/lib/mask-utils.ts`.
-- CEP: `createCepHandler` de `src/lib/mask-utils.ts`.
+- Telefone: `applyPhoneMask` de `src/lib/mask-utils.ts`.
+- CEP: `applyCepMask` de `src/lib/mask-utils.ts`.
 - Avatar: componente shadcn (comp-543) com preview e validação de tipo/tamanho.
 - Documento: componente shadcn (comp-545) com restrição de tipos (PDF/JPG/PNG) e tamanho.
 - iSelfBio: `WebcamCapture` abrindo modal; salvar como arquivo e obter URL do backend.

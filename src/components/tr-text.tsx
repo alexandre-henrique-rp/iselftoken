@@ -19,6 +19,25 @@ interface TrTextProps {
 }
 
 export function TrText({ k, as: Tag = 'span', className }: TrTextProps) {
-  const { t } = useTranslation('common');
-  return <Tag className={className}>{t(k)}</Tag>;
+  // Para evitar divergência de hidratação entre SSR e CSR, renderizamos a chave
+  // no SSR e também no primeiro render do cliente; após montar e quando o i18n
+  // estiver pronto/inicializado, atualizamos para o texto traduzido.
+  const { t, i18n, ready } = useTranslation('common', { useSuspense: false });
+  const [texto, setTexto] = React.useState<string>(k);
+
+  React.useEffect(() => {
+    if (ready || i18n?.isInitialized) {
+      setTexto(t(k));
+    } else {
+      setTexto(k);
+    }
+    // Observa mudanças de idioma e da chave
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready, i18n?.language, k]);
+
+  return (
+    <Tag className={className} suppressHydrationWarning>
+      {texto}
+    </Tag>
+  );
 }
