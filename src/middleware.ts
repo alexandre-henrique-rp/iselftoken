@@ -4,8 +4,7 @@ import { publicRoutes } from './rotas/public';
 import { fundadorRoutes } from './rotas/private/fundador';
 import { investorRoutes } from './rotas/private/investidor';
 import { adminRoutes } from './rotas/private/admin';
-import { afiliadoRoutes } from './rotas/private/afiliado';
-
+import { consultorRoutes } from './rotas/private/consultor';
 
 const publicRoutesList = publicRoutes.map((route) => route.path);
 
@@ -15,28 +14,24 @@ const InvestorRoutesList = investorRoutes.map((route) => route.path);
 
 const AdminRoutesList = adminRoutes.map((route) => route.path);
 
-const AfiliadoRoutesList = afiliadoRoutes.map((route) => route.path);
+const ConsultorRoutesList = consultorRoutes.map((route) => route.path);
 
 export async function middleware(req: NextRequest) {
-  const session = await GetSessionServer();
+  const sessionData = await GetSessionServer();
+  const session = sessionData?.session;
 
   const { pathname } = req.nextUrl;
   const isPublicRoute = publicRoutesList.includes(pathname);
 
-  // Bypass para qualquer rota de API
-  // Evita que chamadas a /api/* sejam redirecionadas pelo middleware
-  if (pathname.startsWith('/api/')) {
-    return NextResponse.next();
-  }
-  if (pathname.startsWith('/auth/')) {
-    return NextResponse.next();
-  }
-  if (pathname.startsWith('/startup/')) {
+  console.log("Sessão no middleware:", session);
+
+  // Bypass para rotas de API e autenticação
+  if (pathname.startsWith('/api/') || pathname.startsWith('/auth/') || pathname.startsWith('/startup/')) {
     return NextResponse.next();
   }
 
-  if(!session){
-    // Para demais rotas públicas
+  // Se não houver sessão, permitir acesso apenas a rotas públicas
+  if (!session) {
     if (isPublicRoute) {
       return NextResponse.next();
     }
@@ -44,8 +39,7 @@ export async function middleware(req: NextRequest) {
   }
 
   // Verificar se a sessão expirou
-  if (session && session.expires && new Date(session.expires) < new Date()) {
-    // Sessão expirada, excluir cookies
+  if (session.expires && new Date(session.expires) < new Date()) {
     const response = NextResponse.redirect(new URL('/login', req.url));
     await DeleteSession();
     return response;
@@ -74,8 +68,8 @@ export async function middleware(req: NextRequest) {
         return NextResponse.next();
       }
     }
-    if (role === 'afiliado') {
-      const allowed = AfiliadoRoutesList.some((base) => pathname === base || pathname.startsWith(base + '/'));
+    if (role === 'consultor') {
+      const allowed = ConsultorRoutesList.some((base) => pathname === base || pathname.startsWith(base + '/'));
       if (allowed) {
         return NextResponse.next();
       }
@@ -96,8 +90,8 @@ export async function middleware(req: NextRequest) {
     if (role === 'admin') {
       return NextResponse.redirect(new URL('/admin', req.url));
     }
-    if (role === 'afiliado') {
-      return NextResponse.redirect(new URL('/afiliado', req.url));
+    if (role === 'consultor') {
+      return NextResponse.redirect(new URL('/dashboard-consultor', req.url));
     }
   }
 

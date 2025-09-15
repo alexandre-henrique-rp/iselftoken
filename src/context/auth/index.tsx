@@ -25,17 +25,25 @@ export async function CreateSessionToken(payload: SessionNext.Session) {
   });
 }
 
-//GetSessionServer responsável por pegar o session  em server components
-export async function GetSessionServer(): Promise<SessionNext.Session | null> {
+export async function GetSessionServer(): Promise<{ session: SessionNext.Session; token: string } | null> {
   try {
-    const token = (await cookies()).get("session-token");
-    if (!token) {
+    const tokenCookie = (await cookies()).get("session-token");
+
+    // Adicione este log para ver se o token está sendo encontrado
+    console.log("Token de sessão encontrado:", !!tokenCookie);
+
+    if (!tokenCookie) {
       return null;
     }
-    const data = await openSessionToken<SessionNext.Session>(token.value);
-    return data;
+
+    const token = tokenCookie.value;
+    const session = await openSessionToken<SessionNext.Session>(token);
+    
+    return { session, token };
+
   } catch (error) {
-    console.log(error)
+    // Este log vai mostrar se a verificação/descriptografia do token falhou
+    console.log("Erro ao obter sessão:", error);
     return null;
   }
 }

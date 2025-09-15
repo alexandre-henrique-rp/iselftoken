@@ -29,7 +29,9 @@ export default function InvestorHome() {
    * para o tipo `getStartupById` esperado pelo componente `StartupCard`.
    * Adiciona valores padrão para propriedades que não existem em getAllStartups.
    */
-  const mapearProfileParaStartup = (item: StartupTypes.getAllStartups): StartupTypes.getStartupById => ({
+  const mapearProfileParaStartup = (
+    item: StartupTypes.getAllStartups,
+  ): StartupTypes.getStartupById => ({
     id: item.id,
     name: item.name,
     logo: item.logo,
@@ -40,12 +42,12 @@ export default function InvestorHome() {
     equityPercentage: item.equityPercentage,
     totalTokens: item.totalTokens,
     tokensRemaining: item.tokensRemaining,
-    fundingGoal: "R$ 1.000.000",
-    raised: "R$ 500.000",
+    fundingGoal: 'R$ 1.000.000',
+    raised: 'R$ 500.000',
     percentage: 50,
-    valuation: "R$ 5.000.000",
+    valuation: 'R$ 5.000.000',
     investors: 25,
-    timeLeft: "30 dias",
+    timeLeft: '30 dias',
     trending: false,
     markdownContent: `## Sobre a ${item.name}\n\n${item.description}\n\n### Categoria\n${item.category}\n\n### Equity\n${item.equityPercentage}`,
     pais: '',

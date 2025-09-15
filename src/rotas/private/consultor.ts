@@ -1,6 +1,6 @@
 import { Bell, Home, User } from "lucide-react";
 
-export const afiliadoRoutes = [
+export const consultorRoutes = [
   {
     id: 1,
     nome: 'Home',
@@ -13,7 +13,7 @@ export const afiliadoRoutes = [
   {
     id: 2,
     nome: 'Dashboard',
-    path: '/dashboard-afiliado',
+    path: '/dashboard-consultor',
     url: '/dashboard-afiliado',
     isActive: true,
     menu: 'geral',
