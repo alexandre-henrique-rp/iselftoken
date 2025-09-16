@@ -82,4 +82,13 @@ export const fundadorRoutes = [
     menu: 'geral',
     icon: null,
   },
+  {
+    id: 10,
+    nome: 'Startup',
+    path: '/dashboard_startups',
+    url: '/dashboard_startups',
+    isActive: true,
+    menu: 'geral',
+    icon: null,
+  },
 ];
