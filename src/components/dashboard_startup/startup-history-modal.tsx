@@ -1,71 +1,118 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Download, TrendingUp, Calendar } from 'lucide-react'
-import { Startup, StartupHistory } from '@/types/startup'
-import { formatCurrency, formatDate, formatPercentage } from '@/lib/utils'
-import { getStartupHistory } from '@/lib/api/startup-service'
+import { useState, useEffect } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Download, TrendingUp, Calendar } from 'lucide-react';
+import { Startup, StartupHistory } from '@/types/startup';
+import { formatCurrency, formatDate, formatPercentage } from '@/lib/utils';
 
 interface StartupHistoryModalProps {
-  startup: Startup
-  isOpen: boolean
-  onClose: () => void
+  startup: Startup;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-export function StartupHistoryModal({ startup, isOpen, onClose }: StartupHistoryModalProps) {
-  const [history, setHistory] = useState<StartupHistory[]>([])
-  const [loading, setLoading] = useState(false)
+export function StartupHistoryModal({
+  startup,
+  isOpen,
+  onClose,
+}: StartupHistoryModalProps) {
+  const [history, setHistory] = useState<StartupHistory[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isOpen) {
-      fetchHistory()
-    }
-  }, [isOpen, startup.id])
+    if (!isOpen) return;
 
-  const fetchHistory = async () => {
-    setLoading(true)
-    try {
-      const data = await getStartupHistory(startup.id)
-      setHistory(data)
-    } catch (error) {
-      console.error('Erro ao carregar histórico:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+    let active = true;
 
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status) {
-      case 'Concluída': return 'default'
-      case 'Ativa': return 'default'
-      case 'Pausada': return 'secondary'
-      case 'Cancelada': return 'destructive'
-      default: return 'secondary'
-    }
-  }
+    const fetchHistory = async () => {
+      setLoading(true);
+      try {
+        const request = await fetch(
+          `/api/startup/dashboard/${startup.id}/historico`,
+        );
+        const data = await request.json();
+        if (active) {
+          setHistory(data);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar histórico:', error);
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchHistory();
+
+    return () => {
+      active = false;
+    };
+  }, [isOpen, startup.id]);
+
+  // const getStatusBadgeVariant = (status: string) => {
+  //   switch (status) {
+  //     case 'Concluída': return 'default'
+  //     case 'Ativa': return 'default'
+  //     case 'Pausada': return 'secondary'
+  //     case 'Cancelada': return 'destructive'
+  //     default: return 'secondary'
+  //   }
+  // }
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
-      case 'Concluída': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-      case 'Ativa': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-      case 'Pausada': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-      case 'Cancelada': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-      default: return ''
+      case 'Concluída':
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'Ativa':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'Pausada':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      case 'Cancelada':
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      default:
+        return '';
     }
-  }
+  };
 
-  const totalCaptado = history.reduce((sum, item) => sum + item.valor_captado, 0)
-  const totalInvestidores = history.reduce((sum, item) => sum + item.numero_investidores, 0)
-  const campanhasConcluidas = history.filter(item => item.status === 'Concluída').length
+  const totalCaptado = history.reduce(
+    (sum, item) => sum + item.valor_captado,
+    0,
+  );
+  const totalInvestidores = history.reduce(
+    (sum, item) => sum + item.numero_investidores,
+    0,
+  );
+  const campanhasConcluidas = history.filter(
+    (item) => item.status === 'Concluída',
+  ).length;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-6xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5" />
@@ -75,22 +122,22 @@ export function StartupHistoryModal({ startup, isOpen, onClose }: StartupHistory
 
         {loading ? (
           <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               {Array.from({ length: 3 }).map((_, i) => (
                 <Card key={i} className="animate-pulse">
                   <CardContent className="p-6">
-                    <div className="h-4 w-24 bg-muted rounded mb-2" />
-                    <div className="h-8 w-32 bg-muted rounded" />
+                    <div className="bg-muted mb-2 h-4 w-24 rounded" />
+                    <div className="bg-muted h-8 w-32 rounded" />
                   </CardContent>
                 </Card>
               ))}
             </div>
-            <div className="h-64 bg-muted rounded animate-pulse" />
+            <div className="bg-muted h-64 animate-pulse rounded" />
           </div>
         ) : (
           <div className="space-y-6">
             {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <Card>
                 <CardHeader className="pb-3">
                   <CardDescription>Total Captado Histórico</CardDescription>
@@ -99,7 +146,7 @@ export function StartupHistoryModal({ startup, isOpen, onClose }: StartupHistory
                   </CardTitle>
                 </CardHeader>
               </Card>
-              
+
               <Card>
                 <CardHeader className="pb-3">
                   <CardDescription>Total de Investidores</CardDescription>
@@ -108,7 +155,7 @@ export function StartupHistoryModal({ startup, isOpen, onClose }: StartupHistory
                   </CardTitle>
                 </CardHeader>
               </Card>
-              
+
               <Card>
                 <CardHeader className="pb-3">
                   <CardDescription>Campanhas Concluídas</CardDescription>
@@ -132,11 +179,14 @@ export function StartupHistoryModal({ startup, isOpen, onClose }: StartupHistory
               </CardHeader>
               <CardContent>
                 {history.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-medium mb-2">Nenhuma campanha encontrada</h3>
+                  <div className="py-8 text-center">
+                    <Calendar className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
+                    <h3 className="mb-2 text-lg font-medium">
+                      Nenhuma campanha encontrada
+                    </h3>
                     <p className="text-muted-foreground">
-                      Esta startup ainda não possui histórico de campanhas de captação.
+                      Esta startup ainda não possui histórico de campanhas de
+                      captação.
                     </p>
                   </div>
                 ) : (
@@ -157,9 +207,15 @@ export function StartupHistoryModal({ startup, isOpen, onClose }: StartupHistory
                       <TableBody>
                         {history.map((item) => (
                           <TableRow key={item.id}>
-                            <TableCell className="font-mono text-sm">{item.id}</TableCell>
-                            <TableCell className="font-medium">{item.nome}</TableCell>
-                            <TableCell>{formatCurrency(item.valor_objetivo)}</TableCell>
+                            <TableCell className="font-mono text-sm">
+                              {item.id}
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              {item.nome}
+                            </TableCell>
+                            <TableCell>
+                              {formatCurrency(item.valor_objetivo)}
+                            </TableCell>
                             <TableCell className="font-medium">
                               {formatCurrency(item.valor_captado)}
                             </TableCell>
@@ -185,7 +241,9 @@ export function StartupHistoryModal({ startup, isOpen, onClose }: StartupHistory
                               </div>
                             </TableCell>
                             <TableCell>
-                              <Badge className={getStatusBadgeColor(item.status)}>
+                              <Badge
+                                className={getStatusBadgeColor(item.status)}
+                              >
                                 {item.status}
                               </Badge>
                             </TableCell>
@@ -200,10 +258,10 @@ export function StartupHistoryModal({ startup, isOpen, onClose }: StartupHistory
           </div>
         )}
 
-        <div className="flex justify-end pt-4 border-t">
+        <div className="flex justify-end border-t pt-4">
           <Button onClick={onClose}>Fechar</Button>
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

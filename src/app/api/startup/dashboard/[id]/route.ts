@@ -1,3 +1,4 @@
+import { StartupTypes } from '@/types/ProfileTypes';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
@@ -7,7 +8,7 @@ export async function GET(
   try {
     const { id } = await params;
     console.log('🚀 ~ GET ~ id:', id);
-    const startup: any[] = [];
+    const startup: StartupTypes.getStartupById[] = [];
     return NextResponse.json(startup, { status: 200 });
   } catch (error) {
     console.log(error);

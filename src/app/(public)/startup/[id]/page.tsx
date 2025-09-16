@@ -104,7 +104,7 @@ export default async function StartupPage({
             <EquityCard2
               affiliateToken={token}
               userRole={
-                !session?.user.role
+                session?.user.role
                   ? 'investidor'
                   : session?.user.role === 'fundador'
                     ? 'startup'

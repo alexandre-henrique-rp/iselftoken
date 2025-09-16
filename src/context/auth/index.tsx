@@ -25,7 +25,7 @@ export async function CreateSessionToken(payload: SessionNext.Session) {
   });
 }
 
-export async function GetSessionServer(): Promise<{ session: SessionNext.Session; token: string } | null> {
+export async function GetSessionServer(): Promise<SessionNext.Session | null> {
   try {
     const tokenCookie = (await cookies()).get("session-token");
 
@@ -37,9 +37,15 @@ export async function GetSessionServer(): Promise<{ session: SessionNext.Session
     }
 
     const token = tokenCookie.value;
-    const session = await openSessionToken<SessionNext.Session>(token);
+    const payload = await openSessionToken(token);
+    const expires = payload.exp as unknown as string;
     
-    return { session, token };
+    return { 
+      user: payload as unknown as SessionNext.Client,
+      expires,
+      token,
+      refreshToken: payload.refreshToken as string
+    };
 
   } catch (error) {
     // Este log vai mostrar se a verificação/descriptografia do token falhou

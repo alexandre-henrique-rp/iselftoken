@@ -17,8 +17,8 @@ const AdminRoutesList = adminRoutes.map((route) => route.path);
 const ConsultorRoutesList = consultorRoutes.map((route) => route.path);
 
 export async function middleware(req: NextRequest) {
-  const sessionData = await GetSessionServer();
-  const session = sessionData?.session;
+  const session = await GetSessionServer();
+  
 
   const { pathname } = req.nextUrl;
   const isPublicRoute = publicRoutesList.includes(pathname);

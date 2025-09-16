@@ -1,7 +1,3 @@
-// Adaptador de Autenticação
-// Interface para serviço de autenticação, seguindo Clean Architecture
-// Permite substituição de provedores (Firebase, Auth0, solução própria) sem impactar o domínio
-
 export interface AuthService {
   login(email: string, password: string): Promise<AuthResult>;
   logout(): Promise<void>;

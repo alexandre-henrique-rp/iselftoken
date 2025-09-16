@@ -8,7 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { z } from 'zod';
 import { DataTable, schema } from '@/components/data-table';
 import { ChartAreaInteractive } from '@/components/chart-area-interactive';
-import { affiliateService, DashboardData } from '@/services/AffiliateService'; // Importe o serviço e a interface
+import { affiliateService } from '@/services/AffiliateService'; // Importe o serviço e a interface
+import { DashboardData } from '@/types/afiliateTypes';
 
 interface AffiliateHomeProps {
   // Use os IDs para buscar os dados da API.
@@ -24,37 +25,50 @@ export default function AffiliateHome({ userId, token, data }: AffiliateHomeProp
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
 
-  const fetchDashboardData = async () => {
-    if (!userId || !token) {
-      setError("Dados de usuário não disponíveis.");
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await affiliateService.getAffiliateDashboard(token, userId);
-      if (response.status === 'success' && response.data) {
-        setDashboardData(response.data);
-      } else {
-        throw new Error(response.message || 'Falha ao carregar os dados do dashboard.');
-      }
-    } catch (err: any) {
-      console.error("Erro ao buscar dados do dashboard:", err);
-      if (retryCount < 3) {
-        setTimeout(() => setRetryCount(retryCount + 1), 2000); // Tenta novamente após 2 segundos
-      } else {
-        setError(err.message || 'Não foi possível carregar os dados. Tente novamente mais tarde.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    let canceled = false;
+
+    const fetchDashboardData = async () => {
+      if (!userId || !token) {
+        setError("Dados de usuário não disponíveis.");
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        const response = await affiliateService.getAffiliateDashboard(token, userId);
+        if (!canceled) {
+          if (response.status === 'success' && response.data) {
+            setDashboardData(response.data);
+          } else {
+            throw new Error(response.message || 'Falha ao carregar os dados do dashboard.');
+          }
+        }
+      } catch (err: unknown) {
+        console.error("Erro ao buscar dados do dashboard:", err);
+        const message = err instanceof Error ? err.message : 'Não foi possível carregar os dados. Tente novamente mais tarde.';
+        if (!canceled) {
+          if (retryCount < 3) {
+            setTimeout(() => setRetryCount((r) => r + 1), 2000); // Tenta novamente após 2 segundos
+          } else {
+            setError(message);
+          }
+        }
+      } finally {
+        if (!canceled) {
+          setLoading(false);
+        }
+      }
+    };
+
     fetchDashboardData();
+
+    return () => {
+      canceled = true;
+    };
   }, [userId, token, retryCount]);
 
   const handleCopy = () => {

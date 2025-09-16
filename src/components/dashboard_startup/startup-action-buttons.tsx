@@ -43,7 +43,7 @@ export function StartupActionButtons({ startup }: StartupActionButtonsProps) {
     setIsInvestorsModalOpen(true)
   }
 
-  const handleEditSubmit = async (data: any) => {
+  const handleEditSubmit = async (data: unknown) => {
     setIsLoading(true)
     
     console.log('API Call: PUT /api/startups/' + startup.id, data)

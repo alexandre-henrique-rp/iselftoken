@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 
 interface EquityInfo2Props {
   affiliateToken?: string;
-  userRole?: 'investidor' | 'startup' | 'admin' | 'afiliado';
+  userRole?: 'investidor' | 'startup' | 'admin' | 'afiliado' | 'consultor';
   isAuthenticated: boolean;
 }
 

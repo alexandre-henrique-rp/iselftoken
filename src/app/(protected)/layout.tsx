@@ -17,12 +17,12 @@ interface Props {
 // Layout protegido: valida a sessão no servidor para evitar loading no client
 export default async function ProtectedLayout({ children }: Props) {
   const sessionData = await GetSessionServer();
-  if (!sessionData?.session) {
+  if (!sessionData) {
     await DeleteSession();
     redirect('/login');
   }
 
-  const { session } = sessionData;
+  const session  = sessionData;
   const role = session.user?.role;
 
   return (
