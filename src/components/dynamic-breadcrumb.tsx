@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { adminRoutes } from '@/rotas/private/admin';
 import { fundadorRoutes } from '@/rotas/private/fundador';
-import { afiliadoRoutes } from '@/rotas/private/afiliado';
+import { consultorRoutes } from '@/rotas/private/consultor';
 import { investorRoutes } from '@/rotas/private/investidor';
 
 interface dynamicBreadcrumbProps {
@@ -31,7 +31,7 @@ export function DynamicBreadcrumb({ role }: dynamicBreadcrumbProps) {
       : role === 'admin'
         ? adminRoutes
         : role === 'afiliado'
-          ? afiliadoRoutes
+          ? consultorRoutes
           : investorRoutes;
 
   const routes = MenuFilter;

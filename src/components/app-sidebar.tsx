@@ -18,7 +18,7 @@ import {
 import { NavProjects } from "./nav-projects"
 import { adminRoutes } from "@/rotas/private/admin"
 import { fundadorRoutes } from "@/rotas/private/fundador"
-import { afiliadoRoutes } from "@/rotas/private/afiliado"
+import { consultorRoutes } from "@/rotas/private/consultor"
 import { investorRoutes } from "@/rotas/private/investidor"
 
 
@@ -29,7 +29,7 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 
 export function AppSidebar({ role, session, ...props }: AppSidebarProps) {
 
-  const MenuFilter = role === "fundador" ? fundadorRoutes : role === "admin" ? adminRoutes : role === "afiliado" ? afiliadoRoutes : investorRoutes;
+  const MenuFilter = role === "fundador" ? fundadorRoutes : role === "admin" ? adminRoutes : role === "afiliado" ? consultorRoutes : investorRoutes;
 
   return (
     <Sidebar variant="inset" {...props}>

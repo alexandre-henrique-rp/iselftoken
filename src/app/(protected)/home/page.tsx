@@ -1,4 +1,4 @@
-import InvestorHome from '@/components/investidorHome';
+import InvestorHome from '@/components/investorHome';
 // import StartupHome from '@/components/startupHome';
 // import { FourSquareLoader } from '@/components/ui/four-square-loader';
 // import { GetSessionServer } from '@/context/auth';
