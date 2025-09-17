@@ -1,8 +1,7 @@
-import generateA2fCode from '@/modules/codigo/a2f';
+import generateA2fCode from '@/lib/a2f';
 import { NextRequest, NextResponse } from 'next/server';
 import * as jose from 'jose';
 import { GetSessionServer } from '@/context/auth';
-
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();

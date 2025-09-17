@@ -38,10 +38,12 @@ export async function GetSessionServer(): Promise<SessionNext.Session | null> {
 
     const token = tokenCookie.value;
     const payload = await openSessionToken(token);
-    const expires = payload.exp as unknown as string;
+    console.log("🚀 ~ GetSessionServer ~ payload:", payload)
+    const expires = new Date((payload.exp as number) * 1000).toISOString();
+    console.log("🚀 ~ GetSessionServer ~ expires:", expires)
     
     return { 
-      user: payload as unknown as SessionNext.Client,
+      user: payload.user as unknown as SessionNext.Client,
       expires,
       token,
       refreshToken: payload.refreshToken as string

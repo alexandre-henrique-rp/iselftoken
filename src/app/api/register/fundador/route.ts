@@ -1,4 +1,4 @@
-import generateA2fCode from '@/modules/codigo/a2f';
+import generateA2fCode from '@/lib/a2f';
 import { NextResponse } from 'next/server';
 import * as jose from 'jose';
 

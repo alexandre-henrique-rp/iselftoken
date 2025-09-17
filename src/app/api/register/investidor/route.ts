@@ -1,4 +1,4 @@
-import generateA2fCode from '@/modules/codigo/a2f';
+import generateA2fCode from '@/lib/a2f';
 import { NextResponse } from 'next/server';
 import * as jose from 'jose';
 export async function POST(request: Request) {
@@ -55,25 +55,7 @@ export async function POST(request: Request) {
     );
 
     // Captura a resposta como texto primeiro para debug
-    const responseText = await response.text();
-    console.log("🚀 ~ POST ~ responseText:", responseText);
-    console.log("🚀 ~ POST ~ response.status:", response.status);
-    console.log("🚀 ~ POST ~ response.headers:", Object.fromEntries(response.headers.entries()));
-
-    let result;
-    try {
-      result = JSON.parse(responseText);
-    } catch (parseError) {
-      console.error("🚀 ~ POST ~ JSON Parse Error:", parseError);
-      console.error("🚀 ~ POST ~ Raw response:", responseText);
-      return NextResponse.json(
-        {
-          message: 'Erro na resposta da API externa',
-          error: `Resposta inválida: ${responseText.substring(0, 200)}...`,
-        },
-        { status: 500 },
-      );
-    }
+    const result = await response.json();
     console.log("🚀 ~ POST ~ result:", result)
 
     if (!response.ok || result.status === 'error') {

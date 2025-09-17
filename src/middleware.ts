@@ -19,11 +19,11 @@ const ConsultorRoutesList = consultorRoutes.map((route) => route.path);
 export async function middleware(req: NextRequest) {
   const session = await GetSessionServer();
   
-
   const { pathname } = req.nextUrl;
+
   const isPublicRoute = publicRoutesList.includes(pathname);
 
-  console.log("Sessão no middleware:", session);
+  // console.log("Sessão no middleware:", session);
 
   // Bypass para rotas de API e autenticação
   if (pathname.startsWith('/api/') || pathname.startsWith('/auth/') || pathname.startsWith('/startup/')) {
@@ -45,6 +45,7 @@ export async function middleware(req: NextRequest) {
     return response;
   }
 
+ 
   if (session) {
     const role = session.user.role;
     // "investidor" | "startup" | "admin" | "afiliado"

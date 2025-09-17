@@ -20,6 +20,7 @@ export async function PUT(request: NextRequest) {
 
     // Tentar verificar o token com tratamento de erro específico
     const tokenData = await VerifyToken(TokenClient);
+    console.log("🚀 ~ PUT ~ tokenData:", tokenData)
 
     const { cog, red, Id } = tokenData;
 
