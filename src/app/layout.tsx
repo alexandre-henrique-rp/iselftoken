@@ -18,8 +18,10 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'),
   title: "iSelfToken",
   description: "Invista em startups promissoras via tokenização de equity",
+  manifest: "/manifest.json",
   icons: {
     icon: "/favicon.ico",
+    apple: "/icon600x600.png",
   },
   openGraph: {
     title: 'iSelfToken',

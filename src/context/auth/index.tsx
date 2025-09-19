@@ -38,9 +38,9 @@ export async function GetSessionServer(): Promise<SessionNext.Session | null> {
 
     const token = tokenCookie.value;
     const payload = await openSessionToken(token);
-    console.log("🚀 ~ GetSessionServer ~ payload:", payload)
+
     const expires = new Date((payload.exp as number) * 1000).toISOString();
-    console.log("🚀 ~ GetSessionServer ~ expires:", expires)
+  
     
     return { 
       user: payload.user as unknown as SessionNext.Client,

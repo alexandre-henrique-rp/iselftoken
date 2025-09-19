@@ -1,0 +1,15 @@
+{
+  "name": "iSelfToken",
+  "short_name": "iSelfToken",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/icon600x600.png",
+      "sizes": "600x600",
+      "type": "image/png"
+    }
+  ]
+}
