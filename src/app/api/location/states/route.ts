@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const country = searchParams.get('country');
+    const country = request.nextUrl.searchParams.get('country')
+    console.log("🚀 ~ GET ~ country:", country)
     if (!country) {
       return NextResponse.json(
         { error: true, message: 'Parametro country é obrigatório', data: null },

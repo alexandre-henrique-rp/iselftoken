@@ -1,10 +1,9 @@
-import { NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const country = searchParams.get('country');
-    const state = searchParams.get('state');
+    const country = request.nextUrl.searchParams.get('country');
+    const state = request.nextUrl.searchParams.get('state');
     if (!country || !state) {
       return NextResponse.json(
         {

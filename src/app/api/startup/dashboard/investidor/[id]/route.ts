@@ -4,10 +4,10 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  ctx: RouteContext<'/api/startup/dashboard/investidor/[id]'>,
 ) {
   try {
-    const { id } = await params;
+    const { id } = await ctx.params;
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');

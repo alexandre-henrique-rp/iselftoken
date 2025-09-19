@@ -3,10 +3,10 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  ctx: RouteContext<'/api/startup/dashboard/[id]'>,
 ) {
   try {
-    const { id } = await params;
+    const { id } = await ctx.params;
     console.log('🚀 ~ GET ~ id:', id);
     const startup: StartupTypes.getStartupById[] = [];
     return NextResponse.json(startup, { status: 200 });

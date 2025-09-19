@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,32 +23,32 @@ import { User, Phone, MapPin, Camera, IdCard, FileText, Building } from "lucide-
 
 // Tipos básicos alinhados ao que a page já usa
 export type PerfilMin = {
-  id: string | number;
-  nome: string;
-  email: string;
-  role: "fundador" | "afiliado" | "admin" | "investidor";
-  telefone: string;
-  cep: string;
-  endereco: string;
-  numero: string;
-  complemento: string;
-  bairro: string;
-  cidade: string;
-  uf: string;
-  pais: string;
-  dt_nascimento: string;
-  bio_facial: string;
-  avatar: string;
-  tipo_documento: string;
-  reg_documento: string;
-  documento: string;
-  termos: boolean;
-  status: string;
-  startups: unknown[];
-  indicados: unknown[];
-  fundador: boolean;
-  afiliado: boolean;
-  persent_ganho: number;
+  id?: number;
+  nome?: string;
+  email?: string;
+  role?: "fundador" | "afiliado" | "admin" | "investidor";
+  telefone?: string;
+  cep?: string;
+  endereco?: string;
+  numero?: string;
+  complemento?: string;
+  bairro?: string;
+  cidade?: string;
+  uf?: string;
+  pais?: string;
+  dt_nascimento?: string;
+  bio_facial?: string;
+  avatar?: string;
+  tipo_documento?: string;
+  reg_documento?: string;
+  documento?: string;
+  termos?: boolean;
+  status?: string;
+  startups?: unknown[];
+  indicados?: unknown[];
+  fundador?: boolean;
+  afiliado?: boolean;
+  persent_ganho?: number;
 };
 
 // Schema Zod completo para validação do formulário de perfil

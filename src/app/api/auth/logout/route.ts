@@ -10,6 +10,7 @@ export async function POST() {
   try {
     // Remove a sessão e cookies relacionados
     await DeleteSession();
+    
 
     return NextResponse.json(
       {

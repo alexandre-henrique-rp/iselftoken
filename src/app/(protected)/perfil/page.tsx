@@ -1,10 +1,8 @@
 // Força renderização dinâmica para evitar problemas com cookies/sessão em SSR
 export const dynamic = 'force-dynamic';
 
-import { TabelaStartupsDoUsuario } from '@/components/business/perfil/tabela-startups-do-usuario';
 import { PerfilForm } from '@/components/business/perfil/perfil-form';
 import { GetSessionServer } from '@/context/auth';
-import Loading from '@/components/ui/Loading';
 
 const request = async (id: string | number) => {
   const user = await fetch(
@@ -20,21 +18,14 @@ const request = async (id: string | number) => {
   return userData;
 }
 
-// type ApiResponse<T = unknown> = {
-//   status?: string;
-//   message?: string;
-//   data?: T;
-//   error?: string;
-// };
-
 type StartupMin = {
-  id: string | number;
+  id: number;
   fantasia?: string;
   cnpj?: string;
 };
 
 type PerfilData = {
-  id?: string | number;
+  id?: number;
   nome?: string;
   email?: string;
   role?: 'investidor' | 'fundador' | 'afiliado' | string;
@@ -76,10 +67,6 @@ export default async function Perfil() {
 
   const role = perfil?.role;
 
-  if(!perfil) {
-    return <Loading />;
-  }
-
   return (
     <>
     <section className="container mx-auto max-w-5xl px-4 py-6">
@@ -95,31 +82,31 @@ export default async function Perfil() {
       {/* Formulário de edição do perfil (client-side: RHF + Zod) */}
       <PerfilForm
         perfil={{
-          id: perfil.id,
-          nome: perfil.nome,
-          email: perfil.email,
+          id: perfil?.id,
+          nome: perfil?.nome,
+          email: perfil?.email,
           role: role as "fundador" | "afiliado" | "admin" | "investidor" | undefined,
-          telefone: perfil.telefone,
-          cep: perfil.cep,
-          endereco: perfil.endereco,
-          numero: perfil.numero,
-          bairro: perfil.bairro,
-          cidade: perfil.cidade,
-          uf: perfil.uf,
-          pais: perfil.pais,
-          dt_nascimento: perfil.dataNascimento,
-          bio_facial: perfil.bio_facial,
-          avatar: perfil.avatar,
-          tipo_documento: perfil.tipo_documento,
-          reg_documento: perfil.reg_documento,
-          documento: perfil.documento,
-          termos: perfil.termos,
-          status: perfil.status,
-          startups: perfil.startups,
-          indicados: perfil.indicados,
-          fundador: perfil.fundador,
-          afiliado: perfil.afiliado,
-          persent_ganho: perfil.persent_ganho,
+          telefone: perfil?.telefone,
+          cep: perfil?.cep,
+          endereco: perfil?.endereco,
+          numero: perfil?.numero,
+          bairro: perfil?.bairro,
+          cidade: perfil?.cidade,
+          uf: perfil?.uf,
+          pais: perfil?.pais,
+          dt_nascimento: perfil?.dataNascimento,
+          bio_facial: perfil?.bio_facial,
+          avatar: perfil?.avatar,
+          tipo_documento: perfil?.tipo_documento,
+          reg_documento: perfil?.reg_documento,
+          documento: perfil?.documento,
+          termos: perfil?.termos,
+          status: perfil?.status,
+          startups: perfil?.startups,
+          indicados: perfil?.indicados,
+          fundador: perfil?.fundador,
+          afiliado: perfil?.afiliado,
+          persent_ganho: perfil?.persent_ganho,
         }}
       />
     </section>

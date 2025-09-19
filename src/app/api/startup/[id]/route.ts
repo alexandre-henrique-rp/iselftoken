@@ -4,9 +4,9 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  ctx: RouteContext<'/api/startup/[id]'>,
 ) {
-  const { id } = await params;
+  const { id } = await ctx.params;
     const startup = featuredStartups.find(
     (s: StartupTypes.getStartupById) => s.id === +id,
   );

@@ -6,10 +6,10 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  ctx: RouteContext<'/api/startup/dashboard/[id]/historico'>,
 ) {
   try {
-    const { id } = await params;
+    const { id } = await ctx.params;
 
     console.log('API Call: GET /api/startups/' + id + '/historico', {
       timestamp: new Date().toISOString(),
