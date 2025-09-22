@@ -24,16 +24,21 @@ export function TrText({ k, as: Tag = 'span', className }: TrTextProps) {
   // estiver pronto/inicializado, atualizamos para o texto traduzido.
   const { t, i18n, ready } = useTranslation('common', { useSuspense: false });
   const [texto, setTexto] = React.useState<string>(k);
+  const [isClient, setIsClient] = React.useState(false);
 
   React.useEffect(() => {
-    if (ready || i18n?.isInitialized) {
-      setTexto(t(k));
-    } else {
+    setIsClient(true);
+  }, []);
+
+  React.useEffect(() => {
+    if (isClient && ready && i18n?.isInitialized) {
+      const translation = t(k);
+      // Se a tradução for diferente da chave, usa a tradução; senão mantém a chave
+      setTexto(translation && translation !== k ? translation : k);
+    } else if (isClient) {
       setTexto(k);
     }
-    // Observa mudanças de idioma e da chave
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready, i18n?.language, k]);
+  }, [isClient, ready, i18n?.isInitialized, i18n?.language, k, t]);
 
   return (
     <Tag className={className} suppressHydrationWarning>

@@ -35,7 +35,7 @@ export function DeleteStartupDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md bg-card text-card-foreground border border-border">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-destructive">
             <AlertTriangle className="h-5 w-5" />
@@ -91,12 +91,14 @@ export function DeleteStartupDialog({
             variant="outline"
             onClick={onClose}
             disabled={isLoading}
+            className="border border-border bg-background hover:bg-accent hover:text-accent-foreground"
           >
             Cancelar
           </Button>
           <Button
             variant="destructive"
             onClick={handleConfirm}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             disabled={isLoading}
           >
             {isLoading ? 'Excluindo...' : 'Sim, Excluir'}

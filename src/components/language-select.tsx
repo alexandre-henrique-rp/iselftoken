@@ -5,35 +5,59 @@ import { setLanguage } from "@/i18n";
 
 /**
  * Componente client para seleção de idioma.
- * - Salva o locale em cookie ("locale") e recarrega a página.
- * - Não altera a URL, evitando dependência de rotas /[locale].
+ * - Salva o locale em cookie ("locale") e funciona com i18n.
+ * - Suporta todos os locales: pt-BR, pt-PT, en-US, en-UK, es-ES.
  */
 interface LanguageSelectProps {
-  defaultLocale?: "pt" | "en" | "es";
+  defaultLocale?: "pt-BR" | "pt-PT" | "en-US" | "en-UK" | "es-ES";
 }
 
-export function LanguageSelect({ defaultLocale = "pt" }: LanguageSelectProps) {
-  const [value, setValue] = React.useState<"pt" | "en" | "es">(defaultLocale);
+// Configuração de locales suportados
+const supportedLocales = ["pt-BR", "pt-PT", "en-US", "en-UK", "es-ES"] as const;
+type SupportedLocale = typeof supportedLocales[number];
 
-  React.useEffect(() => {
-    // tenta obter do cookie 'locale'
+// Mapeamento para verificar se um locale é suportado
+function isSupportedLocale(locale: string): locale is SupportedLocale {
+  return supportedLocales.includes(locale as SupportedLocale);
+}
+
+export function LanguageSelect({ defaultLocale = "pt-BR" }: LanguageSelectProps) {
+  const [value, setValue] = React.useState<SupportedLocale>(() => {
+    // Inicialização lazy - só executa no cliente
+    if (typeof window === 'undefined') {
+      return defaultLocale;
+    }
+
+    // Verifica cookie na inicialização
     const match = document.cookie.match(/(?:^|; )locale=([^;]*)/);
     const cookieLocale = match ? decodeURIComponent(match[1]) : null;
-    if (cookieLocale === "pt" || cookieLocale === "en" || cookieLocale === "es") {
-      setValue(cookieLocale);
-      setLanguage(cookieLocale);
+
+    if (cookieLocale && isSupportedLocale(cookieLocale)) {
+      return cookieLocale;
     }
-  }, []);
+
+    return defaultLocale;
+  });
+
+  React.useEffect(() => {
+    // Sincroniza o i18n com o valor atual
+    setLanguage(value);
+  }, [value]);
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const locale = e.target.value as "pt" | "en" | "es";
-    setValue(locale);
-    // salva cookie simples (1 ano)
-    const expires = new Date();
-    expires.setFullYear(expires.getFullYear() + 1);
-    document.cookie = `locale=${encodeURIComponent(locale)}; expires=${expires.toUTCString()}; path=/`;
-    // aplica runtime sem reload
-    setLanguage(locale);
+    const selectedLocale = e.target.value;
+
+    if (isSupportedLocale(selectedLocale)) {
+      setValue(selectedLocale);
+
+      // Salva cookie (1 ano)
+      const expires = new Date();
+      expires.setFullYear(expires.getFullYear() + 1);
+      document.cookie = `locale=${encodeURIComponent(selectedLocale)}; expires=${expires.toUTCString()}; path=/`;
+
+      // Aplica mudança de idioma
+      setLanguage(selectedLocale);
+    }
   };
 
   return (
@@ -43,9 +67,11 @@ export function LanguageSelect({ defaultLocale = "pt" }: LanguageSelectProps) {
         value={value}
         onChange={handleChange}
       >
-        <option value="pt">PT 🇧🇷</option>
-        <option value="en">EN 🇺🇸</option>
-        <option value="es">ES 🇪🇸</option>
+        <option value="pt-BR">BR 🇧🇷</option>
+        <option value="pt-PT">PT 🇵🇹</option>
+        <option value="en-US">EN 🇺🇸</option>
+        {/* <option value="en-UK">UK 🇬🇧</option> */}
+        <option value="es-ES">ES 🇪🇸</option>
       </select>
       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-muted-foreground">
         <svg

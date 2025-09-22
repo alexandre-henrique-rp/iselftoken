@@ -23,6 +23,7 @@ import {
  * - Seleção de linguagem (LanguageSelect)
  */
 export function MobileMenu() {
+
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -50,7 +51,7 @@ export function MobileMenu() {
 
           <div className="flex items-center justify-between rounded-md border p-3">
             <span className="text-sm text-muted-foreground">Idioma</span>
-            <LanguageSelect defaultLocale="pt" />
+            <LanguageSelect defaultLocale="pt-BR" />
           </div>
         </div>
       </SheetContent>

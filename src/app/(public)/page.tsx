@@ -79,7 +79,7 @@ export default async function Home() {
           </div>
           <nav className="hidden items-center gap-4 md:flex">
             {/* Seletor de idioma (Client Component) */}
-            <LanguageSelect defaultLocale="pt" />
+            <LanguageSelect defaultLocale="pt-BR" />
             <AnimatedThemeToggler />
             <Link href="/login">
               <Button className="inline-flex items-center justify-center rounded-md bg-blue-600 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600/90">
@@ -119,6 +119,7 @@ export default async function Home() {
                 className="h-auto w-full max-w-2xl dark:hidden"
               />
               <HeaderTr />
+              
               <TrText
                 k="home.hero.subtitle"
                 as="p"

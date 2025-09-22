@@ -1,32 +1,32 @@
 {
-  "title": "Acesse sua conta",
-  "subtitle": "Informe seu e-mail abaixo para acessar sua conta",
+  "title": "Accede a tu cuenta",
+  "subtitle": "Introduce tu email para acceder a tu cuenta",
   "form": {
     "email": {
-      "label": "E-mail",
-      "placeholder": "seu@email.com",
-      "required": "Email é obrigatório",
+      "label": "Email",
+      "placeholder": "tu@email.com",
+      "required": "Email es requerido",
       "invalid": "Email inválido"
     },
     "password": {
-      "label": "Senha",
-      "required": "Senha é obrigatória",
-      "forgot": "Esqueceu sua senha?"
+      "label": "Contraseña",
+      "required": "Contraseña es requerida",
+      "forgot": "¿Olvidaste tu contraseña?"
     },
-    "submit": "Entrar"
+    "submit": "Iniciar sesión"
   },
   "register": {
-    "question": "Não tem uma conta?",
-    "button": "Cadastre-se"
+    "question": "¿No tienes una cuenta?",
+    "button": "Regístrate"
   },
   "terms": {
-    "text": "Ao continuar, você concorda com nossos",
-    "link": "Termos de Uso"
+    "text": "Al continuar, aceptas nuestros",
+    "link": "Términos de Uso"
   },
   "messages": {
-    "success": "Login realizado com sucesso!",
-    "success_description": "Redirecionando...",
-    "error": "Erro ao fazer login",
-    "error_description": "Verifique suas credenciais e tente novamente"
+    "success": "¡Inicio de sesión exitoso!",
+    "success_description": "Redirigiendo...",
+    "error": "Error en el inicio de sesión",
+    "error_description": "Por favor verifica tus credenciales e inténtalo de nuevo"
   }
 }

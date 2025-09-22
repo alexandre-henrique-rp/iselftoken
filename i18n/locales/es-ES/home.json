@@ -1,0 +1,54 @@
+{
+  "title": "iSelfToken - Conectando Inversores y Startups",
+  "description": "Plataforma digital para conectar inversores y startups.",
+  "keywords": "inversión, startups, inversores, España, tecnología",
+  "welcome": "Invierte en startups prometedoras a través de la tokenización de equity",
+  "header": {
+    "login": "Iniciar sesión"
+  },
+  "hero": {
+    "title": "Invierte en startups prometedoras a través de la tokenización de equity",
+    "subtitle": "iSelfToken conecta inversores y fundadores de startups en una plataforma segura y accesible.",
+    "cta": {
+      "raise": "Comenzar recaudación",
+      "invest": "Comenzar a invertir"
+    }
+  },
+  "sections": {
+    "raising_title": "Rondas de recaudación"
+  },
+  "cta": {
+    "title": "¿Cómo funciona?",
+    "subtitle1": "Para fundadores: Recauda financiación para tu startup con una solución segura, rápida y 100% digital.",
+    "subtitle2": "Para inversores: Invierte en startups prometedoras con liquidez a través de la tokenización de equity.",
+    "bullets": {
+      "verified": "Startups verificadas",
+      "low_minimum": "Inversión mínima baja"
+    },
+    "button1": "Comenzar recaudación ahora",
+    "button2": "Comenzar a invertir ahora"
+  },
+  "testimonials": {
+    "investors_title": "Testimonios de inversores",
+    "startups_title": "Lo que dicen los fundadores de startups sobre nosotros"
+  },
+  "footer": {
+    "description": "Conectando inversores y fundadores de startups en una plataforma segura y accesible.",
+    "platform": "Plataforma",
+    "for_investors": "Para Inversores",
+    "for_projects": "Para Proyectos",
+    "legal": "Legal",
+    "education": "iSelfToken Education",
+    "terms": "Términos de Uso",
+    "privacy": "Privacidad",
+    "contact": "Contacto",
+    "email": "Email",
+    "phone": "Teléfono",
+    "rights": "Todos los derechos reservados."
+  },
+  "investor": {
+    "highlights": "Destacados",
+    "view_all": "Ver todos",
+    "no_data": "No hay datos disponibles en este momento."
+  }
+}

@@ -2,7 +2,7 @@ import Image from "next/image";
 
 import { LoginForm } from "@/components/login-form";
 
-
+const tema = ["/image-01.jpg", "/image-02.jpg", "/image-03.jpg", "/image-04.jpg"]
 
 export default function LoginPage() {
   // fazer um sorteio aleatório para selecionar uma imagem

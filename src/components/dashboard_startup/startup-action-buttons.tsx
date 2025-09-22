@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -11,7 +12,6 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Edit, Trash2, History, Users, MoreHorizontal } from 'lucide-react'
 import { Startup } from '@/types/startup'
-import { StartupFormModal } from './startup-form-modal'
 import { DeleteStartupDialog } from './delete-startup-dialog'
 import { StartupHistoryModal } from './startup-history-modal'
 import { StartupInvestorsModal } from './startup-investors-modal'
@@ -21,14 +21,14 @@ interface StartupActionButtonsProps {
 }
 
 export function StartupActionButtons({ startup }: StartupActionButtonsProps) {
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const router = useRouter()
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false)
   const [isInvestorsModalOpen, setIsInvestorsModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
   const handleEdit = () => {
-    setIsEditModalOpen(true)
+    router.push(`/dashboard_startups/startup/${startup.id}`)
   }
 
   const handleDelete = () => {
@@ -43,31 +43,6 @@ export function StartupActionButtons({ startup }: StartupActionButtonsProps) {
     setIsInvestorsModalOpen(true)
   }
 
-  const handleEditSubmit = async (data: unknown) => {
-    setIsLoading(true)
-    
-    console.log('API Call: PUT /api/startups/' + startup.id, data)
-    
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
-      setIsEditModalOpen(false)
-      
-      // TODO: Add toast notification
-      // toast.success('Startup atualizada com sucesso!')
-      
-      // TODO: Refresh parent data
-      // router.refresh()
-      
-    } catch (error) {
-      console.error('Erro ao atualizar startup:', error)
-      // TODO: Add error toast
-      // toast.error('Erro ao atualizar startup. Tente novamente.')
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   const handleDeleteConfirm = async () => {
     setIsLoading(true)
@@ -129,15 +104,6 @@ export function StartupActionButtons({ startup }: StartupActionButtonsProps) {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Edit Modal */}
-      <StartupFormModal
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        onSubmit={handleEditSubmit}
-        isLoading={isLoading}
-        initialData={startup}
-        mode="edit"
-      />
 
       {/* Delete Dialog */}
       <DeleteStartupDialog

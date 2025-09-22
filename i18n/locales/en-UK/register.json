@@ -1,81 +1,87 @@
 {
-  "title": "Criar conta",
-  "subtitle": "Preencha os dados abaixo para criar sua conta",
+  "title": "Create account",
+  "subtitle": "Fill in the details below to create your account",
   "form": {
     "name": {
-      "label": "Nome completo",
-      "required": "Nome é obrigatório"
+      "label": "Full name",
+      "required": "Name is required"
     },
     "cpf": {
-      "label": "CPF",
+      "label": "National ID",
       "placeholder": "000.000.000-00",
-      "invalid": "CPF deve ter 11 dígitos",
-      "required": "CPF é obrigatório"
+      "invalid": "National ID must have 11 digits",
+      "required": "National ID is required"
     },
     "phone": {
-      "label": "Telefone",
+      "label": "Telephone",
       "placeholder": "(00) 00000-0000",
-      "required": "Telefone é obrigatório"
+      "required": "Telephone is required"
     },
     "cep": {
-      "label": "CEP",
+      "label": "Postcode",
       "placeholder": "00000-000",
-      "invalid": "CEP deve ter 8 dígitos",
-      "required": "CEP é obrigatório",
-      "not_found": "CEP não encontrado",
-      "search_error": "Erro ao buscar CEP",
-      "searching": "Buscando..."
+      "required": "Postcode is required"
     },
-    "address": {
-      "label": "Endereço",
-      "required": "Endereço é obrigatório"
-    },
-    "neighborhood": {
-      "label": "Bairro",
-      "required": "Bairro é obrigatório"
-    },
-    "city": {
-      "label": "Cidade",
-      "required": "Cidade é obrigatória"
-    },
-    "state": {
-      "label": "Estado",
-      "required": "Estado é obrigatório"
+    "street": {
+      "label": "Street",
+      "required": "Street is required"
     },
     "number": {
-      "label": "Número",
-      "required": "Número é obrigatório"
+      "label": "Number",
+      "required": "Number is required"
+    },
+    "complement": {
+      "label": "Complement",
+      "placeholder": "Flat, suite, etc."
+    },
+    "neighbourhood": {
+      "label": "Neighbourhood",
+      "required": "Neighbourhood is required"
+    },
+    "city": {
+      "label": "City",
+      "required": "City is required"
+    },
+    "state": {
+      "label": "County",
+      "placeholder": "Select county",
+      "required": "County is required"
+    },
+    "country": {
+      "label": "Country",
+      "placeholder": "Select country",
+      "required": "Country is required"
     },
     "email": {
-      "label": "E-mail",
-      "placeholder": "seu@email.com",
-      "required": "Email é obrigatório",
-      "invalid": "Email inválido"
+      "label": "Email",
+      "placeholder": "your@email.com",
+      "required": "Email is required",
+      "invalid": "Invalid email"
     },
     "password": {
-      "label": "Senha",
-      "placeholder": "Digite sua senha",
-      "min": "Senha deve ter pelo menos 12 caracteres",
-      "required": "Senha é obrigatória"
+      "label": "Password",
+      "required": "Password is required",
+      "min": "Password must have at least 6 characters"
     },
-    "confirm_password": {
-      "label": "Confirmar senha",
-      "placeholder": "Digite sua senha novamente",
-      "min": "Senha deve ter pelo menos 12 caracteres",
-      "mismatch": "Senhas não coincidem",
-      "required": "Confirmação de senha é obrigatória"
+    "confirmPassword": {
+      "label": "Confirm password",
+      "required": "Password confirmation is required",
+      "match": "Passwords must match"
     },
-    "terms": {
-      "accept": "Li e aceito os",
-      "terms_of_use": "Termos de Uso",
-      "and": "e",
-      "privacy_policy": "Política de Privacidade",
-      "required": "Você deve aceitar os termos"
-    },
-    "submit": "Criar conta"
+    "submit": "Create account"
+  },
+  "login": {
+    "question": "Already have an account?",
+    "button": "Sign in"
+  },
+  "terms": {
+    "text": "By creating an account, you agree to our",
+    "link": "Terms of Use"
   },
   "messages": {
-    "success": "Conta criada com sucesso!",
-    "error": "Erro ao criar conta"
+    "success": "Account created successfully!",
+    "success_description": "You can now sign in",
+    "error": "Error creating account",
+    "error_description": "Please check the details and try again"
   }
 }
