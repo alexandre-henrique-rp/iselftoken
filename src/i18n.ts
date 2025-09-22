@@ -1,74 +1,129 @@
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
+import i18n, { type Resource } from "i18next";
+import { initReactI18next } from "react-i18next";
 
 // Carrega recursos de tradução
-import ptCommon from '@/../i18n/locales/pt/common.json';
-import enCommon from '@/../i18n/locales/en/common.json';
-import esCommon from '@/../i18n/locales/es/common.json';
+import ptBRHome from '../i18n/locales/pt-BR/home.json';
+import ptBRLogin from '../i18n/locales/pt-BR/login.json';
+import ptBRRegister from '../i18n/locales/pt-BR/register.json';
+import ptBRRecoverPassword from '../i18n/locales/pt-BR/recover-password.json';
+import ptBRResetPassword from '../i18n/locales/pt-BR/reset-password.json';
 
-import ptAuth from '@/../i18n/locales/pt/auth.json';
-import enAuth from '@/../i18n/locales/en/auth.json';
-import esAuth from '@/../i18n/locales/es/auth.json';
+import ptPTHome from '../i18n/locales/pt-PT/home.json';
+import ptPTLogin from '../i18n/locales/pt-PT/login.json';
+import ptPTRegister from '../i18n/locales/pt-PT/register.json';
+import ptPTRecoverPassword from '../i18n/locales/pt-PT/recover-password.json';
+import ptPTResetPassword from '../i18n/locales/pt-PT/reset-password.json';
 
-import ptDashboard from '@/../i18n/locales/pt/dashboard.json';
-import enDashboard from '@/../i18n/locales/en/dashboard.json';
-import esDashboard from '@/../i18n/locales/es/dashboard.json';
+import enUSHome from '../i18n/locales/en-US/home.json';
+import enUSLogin from '../i18n/locales/en-US/login.json';
+import enUSRegister from '../i18n/locales/en-US/register.json';
+import enUSRecoverPassword from '../i18n/locales/en-US/recover-password.json';
+import enUSResetPassword from '../i18n/locales/en-US/reset-password.json';
 
-const resources = {
-  pt: { 
-    common: ptCommon,
-    auth: ptAuth,
-    dashboard: ptDashboard
+import enUKHome from '../i18n/locales/en-UK/home.json';
+import enUKLogin from '../i18n/locales/en-UK/login.json';
+import enUKRegister from '../i18n/locales/en-UK/register.json';
+import enUKRecoverPassword from '../i18n/locales/en-UK/recover-password.json';
+import enUKResetPassword from '../i18n/locales/en-UK/reset-password.json';
+
+import esESHome from '../i18n/locales/es-ES/home.json';
+import esESLogin from '../i18n/locales/es-ES/login.json';
+import esESRegister from '../i18n/locales/es-ES/register.json';
+import esESRecoverPassword from '../i18n/locales/es-ES/recover-password.json';
+import esESResetPassword from '../i18n/locales/es-ES/reset-password.json';
+
+const resources: Resource = {
+  'pt-BR': {
+    home: ptBRHome,
+    login: ptBRLogin,
+    register: ptBRRegister,
+    recoverPassword: ptBRRecoverPassword,
+    resetPassword: ptBRResetPassword
   },
-  en: { 
-    common: enCommon,
-    auth: enAuth,
-    dashboard: enDashboard
+  'pt-PT': {
+    home: ptPTHome,
+    login: ptPTLogin,
+    register: ptPTRegister,
+    recoverPassword: ptPTRecoverPassword,
+    resetPassword: ptPTResetPassword
   },
-  es: { 
-    common: esCommon,
-    auth: esAuth,
-    dashboard: esDashboard
+  'en-US': {
+    home: enUSHome,
+    login: enUSLogin,
+    register: enUSRegister,
+    recoverPassword: enUSRecoverPassword,
+    resetPassword: enUSResetPassword
   },
-} as const;
+  'en-UK': {
+    home: enUKHome,
+    login: enUKLogin,
+    register: enUKRegister,
+    recoverPassword: enUKRecoverPassword,
+    resetPassword: enUKResetPassword
+  },
+  'es-ES': {
+    home: esESHome,
+    login: esESLogin,
+    register: esESRegister,
+    recoverPassword: esESRecoverPassword,
+    resetPassword: esESResetPassword
+  },
+};
 
-// Verifica se está no ambiente do cliente antes de inicializar
-// const isClient = typeof window !== 'undefined';
-
-// Inicializa i18next uma única vez, tanto no cliente quanto no servidor
-if (!i18n.isInitialized) {
-  i18n
-    .use(initReactI18next)
-    .init({
-      resources,
-      lng: 'pt',
-      fallbackLng: 'pt',
-      debug: false,
-      ns: ['common', 'auth', 'dashboard'],
-      defaultNS: 'common',
-      interpolation: {
-        escapeValue: false,
-      },
-      returnNull: false,
-      returnEmptyString: false,
-      react: {
-        useSuspense: false,
-      },
-    })
-    .catch(() => {
-      // Silencia erro de init
-    });
+function isSupportedLocale(lng: string | null): lng is string {
+	return (
+		lng === "pt-BR" ||
+		lng === "pt-PT" ||
+		lng === "en-US" ||
+		lng === "en-UK" ||
+		lng === "es-ES"
+	);
 }
 
-export function setLanguage(lng: 'pt' | 'en' | 'es') {
-  i18n.changeLanguage(lng);
+if (!i18n.isInitialized) {
+	i18n
+		.use(initReactI18next)
+		.init({
+			resources,
+			lng: getInitialLng(),
+			fallbackLng: "pt-BR",
+			debug: false,
+			ns: ["home", "login", "register", "recoverPassword", "resetPassword"],
+			defaultNS: "home",
+			interpolation: {
+				escapeValue: false,
+			},
+			returnNull: false,
+			returnEmptyString: false,
+			react: {
+				useSuspense: false,
+			},
+		})
+		.then(() => {})
+		.catch(() => {
+			// Silencia erro de init
+		});
+}
+
+export async function setLanguage(lng: string) {
+	const fallback = isSupportedLocale(lng) ? lng : "pt-BR";
+	i18n.changeLanguage(fallback);
 }
 
 export default i18n;
 
-// import { createSharedPathnamesNavigation } from 'next-intl/navigation';
-
-// export const locales = ['pt', 'en', 'es'] as const;
-// export const localePrefix = 'always';
-
-// export const { Link, redirect, usePathname, useRouter } = createSharedPathnamesNavigation({ locales, localePrefix });
+function getInitialLng(): string {
+	if (typeof window === 'undefined') {
+		return 'pt-BR';
+	}
+	const url = new URL(window.location.href);
+	const lng = url.searchParams.get('lng');
+	if (isSupportedLocale(lng)) {
+		return lng;
+	}
+	const browserLng = navigator.language;
+	if (isSupportedLocale(browserLng)) {
+		return browserLng;
+	}
+	return 'pt-BR';
+}

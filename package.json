@@ -2,10 +2,15 @@
   "name": "iselftoken",
   "version": "0.1.0",
   "private": true,
+  "pkg": {
+    "scripts": ".next/standalone/**/*.js",
+    "assets": ".next/standalone/**/*"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "server": "node .next/standalone/server.js",
     "lint": "next lint",
     "test": "jest"
   },

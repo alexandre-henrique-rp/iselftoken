@@ -8,7 +8,9 @@
       "login": "Entrar"
     },
     "hero": {
-      "subtitle": "A iSelfToken conecta investidores e fundadores de startups em uma plataforma segura e acessível.","cta": {
+      "title": "Invista em startups promissoras via tokenização de equity",
+      "subtitle": "A iSelfToken conecta investidores e fundadores de startups em uma plataforma segura e acessível.",
+      "cta": {
         "raise": "Captar investimento",
         "invest": "Comece a Investir"
       }
@@ -44,6 +46,11 @@
       "email": "Email",
       "phone": "Telefone",
       "rights": "Todos os direitos reservados."
+    },
+    "investor": {
+      "highlights": "Destaques",
+      "view_all": "Ver todos",
+      "no_data": "Sem dados disponíveis no momento."
     }
   },
   "testimonials": {

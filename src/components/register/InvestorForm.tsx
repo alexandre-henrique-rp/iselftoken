@@ -52,40 +52,40 @@ export const InvestorForm: FC<InvestorFormProps> = ({
   ddi,
 }) => {
   const router = useRouter();
-  const { t } = useTranslation('auth');
+  const { t } = useTranslation('register');
 
   // Schema de validação criado dinamicamente com traduções
   const investorSchema = z
     .object({
-      nome: z.string().min(1, t('register.form.name.required')),
+      nome: z.string().min(1, t('form.name.required')),
       cpf: z
         .string()
         .transform((v) => String(v).replace(/\D/g, ''))
-        .pipe(z.string().length(11, t('register.form.cpf.invalid'))),
-      telefone: z.string().min(1, t('register.form.phone.required')),
+        .pipe(z.string().length(11, t('form.cpf.invalid'))),
+      telefone: z.string().min(1, t('form.phone.required')),
       cep: z
         .string()
         .transform((v) => String(v).replace(/\D/g, ''))
-        .pipe(z.string().length(8, t('register.form.cep.invalid'))),
-      endereco: z.string().min(1, t('register.form.address.required')),
-      bairro: z.string().min(1, t('register.form.neighborhood.required')),
-      cidade: z.string().min(1, t('register.form.city.required')),
-      uf: z.string().min(1, t('register.form.state.required')),
+        .pipe(z.string().length(8, t('form.cep.invalid'))),
+      endereco: z.string().min(1, t('form.address.required')),
+      bairro: z.string().min(1, t('form.neighborhood.required')),
+      cidade: z.string().min(1, t('form.city.required')),
+      uf: z.string().min(1, t('form.state.required')),
       pais: z.string().min(1, 'País é obrigatório'),
-      numero: z.string().min(1, t('register.form.number.required')),
-      email: z.string().min(1, t('register.form.email.required')),
-      senha: z.string().min(12, t('register.form.password.min')),
+      numero: z.string().min(1, t('form.number.required')),
+      email: z.string().min(1, t('form.email.required')),
+      senha: z.string().min(12, t('form.password.min')),
       confirmacaoSenha: z
         .string()
-        .min(12, t('register.form.confirm_password.min')),
+        .min(12, t('form.confirm_password.min')),
       termo: z
         .boolean()
         .refine((v) => v === true, {
-          message: t('register.form.terms.required'),
+          message: t('form.terms.required'),
         }),
     })
     .refine((data) => data.senha === data.confirmacaoSenha, {
-      message: t('register.form.confirm_password.mismatch'),
+      message: t('form.confirm_password.mismatch'),
       path: ['confirmacaoSenha'],
     });
 
@@ -178,7 +178,7 @@ export const InvestorForm: FC<InvestorFormProps> = ({
       if (data?.erro) {
         setError('cep', {
           type: 'manual',
-          message: t('register.form.cep.not_found'),
+          message: t('form.cep.not_found'),
         });
         return;
       }
@@ -189,7 +189,7 @@ export const InvestorForm: FC<InvestorFormProps> = ({
     } catch {
       setError('cep', {
         type: 'manual',
-        message: t('register.form.cep.search_error'),
+        message: t('form.cep.search_error'),
       });
     } finally {
       setBuscandoCep(false);
@@ -284,14 +284,14 @@ export const InvestorForm: FC<InvestorFormProps> = ({
                   d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
                 />
               </svg>
-              <span>{t('register.form.cep.searching')}</span>
+              <span>{t('form.cep.searching')}</span>
             </div>
           )}
         </div>
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="endereco">{t('register.form.address.label')}</Label>
+        <Label htmlFor="endereco">{t('form.address.label')}</Label>
         <Input id="endereco" {...register('endereco')} />
         {errors.endereco && (
           <p className="text-sm text-red-500">{errors.endereco.message}</p>
@@ -301,7 +301,7 @@ export const InvestorForm: FC<InvestorFormProps> = ({
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <div className="grid gap-2">
           <Label htmlFor="bairro">
-            {t('register.form.neighborhood.label')}
+            {t('form.neighborhood.label')}
           </Label>
           <Input id="bairro" {...register('bairro')} />
           {errors.bairro && (
@@ -309,7 +309,7 @@ export const InvestorForm: FC<InvestorFormProps> = ({
           )}
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="cidade">{t('register.form.city.label')}</Label>
+          <Label htmlFor="cidade">{t('form.city.label')}</Label>
           <Input id="cidade" readOnly aria-readonly {...register('cidade')} />
           {errors.cidade && (
             <p className="text-sm text-red-500">{errors.cidade.message}</p>
@@ -319,7 +319,7 @@ export const InvestorForm: FC<InvestorFormProps> = ({
 
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <div className="grid gap-2">
-          <Label htmlFor="uf">{t('register.form.state.label')}</Label>
+          <Label htmlFor="uf">{t('form.state.label')}</Label>
           <Input
             id="uf"
             maxLength={2}
@@ -332,7 +332,7 @@ export const InvestorForm: FC<InvestorFormProps> = ({
           )}
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="numero">{t('register.form.number.label')}</Label>
+          <Label htmlFor="numero">{t('form.number.label')}</Label>
           <Input id="numero" {...register('numero')} />
           {errors.numero && (
             <p className="text-sm text-red-500">{errors.numero.message}</p>
@@ -342,11 +342,11 @@ export const InvestorForm: FC<InvestorFormProps> = ({
 
       <div className="grid grid-cols-1">
         <div className="grid gap-2">
-          <Label htmlFor="email">{t('register.form.email.label')}</Label>
+          <Label htmlFor="email">{t('form.email.label')}</Label>
           <Input
             id="email"
             type="email"
-            placeholder={t('register.form.email.placeholder')}
+            placeholder={t('form.email.placeholder')}
             minLength={6}
             {...register('email')}
           />
@@ -358,11 +358,11 @@ export const InvestorForm: FC<InvestorFormProps> = ({
 
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <div className="grid gap-2">
-          <Label htmlFor="senha">{t('register.form.password.label')}</Label>
+          <Label htmlFor="senha">{t('form.password.label')}</Label>
           <Input
             id="senha"
             type="password"
-            placeholder={t('register.form.password.placeholder')}
+            placeholder={t('form.password.placeholder')}
             minLength={12}
             {...register('senha')}
           />
@@ -372,12 +372,12 @@ export const InvestorForm: FC<InvestorFormProps> = ({
         </div>
         <div className="grid gap-2">
           <Label htmlFor="confirmacaoSenha">
-            {t('register.form.confirm_password.label')}
+            {t('form.confirm_password.label')}
           </Label>
           <Input
             id="confirmacaoSenha"
             type="password"
-            placeholder={t('register.form.confirm_password.placeholder')}
+            placeholder={t('form.confirm_password.placeholder')}
             minLength={12}
             {...register('confirmacaoSenha')}
           />
@@ -396,22 +396,22 @@ export const InvestorForm: FC<InvestorFormProps> = ({
           className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
         />
         <Label htmlFor="termo" className="text-sm">
-          {t('register.form.terms.accept')}{' '}
+          {t('form.terms.accept')}{' '}
           <button
             type="button"
             className="text-[#d500f9] underline hover:no-underline"
             onClick={() => router.push('/politicas')}
           >
-            {t('register.form.terms.terms_of_use')}
+            {t('form.terms.terms_of_use')}
           </button>{' '}
-          {t('register.form.terms.and')}{' '}
+          {t('form.terms.and')}{' '}
           <button
             type="button"
             className="text-[#d500f9] underline hover:no-underline"
             // abrir em nova aba
             onClick={() => window.open('https://iselftoken.net/termo-de-uso-para-investidores-iselftoken/', '_blank')}
           >
-            {t('register.form.terms.privacy_policy')}
+            {t('form.terms.privacy_policy')}
           </button>
         </Label>
       </div>
@@ -419,11 +419,11 @@ export const InvestorForm: FC<InvestorFormProps> = ({
         <p className="text-sm text-red-500">{String(errors.termo.message)}</p>
       )}
       <p className="text-muted-foreground text-xs">
-        {t('register.form.password.min')}
+        {t('form.password.min')}
       </p>
 
       <Button type="submit" className="w-full">
-        {t('register.form.submit')}
+        {t('form.submit')}
       </Button>
     </form>
   );

@@ -1,0 +1,54 @@
+{
+  "title": "iSelfToken - Connecting Investors and Startups",
+  "description": "Digital platform to connect investors and startups.",
+  "keywords": "investimento, startups, investidores, Brasil, tecnologia",
+  "welcome": "Invest in promising startups through equity tokenisation",
+  "header": {
+    "login": "Sign in"
+  },
+  "hero": {
+    "title": "Invest in promising startups through equity tokenisation",
+    "subtitle": "iSelfToken connects investors and startup founders in a secure and accessible platform.",
+    "cta": {
+      "raise": "Start fundraising",
+      "invest": "Start investing"
+    }
+  },
+  "sections": {
+    "raising_title": "Fundraising rounds"
+  },
+  "cta": {
+    "title": "How does it work?",
+    "subtitle1": "For founders: Raise funding for your startup with a secure, fast and 100% digital solution.",
+    "subtitle2": "For investors: Invest in promising startups with liquidity through equity tokenisation.",
+    "bullets": {
+      "verified": "Verified startups",
+      "low_minimum": "Low minimum investment"
+    },
+    "button1": "Start fundraising now",
+    "button2": "Start investing now"
+  },
+  "testimonials": {
+    "investors_title": "Testimonials from investors",
+    "startups_title": "What startup founders say about us"
+  },
+  "footer": {
+    "description": "Connecting investors and startup founders in a secure and accessible platform.",
+    "platform": "Platform",
+    "for_investors": "For Investors",
+    "for_projects": "For Projects",
+    "legal": "Legal",
+    "education": "iSelfToken Education",
+    "terms": "Terms of Use",
+    "privacy": "Privacy",
+    "contact": "Contact",
+    "email": "Email",
+    "phone": "Phone",
+    "rights": "All rights reserved."
+  },
+  "investor": {
+    "highlights": "Highlights",
+    "view_all": "View all",
+    "no_data": "No data available at the moment."
+  }
+}

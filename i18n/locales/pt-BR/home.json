@@ -1,0 +1,54 @@
+{
+  "title": "iSelfToken - Conectando Investidores e Startups",
+  "description": "Plataforma digital para conectar investidores e startups no Brasil.",
+  "keywords": "investimento, startups, investidores, Brasil, tecnologia",
+  "welcome": "Invista em startups promissoras via tokenização de equity",
+  "header": {
+    "login": "Entrar"
+  },
+  "hero": {
+    "title": "Invista em startups promissoras via tokenização de equity",
+    "subtitle": "A iSelfToken conecta investidores e fundadores de startups em uma plataforma segura e acessível.",
+    "cta": {
+      "raise": "Captar investimento",
+      "invest": "Comece a Investir"
+    }
+  },
+  "sections": {
+    "raising_title": "Rodadas de captação"
+  },
+  "cta": {
+    "title": "Como Funciona?",
+    "subtitle1": "Para Fundadores: Capte investimento para sua startup com uma solução segura, rápida e 100% digital.",
+    "subtitle2": "Para Investidores: Invista em startups promissoras com liquidez via tokenização de equity.",
+    "bullets": {
+      "verified": "Startups verificadas",
+      "low_minimum": "Investimento mínimo baixo"
+    },
+    "button1": "comece a captar agora",
+    "button2": "comece a investir agora"
+  },
+  "testimonials": {
+    "investors_title": "Depoimentos de quem já investe",
+    "startups_title": "O que os fundadores de startups falam sobre nós"
+  },
+  "footer": {
+    "description": "Conecta investidores e fundadores de startups em uma plataforma segura e acessível.",
+    "platform": "Plataforma",
+    "for_investors": "Para Investidores",
+    "for_projects": "Para Projetos",
+    "legal": "Legal",
+    "education": "iSelfToken Education",
+    "terms": "Termos de Uso",
+    "privacy": "Privacidade",
+    "contact": "Contato",
+    "email": "Email",
+    "phone": "Telefone",
+    "rights": "Todos os direitos reservados."
+  },
+  "investor": {
+    "highlights": "Destaques",
+    "view_all": "Ver todos",
+    "no_data": "Sem dados disponíveis no momento."
+  }
+}

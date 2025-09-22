@@ -1,0 +1,81 @@
+{
+  "title": "Criar conta",
+  "subtitle": "Preencha os dados abaixo para criar sua conta",
+  "form": {
+    "name": {
+      "label": "Nome completo",
+      "required": "Nome é obrigatório"
+    },
+    "cpf": {
+      "label": "CPF",
+      "placeholder": "000.000.000-00",
+      "invalid": "CPF deve ter 11 dígitos",
+      "required": "CPF é obrigatório"
+    },
+    "phone": {
+      "label": "Telefone",
+      "placeholder": "(00) 00000-0000",
+      "required": "Telefone é obrigatório"
+    },
+    "cep": {
+      "label": "CEP",
+      "placeholder": "00000-000",
+      "invalid": "CEP deve ter 8 dígitos",
+      "required": "CEP é obrigatório",
+      "not_found": "CEP não encontrado",
+      "search_error": "Erro ao buscar CEP",
+      "searching": "Buscando..."
+    },
+    "address": {
+      "label": "Endereço",
+      "required": "Endereço é obrigatório"
+    },
+    "neighborhood": {
+      "label": "Bairro",
+      "required": "Bairro é obrigatório"
+    },
+    "city": {
+      "label": "Cidade",
+      "required": "Cidade é obrigatória"
+    },
+    "state": {
+      "label": "Estado",
+      "required": "Estado é obrigatório"
+    },
+    "number": {
+      "label": "Número",
+      "required": "Número é obrigatório"
+    },
+    "email": {
+      "label": "E-mail",
+      "placeholder": "seu@email.com",
+      "required": "Email é obrigatório",
+      "invalid": "Email inválido"
+    },
+    "password": {
+      "label": "Senha",
+      "placeholder": "Digite sua senha",
+      "min": "Senha deve ter pelo menos 12 caracteres",
+      "required": "Senha é obrigatória"
+    },
+    "confirm_password": {
+      "label": "Confirmar senha",
+      "placeholder": "Digite sua senha novamente",
+      "min": "Senha deve ter pelo menos 12 caracteres",
+      "mismatch": "Senhas não coincidem",
+      "required": "Confirmação de senha é obrigatória"
+    },
+    "terms": {
+      "accept": "Li e aceito os",
+      "terms_of_use": "Termos de Uso",
+      "and": "e",
+      "privacy_policy": "Política de Privacidade",
+      "required": "Você deve aceitar os termos"
+    },
+    "submit": "Criar conta"
+  },
+  "messages": {
+    "success": "Conta criada com sucesso!",
+    "error": "Erro ao criar conta"
+  }
+}

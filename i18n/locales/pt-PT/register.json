@@ -1,0 +1,81 @@
+{
+  "title": "Criar conta",
+  "subtitle": "Preencha os dados abaixo para criar a sua conta",
+  "form": {
+    "name": {
+      "label": "Nome completo",
+      "required": "Nome é obrigatório"
+    },
+    "cpf": {
+      "label": "NIF",
+      "placeholder": "123456789",
+      "invalid": "NIF deve ter 9 dígitos",
+      "required": "NIF é obrigatório"
+    },
+    "phone": {
+      "label": "Telefone",
+      "placeholder": "(00) 00000-0000",
+      "required": "Telefone é obrigatório"
+    },
+    "cep": {
+      "label": "Código Postal",
+      "placeholder": "0000-000",
+      "invalid": "Código Postal deve ter 8 dígitos",
+      "required": "Código Postal é obrigatório",
+      "not_found": "Código Postal não encontrado",
+      "search_error": "Erro ao buscar Código Postal",
+      "searching": "A procurar..."
+    },
+    "address": {
+      "label": "Morada",
+      "required": "Morada é obrigatória"
+    },
+    "neighborhood": {
+      "label": "Freguesia",
+      "required": "Freguesia é obrigatória"
+    },
+    "city": {
+      "label": "Cidade",
+      "required": "Cidade é obrigatória"
+    },
+    "state": {
+      "label": "Distrito",
+      "required": "Distrito é obrigatório"
+    },
+    "number": {
+      "label": "Número",
+      "required": "Número é obrigatório"
+    },
+    "email": {
+      "label": "E-mail",
+      "placeholder": "seu@email.com",
+      "required": "Email é obrigatório",
+      "invalid": "Email inválido"
+    },
+    "password": {
+      "label": "Senha",
+      "placeholder": "Digite a sua senha",
+      "min": "Senha deve ter pelo menos 12 caracteres",
+      "required": "Senha é obrigatória"
+    },
+    "confirm_password": {
+      "label": "Confirmar senha",
+      "placeholder": "Digite a sua senha novamente",
+      "min": "Senha deve ter pelo menos 12 caracteres",
+      "mismatch": "Senhas não coincidem",
+      "required": "Confirmação de senha é obrigatória"
+    },
+    "terms": {
+      "accept": "Li e aceito os",
+      "terms_of_use": "Termos de Utilização",
+      "and": "e",
+      "privacy_policy": "Política de Privacidade",
+      "required": "Deve aceitar os termos"
+    },
+    "submit": "Criar conta"
+  },
+  "messages": {
+    "success": "Conta criada com sucesso!",
+    "error": "Erro ao criar conta"
+  }
+}
