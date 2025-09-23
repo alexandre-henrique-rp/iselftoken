@@ -20,3 +20,9 @@ ter uma pagina notificação, onde podemos fazer envio de  notificação para to
 
 terminal perfil
 e jornada do investidor
+
+add botão reserva de toquem no cadastro
+
+criar botão complice( )
+
+para ter o cadastro ativo tem que pagar a taxa de adesão
