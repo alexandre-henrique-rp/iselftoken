@@ -1,7 +1,6 @@
 'use client'
 
 import { Control, UseFormGetValues, useWatch } from 'react-hook-form'
-import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -26,7 +25,6 @@ export function InvestimentoSection({
   control,
   getValues,
 }: InvestimentoSectionProps) {
-  const router = useRouter()
 
   const metaCaptacao = useWatch({
     control,
@@ -63,7 +61,8 @@ export function InvestimentoSection({
     }
 
     localStorage.setItem('checkoutData', JSON.stringify(checkoutData))
-    router.push('/checkout')
+    window.open('/checkout', '_blank')
+
   }
 
   return (
@@ -138,7 +137,7 @@ export function InvestimentoSection({
 
           <div className="flex h-full items-end">
             <Button
-              className="bg-primary text-primary-foreground hover:bg-primary/90 h-10 w-full font-medium transition-colors"
+              className="bg-[#d500f9] text-white hover:bg-[#d500f9]/90 h-10 w-full font-medium transition-colors"
               disabled={!isButtonEnabled}
               type="button"
               onClick={handleReserveClick}

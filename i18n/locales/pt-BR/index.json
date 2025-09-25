@@ -112,5 +112,19 @@
         "empty": "Nenhuma startup encontrada."
       }
     }
+  },
+  "payment": {
+    "title": "Efetue o Pagamento PIX",
+    "description": "Escaneie o QR Code ou copie o código abaixo.",
+    "copy_code": "Ou copie a linha digitável:",
+    "copy_button": "Copiar Código",
+    "waiting_confirmation": "Aguardando confirmação de pagamento...",
+    "verify_button": "Verificar Pagamento",
+    "expired_title": "Tempo Expirado",
+    "expired_description": "O tempo para pagamento expirou. Clique em revalidar para gerar um novo código PIX.",
+    "revalidate_button": "Revalidar PIX",
+    "success_title": "Pagamento Aprovado!",
+    "success_message": "Pagamento confirmado com sucesso!",
+    "close_tab_button": "Fechar Aba"
   }
 }

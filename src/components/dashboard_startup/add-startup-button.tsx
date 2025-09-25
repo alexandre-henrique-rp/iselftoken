@@ -23,7 +23,7 @@ export function AddStartupButton() {
         <TooltipTrigger asChild>
           <Button
             onClick={handleClick}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 transition-colors"
+            className="bg-[#d500f9] text-white hover:bg-[#d500f9]/90 gap-2 transition-colors"
           >
             <Plus className="h-4 w-4" />
             Nova Startup

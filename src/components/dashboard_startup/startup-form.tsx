@@ -157,7 +157,7 @@ export function StartupForm({ mode, initialData }: StartupFormProps) {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="bg-primary text-primary-foreground hover:bg-primary/90 h-10 w-full px-8 font-medium sm:w-auto"
+                className="bg-[#d500f9] text-white hover:bg-[#d500f9]/90 h-10 w-full px-8 font-medium sm:w-auto"
               >
                 {isLoading ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
