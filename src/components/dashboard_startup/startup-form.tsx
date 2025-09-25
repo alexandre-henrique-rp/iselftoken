@@ -6,29 +6,15 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { ArrowLeft, Save, Loader2 } from 'lucide-react'
 import { Startup } from '@/types/startup'
-import { applyCnpjMask, unmaskValue } from '@/lib/mask-utils'
+import { unmaskValue } from '@/lib/mask-utils'
+import { InformacoesBasicasSection } from './form-sections/informacoes-basicas-section'
+import { ClassificacaoSection } from './form-sections/classificacao-section'
+import { InvestimentoSection } from './form-sections/investimento-section'
 
 interface StartupWithFormData extends Startup {
   descricao_objetivo?: string
@@ -41,10 +27,15 @@ const startupSchema = z.object({
   data_fundacao: z.string().min(1, 'Data de fundação é obrigatória'),
   area_atuacao: z.string().min(1, 'Área de atuação é obrigatória'),
   estagio: z.string().min(1, 'Estágio é obrigatório'),
-  descritivo_basico: z.string().min(10, 'Descrição deve ter pelo menos 10 caracteres'),
-  meta_captacao: z.number().min(1, 'Meta de captação deve ser maior que 0'),
-  equity_oferecido: z.number().min(0.1).max(100, 'Equity deve estar entre 0.1% e 100%'),
-  descricao_objetivo: z.string().min(20, 'Objetivo deve ter pelo menos 20 caracteres'),
+  descritivo_basico:
+    z.string().min(10, 'Descrição deve ter pelo menos 10 caracteres'),
+  meta_captacao: z.number().refine((val) => val === 0 || (val >= 100000.00 && val <= 15000000.00), {
+    message: 'Meta de captação deve ser 0 ou entre R$ 100.000,00 e R$ 15.000.000,00'
+  }),
+  equity_oferecido:
+    z.number().min(0.1).max(100, 'Equity deve estar entre 0.1% e 100%'),
+  descricao_objetivo:
+    z.string().min(20, 'Objetivo deve ter pelo menos 20 caracteres'),
 })
 
 type StartupFormData = z.infer<typeof startupSchema>
@@ -53,29 +44,6 @@ interface StartupFormProps {
   mode: 'create' | 'edit'
   initialData?: StartupWithFormData
 }
-
-const AREA_ATUACAO_OPTIONS = [
-  'Fintech',
-  'E-commerce',
-  'SaaS',
-  'EdTech',
-  'HealthTech',
-  'AgTech',
-  'Marketplace',
-  'Logística',
-  'Energia',
-  'Varejo',
-  'Outros'
-]
-
-const ESTAGIO_OPTIONS = [
-  'Ideia',
-  'MVP',
-  'Produto',
-  'Tração',
-  'Crescimento',
-  'Expansão'
-]
 
 export function StartupForm({ mode, initialData }: StartupFormProps) {
   const router = useRouter()
@@ -86,23 +54,21 @@ export function StartupForm({ mode, initialData }: StartupFormProps) {
     defaultValues: {
       nome: initialData?.nome || '',
       cnpj: initialData?.cnpj || '',
-      pais: typeof initialData?.pais === 'string' ? initialData.pais : initialData?.pais?.iso3 || 'BRA',
+      pais:
+        typeof initialData?.pais === 'string'
+          ? initialData.pais
+          : initialData?.pais?.iso3 || 'BRA',
       data_fundacao: initialData?.data_fundacao
         ? new Date(initialData.data_fundacao).toISOString().split('T')[0]
         : '',
       area_atuacao: initialData?.area_atuacao || '',
       estagio: initialData?.estagio || '',
       descritivo_basico: initialData?.descritivo_basico || '',
-      meta_captacao: initialData?.meta_captacao || 0,
+      meta_captacao: initialData?.meta_captacao || 100000.0,
       equity_oferecido: initialData?.equity_oferecido || 0,
       descricao_objetivo: initialData?.descricao_objetivo || '',
     },
   })
-
-  const handleCnpjChange = (value: string) => {
-    const maskedValue = applyCnpjMask(value)
-    form.setValue('cnpj', maskedValue)
-  }
 
   const onSubmit = async (data: StartupFormData) => {
     setIsLoading(true)
@@ -114,9 +80,8 @@ export function StartupForm({ mode, initialData }: StartupFormProps) {
         data_fundacao: new Date(data.data_fundacao),
       }
 
-      const url = mode === 'edit'
-        ? `/api/startup/${initialData?.id}`
-        : '/api/startup'
+      const url =
+        mode === 'edit' ? `/api/startup/${initialData?.id}` : '/api/startup'
 
       const method = mode === 'edit' ? 'PUT' : 'POST'
 
@@ -140,7 +105,6 @@ export function StartupForm({ mode, initialData }: StartupFormProps) {
 
       router.push('/dashboard_startups')
       router.refresh()
-
     } catch (error) {
       console.error('Erro ao salvar startup:', error)
       toast.error('Erro ao salvar startup. Tente novamente.')
@@ -155,11 +119,10 @@ export function StartupForm({ mode, initialData }: StartupFormProps) {
 
   return (
     <div className="space-y-8">
-      {/* Back Button */}
       <Button
         variant="ghost"
         onClick={handleBack}
-        className="gap-2 hover:bg-accent hover:text-accent-foreground transition-colors"
+        className="hover:bg-accent hover:text-accent-foreground gap-2 transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />
         Voltar
@@ -167,264 +130,47 @@ export function StartupForm({ mode, initialData }: StartupFormProps) {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          {/* Informações Básicas */}
-          <Card className="bg-card text-card-foreground shadow-sm border border-border">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-foreground text-xl">Informações Básicas</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="nome"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nome da Startup</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Digite o nome da startup" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+          <InformacoesBasicasSection control={form.control} />
 
-                <FormField
-                  control={form.control}
-                  name="cnpj"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>CNPJ</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="00.000.000/0000-00"
-                          {...field}
-                          onChange={(e) => handleCnpjChange(e.target.value)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+          <ClassificacaoSection control={form.control} />
 
-                <FormField
-                  control={form.control}
-                  name="data_fundacao"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Data de Fundação</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="pais"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>País</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione o país" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="BRA">Brasil</SelectItem>
-                          <SelectItem value="USA">Estados Unidos</SelectItem>
-                          <SelectItem value="ARG">Argentina</SelectItem>
-                          <SelectItem value="CHL">Chile</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="descritivo_basico"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Descrição Básica</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Descreva brevemente sua startup"
-                        className="resize-none"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </CardContent>
-          </Card>
-
-          {/* Classificação */}
-          <Card className="bg-card text-card-foreground shadow-sm border border-border">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-foreground text-xl">Classificação</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="area_atuacao"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Área de Atuação</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione a área" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {AREA_ATUACAO_OPTIONS.map((area) => (
-                            <SelectItem key={area} value={area}>
-                              {area}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="estagio"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Estágio</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione o estágio" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {ESTAGIO_OPTIONS.map((estagio) => (
-                            <SelectItem key={estagio} value={estagio}>
-                              {estagio}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Investimento */}
-          <Card className="bg-card text-card-foreground shadow-sm border border-border">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-foreground text-xl">Informações de Investimento</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="meta_captacao"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Meta de Captação (R$)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="0"
-                          {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="equity_oferecido"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Equity Oferecido (%)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          step="0.1"
-                          min="0.1"
-                          max="100"
-                          placeholder="0.0"
-                          {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="descricao_objetivo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Objetivo do Investimento</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Descreva como pretende usar o investimento"
-                        className="resize-none"
-                        rows={4}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </CardContent>
-          </Card>
+          <InvestimentoSection
+            control={form.control}
+            getValues={form.getValues}
+          />
 
           <Separator className="border-border" />
 
-          {/* Submit Button */}
-          <div className="flex justify-end gap-4 pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleBack}
-              disabled={isLoading}
-              className="border border-border bg-background hover:bg-accent hover:text-accent-foreground"
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 transition-colors"
-            >
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Save className="h-4 w-4" />
-              )}
-              {isLoading
-                ? 'Salvando...'
-                : mode === 'edit'
+          <div className="flex flex-col justify-end gap-4 pt-6 sm:flex-row">
+            <div className="flex items-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleBack}
+                disabled={isLoading}
+                className="border-border bg-background hover:bg-accent hover:text-accent-foreground h-10 w-full border px-8 sm:w-auto"
+              >
+                Cancelar
+              </Button>
+            </div>
+            <div className="flex items-end">
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="bg-primary text-primary-foreground hover:bg-primary/90 h-10 w-full px-8 font-medium sm:w-auto"
+              >
+                {isLoading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="mr-2 h-4 w-4" />
+                )}
+                {isLoading
+                  ? 'Salvando...'
+                  : mode === 'edit'
                   ? 'Atualizar Startup'
-                  : 'Criar Startup'
-              }
-            </Button>
+                  : 'Criar Startup'}
+              </Button>
+            </div>
           </div>
         </form>
       </Form>

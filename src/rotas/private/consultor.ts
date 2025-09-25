@@ -55,22 +55,4 @@ export const consultorRoutes = [
     menu: 'geral',
     icon: null,
   },
-  {
-    id: 7,
-    nome: 'Painel financeiro',
-    path: '/painel-financeiro',
-    url: '/painel-financeiro',
-    isActive: true,
-    menu: 'geral',
-    icon: null,
-  },
-  {
-    id: 8,
-    nome: 'Treinamento',
-    path: '/treinamento',
-    url: '/treinamento',
-    isActive: true,
-    menu: 'geral',
-    icon: null,
-  },
 ];

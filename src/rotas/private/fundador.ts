@@ -75,15 +75,6 @@ export const fundadorRoutes = [
   },
   {
     id: 9,
-    nome: 'Treinamento',
-    path: '/treinamento',
-    url: '/treinamento',
-    isActive: true,
-    menu: 'geral',
-    icon: null,
-  },
-  {
-    id: 10,
     nome: 'Startup',
     path: '/dashboard_startups',
     url: '/dashboard_startups',
