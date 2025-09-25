@@ -82,4 +82,22 @@ export const fundadorRoutes = [
     menu: 'geral',
     icon: null,
   },
+  {
+    id: 10,
+    nome: 'Checkout',
+    path: '/checkout',
+    url: '/checkout',
+    isActive: false,
+    menu: 'private',
+    icon: null,
+  },
+  {
+    id: 11,
+    nome: 'Pagamento',
+    path: '/payment',
+    url: '/payment',
+    isActive: false,
+    menu: 'private',
+    icon: null,
+  }
 ];
