@@ -237,7 +237,7 @@ export function A2FPageClient({ token }: { token: string }) {
             </div>
             <div className="flex flex-1 items-center justify-center overflow-y-auto py-6">
               <div className="w-full max-w-sm">
-                <Card>
+                <Card className="p-4">
                   <CardHeader>
                     <CardTitle>Verificação em 2 fatores</CardTitle>
                   </CardHeader>

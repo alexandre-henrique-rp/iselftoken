@@ -99,5 +99,14 @@ export const fundadorRoutes = [
     isActive: false,
     menu: 'private',
     icon: null,
+  },
+  {
+    id: 12,
+    nome: 'Startups by id',
+    path: '/privat/startup/',
+    url: '/privat/startup',
+    isActive: false,
+    menu: 'private',
+    icon: null,
   }
 ];

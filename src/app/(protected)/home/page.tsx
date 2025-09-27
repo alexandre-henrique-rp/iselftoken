@@ -1,59 +1,83 @@
-import InvestorHome from '@/components/investorHome';
-// import StartupHome from '@/components/startupHome';
-// import { FourSquareLoader } from '@/components/ui/four-square-loader';
-// import { GetSessionServer } from '@/context/auth';
-// import dados from '@/data/data.json';
+import React, { Suspense } from 'react';
+import { AdCarousel } from '@/components/home/AdCarousel';
+import { AppleCarouselWrapper } from '@/components/home/AppleCarouselWrapper';
+import {
+  getFeaturedStartups,
+  getVerifiedStartups,
+  getAcceleratedStartups,
+  getApprovalPhaseStartups,
+  getAdBanners
+} from '@/data/home-data';
+import { Skeleton } from '@/components/ui/skeleton';
 
-// // Busca dados do investidor com controle de cache e headers
-// async function getInvestor(session: SessionNext.Session) {
-//   const response = await fetch('/api/investidor', {
-//     cache: 'no-store',
-//     headers: {
-//       Authorization: `Bearer ${session.refreshToken}`,
-//     },
-//   });
-//   if (!response.ok) {
-//     throw new Error('Falha ao carregar investidor');
-//   }
-//   const data = await response.json();
-//   return data as { name: string };
-// }
+const CarouselSkeleton = () => (
+  <div className="py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+    <Skeleton className="h-6 sm:h-8 w-1/2 sm:w-1/3 mb-6 sm:mb-8" />
+    <div className="flex gap-2 sm:gap-4 overflow-hidden">
+      <div className="min-w-0 flex-[0_0_100%] sm:flex-[0_0_85%] md:flex-[0_0_50%] lg:flex-[0_0_33.3333%]">
+        <Skeleton className="h-[300px] sm:h-[350px] md:h-[400px] w-full rounded-lg" />
+      </div>
+      <div className="min-w-0 flex-[0_0_100%] sm:flex-[0_0_85%] md:flex-[0_0_50%] lg:flex-[0_0_33.3333%] hidden md:block">
+        <Skeleton className="h-[300px] sm:h-[350px] md:h-[400px] w-full rounded-lg" />
+      </div>
+      <div className="min-w-0 flex-[0_0_100%] sm:flex-[0_0_85%] md:flex-[0_0_50%] lg:flex-[0_0_33.3333%] hidden lg:block">
+        <Skeleton className="h-[300px] sm:h-[350px] md:h-[400px] w-full rounded-lg" />
+      </div>
+    </div>
+  </div>
+);
 
-// // Busca dados da startup com controle de cache e headers
-// async function getStartup(session: SessionNext.Session) {
-//   const response = await fetch('/api/startup', {
-//     cache: 'no-store',
-//     headers: {
-//       Authorization: `Bearer ${session.refreshToken}`,
-//     },
-//   });
-//   if (!response.ok) {
-//     throw new Error('Falha ao carregar startup');
-//   }
-//   const data = await response.json();
-//   return data as { name: string };
-// }
+const AdCarouselLoader = async () => {
+  const banners = await getAdBanners();
+  return <AdCarousel banners={banners} />;
+};
+
+const FeaturedStartupsLoader = async () => {
+  const startups = await getFeaturedStartups();
+  return <AppleCarouselWrapper title="Startups em Destaque" startups={startups} />;
+};
+
+const VerifiedStartupsLoader = async () => {
+  const startups = await getVerifiedStartups();
+  return <AppleCarouselWrapper title="Startups Verificadas" startups={startups} />;
+};
+
+const AcceleratedStartupsLoader = async () => {
+  const startups = await getAcceleratedStartups();
+  return <AppleCarouselWrapper title="Startups Aceleradas" startups={startups} />;
+};
+
+const ApprovalPhaseStartupsLoader = async () => {
+  const startups = await getApprovalPhaseStartups();
+  return <AppleCarouselWrapper title="Startups em Fase de Aprovação" startups={startups} />;
+};
 
 export const dynamic = 'force-dynamic';
 
-export default async function Home() {
-  // const session = await GetSessionServer();
+export default function Home() {
+  return (
+    <div className="w-full min-h-screen">
+      <Suspense fallback={<Skeleton className="h-64 sm:h-80 md:h-96 w-full" />}>
+        <AdCarouselLoader />
+      </Suspense>
 
-  // if (!session) {
-  //   return <FourSquareLoader className="h-full w-full" />;
-  // }
-  
-  // if (!session.refreshToken) {
-  //   return <FourSquareLoader className="h-full w-full" />;
-  // }
+      <div className="max-w-[1380px] mx-auto">
+        <Suspense fallback={<CarouselSkeleton />}>
+          <FeaturedStartupsLoader />
+        </Suspense>
 
-  // Busca somente os dados necessários conforme o perfil do usuário
-  // if (session.user?.role === 'investidor') {
-  //   const data = await getInvestor(session);
-  //   return <InvestorHome />;
-  // }
+        <Suspense fallback={<CarouselSkeleton />}>
+          <VerifiedStartupsLoader />
+        </Suspense>
 
-  // const data = await getStartup(session);
-  // return <StartupHome data={dados} />;
-  return <InvestorHome />;
+        <Suspense fallback={<CarouselSkeleton />}>
+          <AcceleratedStartupsLoader />
+        </Suspense>
+
+        <Suspense fallback={<CarouselSkeleton />}>
+          <ApprovalPhaseStartupsLoader />
+        </Suspense>
+      </div>
+    </div>
+  );
 }

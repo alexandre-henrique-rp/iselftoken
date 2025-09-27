@@ -17,9 +17,10 @@ interface EmblaCarouselProps {
   children: React.ReactNode;
   className?: string;
   options?: EmblaOptionsType;
+  showArrows?: boolean;
 }
 
-export function EmblaCarousel({ children, className, options }: EmblaCarouselProps) {
+export function EmblaCarousel({ children, className, options, showArrows = true }: EmblaCarouselProps) {
   const [viewportRef, emblaApi] = useEmblaCarousel({ loop: false, align: "start", ...options });
   const [selectedIndex, setSelectedIndex] = React.useState(0);
   const [scrollSnaps, setScrollSnaps] = React.useState<number[]>([]);
@@ -41,44 +42,48 @@ export function EmblaCarousel({ children, className, options }: EmblaCarouselPro
   const scrollTo = (index: number) => emblaApi && emblaApi.scrollTo(index);
 
   return (
-    <div className={cn("relative", className)}>
+    <div className={cn("relative w-full", className)}>
       <div className="overflow-hidden" ref={viewportRef}>
         {/* Gutters laterais para acomodar as setas sem cobrir os cards */}
-        <div className="ml-0 flex touch-pan-y gap-4 px-8 md:px-12">
+        <div className="ml-0 flex touch-pan-y gap-4">
           {children}
         </div>
       </div>
 
       {/* Arrows - escondidas no mobile */}
-      <button
-        type="button"
-        aria-label="Anterior"
-        onClick={scrollPrev}
-        className={cn(
-          "hidden md:flex",
-          "absolute left-2 top-1/2 -translate-y-1/2 z-10",
-          "h-10 w-10 items-center justify-center rounded-full bg-white/80 border border-gray-300 text-gray-700 hover:bg-white/90",
-          "dark:bg-black/80 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-black/90",
-          "backdrop-blur-sm shadow-lg"
-        )}
-      >
-        <ChevronLeft className="h-5 w-5" />
-      </button>
+      {showArrows && (
+        <>
+          <button
+            type="button"
+            aria-label="Anterior"
+            onClick={scrollPrev}
+            className={cn(
+              "hidden md:flex",
+              "absolute left-2 top-1/2 -translate-y-1/2 z-10",
+              "h-10 w-10 items-center justify-center rounded-full bg-white/80 border border-gray-300 text-gray-700 hover:bg-white/90",
+              "dark:bg-black/80 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-black/90",
+              "backdrop-blur-sm shadow-lg"
+            )}
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
 
-      <button
-        type="button"
-        aria-label="Próximo"
-        onClick={scrollNext}
-        className={cn(
-          "hidden md:flex",
-          "absolute right-2 top-1/2 -translate-y-1/2 z-10",
-          "h-10 w-10 items-center justify-center rounded-full bg-white/80 border border-gray-300 text-gray-700 hover:bg-white/90",
-          "dark:bg-black/80 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-black/90",
-          "backdrop-blur-sm shadow-lg"
-        )}
-      >
-        <ChevronRight className="h-5 w-5" />
-      </button>
+          <button
+            type="button"
+            aria-label="Próximo"
+            onClick={scrollNext}
+            className={cn(
+              "hidden md:flex",
+              "absolute right-2 top-1/2 -translate-y-1/2 z-10",
+              "h-10 w-10 items-center justify-center rounded-full bg-white/80 border border-gray-300 text-gray-700 hover:bg-white/90",
+              "dark:bg-black/80 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-black/90",
+              "backdrop-blur-sm shadow-lg"
+            )}
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </>
+      )}
 
       {/* Dots */}
       <div className="mt-4 flex items-center justify-center gap-2">
@@ -109,7 +114,7 @@ export function EmblaSlide({ className, children }: { className?: string; childr
         // base: 100%, md: 50%, lg+: 33.333%
         "min-w-0 flex-[0_0_100%] md:flex-[0_0_50%] lg:flex-[0_0_33.3333%]",
         // evitar espremimento interno
-        "px-2 md:px-2",
+        "px-1 md:px-1",
         className
       )}
     >

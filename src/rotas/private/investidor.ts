@@ -55,4 +55,13 @@ export const investorRoutes = [
     menu: 'interno',
     icon: NotebookPen,
   },
+  {
+    id: 7,
+    nome: 'Detalhes da Startup',
+    path: '/privat/startup/',
+    url: '/privat/startup',
+    isActive: false,
+    menu: 'private',
+    icon: null,
+  },
 ];

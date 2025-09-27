@@ -35,7 +35,7 @@ export async function POST(request: Request) {
       );
     }
     const role = data.data.user.role;
-    const red = role === 'fundador' ? '/dashboard' : role === 'admin' ? '/admin' : role === 'afiliado' ? '/afiliado' : '/home';
+    const red = role === 'admin' ? '/admin' : '/home';
 
     // gerar payload
     const payload = {

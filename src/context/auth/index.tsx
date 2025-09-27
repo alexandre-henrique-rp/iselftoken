@@ -30,7 +30,7 @@ export async function GetSessionServer(): Promise<SessionNext.Session | null> {
     const tokenCookie = (await cookies()).get("session-token");
 
     // Adicione este log para ver se o token está sendo encontrado
-    console.log("Token de sessão encontrado:", !!tokenCookie);
+    // console.log("Token de sessão encontrado:", !!tokenCookie);
 
     if (!tokenCookie) {
       return null;
