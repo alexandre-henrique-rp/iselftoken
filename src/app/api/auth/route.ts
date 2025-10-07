@@ -7,7 +7,6 @@ import {
 import { NextResponse } from 'next/server';
 import * as jose from 'jose';
 import generateA2fCode from '@/lib/a2f';
-import { cookies } from 'next/headers';
 
 export async function POST(request: Request) {
   try {

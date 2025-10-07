@@ -1,5 +1,5 @@
 import { Rotas } from "@/types/rotasTypes";
-import { Bell, Factory, GraduationCap, GraduationCapIcon, Home, TrendingUp, User, Wallet } from "lucide-react";
+import { Bell, Factory, GraduationCapIcon, Home, User, Wallet } from "lucide-react";
 
 export const fundadorRoutes: Rotas.Types[] = [
   {
