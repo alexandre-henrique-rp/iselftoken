@@ -59,43 +59,34 @@ export async function GetSessionServer(): Promise<SessionNext.Session | null> {
 //DestroySession responsável por destruir o session
 export async function DeleteSession() {
   (await cookies()).delete("session-token");
-  (await cookies()).delete("a2f-verified");
 }
 
-// A2F Verified Cookie Utilities
-// Funções utilitárias para salvar, ler e remover o estado de verificação de e-mail (A2F) nos cookies.
 
-/**
- * Define/atualiza o cookie "a2f-verified" indicando se o código de e-mail foi verificado.
- * Por padrão, não usa httpOnly (permite leitura no client) e dura 60 minutos.
- */
-export async function SetA2fVerified(
+export async function SetSession2fa(
   value: boolean,
-  options?: { maxAgeMinutes?: number; httpOnly?: boolean; path?: string }
+  options?: {
+    path?: string;
+    expires?: number;
+    secure?: boolean;
+    sameSite?: 'lax' | 'strict' | 'none';
+    domain?: string;
+  }
 ): Promise<void> {
-  const maxAgeMinutes = options?.maxAgeMinutes ?? 60
-  const httpOnly = options?.httpOnly ?? false
-  const path = options?.path ?? "/"
-
-  ;(await cookies()).set("a2f-verified", value ? "true" : "false", {
-    maxAge: maxAgeMinutes * 60,
-    httpOnly,
-    path,
-  })
+  const cookieStore = await cookies();
+  cookieStore.set("session_2fa", value.toString(), {
+    expires: options?.expires ? new Date(Date.now() + options.expires * 1000) : undefined,
+    httpOnly: true,
+    path: options?.path ?? '/',
+  });
 }
 
-/**
- * Lê o cookie "a2f-verified" e retorna true/false. Ausente => false.
- */
-export async function GetA2fVerified(): Promise<boolean> {
+export async function GetSession2fa(): Promise<boolean> {
   const cookieStore = await cookies()
-  const c = cookieStore.get("a2f-verified")
-  return c?.value === "true"
+  const c = cookieStore.get("session_2fa")
+  if (!c) {
+    return false
+  }
+  return c.value === "true"
 }
 
-/**
- * Remove o cookie "a2f-verified".
- */
-export async function DeleteA2fVerified(): Promise<void> {
-  (await cookies()).delete("a2f-verified")
-}
+

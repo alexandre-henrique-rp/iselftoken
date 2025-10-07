@@ -3,7 +3,6 @@ import { type NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest) {
   try {
     const country = request.nextUrl.searchParams.get('country')
-    console.log("🚀 ~ GET ~ country:", country)
     if (!country) {
       return NextResponse.json(
         { error: true, message: 'Parametro country é obrigatório', data: null },

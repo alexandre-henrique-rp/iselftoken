@@ -1,7 +1,7 @@
 // Força renderização dinâmica para evitar problemas com cookies/sessão em SSR
 export const dynamic = 'force-dynamic';
 
-import { PerfilForm } from '@/components/business/perfil/perfil-form';
+import { PerfilForm } from '@/components/perfil/perfil-form';
 import { GetSessionServer } from '@/context/auth';
 
 const request = async (id: string | number) => {
@@ -64,6 +64,7 @@ export default async function Perfil() {
   const isSuccess = res?.status === 'success';
   const message = !isSuccess && 'Não foi possível carregar o perfil.';
   const perfil: PerfilData | undefined = res?.data
+  console.log("🚀 ~ Perfil ~ perfil:", perfil)
 
   const role = perfil?.role;
 

@@ -11,17 +11,17 @@ export type ProfileCardData = {
 // ProfileCard alinhado ao layout do exemplo fornecido
 export function ProfileCard2({ data }: ProfileCardData ) {
   return (
-    <Card className="overflow-hidden rounded-xl border border-blue-700 bg-zinc-100 dark:bg-card text-card-foreground shadow-sm !py-2">
+    <Card className="overflow-hidden rounded-xl border border-blue-700 bg-zinc-100 dark:bg-card text-card-foreground shadow-sm">
       <CardContent className="px-5 py-4">
         {/* Header compacto: Logo + Nome */}
         <div className="flex items-center gap-3">
-          <div className="flex-shrink-0 w-24 h-24 rounded-lg border border-border bg-background p-1">
+          <div className="flex-shrink-0 w-24 h-17 rounded-lg border border-border bg-background p-1">
             <Image 
               src={data.logo} 
               alt={`Logo da ${data.name}`}
               width={64} 
               height={64} 
-              className="w-full h-full object-contain"
+              className="w-full h-full object-contain rounded-lg"
             />
           </div>
           <div className="flex-1 min-w-0">
@@ -49,10 +49,10 @@ export function ProfileCard2({ data }: ProfileCardData ) {
         </div>
 
         {/* Divisor */}
-        <div className="mt-4 pt-4 border-t border-[#d500f9]" />
+        <div className="my-3 border-t border-[#d500f9]" />
 
         {/* Métricas simples */}
-        <div className="mt-4 flex justify-between gap-3 px-4">
+        <div className="flex justify-between gap-3 px-4">
           <div className="">
             <span className="text-xs font-medium text-muted-foreground">Equity ofertado</span>
             <p className="mt-1 text-sm font-semibold text-foreground">{data.equityPercentage}</p>

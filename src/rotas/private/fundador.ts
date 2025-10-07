@@ -1,6 +1,7 @@
-import { Bell, Home, TrendingUp, User } from "lucide-react";
+import { Rotas } from "@/types/rotasTypes";
+import { Bell, Factory, GraduationCap, GraduationCapIcon, Home, TrendingUp, User, Wallet } from "lucide-react";
 
-export const fundadorRoutes = [
+export const fundadorRoutes: Rotas.Types[] = [
   {
     id: 1,
     nome: 'Home',
@@ -9,15 +10,6 @@ export const fundadorRoutes = [
     isActive: true,
     menu: 'geral',
     icon: Home,
-  },
-  {
-    id: 2,
-    nome: 'Dashboard',
-    path: '/dashboard',
-    url: '/dashboard',
-    isActive: true,
-    menu: 'geral',
-    icon: null,
   },
   {
     id: 3,
@@ -61,8 +53,8 @@ export const fundadorRoutes = [
     path: '/treinamento',
     url: '/treinamento',
     isActive: true,
-    menu: 'geral',
-    icon: null,
+    menu: 'interno',
+    icon: GraduationCapIcon,
   },
   {
     id: 8,
@@ -70,8 +62,8 @@ export const fundadorRoutes = [
     path: '/painel-financeiro',
     url: '/painel-financeiro',
     isActive: true,
-    menu: 'geral',
-    icon: TrendingUp,
+    menu: 'interno',
+    icon: Wallet,
   },
   {
     id: 9,
@@ -80,7 +72,7 @@ export const fundadorRoutes = [
     url: '/dashboard_startups',
     isActive: true,
     menu: 'geral',
-    icon: null,
+    icon: Factory,
   },
   {
     id: 10,

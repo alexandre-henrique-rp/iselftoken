@@ -20,7 +20,7 @@ interface EmblaCarouselProps {
   showArrows?: boolean;
 }
 
-export function EmblaCarousel({ children, className, options, showArrows = true }: EmblaCarouselProps) {
+export function EmblaCarousel({ children, className, options, showArrows = false }: EmblaCarouselProps) {
   const [viewportRef, emblaApi] = useEmblaCarousel({ loop: false, align: "start", ...options });
   const [selectedIndex, setSelectedIndex] = React.useState(0);
   const [scrollSnaps, setScrollSnaps] = React.useState<number[]>([]);

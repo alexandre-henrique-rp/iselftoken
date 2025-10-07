@@ -1,6 +1,7 @@
+import { Rotas } from "@/types/rotasTypes";
 import { Bell, ChartNoAxesCombined, Home, NotebookPen, User } from "lucide-react";
 
-export const investorRoutes = [
+export const investorRoutes: Rotas.Types[] = [
   {
     id: 1,
     nome: 'Home',

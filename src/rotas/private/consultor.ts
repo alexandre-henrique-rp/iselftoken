@@ -1,6 +1,7 @@
-import { Bell, Home, User } from "lucide-react";
+import { Rotas } from "@/types/rotasTypes";
+import { Bell, Home, User, Wallet } from "lucide-react";
 
-export const consultorRoutes = [
+export const consultorRoutes: Rotas.Types[] = [
   {
     id: 1,
     nome: 'Home',
@@ -52,7 +53,16 @@ export const consultorRoutes = [
     path: '/treinamento',
     url: '/treinamento',
     isActive: true,
-    menu: 'geral',
+    menu: 'interno',
     icon: null,
+  },
+  {
+    id: 7,
+    nome: 'Painel financeiro',
+    path: '/painel-financeiro',
+    url: '/painel-financeiro',
+    isActive: true,
+    menu: 'interno',
+    icon: Wallet,
   },
 ];

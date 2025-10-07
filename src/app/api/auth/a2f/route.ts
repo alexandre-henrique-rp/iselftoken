@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as jose from 'jose';
+import { SetSession2fa } from '@/context/auth';
 
 
 export async function PUT(request: NextRequest) {
@@ -20,7 +21,7 @@ export async function PUT(request: NextRequest) {
 
     // Tentar verificar o token com tratamento de erro específico
     const tokenData = await VerifyToken(TokenClient);
-    console.log("🚀 ~ PUT ~ tokenData:", tokenData)
+  
 
     const { cog, red, Id } = tokenData;
 
@@ -44,6 +45,10 @@ export async function PUT(request: NextRequest) {
         { error: 'Caminho de redirecionamento inválido' },
         { status: 400 },
       );
+    }
+
+    if(red === '/home' || red === '/admin') {
+      await SetSession2fa(true, {path: '/', expires: 60 * 60 * 24 * 7})
     }
     
     return NextResponse.json(

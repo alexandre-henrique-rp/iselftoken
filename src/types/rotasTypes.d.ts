@@ -7,7 +7,7 @@ export namespace Rotas {
     path: string,
     url: string,
     isActive: boolean,
-    menu: string,
+    menu: 'user' | 'geral' | 'config' | 'private' | 'interno',
     icon: LucideIcon | null,
   }
 }

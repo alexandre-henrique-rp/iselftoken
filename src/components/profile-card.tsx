@@ -11,29 +11,29 @@ export type ProfileCardData = {
 // ProfileCard alinhado ao layout do exemplo fornecido
 export function ProfileCard({ data }: ProfileCardData) {
   return (
-    <Card className="dark:bg-card text-card-foreground !gap-3 overflow-hidden rounded-xl border border-blue-700 bg-zinc-100 !py-3 shadow-sm">
+    <Card className="dark:bg-card text-card-foreground overflow-hidden rounded-xl border border-blue-700 bg-zinc-100 shadow-sm">
       <CardHeader className="p-0">
         <div className="bg-muted relative aspect-[16/9]">
           <Image
             src={data.image}
             alt={data.name}
             fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 70vw, 60vw"
+            sizes="(max-width: 640px) 90vw, (max-width: 1024px) 60vw, 50vw"
             className="object-cover"
           />
         </div>
       </CardHeader>
 
-      <CardContent className="px-5 pt-3 pb-5">
+      <CardContent className="pt-1">
         {/* Título e descrição */}
         <div className="flex items-center gap-3">
-          <div className="border-border bg-background h-24 w-24 flex-shrink-0 rounded-lg border p-1">
+          <div className="border-border bg-background h-17 w-24 flex-shrink-0 rounded-lg border p-0.5 ">
             <Image
               src={data.logo}
               alt={`Logo da ${data.name}`}
               width={48}
               height={48}
-              className="h-full w-full object-contain"
+              className="h-full w-full object-contain rounded-lg"
             />
           </div>
           <div className="min-w-0 flex-1">
@@ -47,7 +47,7 @@ export function ProfileCard({ data }: ProfileCardData) {
         </p>
 
         {/* selos */}
-        <div className="scrollbar-hide mt-2 flex h-10 items-center gap-1.5 overflow-x-auto">
+        <div className="scrollbar-hide flex h-10 items-center gap-1.5 overflow-x-auto">
           {data.selos.map((selo) => (
             <div key={selo.id} className="flex-shrink-0">
               <Image
@@ -66,7 +66,7 @@ export function ProfileCard({ data }: ProfileCardData) {
         <div className="mt-4 border-t border-[#d500f9] pt-4" />
 
         {/* Métricas simples */}
-        <div className="mt-4 flex justify-between gap-3 px-4">
+        <div className="flex justify-between gap-3 px-4">
           <div>
             <span className="text-muted-foreground text-xs font-medium">
               Equity ofertado

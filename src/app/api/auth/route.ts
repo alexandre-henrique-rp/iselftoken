@@ -1,11 +1,13 @@
 import {
   CreateSessionToken,
   DeleteSession,
+  GetSession2fa,
   GetSessionServer,
 } from '@/context/auth';
 import { NextResponse } from 'next/server';
 import * as jose from 'jose';
 import generateA2fCode from '@/lib/a2f';
+import { cookies } from 'next/headers';
 
 export async function POST(request: Request) {
   try {
@@ -32,6 +34,22 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { message: data.message || 'Erro ao autenticar', error: null },
         { status: response.status },
+      );
+    }
+
+    const session2fa = await GetSession2fa();
+    if (session2fa) {
+      const role = data.data.user.role;
+      // criar sessão
+      await CreateSessionToken({
+        user: data.data.user,
+        token: data.data.token,
+        refreshToken: data.data.refreshToken,
+      });
+      const red = role === 'admin' ? '/admin' : '/home';
+      return NextResponse.json(
+        { message: 'Autenticado com sucesso', url: red },
+        { status: 200 },
       );
     }
     const role = data.data.user.role;
@@ -131,7 +149,11 @@ export async function DELETE() {
   } catch (error) {
     console.log(error);
     return NextResponse.json(
-      { message: error instanceof Error ? error.message : 'Erro ao finalizar sessão', error: JSON.stringify(error, null, 2) || null },
+      {
+        message:
+          error instanceof Error ? error.message : 'Erro ao finalizar sessão',
+        error: JSON.stringify(error, null, 2) || null,
+      },
       { status: 500 },
     );
   }

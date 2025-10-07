@@ -54,7 +54,7 @@ const ApprovalPhaseStartupsLoader = async () => {
 
 export const dynamic = 'force-dynamic';
 
-export default function Home() {
+export default async function Home() {
   return (
     <div className="w-full min-h-screen">
       <Suspense fallback={<Skeleton className="h-64 sm:h-80 md:h-96 w-full" />}>
