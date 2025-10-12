@@ -34,7 +34,7 @@ export function AppSidebar({ role, session, ...props }: AppSidebarProps) {
 
   // Type-safe filtering functions
   const getItemsByMenu = (menuType: 'geral' | 'interno' | 'config' | 'user' | 'private'): Rotas.Types[] => {
-    return MenuFilter.filter((item): item is Rotas.Types => item.menu === menuType);
+    return MenuFilter.filter(item => item.menu === menuType) as Rotas.Types[];
   };
 
   return (
