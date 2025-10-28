@@ -52,7 +52,7 @@ export async function middleware(req: NextRequest) {
 
   if (session) {
     const role = session.user.role;
-    console.log("🚀 ~ middleware ~ role:", role)
+    // console.log("🚀 ~ middleware ~ role:", role)
     // "investidor" | "startup" | "admin" | "afiliado"
     if (role === 'fundador') {
       const allowed = StartupRoutesList.some(
