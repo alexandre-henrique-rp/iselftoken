@@ -42,14 +42,56 @@ export async function PUT(
 ) {
   try {
     const { id } = await ctx.params;
-    const body = await req.formData();
-    const user = await fetch(`${process.env.NEXTAUTH_API_URL}/users/${id}`, {
+    const body = await req.json();
+    const {
+      nome,
+      email,
+      role,
+      telefone,
+      cep,
+      endereco,
+      bairro,
+      cidade,
+      uf,
+      pais,
+      numero,
+      avatar,
+      documento,
+      reg_documento,
+      tipo_documento,
+      status,
+      termos,
+      bio_facial,
+      fundador,
+      afiliado,
+      dt_nascimento,
+    } = body;
+
+    let url;
+    switch (role) {
+      case 'fundador':
+        url = `${process.env.NEXTAUTH_API_URL}/users/${id}`;
+        break;
+      case 'afiliado':
+        url = `${process.env.NEXTAUTH_API_URL}/affiliate/${id}`;
+        break;
+      case 'investidor':
+        url = `${process.env.NEXTAUTH_API_URL}/investidor/${id}`;
+        break;
+      case 'admin':
+        url = `${process.env.NEXTAUTH_API_URL}/users/${id}`;
+        break;
+      default:
+        url = `${process.env.NEXTAUTH_API_URL}/users/${id}`;
+        break;
+    }
+
+    const user = await fetch(url, {
       method: 'PUT',
       body,
     });
-    console.log("🚀 ~ PUT ~ user:", user)
     const userData = await user.json();
-    console.log("🚀 ~ PUT response ~ userData:", userData)
+    console.log('🚀 ~ PUT response ~ userData:', userData);
     if (!user.ok) {
       return NextResponse.json(
         {
@@ -60,12 +102,16 @@ export async function PUT(
         { status: user.status },
       );
     }
-    return NextResponse.json({
-      status: 'success',
-      message: 'Perfil atualizado com sucesso',
-      data: userData
-    }, { status: 200 });
+    return NextResponse.json(
+      {
+        status: 'success',
+        message: 'Perfil atualizado com sucesso',
+        data: userData,
+      },
+      { status: 200 },
+    );
   } catch (error) {
+    console.log("🚀 ~ PUT ~ error:", error)
     return NextResponse.json(
       {
         message:

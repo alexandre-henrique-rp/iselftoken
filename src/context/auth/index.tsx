@@ -10,16 +10,27 @@ export async function openSessionToken<T = jose.JWTPayload>(token: string): Prom
 
 // createSession responsável por criar o session
 export async function CreateSessionToken(payload: SessionNext.Session) {
+  const { user, ...rest } = payload
+  
   const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET)
-  const token = await new jose.SignJWT(payload as unknown as jose.JWTPayload)
+  const token = await new jose.SignJWT({rest} as unknown as jose.JWTPayload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("6h")
     .sign(secret)
   const { exp } = await openSessionToken(token);
 
-  (await cookies()).set("session-token", token, {
-    expires: (exp as number) * 1000,
+  const cookieStore = await cookies();
+  const expiresAt = new Date((exp as number) * 1000);
+
+  cookieStore.set("user", JSON.stringify(user), {
+    expires: expiresAt,
+    path: "/",
+    httpOnly: true,
+  })
+
+  cookieStore.set("session-token", token, {
+    expires: expiresAt,
     path: "/",
     httpOnly: true,
   });
@@ -27,15 +38,18 @@ export async function CreateSessionToken(payload: SessionNext.Session) {
 
 export async function GetSessionServer(): Promise<SessionNext.Session | null> {
   try {
-    const tokenCookie = (await cookies()).get("session-token");
-
-    // Adicione este log para ver se o token está sendo encontrado
-    // console.log("Token de sessão encontrado:", !!tokenCookie);
+    const cookieStore = await cookies();
+    const tokenCookie = cookieStore.get("session-token");
+    const userCookie = cookieStore.get("user");
 
     if (!tokenCookie) {
       return null;
     }
+    if (!userCookie) {
+      return null;
+    }
 
+    const user = JSON.parse(userCookie.value) as SessionNext.Client;
     const token = tokenCookie.value;
     const payload = await openSessionToken(token);
 
@@ -43,7 +57,7 @@ export async function GetSessionServer(): Promise<SessionNext.Session | null> {
   
     
     return { 
-      user: payload.user as unknown as SessionNext.Client,
+      user: user,
       expires,
       token,
       refreshToken: payload.refreshToken as string
@@ -58,7 +72,9 @@ export async function GetSessionServer(): Promise<SessionNext.Session | null> {
 
 //DestroySession responsável por destruir o session
 export async function DeleteSession() {
-  (await cookies()).delete("session-token");
+  const cookieStore = await cookies();
+  cookieStore.delete("session-token");
+  cookieStore.delete("user");
 }
 
 
