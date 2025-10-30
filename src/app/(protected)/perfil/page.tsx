@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 
 import { PerfilForm } from '@/components/perfil/perfil-form';
 import { GetSessionServer } from '@/context/auth';
+import Image from 'next/image';
 
 const request = async (id: string | number) => {
   const user = await fetch(
@@ -80,13 +81,15 @@ export default async function Perfil() {
                 <div className="relative">
                   <div className="h-24 w-24 overflow-hidden rounded-full border-4 border-primary/20 bg-muted md:h-32 md:w-32">
                     {perfil?.avatar ? (
-                      <img
+                      <Image
                         src={perfil.avatar}
                         alt={perfil?.nome || 'Avatar'}
+                        width={100}
+                        height={100}
                         className="h-full w-full object-cover"
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 to-blue/20">
+                      <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-primary/20 to-blue/20">
                         <span className="text-3xl font-bold text-primary md:text-4xl">
                           {perfil?.nome?.charAt(0).toUpperCase() || 'U'}
                         </span>
