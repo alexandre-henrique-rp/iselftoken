@@ -20,6 +20,48 @@ interface StartupWithFormData extends Startup {
   descricao_objetivo?: string
 }
 
+const AREA_ATUACAO_SUGESTOES: Array<{ area: string; keywords: string[] }> = [
+  { area: 'Fintech', keywords: ['fintech', 'finance', 'pagamento', 'bank', 'credito', 'crédito'] },
+  { area: 'E-commerce', keywords: ['comércio', 'commerce', 'loja', 'marketplace', 'varejo online'] },
+  { area: 'SaaS', keywords: ['software', 'plataforma', 'sas', 'gestão', 'service'] },
+  { area: 'EdTech', keywords: ['educ', 'ensino', 'aprend', 'treinamento', 'curso'] },
+  { area: 'HealthTech', keywords: ['saúde', 'health', 'clínic', 'medic', 'hospital'] },
+  { area: 'AgTech', keywords: ['agro', 'agrícola', 'campo', 'fazenda'] },
+  { area: 'Marketplace', keywords: ['marketplace', 'hub de ofertas', 'plataforma de oferta'] },
+  { area: 'Logística', keywords: ['logístic', 'transporte', 'entrega', 'last mile', 'supply'] },
+  { area: 'Energia', keywords: ['energia', 'solar', 'power', 'renovável', 'elétrica'] },
+  { area: 'Varejo', keywords: ['varejo', 'retail', 'loja física'] },
+  { area: 'Outros', keywords: [] },
+]
+
+interface EmpresaCnpjResponse {
+  razao_social?: string
+  capital_social?: string | number
+  estabelecimento?: {
+    data_inicio_atividade?: string
+    atividade_principal?: {
+      descricao?: string
+    }
+    pais?: {
+      iso3?: string
+    }
+  }
+}
+
+const encontrarAreaPorDescricao = (descricao?: string): string | undefined => {
+  if (!descricao) {
+    return undefined
+  }
+
+  const descricaoNormalizada = descricao.toLowerCase()
+
+  const sugestao = AREA_ATUACAO_SUGESTOES.find(({ keywords }) =>
+    keywords.some((keyword) => descricaoNormalizada.includes(keyword))
+  )
+
+  return sugestao?.area
+}
+
 const startupSchema = z.object({
   nome: z.string().min(1, 'Nome é obrigatório'),
   cnpj: z.string().min(18, 'CNPJ inválido'),
@@ -48,6 +90,7 @@ interface StartupFormProps {
 export function StartupForm({ mode, initialData }: StartupFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [isConsultingCnpj, setIsConsultingCnpj] = useState(false)
 
   const form = useForm<StartupFormData>({
     resolver: zodResolver(startupSchema),
@@ -117,6 +160,93 @@ export function StartupForm({ mode, initialData }: StartupFormProps) {
     router.back()
   }
 
+  const handleConsultCnpj = async () => {
+    const cnpjValue = form.getValues('cnpj')
+    const sanitizedCnpj = unmaskValue(cnpjValue)
+    console.log("🚀 ~ handleConsultCnpj ~ sanitizedCnpj:", sanitizedCnpj)
+
+    if (sanitizedCnpj.length !== 14) {
+      toast.warning('Informe um CNPJ válido para consulta.')
+      return
+    }
+
+    setIsConsultingCnpj(true)
+
+    try {
+      const response = await fetch(`/api/cnpj/${sanitizedCnpj}`)
+     
+
+      if (response.status === 404) {
+        toast.info('CNPJ não encontrado na base consultada.')
+        return
+      }
+
+      if (!response.ok) {
+        throw new Error('Falha na consulta do CNPJ')
+      }
+
+      const empresa: EmpresaCnpjResponse = await response.json()
+
+      if (empresa?.razao_social) {
+        form.setValue('nome', empresa.razao_social, {
+          shouldDirty: true,
+          shouldTouch: true,
+          shouldValidate: true,
+        })
+      }
+
+      const dataFundacao = empresa?.estabelecimento?.data_inicio_atividade
+
+      if (dataFundacao) {
+        form.setValue('data_fundacao', new Date(dataFundacao).toISOString().split('T')[0], {
+          shouldDirty: true,
+          shouldTouch: true,
+          shouldValidate: true,
+        })
+      }
+
+      const paisIso3 = empresa?.estabelecimento?.pais?.iso3
+      const paisesPermitidos = ['BRA', 'USA', 'ARG', 'CHL']
+
+      if (paisIso3 && paisesPermitidos.includes(paisIso3)) {
+        form.setValue('pais', paisIso3, {
+          shouldDirty: true,
+          shouldTouch: true,
+          shouldValidate: true,
+        })
+      }
+
+      const areaSugerida = encontrarAreaPorDescricao(
+        empresa?.estabelecimento?.atividade_principal?.descricao
+      )
+
+      form.setValue('area_atuacao', areaSugerida || 'Outros', {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true,
+      })
+
+      if (!initialData) {
+        const receitaPresumida = Number(empresa?.capital_social)
+        if (!Number.isNaN(receitaPresumida) && receitaPresumida > 0) {
+          const metaSugerida = Math.min(Math.max(receitaPresumida * 0.1, 100000), 15000000)
+          form.setValue('meta_captacao', Number(metaSugerida.toFixed(2)), {
+            shouldDirty: true,
+            shouldTouch: true,
+            shouldValidate: true,
+          })
+        }
+      }
+
+      toast.success('Dados do CNPJ preenchidos automaticamente.')
+    } catch (error) {
+      console.error('Erro ao consultar CNPJ:', error)
+      toast.error('Não foi possível consultar o CNPJ. Tente novamente mais tarde.')
+    } finally {
+      setIsConsultingCnpj(false)
+    }
+  }
+
   return (
     <div className="space-y-8">
       <Button
@@ -130,7 +260,11 @@ export function StartupForm({ mode, initialData }: StartupFormProps) {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <InformacoesBasicasSection control={form.control} />
+          <InformacoesBasicasSection
+            control={form.control}
+            onConsultCnpj={handleConsultCnpj}
+            isConsultingCnpj={isConsultingCnpj}
+          />
 
           <ClassificacaoSection control={form.control} />
 

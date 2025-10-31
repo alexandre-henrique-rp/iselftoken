@@ -73,12 +73,12 @@ export function InvestimentoSection({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 items-end gap-6 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <Controller
             control={control}
             name="meta_captacao"
             render={({ field, fieldState: { error } }) => (
-              <FormItem className="h-full">
+              <FormItem className="flex h-full flex-col gap-2">
                 <FormLabel className="text-sm font-medium">
                   Meta de Captação (R$)
                 </FormLabel>
@@ -114,7 +114,7 @@ export function InvestimentoSection({
             control={control}
             name="equity_oferecido"
             render={({ field, fieldState: { error } }) => (
-              <FormItem className="h-full">
+              <FormItem className="flex h-full flex-col gap-2">
                 <FormLabel className="text-sm font-medium">
                   Equity Oferecido (%)
                 </FormLabel>
@@ -130,14 +130,17 @@ export function InvestimentoSection({
                     }}
                   />
                 </FormControl>
+                <span aria-hidden className="text-xs text-transparent">
+                  espaço reservado
+                </span>
                 {error && <FormMessage>{error.message}</FormMessage>}
               </FormItem>
             )}
           />
 
-          <div className="flex h-full items-end">
+          <div className="flex flex-col gap-3 lg:col-span-2 lg:flex-row lg:items-center lg:justify-end">
             <Button
-              className="bg-[#d500f9] text-white hover:bg-[#d500f9]/90 h-10 w-full font-medium transition-colors"
+              className="bg-[#d500f9] text-white hover:bg-[#d500f9]/90 h-10 w-full font-medium transition-colors lg:w-auto"
               disabled={!isButtonEnabled}
               type="button"
               onClick={handleReserveClick}

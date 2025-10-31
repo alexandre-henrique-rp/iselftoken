@@ -1,4 +1,5 @@
 import { Control } from 'react-hook-form'
+import { Loader2, Search } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -16,13 +17,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { applyCnpjMask } from '@/lib/mask-utils'
+import { Button } from '@/components/ui/button'
+import { applyCnpjMask, unmaskValue } from '@/lib/mask-utils'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 interface InformacoesBasicasSectionProps {
   control: Control<any>
+  onConsultCnpj: () => Promise<void>
+  isConsultingCnpj: boolean
 }
 
-export function InformacoesBasicasSection({ control }: InformacoesBasicasSectionProps) {
+export function InformacoesBasicasSection({
+  control,
+  onConsultCnpj,
+  isConsultingCnpj,
+}: InformacoesBasicasSectionProps) {
   const handleCnpjChange = (value: string, field: { onChange: (value: string) => void }) => {
     const maskedValue = applyCnpjMask(value)
     field.onChange(maskedValue)
@@ -63,12 +72,39 @@ export function InformacoesBasicasSection({ control }: InformacoesBasicasSection
                 <FormItem className="h-full">
                   <FormLabel className="text-sm font-medium">CNPJ</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="00.000.000/0000-00"
-                      className="h-10"
-                      {...field}
-                      onChange={(e) => handleCnpjChange(e.target.value, field)}
-                    />
+                    <div className="flex flex-col gap-2 sm:grid sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-3">
+                      <Input
+                        placeholder="00.000.000/0000-00"
+                        className="h-10 sm:w-full"
+                        {...field}
+                        onChange={(e) => handleCnpjChange(e.target.value, field)}
+                      />
+                      <div className="flex items-center gap-2 sm:justify-end">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              className="h-10 w-full sm:w-10 sm:px-0"
+                              onClick={onConsultCnpj}
+                              disabled={
+                                isConsultingCnpj || unmaskValue(field.value).length !== 14
+                              }
+                            >
+                              {isConsultingCnpj ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Search className="h-4 w-4" />
+                              )}
+                              <span className="sr-only">Consultar CNPJ</span>
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-xs text-center">
+                            Utilize a consulta para preencher automaticamente a razão social e demais dados.
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
