@@ -206,7 +206,7 @@ export function A2FPageClient({ token }: { token: string }) {
   }
 
   return (
-    <div className="grid min-h-[100dvh] lg:grid-cols-2">
+    <div className="grid min-h-dvh lg:grid-cols-2">
       {/* Imagem à esquerda */}
       <div className="bg-muted relative hidden lg:block">
         <Image
