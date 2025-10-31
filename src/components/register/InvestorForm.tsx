@@ -201,7 +201,7 @@ export const InvestorForm: FC<InvestorFormProps> = ({
       {/* Campo oculto para enviar o país no submit */}
       <input type="hidden" {...register('pais')} />
       <div className="grid gap-2">
-        <Label htmlFor="nome">{t('register.form.name.label')}</Label>
+        <Label htmlFor="nome">{t('form.name.label')}</Label>
         <Input id="nome" {...register('nome')} />
         {errors.nome && (
           <p className="text-sm text-red-500">{errors.nome.message}</p>
@@ -209,13 +209,13 @@ export const InvestorForm: FC<InvestorFormProps> = ({
       </div>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
         <div className="grid gap-2">
-          <Label htmlFor="cpf">{t('register.form.cpf.label')}</Label>
+          <Label htmlFor="cpf">{t('form.cpf.label')}</Label>
           <Input
             id="cpf"
             {...register('cpf')}
             onChange={(e: ChangeEvent<HTMLInputElement>) => cpfMaskHandler(e)}
             maxLength={14}
-            placeholder={t('register.form.cpf.placeholder')}
+            placeholder={t('form.cpf.placeholder')}
           />
           {errors.cpf && (
             <p className="text-sm text-red-500">{errors.cpf.message}</p>
@@ -223,13 +223,13 @@ export const InvestorForm: FC<InvestorFormProps> = ({
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="telefone">{t('register.form.phone.label')}</Label>
+          <Label htmlFor="telefone">{t('form.phone.label')}</Label>
           <Input
             id="telefone"
             {...register('telefone')}
             onChange={(e: ChangeEvent<HTMLInputElement>) => phoneMaskHandler(e)}
             maxLength={15}
-            placeholder={t('register.form.phone.placeholder')}
+            placeholder={t('form.phone.placeholder')}
           />
           {errors.telefone && (
             <p className="text-sm text-red-500">{errors.telefone.message}</p>
@@ -237,7 +237,7 @@ export const InvestorForm: FC<InvestorFormProps> = ({
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="cep">{t('register.form.cep.label')}</Label>
+          <Label htmlFor="cep">{t('form.cep.label')}</Label>
           <Input
             id="cep"
             {...register('cep')}
@@ -254,7 +254,7 @@ export const InvestorForm: FC<InvestorFormProps> = ({
               buscarCep(raw);
             }}
             maxLength={9}
-            placeholder={t('register.form.cep.placeholder')}
+            placeholder={t('form.cep.placeholder')}
           />
           {errors.cep && (
             <p className="text-sm text-red-500">{errors.cep.message}</p>
@@ -388,31 +388,32 @@ export const InvestorForm: FC<InvestorFormProps> = ({
           )}
         </div>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-3">
         <input
           id="termo"
           type="checkbox"
           {...register('termo')}
           className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
         />
-        <Label htmlFor="termo" className="text-sm">
-          {t('form.terms.accept')}{' '}
-          <button
-            type="button"
-            className="text-[#d500f9] underline hover:no-underline"
-            onClick={() => router.push('/politicas')}
-          >
-            {t('form.terms.terms_of_use')}
-          </button>{' '}
-          {t('form.terms.and')}{' '}
-          <button
-            type="button"
-            className="text-[#d500f9] underline hover:no-underline"
-            // abrir em nova aba
-            onClick={() => window.open('https://iselftoken.net/termo-de-uso-para-investidores-iselftoken/', '_blank')}
-          >
-            {t('form.terms.privacy_policy')}
-          </button>
+        <Label htmlFor="termo" className="text-sm leading-relaxed">
+          <span className="block">{t('form.terms.accept')}</span>
+          <span className="flex flex-wrap items-center gap-1">
+            <button
+              type="button"
+              className="text-primary underline hover:no-underline"
+              onClick={() => router.push('/politicas')}
+            >
+              {t('form.terms.terms_of_use')}
+            </button>
+            <span>{t('form.terms.and')}</span>
+            <button
+              type="button"
+              className="text-primary underline hover:no-underline"
+              onClick={() => window.open('https://iselftoken.net/termo-de-uso-para-investidores-iselftoken/', '_blank')}
+            >
+              {t('form.terms.privacy_policy')}
+            </button>
+          </span>
         </Label>
       </div>
       {errors.termo && (

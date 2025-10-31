@@ -1,14 +1,14 @@
 import { Control } from 'react-hook-form'
 import { Loader2, Search } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from '@/components/ui/form'
 import {
   Select,
@@ -20,6 +20,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { applyCnpjMask, unmaskValue } from '@/lib/mask-utils'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import AvatarUploader from '@/components/comp-543'
 
 interface InformacoesBasicasSectionProps {
   control: Control<any>
@@ -41,8 +42,34 @@ export function InformacoesBasicasSection({
     <Card className="bg-card text-card-foreground shadow-sm border border-border">
       <CardHeader className="pb-4">
         <CardTitle className="text-foreground text-xl">Informações Básicas</CardTitle>
+        <CardDescription className="text-muted-foreground">
+          Informações essenciais sobre a startup, incluindo identificação e dados cadastrais
+        </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
+        {/* Logo Upload */}
+        <div className="flex justify-center">
+          <FormField
+            control={control}
+            name="logo"
+            render={({ field }) => (
+              <FormItem className="flex flex-col items-center">
+                <FormLabel className="text-sm font-medium mb-2">Logo da Startup</FormLabel>
+                <FormControl>
+                  <AvatarUploader
+                    accept="image/png,image/jpeg,image/jpg,image/svg+xml"
+                    onFileChange={(file) => field.onChange(file)}
+                  />
+                </FormControl>
+                <FormDescription className="text-xs text-center mt-2">
+                  PNG, JPG ou SVG (recomendado: 256x256px)
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="flex flex-col justify-end h-full">
             <FormField
@@ -50,14 +77,37 @@ export function InformacoesBasicasSection({
               name="nome"
               render={({ field }) => (
                 <FormItem className="h-full">
-                  <FormLabel className="text-sm font-medium">Nome da Startup</FormLabel>
+                  <FormLabel className="text-sm font-medium">Razão Social</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Digite o nome da startup"
+                      placeholder="Digite a razão social"
                       className="h-10"
                       {...field}
                     />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="flex flex-col justify-end h-full">
+            <FormField
+              control={control}
+              name="nome_fantasia"
+              render={({ field }) => (
+                <FormItem className="h-full">
+                  <FormLabel className="text-sm font-medium">Nome Fantasia</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Digite o nome fantasia (opcional)"
+                      className="h-10"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription className="text-xs">
+                    Nome comercial da startup, se diferente da razão social
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -157,26 +207,30 @@ export function InformacoesBasicasSection({
               )}
             />
           </div>
-        </div>
 
-        <div className="flex flex-col justify-end">
-          <FormField
-            control={control}
-            name="descritivo_basico"
-            render={({ field }) => (
-              <FormItem className="h-full">
-                <FormLabel className="text-sm font-medium">Descrição Básica</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Descreva brevemente sua startup"
-                    className="resize-none min-h-[80px] h-full"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="flex flex-col justify-end h-full">
+            <FormField
+              control={control}
+              name="site"
+              render={({ field }) => (
+                <FormItem className="h-full">
+                  <FormLabel className="text-sm font-medium">Site</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="url"
+                      placeholder="https://www.suastartup.com.br"
+                      className="h-10"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription className="text-xs">
+                    URL do site oficial da startup (opcional)
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
       </CardContent>
     </Card>

@@ -2,7 +2,9 @@ export const dynamic = 'force-dynamic'
 
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { StartupForm } from '@/components/dashboard_startup/startup-form'
+import { StartupFormEdit } from '@/components/dashboard_startup/startup-form-edit'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Suspense } from 'react'
 
 export const metadata: Metadata = {
   title: 'Editar Startup | iSelfToken',
@@ -33,6 +35,20 @@ const getStartup = async (id: string) => {
   }
 }
 
+// Componente de loading para Skeleton
+function StartupFormSkeleton() {
+  return (
+    <div className="space-y-6">
+      <Skeleton className="h-10 w-24" />
+      <div className="space-y-4">
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-[600px] w-full" />
+        <Skeleton className="h-10 w-32 ml-auto" />
+      </div>
+    </div>
+  )
+}
+
 export default async function EditarStartupPage({ params }: EditarStartupPageProps) {
   const { id } = await params
 
@@ -44,18 +60,20 @@ export default async function EditarStartupPage({ params }: EditarStartupPagePro
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-6 py-8 max-w-6xl">
-        <div className="flex flex-col gap-8">
+      <div className="container mx-auto px-6 py-8 max-w-7xl">
+        <div className="flex flex-col gap-6">
           {/* Header */}
           <div className="flex flex-col gap-3">
             <h1 className="text-3xl font-bold tracking-tight text-foreground">Editar Startup</h1>
             <p className="text-muted-foreground text-lg">
-              Edite as informações da startup <strong className="text-foreground">{startup.nome}</strong>
+              Atualize as informações da startup <strong className="text-foreground">{startup.nome}</strong>
             </p>
           </div>
 
-          {/* Form */}
-          <StartupForm mode="edit" initialData={startup} />
+          {/* Form com Suspense para skeleton */}
+          <Suspense fallback={<StartupFormSkeleton />}>
+            <StartupFormEdit mode="edit" initialData={startup} />
+          </Suspense>
         </div>
       </div>
     </div>

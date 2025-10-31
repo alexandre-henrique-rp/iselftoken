@@ -72,7 +72,8 @@
       "privacy_policy": "Política de Privacidade",
       "required": "Você deve aceitar os termos"
     },
-    "submit": "Criar conta"
+    "submit": "Criar conta",
+    "login_link": "Já tenho uma conta"
   },
   "messages": {
     "success": "Conta criada com sucesso!",

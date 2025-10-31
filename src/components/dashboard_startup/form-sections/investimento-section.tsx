@@ -1,8 +1,9 @@
 'use client'
 
 import { Control, UseFormGetValues, useWatch } from 'react-hook-form'
+import { useMemo } from 'react'
 import { toast } from 'sonner'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -12,9 +13,11 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from '@/components/ui/form'
 import { Controller } from 'react-hook-form'
 import { currency, unMask } from 'remask'
+import { TrendingUp } from 'lucide-react'
 
 interface InvestimentoSectionProps {
   control: Control<any>
@@ -35,6 +38,14 @@ export function InvestimentoSection({
     control,
     name: 'equity_oferecido',
   })
+
+  // Cálculo do valuation: meta_captacao / (equity_oferecido / 100)
+  const valuation = useMemo(() => {
+    if (!metaCaptacao || !equityOferecido || equityOferecido === 0) {
+      return 0
+    }
+    return metaCaptacao / (equityOferecido / 100)
+  }, [metaCaptacao, equityOferecido])
 
   const isButtonEnabled = metaCaptacao >= 100000 && equityOferecido > 0
 
@@ -71,8 +82,11 @@ export function InvestimentoSection({
         <CardTitle className="text-foreground text-xl">
           Informações de Investimento
         </CardTitle>
+        <CardDescription className="text-muted-foreground">
+          Defina os valores de captação e participação societária oferecida
+        </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <Controller
             control={control}
@@ -130,13 +144,45 @@ export function InvestimentoSection({
                     }}
                   />
                 </FormControl>
-                <span aria-hidden className="text-xs text-transparent">
-                  espaço reservado
-                </span>
+                <FormDescription className="text-xs">
+                  Percentual de participação societária oferecida aos investidores
+                </FormDescription>
                 {error && <FormMessage>{error.message}</FormMessage>}
               </FormItem>
             )}
           />
+
+          {/* Campo Calculado: Valuation */}
+          <div className="lg:col-span-2">
+            <FormItem className="flex h-full flex-col gap-2">
+              <FormLabel className="text-sm font-medium flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-primary" />
+                Valuation Calculado
+              </FormLabel>
+              <FormControl>
+                <div className="relative">
+                  <Input
+                    type="text"
+                    readOnly
+                    value={currency.mask({
+                      locale: 'pt-BR',
+                      currency: 'BRL',
+                      value: valuation,
+                    })}
+                    className="h-10 bg-muted/50 text-foreground font-semibold text-lg cursor-not-allowed"
+                  />
+                  {valuation > 0 && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      <span className="text-xs text-primary font-medium">Auto-calculado</span>
+                    </div>
+                  )}
+                </div>
+              </FormControl>
+              <FormDescription className="text-xs">
+                Valor de avaliação da empresa (Fórmula: Meta de Captação ÷ Equity Oferecido)
+              </FormDescription>
+            </FormItem>
+          </div>
 
           <div className="flex flex-col gap-3 lg:col-span-2 lg:flex-row lg:items-center lg:justify-end">
             <Button

@@ -39,7 +39,7 @@ export default function RegisterFlow({
   const [DDI, setDDI] = useState<string>('');
   const [uf, setUf] = useState<string>('');
   const [cidade, setCidade] = useState<string>('');
-  const { t } = useTranslation('auth');
+  const { t } = useTranslation('register');
 
   // Listas carregadas da API interna
   const [estadosLista, setEstadosLista] = useState<LocationTypes.StateItem[]>(
@@ -147,7 +147,7 @@ export default function RegisterFlow({
   }
 
   return (
-    <div className="grid min-h-[100dvh] lg:grid-cols-2">
+    <div className="grid min-h-dvh lg:grid-cols-2">
       {/* Imagem à direita para variar do login */}
       <div className="flex flex-col gap-4 p-4 sm:p-6 md:p-10">
         <div className="flex justify-center gap-2 md:justify-start">
@@ -165,7 +165,7 @@ export default function RegisterFlow({
           <div className="w-full max-w-lg">
             <Card>
               <CardHeader>
-                <CardTitle>{t('register.title')}</CardTitle>
+                <CardTitle>{t('title')}</CardTitle>
               </CardHeader>
               <CardContent>
                 {Verifique && (
@@ -182,7 +182,7 @@ export default function RegisterFlow({
                     href="/login"
                     className="text-primary underline-offset-4 hover:underline"
                   >
-                    {t('register.login.button')}
+                    {t('form.login_link')}
                   </Link>
                 </div>
               </CardContent>
@@ -192,7 +192,7 @@ export default function RegisterFlow({
         {/* Modal 1: País / Estado / Cidade + Termos */}
         <Dialog open={openModalLocal} onOpenChange={handleBlockCloseLocal}>
           <DialogContent
-            className="sm:max-w-lg"
+            className="w-[calc(100vw-2rem)] max-w-md space-y-5 p-6 sm:max-w-lg sm:space-y-6 sm:p-8"
             onEscapeKeyDown={(e) => e.preventDefault()}
             onPointerDownOutside={(e) => e.preventDefault()}
             showCloseButton={false}
@@ -211,7 +211,7 @@ export default function RegisterFlow({
                 </label>
                 <select
                   id="pais"
-                  className="bg-background h-9 rounded-md border px-3 text-sm"
+                  className="bg-background h-10 w-full rounded-md border px-3 text-sm"
                   value={pais}
                   onChange={(e) => {
                     setPais(e.target.value);
@@ -238,7 +238,7 @@ export default function RegisterFlow({
                 </label>
                 <select
                   id="uf"
-                  className="bg-background h-9 rounded-md border px-3 text-sm"
+                  className="bg-background h-10 w-full rounded-md border px-3 text-sm"
                   value={uf}
                   onChange={(e) => {
                     setUf(e.target.value);
@@ -262,7 +262,7 @@ export default function RegisterFlow({
                 </label>
                 <select
                   id="cidade"
-                  className="bg-background h-9 rounded-md border px-3 text-sm"
+                  className="bg-background h-10 w-full rounded-md border px-3 text-sm"
                   value={cidade}
                   onChange={(e) => setCidade(e.target.value)}
                   disabled={!uf || loadingCidades}
@@ -278,19 +278,17 @@ export default function RegisterFlow({
                 </select>
               </div>
 
-              <div className="mt-2 flex items-center justify-between gap-2">
-                <Button variant="ghost" onClick={cancelarRegistro}>
+              <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <Button variant="ghost" onClick={cancelarRegistro} className="w-full sm:w-auto">
                   Cancelar
                 </Button>
-                <div className="flex items-center gap-2">
-                  {/* Voltar não faz nada aqui pois é o primeiro modal */}
-                  <Button
-                    onClick={avancarParaPerfil}
-                    disabled={!pais || !uf || !cidade}
-                  >
-                    Próximo
-                  </Button>
-                </div>
+                <Button
+                  className="w-full sm:w-auto"
+                  onClick={avancarParaPerfil}
+                  disabled={!pais || !uf || !cidade}
+                >
+                  Próximo
+                </Button>
               </div>
             </div>
           </DialogContent>

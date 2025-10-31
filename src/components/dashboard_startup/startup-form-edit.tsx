@@ -4,85 +4,53 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { toast } from 'sonner'
 import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import { ArrowLeft, Save, Loader2 } from 'lucide-react'
-import { Startup } from '@/types/startup'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ArrowLeft, Save, Loader2, Building2, Tag, Presentation, DollarSign, Shield } from 'lucide-react'
+import { startupEditSchema, startupEditDefaultValues, type StartupEditFormData } from '@/schemas/startup-edit-schema'
 import { unmaskValue } from '@/lib/mask-utils'
+
+// Importar todas as seções
 import { InformacoesBasicasSection } from './form-sections/informacoes-basicas-section'
 import { ClassificacaoSection } from './form-sections/classificacao-section'
+import { ApresentacaoPitchSection } from './form-sections/apresentacao-pitch-section'
 import { InvestimentoSection } from './form-sections/investimento-section'
+import { DocumentacaoKYBSection } from './form-sections/documentacao-kyb-section'
 
-interface StartupWithFormData extends Startup {
-  descricao_objetivo?: string
-}
-
-const startupSchema = z.object({
-  nome: z.string().min(1, 'Nome é obrigatório'),
-  cnpj: z.string().min(18, 'CNPJ inválido'),
-  pais: z.string().min(1, 'País é obrigatório'),
-  data_fundacao: z.string().min(1, 'Data de fundação é obrigatória'),
-  area_atuacao: z.string().min(1, 'Área de atuação é obrigatória'),
-  estagio: z.string().min(1, 'Estágio é obrigatório'),
-  descritivo_basico:
-    z.string().min(10, 'Descrição deve ter pelo menos 10 caracteres'),
-  meta_captacao: z.number().refine((val) => val === 0 || (val >= 100000.00 && val <= 15000000.00), {
-    message: 'Meta de captação deve ser 0 ou entre R$ 100.000,00 e R$ 15.000.000,00'
-  }),
-  equity_oferecido:
-    z.number().min(0.1).max(100, 'Equity deve estar entre 0.1% e 100%'),
-  descricao_objetivo:
-    z.string().min(20, 'Objetivo deve ter pelo menos 20 caracteres'),
-})
-
-type StartupFormData = z.infer<typeof startupSchema>
-
-interface StartupFormProps {
+interface StartupFormEditProps {
   mode: 'create' | 'edit'
-  initialData?: StartupWithFormData
+  initialData?: Partial<StartupEditFormData> | null
 }
 
-export function StartupForm({ mode, initialData }: StartupFormProps) {
+export function StartupFormEdit({ mode, initialData }: StartupFormEditProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [isConsultingCnpj, setIsConsultingCnpj] = useState(false)
+  const [activeTab, setActiveTab] = useState('informacoes')
 
-  const form = useForm<StartupFormData>({
-    resolver: zodResolver(startupSchema),
-    defaultValues: {
-      nome: initialData?.nome || '',
-      cnpj: initialData?.cnpj || '',
-      pais:
-        typeof initialData?.pais === 'string'
-          ? initialData.pais
-          : initialData?.pais?.iso3 || 'BRA',
-      data_fundacao: initialData?.data_fundacao
-        ? new Date(initialData.data_fundacao).toISOString().split('T')[0]
-        : '',
-      area_atuacao: initialData?.area_atuacao || '',
-      estagio: initialData?.estagio || '',
-      descritivo_basico: initialData?.descritivo_basico || '',
-      meta_captacao: initialData?.meta_captacao || 100000.0,
-      equity_oferecido: initialData?.equity_oferecido || 0,
-      descricao_objetivo: initialData?.descricao_objetivo || '',
-    },
+  const form = useForm({
+    // @ts-expect-error - Type conflict between Zod schema and react-hook-form resolver
+    resolver: zodResolver(startupEditSchema),
+    defaultValues: initialData || startupEditDefaultValues,
   })
 
-  const onSubmit = async (data: StartupFormData) => {
+  const onSubmit = async (data: StartupEditFormData) => {
     setIsLoading(true)
 
     try {
+      // Preparar dados para envio
       const submitData = {
         ...data,
         cnpj: unmaskValue(data.cnpj),
         data_fundacao: new Date(data.data_fundacao),
+        // TODO: Implementar upload de arquivos para API
+        // Os arquivos precisarão ser enviados para /api/upload primeiro
       }
 
-      const url =
-        mode === 'edit' ? `/api/startup/${initialData?.id}` : '/api/startup'
-
+      const url = mode === 'edit' ? `/api/startup/${(initialData as {id?: number})?.id}` : '/api/startup'
       const method = mode === 'edit' ? 'PUT' : 'POST'
 
       const response = await fetch(url, {
@@ -117,8 +85,62 @@ export function StartupForm({ mode, initialData }: StartupFormProps) {
     router.back()
   }
 
+  const handleConsultCnpj = async () => {
+    const cnpjValue = form.getValues('cnpj') || ''
+    const sanitizedCnpj = unmaskValue(cnpjValue)
+
+    if (sanitizedCnpj.length !== 14) {
+      toast.warning('Informe um CNPJ válido para consulta.')
+      return
+    }
+
+    setIsConsultingCnpj(true)
+
+    try {
+      const response = await fetch(`/api/cnpj/${sanitizedCnpj}`)
+
+      if (response.status === 404) {
+        toast.info('CNPJ não encontrado na base consultada.')
+        return
+      }
+
+      if (!response.ok) {
+        throw new Error('Falha na consulta do CNPJ')
+      }
+
+      const empresa = await response.json()
+
+      if (empresa?.razao_social) {
+        form.setValue('nome', empresa.razao_social, {
+          shouldDirty: true,
+          shouldTouch: true,
+          shouldValidate: true,
+        })
+      }
+
+      if (empresa?.estabelecimento?.data_inicio_atividade) {
+        const dataFundacao = new Date(empresa.estabelecimento.data_inicio_atividade)
+          .toISOString()
+          .split('T')[0]
+        form.setValue('data_fundacao', dataFundacao, {
+          shouldDirty: true,
+          shouldTouch: true,
+          shouldValidate: true,
+        })
+      }
+
+      toast.success('Dados do CNPJ preenchidos automaticamente.')
+    } catch (error) {
+      console.error('Erro ao consultar CNPJ:', error)
+      toast.error('Não foi possível consultar o CNPJ. Tente novamente mais tarde.')
+    } finally {
+      setIsConsultingCnpj(false)
+    }
+  }
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+      {/* Header com botão voltar */}
       <Button
         variant="ghost"
         onClick={handleBack}
@@ -128,51 +150,92 @@ export function StartupForm({ mode, initialData }: StartupFormProps) {
         Voltar
       </Button>
 
+      {/* Formulário com Tabs */}
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <InformacoesBasicasSection control={form.control} />
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            {/* Lista de Tabs */}
+            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 h-auto gap-2 bg-muted p-2">
+              <TabsTrigger value="informacoes" className="gap-2">
+                <Building2 className="h-4 w-4" />
+                <span className="hidden sm:inline">Informações</span>
+              </TabsTrigger>
+              <TabsTrigger value="classificacao" className="gap-2">
+                <Tag className="h-4 w-4" />
+                <span className="hidden sm:inline">Classificação</span>
+              </TabsTrigger>
+              <TabsTrigger value="apresentacao" className="gap-2">
+                <Presentation className="h-4 w-4" />
+                <span className="hidden sm:inline">Pitch</span>
+              </TabsTrigger>
+              <TabsTrigger value="investimento" className="gap-2">
+                <DollarSign className="h-4 w-4" />
+                <span className="hidden sm:inline">Investimento</span>
+              </TabsTrigger>
+              <TabsTrigger value="documentacao" className="gap-2">
+                <Shield className="h-4 w-4" />
+                <span className="hidden sm:inline">Documentação</span>
+              </TabsTrigger>
+            </TabsList>
 
-          <ClassificacaoSection control={form.control} />
+            {/* Conteúdo das Tabs */}
+            <TabsContent value="informacoes" className="mt-6">
+              <InformacoesBasicasSection
+                control={form.control}
+                onConsultCnpj={handleConsultCnpj}
+                isConsultingCnpj={isConsultingCnpj}
+              />
+            </TabsContent>
 
-          <InvestimentoSection
-            control={form.control}
-            getValues={form.getValues}
-          />
+            <TabsContent value="classificacao" className="mt-6">
+              <ClassificacaoSection control={form.control} />
+            </TabsContent>
 
-          
+            <TabsContent value="apresentacao" className="mt-6">
+              <ApresentacaoPitchSection control={form.control} />
+            </TabsContent>
+
+            <TabsContent value="investimento" className="mt-6">
+              <InvestimentoSection
+                control={form.control}
+                getValues={form.getValues}
+              />
+            </TabsContent>
+
+            <TabsContent value="documentacao" className="mt-6">
+              <DocumentacaoKYBSection control={form.control} />
+            </TabsContent>
+          </Tabs>
 
           <Separator className="border-border" />
 
+          {/* Botões de ação */}
           <div className="flex flex-col justify-end gap-4 pt-6 sm:flex-row">
-            <div className="flex items-end">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleBack}
-                disabled={isLoading}
-                className="border-border bg-background hover:bg-accent hover:text-accent-foreground h-10 w-full border px-8 sm:w-auto"
-              >
-                Cancelar
-              </Button>
-            </div>
-            <div className="flex items-end">
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="bg-[#d500f9] text-white hover:bg-[#d500f9]/90 h-10 w-full px-8 font-medium sm:w-auto"
-              >
-                {isLoading ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Save className="mr-2 h-4 w-4" />
-                )}
-                {isLoading
-                  ? 'Salvando...'
-                  : mode === 'edit'
-                  ? 'Atualizar Startup'
-                  : 'Criar Startup'}
-              </Button>
-            </div>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleBack}
+              disabled={isLoading}
+              className="border-border bg-background hover:bg-accent hover:text-accent-foreground h-10 w-full border px-8 sm:w-auto"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 h-10 w-full px-8 font-medium sm:w-auto"
+            >
+              {isLoading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="mr-2 h-4 w-4" />
+              )}
+              {isLoading
+                ? 'Salvando...'
+                : mode === 'edit'
+                ? 'Atualizar Startup'
+                : 'Criar Startup'}
+            </Button>
           </div>
         </form>
       </Form>

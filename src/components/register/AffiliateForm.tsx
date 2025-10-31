@@ -1,17 +1,18 @@
-'use client';
+"use client";
 
-import { FC, ChangeEvent, useEffect, useState } from 'react';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { cpfMaskHandler, phoneMaskHandler } from '@/lib/mask-utils';
-import { useRouter } from 'next/navigation';
-import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
+import { FC, ChangeEvent, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { useTranslation } from "react-i18next";
+import "@/i18n";
+import { toast } from "sonner";
 
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { cpfMaskHandler, phoneMaskHandler } from "@/lib/mask-utils";
 
 export type AffiliateInputs = {
   nome: string;
@@ -37,6 +38,10 @@ export type AffiliateFormProps = {
   ddi?: string;
 };
 
+/**
+ * Formulário de registro de afiliado, replicando a experiência dos demais cadastros
+ * com suporte a i18n, máscaras e validação via Zod. Responsivo e pronto para dark/light.
+ */
 export const AffiliateForm: FC<AffiliateFormProps> = ({
   cidadeInicial,
   ufInicial,
@@ -44,42 +49,38 @@ export const AffiliateForm: FC<AffiliateFormProps> = ({
   ddi,
 }) => {
   const router = useRouter();
-  const { t } = useTranslation('auth');
+  const { t } = useTranslation("register");
 
-  // Schema dinâmico com traduções
   const affiliateSchema = z
     .object({
-      nome: z.string().min(1, t('register.affiliate.name.required')),
+      nome: z.string().min(1, t("form.name.required")),
       cpf: z
         .string()
-        .transform((v) => String(v).replace(/\D/g, ''))
-        .pipe(z.string().length(11, t('register.form.cpf.length_error'))),
-      telefone: z.string().min(1, t('register.form.phone.required')),
+        .transform((v) => String(v).replace(/\D/g, ""))
+        .pipe(z.string().length(11, t("form.cpf.invalid"))),
+      telefone: z.string().min(1, t("form.phone.required")),
       cep: z
         .string()
-        .transform((v) => String(v).replace(/\D/g, ''))
-        .pipe(z.string().length(8, t('register.form.cep.length_error'))),
-      endereco: z.string().min(1, t('register.form.address.required')),
-      bairro: z.string().min(1, t('register.form.neighborhood.required')),
-      cidade: z.string().min(1, t('register.form.city.required')),
-      uf: z.string().min(1, t('register.form.state.required')),
-      pais: z.string().min(1, 'País é obrigatório'),
-      numero: z.string().min(1, t('register.form.number.required')),
-      email: z.string().min(1, t('register.form.email.required')),
-      senha: z.string().min(12, t('register.form.password.min_length')),
-      confirmacaoSenha: z
-        .string()
-        .min(12, t('register.form.confirm_password.min_length')),
-      termo: z
-        .boolean()
-        .refine((v) => v === true, {
-          message: t('register.form.terms.required'),
-        }),
+        .transform((v) => String(v).replace(/\D/g, ""))
+        .pipe(z.string().length(8, t("form.cep.invalid"))),
+      endereco: z.string().min(1, t("form.address.required")),
+      bairro: z.string().min(1, t("form.neighborhood.required")),
+      cidade: z.string().min(1, t("form.city.required")),
+      uf: z.string().min(1, t("form.state.required")),
+      pais: z.string().min(1, "País é obrigatório"),
+      numero: z.string().min(1, t("form.number.required")),
+      email: z.string().min(1, t("form.email.required")),
+      senha: z.string().min(12, t("form.password.min")),
+      confirmacaoSenha: z.string().min(12, t("form.confirm_password.min")),
+      termo: z.boolean().refine((v) => v === true, {
+        message: t("form.terms.required"),
+      }),
     })
     .refine((data) => data.senha === data.confirmacaoSenha, {
-      message: t('register.form.password.mismatch'),
-      path: ['confirmacaoSenha'],
+      message: t("form.confirm_password.mismatch"),
+      path: ["confirmacaoSenha"],
     });
+
   const {
     register,
     handleSubmit,
@@ -90,9 +91,9 @@ export const AffiliateForm: FC<AffiliateFormProps> = ({
   } = useForm<AffiliateInputs>({
     resolver: zodResolver(affiliateSchema),
     defaultValues: {
-      cidade: cidadeInicial || '',
-      uf: ufInicial || '',
-      pais: paisInicial || '',
+      cidade: cidadeInicial || "",
+      uf: ufInicial || "",
+      pais: paisInicial || "",
       termo: false,
     },
   });
@@ -100,89 +101,82 @@ export const AffiliateForm: FC<AffiliateFormProps> = ({
   const [buscandoCep, setBuscandoCep] = useState(false);
   const [ultimoCepBuscado, setUltimoCepBuscado] = useState<string | null>(null);
 
-  // Sincroniza mudanças vindas do modal
   useEffect(() => {
-    if (cidadeInicial)
-      setValue('cidade', cidadeInicial, { shouldValidate: true });
-    if (ufInicial) setValue('uf', ufInicial, { shouldValidate: true });
-    if (paisInicial) setValue('pais', paisInicial, { shouldValidate: true });
+    if (cidadeInicial) setValue("cidade", cidadeInicial, { shouldValidate: true });
+    if (ufInicial) setValue("uf", ufInicial, { shouldValidate: true });
+    if (paisInicial) setValue("pais", paisInicial, { shouldValidate: true });
   }, [cidadeInicial, ufInicial, paisInicial, setValue]);
 
   const onSubmit: SubmitHandler<AffiliateInputs> = async (data) => {
-    console.log('Registro de afiliado:', data);
-    const dados = {
-      ...data,
-      telefone: `${ddi}${data.telefone.replace(/\D/g, '')}`,
-    }
     try {
       const response = await fetch(`/api/register/afiliado`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
+          "Content-Type": "application/json",
+          Accept: "application/json",
         },
         body: JSON.stringify({
-          ...dados,
-          redirectPath: '/login'
+          ...data,
+          telefone: `${ddi ?? ""}${data.telefone}`,
+          redirectPath: "/login",
         }),
       });
-      
+
       let result;
       try {
         result = await response.json();
       } catch {
-        toast('Erro ao registrar afiliado', {
+        toast("Erro ao registrar afiliado", {
           duration: 5000,
-          description: 'Erro na comunicação com o servidor'
+          description: "Erro na comunicação com o servidor",
         });
         return;
       }
-      
-      console.log(result);
+
       if (!response.ok) {
-        toast('Erro ao registrar afiliado',{ 
-          description: result.message || 'Erro ao registrar afiliado',
+        toast("Erro ao registrar afiliado", {
+          description: result.message || "Erro ao registrar afiliado",
           duration: 5000,
-        })
+        });
         return;
       }
-      toast('Afiliado registrado com sucesso', {
+
+      toast("Afiliado registrado com sucesso", {
         duration: 5000,
-      })
-      router.push(result.url);
+      });
+      router.push(result.url ?? "/login");
     } catch (error) {
-      console.log(error);
-      toast('Erro ao registrar afiliado', {
+      console.error(error);
+      toast("Erro ao registrar afiliado", {
         duration: 5000,
-        description: 'Erro de conexão'
-      })
+        description: "Erro de conexão",
+      });
     }
   };
 
-  // Busca ViaCEP sob demanda (onBlur ou ao completar 8 dígitos numéricos)
   const buscarCep = async (raw: string) => {
     if (raw.length !== 8) return;
-    if (ultimoCepBuscado === raw || buscandoCep) return;
+    if ((ultimoCepBuscado === raw && !errors.cep) || buscandoCep) return;
     setUltimoCepBuscado(raw);
     setBuscandoCep(true);
     try {
       const res = await fetch(`https://viacep.com.br/ws/${raw}/json/`);
       const data = await res.json();
       if (data?.erro) {
-        setError('cep', {
-          type: 'manual',
-          message: t('register.form.cep.not_found'),
+        setError("cep", {
+          type: "manual",
+          message: t("form.cep.not_found"),
         });
         return;
       }
-      clearErrors('cep');
-      setValue('endereco', data?.logradouro || '');
-      setValue('bairro', data?.bairro || '');
-      clearErrors(['endereco', 'bairro']);
+      clearErrors("cep");
+      setValue("endereco", data?.logradouro || "");
+      setValue("bairro", data?.bairro || "");
+      clearErrors(["endereco", "bairro"]);
     } catch {
-      setError('cep', {
-        type: 'manual',
-        message: t('register.form.cep.search_error'),
+      setError("cep", {
+        type: "manual",
+        message: t("form.cep.search_error"),
       });
     } finally {
       setBuscandoCep(false);
@@ -191,38 +185,35 @@ export const AffiliateForm: FC<AffiliateFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {/* Campo oculto para enviar o país no submit */}
-      <input type="hidden" {...register('pais')} />
+      <input type="hidden" {...register("pais")}></input>
+
       <div className="grid gap-2">
-        <Label htmlFor="nome">{t('register.form.name.label')}</Label>
-        <Input id="nome" {...register('nome')} />
-        {errors.nome && (
-          <p className="text-sm text-red-500">{errors.nome.message}</p>
-        )}
+        <Label htmlFor="nome">{t("form.name.label")}</Label>
+        <Input id="nome" {...register("nome")} />
+        {errors.nome && <p className="text-sm text-red-500">{errors.nome.message}</p>}
       </div>
+
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
         <div className="grid gap-2">
-          <Label htmlFor="cpf">{t('register.form.cpf.label')}</Label>
+          <Label htmlFor="cpf">{t("form.cpf.label")}</Label>
           <Input
             id="cpf"
-            {...register('cpf')}
+            {...register("cpf")}
             onChange={(e: ChangeEvent<HTMLInputElement>) => cpfMaskHandler(e)}
             maxLength={14}
-            placeholder={t('register.form.cpf.placeholder')}
+            placeholder={t("form.cpf.placeholder")}
           />
-          {errors.cpf && (
-            <p className="text-sm text-red-500">{errors.cpf.message}</p>
-          )}
+          {errors.cpf && <p className="text-sm text-red-500">{errors.cpf.message}</p>}
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="telefone">{t('register.form.phone.label')}</Label>
+          <Label htmlFor="telefone">{t("form.phone.label")}</Label>
           <Input
             id="telefone"
-            {...register('telefone')}
+            {...register("telefone")}
             onChange={(e: ChangeEvent<HTMLInputElement>) => phoneMaskHandler(e)}
             maxLength={15}
-            placeholder={t('register.form.phone.placeholder')}
+            placeholder={t("form.phone.placeholder")}
           />
           {errors.telefone && (
             <p className="text-sm text-red-500">{errors.telefone.message}</p>
@@ -230,192 +221,144 @@ export const AffiliateForm: FC<AffiliateFormProps> = ({
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="cep">{t('register.form.cep.label')}</Label>
+          <Label htmlFor="cep">{t("form.cep.label")}</Label>
           <Input
             id="cep"
-            {...register('cep')}
+            {...register("cep")}
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
               const maskedValue = e.target.value;
-              setValue('cep', maskedValue, { shouldValidate: true });
-              const rawValue = maskedValue.replace(/\D/g, '');
+              setValue("cep", maskedValue, { shouldValidate: true });
+              const rawValue = maskedValue.replace(/\D/g, "");
               if (rawValue.length === 8) {
                 buscarCep(rawValue);
               }
             }}
             onBlur={(e) => {
-              const raw = e.currentTarget.value.replace(/\D/g, '');
+              const raw = e.currentTarget.value.replace(/\D/g, "");
               buscarCep(raw);
             }}
             maxLength={9}
-            placeholder={t('register.form.cep.placeholder')}
+            placeholder={t("form.cep.placeholder")}
           />
-          {errors.cep && (
-            <p className="text-sm text-red-500">{errors.cep.message}</p>
-          )}
+          {errors.cep && <p className="text-sm text-red-500">{errors.cep.message}</p>}
           {buscandoCep && (
-            <div
-              className="text-muted-foreground flex items-center gap-2 text-xs"
-              aria-live="polite"
-            >
-              <svg
-                className="h-4 w-4 animate-spin"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                  fill="none"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                />
-              </svg>
-              <span>{t('register.form.cep.searching')}</span>
-            </div>
+            <span className="text-muted-foreground text-xs" aria-live="polite">
+              {t("form.cep.searching")}
+            </span>
           )}
         </div>
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="endereco">{t('register.form.address.label')}</Label>
-        <Input id="endereco" {...register('endereco')} />
-        {errors.endereco && (
-          <p className="text-sm text-red-500">{errors.endereco.message}</p>
-        )}
+        <Label htmlFor="endereco">{t("form.address.label")}</Label>
+        <Input id="endereco" {...register("endereco")} />
+        {errors.endereco && <p className="text-sm text-red-500">{errors.endereco.message}</p>}
       </div>
 
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <div className="grid gap-2">
-          <Label htmlFor="bairro">
-            {t('register.form.neighborhood.label')}
-          </Label>
-          <Input id="bairro" {...register('bairro')} />
-          {errors.bairro && (
-            <p className="text-sm text-red-500">{errors.bairro.message}</p>
-          )}
+          <Label htmlFor="bairro">{t("form.neighborhood.label")}</Label>
+          <Input id="bairro" {...register("bairro")} />
+          {errors.bairro && <p className="text-sm text-red-500">{errors.bairro.message}</p>}
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="cidade">{t('register.form.city.label')}</Label>
-          <Input id="cidade" readOnly aria-readonly {...register('cidade')} />
-          {errors.cidade && (
-            <p className="text-sm text-red-500">{errors.cidade.message}</p>
-          )}
+          <Label htmlFor="cidade">{t("form.city.label")}</Label>
+          <Input id="cidade" readOnly aria-readonly {...register("cidade")} />
+          {errors.cidade && <p className="text-sm text-red-500">{errors.cidade.message}</p>}
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <div className="grid gap-2">
-          <Label htmlFor="uf">{t('register.form.state.label')}</Label>
-          <Input
-            id="uf"
-            maxLength={2}
-            readOnly
-            aria-readonly
-            {...register('uf')}
-          />
-          {errors.uf && (
-            <p className="text-sm text-red-500">{errors.uf.message}</p>
-          )}
+          <Label htmlFor="uf">{t("form.state.label")}</Label>
+          <Input id="uf" maxLength={2} readOnly aria-readonly {...register("uf")} />
+          {errors.uf && <p className="text-sm text-red-500">{errors.uf.message}</p>}
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="numero">{t('register.form.number.label')}</Label>
-          <Input id="numero" {...register('numero')} />
-          {errors.numero && (
-            <p className="text-sm text-red-500">{errors.numero.message}</p>
-          )}
+          <Label htmlFor="numero">{t("form.number.label")}</Label>
+          <Input id="numero" {...register("numero")} />
+          {errors.numero && <p className="text-sm text-red-500">{errors.numero.message}</p>}
         </div>
       </div>
 
-      <div className="grid grid-cols-1">
-        <div className="grid gap-2">
-          <Label htmlFor="email">{t('register.form.email.label')}</Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder={t('register.form.email.placeholder')}
-            minLength={6}
-            {...register('email')}
-          />
-          {errors.email && (
-            <p className="text-sm text-red-500">{errors.email.message}</p>
-          )}
-        </div>
+      <div className="grid gap-2">
+        <Label htmlFor="email">{t("form.email.label")}</Label>
+        <Input
+          id="email"
+          type="email"
+          placeholder={t("form.email.placeholder")}
+          minLength={6}
+          {...register("email")}
+        />
+        {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
       </div>
 
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <div className="grid gap-2">
-          <Label htmlFor="senha">{t('register.form.password.label')}</Label>
+          <Label htmlFor="senha">{t("form.password.label")}</Label>
           <Input
             id="senha"
             type="password"
-            placeholder={t('register.form.password.placeholder')}
+            placeholder={t("form.password.placeholder")}
             minLength={12}
-            {...register('senha')}
+            {...register("senha")}
           />
-          {errors.senha && (
-            <p className="text-sm text-red-500">{errors.senha.message}</p>
-          )}
+          {errors.senha && <p className="text-sm text-red-500">{errors.senha.message}</p>}
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="confirmacaoSenha">
-            {t('register.form.confirm_password.label')}
-          </Label>
+          <Label htmlFor="confirmacaoSenha">{t("form.confirm_password.label")}</Label>
           <Input
             id="confirmacaoSenha"
             type="password"
-            placeholder={t('register.form.confirm_password.placeholder')}
+            placeholder={t("form.confirm_password.placeholder")}
             minLength={12}
-            {...register('confirmacaoSenha')}
+            {...register("confirmacaoSenha")}
           />
           {errors.confirmacaoSenha && (
-            <p className="text-sm text-red-500">
-              {errors.confirmacaoSenha.message}
-            </p>
+            <p className="text-sm text-red-500">{errors.confirmacaoSenha.message}</p>
           )}
         </div>
       </div>
-      <div className="flex items-center gap-2">
+
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-3">
         <input
           id="termo"
           type="checkbox"
-          {...register('termo')}
+          {...register("termo")}
           className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
         />
-        <Label htmlFor="termo" className="text-sm">
-          {t('register.form.terms.accept')}{' '}
-          <button
-            type="button"
-            className="text-primary underline hover:no-underline"
-            onClick={() => router.push('/politicas')}
-          >
-            {t('register.form.terms.terms_of_use')}
-          </button>{' '}
-          {t('register.form.terms.and')}{' '}
-          <button
-            type="button"
-            className="text-primary underline hover:no-underline"
-            onClick={() => window.open('https://iselftoken.net/termo-de-uso-para-consultor-afiliado-iselftoken/', '_blank')}
-          >
-            {t('register.form.terms.privacy_policy')}
-          </button>
+        <Label htmlFor="termo" className="text-sm leading-relaxed">
+          <span className="block">{t("form.terms.accept")}</span>
+          <span className="flex flex-wrap items-center gap-1">
+            <button
+              type="button"
+              className="text-primary underline hover:no-underline"
+              onClick={() => router.push("/politicas")}
+            >
+              {t("form.terms.terms_of_use")}
+            </button>
+            <span>{t("form.terms.and")}</span>
+            <button
+              type="button"
+              className="text-primary underline hover:no-underline"
+              onClick={() =>
+                window.open(
+                  "https://iselftoken.net/termo-de-uso-para-consultor-afiliado-iselftoken/",
+                  "_blank"
+                )
+              }
+            >
+              {t("form.terms.privacy_policy")}
+            </button>
+          </span>
         </Label>
       </div>
-      {errors.termo && (
-        <p className="text-sm text-red-500">{String(errors.termo.message)}</p>
-      )}
-      <p className="text-muted-foreground text-xs">
-        {t('register.form.password.min')}
-      </p>
+      {errors.termo && <p className="text-sm text-red-500">{String(errors.termo.message)}</p>}
+
+      <p className="text-muted-foreground text-xs">{t("form.password.min")}</p>
 
       <Button type="submit" className="w-full">
-        {t('register.form.submit')}
+        {t("form.submit")}
       </Button>
     </form>
   );
