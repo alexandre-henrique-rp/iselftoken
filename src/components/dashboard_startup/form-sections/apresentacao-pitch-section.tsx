@@ -76,13 +76,13 @@ export function ApresentacaoPitchSection({ control }: ApresentacaoPitchSectionPr
           />
         </div>
 
-        {/* Vídeo Pitch */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Vídeo Pitch e PDF */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           <FormField
             control={control}
             name="video_pitch"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="space-y-2">
                 <FormLabel className="text-sm font-medium flex items-center gap-2">
                   <Video className="h-4 w-4 text-primary" />
                   Vídeo Pitch (YouTube)
@@ -91,7 +91,7 @@ export function ApresentacaoPitchSection({ control }: ApresentacaoPitchSectionPr
                   <Input
                     type="url"
                     placeholder="https://www.youtube.com/watch?v=..."
-                    className="h-10"
+                    className="h-9 sm:h-10 text-xs sm:text-sm"
                     {...field}
                   />
                 </FormControl>
@@ -108,13 +108,13 @@ export function ApresentacaoPitchSection({ control }: ApresentacaoPitchSectionPr
             control={control}
             name="pitch_pdf"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="space-y-2">
                 <FormLabel className="text-sm font-medium flex items-center gap-2">
                   <FileText className="h-4 w-4 text-primary" />
                   Pitch Deck (PDF)
                 </FormLabel>
                 <FormControl>
-                  <div className="border border-dashed border-border rounded-lg p-4 hover:border-primary transition-colors">
+                  <div className="border border-dashed border-border rounded-lg p-3 sm:p-4 hover:border-primary transition-colors">
                     <FileUploader
                       accept="application/pdf"
                       maxSizeMB={10}
@@ -132,11 +132,11 @@ export function ApresentacaoPitchSection({ control }: ApresentacaoPitchSectionPr
         </div>
 
         {/* Redes Sociais Dinâmicas */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
+        <div className="space-y-3 sm:space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="space-y-1">
               <FormLabel className="text-sm font-medium">Redes Sociais</FormLabel>
-              <FormDescription className="text-xs mt-1">
+              <FormDescription className="text-xs">
                 Adicione os perfis da sua startup nas redes sociais
               </FormDescription>
             </div>
@@ -145,10 +145,10 @@ export function ApresentacaoPitchSection({ control }: ApresentacaoPitchSectionPr
               variant="outline"
               size="sm"
               onClick={() => append({ plataforma: 'linkedin', url: '' })}
-              className="gap-2"
+              className="gap-1.5 text-xs sm:text-sm h-8 sm:h-9 shrink-0"
             >
-              <Plus className="h-4 w-4" />
-              Adicionar Rede
+              <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span>Adicionar Rede</span>
             </Button>
           </div>
 
@@ -162,61 +162,65 @@ export function ApresentacaoPitchSection({ control }: ApresentacaoPitchSectionPr
 
           <div className="space-y-4">
             {fields.map((field, index) => (
-              <div key={field.id} className="grid grid-cols-1 md:grid-cols-[200px_1fr_auto] gap-4 items-start p-4 border border-border rounded-lg bg-muted/20">
-                <FormField
-                  control={control}
-                  name={`redes_sociais.${index}.plataforma`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs">Plataforma</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <div key={field.id} className="p-3 sm:p-4 border border-border rounded-lg bg-muted/20 space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,180px)_1fr] gap-3 items-start">
+                  <FormField
+                    control={control}
+                    name={`redes_sociais.${index}.plataforma`}
+                    render={({ field }) => (
+                      <FormItem className="space-y-1.5">
+                        <FormLabel className="text-xs sm:text-sm">Plataforma</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="h-9 sm:h-10 text-xs sm:text-sm">
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {REDES_SOCIAIS.map((rede) => (
+                              <SelectItem key={rede.value} value={rede.value}>
+                                {rede.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={control}
+                    name={`redes_sociais.${index}.url`}
+                    render={({ field }) => (
+                      <FormItem className="space-y-1.5">
+                        <FormLabel className="text-xs sm:text-sm">URL do Perfil</FormLabel>
                         <FormControl>
-                          <SelectTrigger className="h-10">
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
+                          <Input
+                            type="url"
+                            placeholder="https://..."
+                            className="h-9 sm:h-10 text-xs sm:text-sm"
+                            {...field}
+                          />
                         </FormControl>
-                        <SelectContent>
-                          {REDES_SOCIAIS.map((rede) => (
-                            <SelectItem key={rede.value} value={rede.value}>
-                              {rede.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-                <FormField
-                  control={control}
-                  name={`redes_sociais.${index}.url`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs">URL do Perfil</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="url"
-                          placeholder="https://..."
-                          className="h-10"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => remove(index)}
-                  className="mt-7 text-destructive hover:text-destructive hover:bg-destructive/10"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  <span className="sr-only">Remover rede social</span>
-                </Button>
+                <div className="flex justify-end pt-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => remove(index)}
+                    className="h-8 text-destructive hover:text-destructive hover:bg-destructive/10 gap-1.5"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    <span className="text-xs">Remover</span>
+                  </Button>
+                </div>
               </div>
             ))}
           </div>

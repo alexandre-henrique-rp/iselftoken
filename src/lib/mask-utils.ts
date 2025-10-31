@@ -23,7 +23,10 @@ export const MASK_PATTERNS = {
  * @param value O valor com máscara.
  * @returns O valor sem máscara (apenas dígitos).
  */
-export const unmaskValue = (value: string): string => unMask(value)
+export const unmaskValue = (value: string | undefined | null): string => {
+  if (!value) return ''
+  return unMask(value)
+}
 
 /**
  * Aplica máscara de CPF usando remask.

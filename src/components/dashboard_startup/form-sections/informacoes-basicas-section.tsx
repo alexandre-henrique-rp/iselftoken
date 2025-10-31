@@ -46,7 +46,7 @@ export function InformacoesBasicasSection({
           Informações essenciais sobre a startup, incluindo identificação e dados cadastrais
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4 sm:space-y-6">
         {/* Logo Upload */}
         <div className="flex justify-center">
           <FormField
@@ -70,7 +70,7 @@ export function InformacoesBasicasSection({
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           <div className="flex flex-col justify-end h-full">
             <FormField
               control={control}

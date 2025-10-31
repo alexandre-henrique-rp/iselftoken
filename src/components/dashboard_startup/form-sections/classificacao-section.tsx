@@ -58,8 +58,8 @@ export function ClassificacaoSection({ control }: ClassificacaoSectionProps) {
           Defina como sua startup será categorizada e apresentada no marketplace
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <CardContent className="space-y-4 sm:space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           <div className="flex flex-col justify-end h-full">
             <FormField
               control={control}

@@ -86,8 +86,8 @@ export function InvestimentoSection({
           Defina os valores de captação e participação societária oferecida
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <CardContent className="space-y-4 sm:space-y-6">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
           <Controller
             control={control}
             name="meta_captacao"

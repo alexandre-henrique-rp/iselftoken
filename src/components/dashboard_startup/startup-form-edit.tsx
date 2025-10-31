@@ -86,7 +86,7 @@ export function StartupFormEdit({ mode, initialData }: StartupFormEditProps) {
   }
 
   const handleConsultCnpj = async () => {
-    const cnpjValue = form.getValues('cnpj') || ''
+    const cnpjValue = form.getValues('cnpj')
     const sanitizedCnpj = unmaskValue(cnpjValue)
 
     if (sanitizedCnpj.length !== 14) {
@@ -155,26 +155,30 @@ export function StartupFormEdit({ mode, initialData }: StartupFormEditProps) {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             {/* Lista de Tabs */}
-            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 h-auto gap-2 bg-muted p-2">
-              <TabsTrigger value="informacoes" className="gap-2">
-                <Building2 className="h-4 w-4" />
-                <span className="hidden sm:inline">Informações</span>
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 h-auto gap-1.5 sm:gap-2 bg-muted p-1.5 sm:p-2">
+              <TabsTrigger value="informacoes" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-2 sm:py-2.5">
+                <Building2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline">Informações</span>
+                <span className="xs:hidden">Info</span>
               </TabsTrigger>
-              <TabsTrigger value="classificacao" className="gap-2">
-                <Tag className="h-4 w-4" />
-                <span className="hidden sm:inline">Classificação</span>
+              <TabsTrigger value="classificacao" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-2 sm:py-2.5">
+                <Tag className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline">Classificação</span>
+                <span className="xs:hidden">Class</span>
               </TabsTrigger>
-              <TabsTrigger value="apresentacao" className="gap-2">
-                <Presentation className="h-4 w-4" />
-                <span className="hidden sm:inline">Pitch</span>
+              <TabsTrigger value="apresentacao" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-2 sm:py-2.5">
+                <Presentation className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span>Pitch</span>
               </TabsTrigger>
-              <TabsTrigger value="investimento" className="gap-2">
-                <DollarSign className="h-4 w-4" />
-                <span className="hidden sm:inline">Investimento</span>
+              <TabsTrigger value="investimento" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-2 sm:py-2.5">
+                <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline">Investimento</span>
+                <span className="xs:hidden">Invest</span>
               </TabsTrigger>
-              <TabsTrigger value="documentacao" className="gap-2">
-                <Shield className="h-4 w-4" />
-                <span className="hidden sm:inline">Documentação</span>
+              <TabsTrigger value="documentacao" className="gap-1.5 text-xs sm:text-sm px-2 sm:px-3 py-2 sm:py-2.5 col-span-2 sm:col-span-1">
+                <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline">Documentação</span>
+                <span className="xs:hidden">Docs</span>
               </TabsTrigger>
             </TabsList>
 

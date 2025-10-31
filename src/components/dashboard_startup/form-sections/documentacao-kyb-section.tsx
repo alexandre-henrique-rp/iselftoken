@@ -91,33 +91,33 @@ export function DocumentacaoKYBSection({ control }: DocumentacaoKYBSectionProps)
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4 sm:space-y-6">
         <Alert className="border-primary/50 bg-primary/5">
-          <FileCheck className="h-4 w-4 text-primary" />
-          <AlertDescription className="text-sm">
+          <FileCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
+          <AlertDescription className="text-xs sm:text-sm">
             Todos os documentos devem ser legíveis e atualizados. Arquivos PDF são preferíveis.
             Os documentos marcados como &quot;opcional&quot; podem ser enviados posteriormente.
           </AlertDescription>
         </Alert>
 
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6">
           {DOCUMENTOS_KYB.map((doc) => (
             <FormField
               key={doc.name}
               control={control}
               name={doc.name}
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium">
+                <FormItem className="space-y-2">
+                  <FormLabel className="text-xs sm:text-sm font-medium">
                     {doc.label}
                     {doc.description.includes('opcional') && (
-                      <span className="ml-2 text-xs text-muted-foreground font-normal">
+                      <span className="ml-1.5 sm:ml-2 text-xs text-muted-foreground font-normal">
                         (Opcional)
                       </span>
                     )}
                   </FormLabel>
                   <FormControl>
-                    <div className="border border-dashed border-border rounded-lg p-3 hover:border-primary transition-colors bg-muted/10">
+                    <div className="border border-dashed border-border rounded-lg p-2 sm:p-3 hover:border-primary transition-colors bg-muted/10">
                       <FileUploader
                         accept={doc.accept}
                         maxSizeMB={5}
