@@ -165,7 +165,7 @@ export default async function Home() {
         {/* CTA */}
         <section className="border-border/20 bg-background py-16">
           <div className="container mx-auto px-6">
-            <div className="border-border flex flex-col items-start justify-between gap-6 rounded-xl border bg-gradient-to-r from-[#d500f9] to-black p-8 md:flex-row md:items-center dark:border-zinc-800 dark:bg-gradient-to-l dark:from-black/10 dark:to-zinc-200/10">
+            <div className="border-border flex flex-col items-start justify-between gap-6 rounded-xl border bg-linear-to-r from-[#d500f9] to-black p-8 md:flex-row md:items-center dark:border-zinc-800 dark:bg-linear-to-l dark:from-black/10 dark:to-zinc-200/10">
               <div className="flex-1">
                 <h3 className="text-foreground mb-3 text-2xl font-bold">
                   <TrText k="home.cta.title" />

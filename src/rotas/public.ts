@@ -46,5 +46,17 @@ export const publicRoutes = [
     "nome": "Startup by id",
     "path": "/startup/:id",
     "menu": "public"
+  },
+  {
+    "id": 9,
+    "nome": "Checkout",
+    "path": "/checkout",
+    "menu": "public"
+  },
+  {
+    "id": 10,
+    "nome": "Plans",
+    "path": "/business/plans",
+    "menu": "public"
   }
 ]

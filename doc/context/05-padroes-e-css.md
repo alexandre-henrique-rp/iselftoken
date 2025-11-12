@@ -1,337 +1,375 @@
----
-Descrição: Padrões de estilos e css do projeto iSelfToken
----
+# 🎨 Guia de Padrões CSS - iSelfToken
+## Design Minimalista & Alto Padrão
 
-# Padrões de Layout e Tema - iSelfToken
+## 🌈 Identidade Visual Sofisticada
 
-Este documento define os padrões de layout e sistema de tema para dark mode e light mode da aplicação iSelfToken.
+### Cor Principal da Empresa
+<div style="display: inline-block; padding: 16px 32px; background: #d500f9; color: white; border-radius: 4px; font-weight: 300; letter-spacing: 1px; margin: 12px 0; font-size: 14px;">
+#d500f9 - MAGENTA ELEGANTE
+</div>
 
-## Sistema de Cores e Tema
+**Aplicações Premium:**
+- Acentos sutis em elementos estratégicos
+- Estados hover e focus minimalistas
+- Elementos de navegação principal
+- Detalhes de luxo e sofisticação
 
-### Configuração Base
+### Paleta de Cores Premium
 
-A aplicação utiliza **Tailwind CSS 4** com **CSS custom properties** para gerenciar o sistema de tema. O sistema é baseado em tokens semânticos que se adaptam automaticamente aos modos claro e escuro.
-
-#### Tipografia
-
-**Fonte Principal:** [Inter](https://fonts.google.com/specimen/Inter)
-- Carregada via Google Fonts
-- Fallback: `-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif`
-- Suporte completo a peso variável (100-900)
-- Otimizada para legibilidade em interfaces digitais
-
-#### Cores da Empresa
-
-**Paleta Principal:**
-- **Roxo Principal:** `#d500f9` - Cor primária da marca
-- **Azul Padrão:** `#2962ff` - Cor secundária para ações e links
-- **Verde:** `#34a853` - Cor para status positivos e indicadores de sucesso
-
-#### Variáveis de Cor (OKLCH)
-
-**Light Mode (:root)**
+#### Fundos Monocromáticos
 ```css
---background: oklch(1 0 0);                    /* Branco puro */
---foreground: oklch(0.147 0.004 49.25);        /* Texto principal escuro */
---card: oklch(1 0 0);                          /* Fundo de cards */
+/* Fundos principais - tons de cinza sofisticados */
+bg-primary: oklch(0.090 0.004 49.25)      /* Preto suave */
+bg-secondary: oklch(0.120 0.004 49.25)    /* Cinza escuro */
+bg-tertiary: oklch(0.160 0.004 49.25)     /* Cinza médio */
+bg-card: oklch(0.140 0.004 49.25)         /* Cards premium */
+bg-surface: oklch(0.180 0.004 49.25)      /* Superfícies */
 
-/* Cores da empresa */
---primary: oklch(0.586 0.263 318);             /* #d500f9 - Roxo principal */
---primary-foreground: oklch(1 0 0);            /* Branco para contraste */
---blue: oklch(0.515 0.251 263);               /* #2962ff - Azul padrão */
---blue-foreground: oklch(1 0 0);
---green: oklch(0.638 0.177 142);              /* #34a853 - Verde */
---green-foreground: oklch(1 0 0);
-
---secondary: oklch(0.97 0.001 106.424);        /* Cinza claro */
---muted: oklch(0.97 0.001 106.424);            /* Texto secundário */
---border: oklch(0.923 0.003 48.717);           /* Bordas suaves */
---ring: oklch(0.586 0.263 318);               /* Ring usando cor principal */
+/* Cor principal em backgrounds - uso sutil */
+bg-accent-primary: rgba(213, 0, 249, 0.05)  /* Acento minimalista */
+bg-accent-hover: rgba(213, 0, 249, 0.08)   /* Hover sutil */
 ```
 
-**Dark Mode (.dark)**
+#### Tipografia Monocromática
 ```css
---background: oklch(0.147 0.004 49.25);        /* Fundo escuro */
---foreground: oklch(0.985 0.001 106.423);      /* Texto claro */
---card: oklch(0.216 0.006 56.043);             /* Cards mais escuros */
+/* Hierarquia tipográfica sofisticada */
+text-primary: oklch(0.980 0.004 49.25)     /* Branco suave */
+text-secondary: oklch(0.850 0.004 49.25)   /* Cinza claro */
+text-tertiary: oklch(0.650 0.004 49.25)    /* Cinza médio */
+text-muted: oklch(0.450 0.004 49.25)       /* Cinza escuro */
 
-/* Cores da empresa no dark mode - mais vibrantes */
---primary: oklch(0.686 0.313 318);             /* Roxo mais claro para dark mode */
---primary-foreground: oklch(0.147 0.004 49.25); /* Fundo escuro para contraste */
---blue: oklch(0.615 0.301 263);               /* Azul mais claro */
---blue-foreground: oklch(0.147 0.004 49.25);
---green: oklch(0.738 0.227 142);              /* Verde mais claro */
---green-foreground: oklch(0.147 0.004 49.25);
-
---secondary: oklch(0.268 0.007 34.298);        /* Cinza médio */
---muted: oklch(0.268 0.007 34.298);            /* Texto secundário escuro */
---border: oklch(1 0 0 / 10%);                  /* Bordas transparentes */
---ring: oklch(0.686 0.313 318);               /* Ring usando cor principal dark */
+/* Cor principal em textos - uso estratégico */
+text-accent: #d500f9                        /* Destaques elegantes */
+text-accent-subtle: rgba(213, 0, 249, 0.8) /* Links suaves */
 ```
 
-### Implementação do Theme Provider
+#### Bordas Invisíveis
+```css
+/* Bordas quase invisíveis - design limpo */
+border-subtle: oklch(0.180 0.004 49.25)    /* Bordas sutis */
+border-card: oklch(0.160 0.004 49.25)      /* Cards */
+border-divider: oklch(0.140 0.004 49.25)   /* Divisores */
 
-```tsx
-// Root layout com ThemeProvider
-<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-  <Outlet />
-</ThemeProvider>
+/* Cor principal em bordas - uso minimalista */
+border-accent: rgba(213, 0, 249, 0.2)      /* Focus states */
+border-accent-active: rgba(213, 0, 249, 0.4) /* Estados ativos */
 ```
 
-### Toggle de Tema Animado
+---
 
-O componente `AnimatedThemeToggler` implementa:
-- Transição suave com View Transitions API
-- Animação de revelação circular
-- Integração com next-themes para persistência
-- Detecção automática da preferência do sistema
+## 🏗️ Layout Minimalista
 
-## Padrões de Layout
+### Grid System Elegante
+```css
+/* Layout clean e espaçoso */
+.grid-premium {
+  @apply grid min-h-dvh lg:grid-cols-2;
+  gap: 0; /* Sem divisão visual */
+}
 
-### 1. Header/Navigation
+.container-elegant {
+  @apply flex flex-col gap-8 p-8 sm:p-12 md:p-16;
+  max-width: 1400px;
+  margin: 0 auto;
+}
 
-**Estrutura Base:**
-```tsx
-<header className="border-border bg-background/80 sticky top-0 z-50 border-b backdrop-blur">
-  <div className="container mx-auto flex h-16 items-center justify-between px-6">
-    {/* Logo - usando cor primária da empresa */}
-    <div className="flex items-center gap-2">
-      <span className="text-xl font-bold tracking-tight text-primary">
-        iSelfToken
-      </span>
-    </div>
+/* Espaçamento generoso */
+.spacing-generous {
+  @apply gap-12 lg:gap-16;
+}
 
-    {/* Navigation Desktop */}
-    <nav className="hidden items-center gap-4 md:flex">
-      <LanguageSelect />
-      <AnimatedThemeToggler />
-      <Button className="bg-blue text-blue-foreground hover:bg-blue/90">
-        Login
-      </Button>
-    </nav>
-
-    {/* Mobile Menu */}
-    <div className="md:hidden">
-      <MobileMenu />
-    </div>
-  </div>
-</header>
+.padding-premium {
+  @apply p-12 sm:p-16 md:p-20;
+}
 ```
 
-**Características:**
-- `bg-background/80` - Fundo semi-transparente
-- `backdrop-blur` - Efeito de blur no fundo
-- `sticky top-0 z-50` - Header fixo no topo
-- Responsivo com menu mobile
+### Estrutura Simples
+```css
+/* Layout limpo sem decorações excessivas */
+.layout-clean {
+  background: oklch(0.090 0.004 49.25);
+  min-height: 100vh;
+}
 
-### 2. Cards
-
-**Componente Base:**
-```tsx
-<Card className="bg-card text-card-foreground">
-  <CardHeader>
-    <CardTitle>Título</CardTitle>
-    <CardDescription>Descrição</CardDescription>
-  </CardHeader>
-  <CardContent>
-    {/* Conteúdo */}
-  </CardContent>
-  <CardFooter>
-    {/* Ações */}
-  </CardFooter>
-</Card>
+.content-centered {
+  @apply flex items-center justify-center;
+  padding: 80px 40px;
+}
 ```
 
-**Características:**
-- `rounded-xl border py-6 shadow-sm` - Bordas arredondadas e sombra sutil
-- Uso de tokens semânticos (`bg-card`, `text-card-foreground`)
-- Layout flexível com gap consistente
+---
 
-### 3. Buttons
+## 📐 Espaçamentos Generosos
 
-**Variantes por Tema:**
-```tsx
-// Primary (roxo da empresa)
-className="bg-primary text-primary-foreground hover:bg-primary/90"
+### Sistema de Espaçamento Premium
+```css
+/* Espaçamentos amplos para respiração visual */
+.space-xxs { @apply gap-2; }
+.space-xs { @apply gap-4; }
+.space-sm { @apply gap-6; }
+.space-md { @apply gap-8; }
+.space-lg { @apply gap-12; }
+.space-xl { @apply gap-16; }
+.space-xxl { @apply gap-20; }
 
-// Blue (azul da empresa)
-className="bg-blue text-blue-foreground hover:bg-blue/90"
-
-// Green (verde da empresa)
-className="bg-green text-green-foreground hover:bg-green/90"
-
-// Outline
-className="border bg-background hover:bg-accent dark:bg-input/30 dark:border-input dark:hover:bg-input/50"
-
-// Ghost
-className="hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50"
+/* Padding sofisticado */
+.padding-compact { @apply p-6; }
+.padding-comfortable { @apply p-8; }
+.padding-generous { @apply p-12; }
+.padding-luxurious { @apply p-16; }
 ```
 
-**Características:**
-- Estados específicos para dark mode (`dark:`)
-- Transições suaves em todas as interações
-- Uso consistente de tokens de cor semânticos
+---
 
-### 4. Footer
+## 🎴 Cards Minimalistas
 
-**Estrutura:**
-```tsx
-<footer className="dark:bg-background text-muted-foreground bg-zinc-700">
-  <div className="border-border container mx-auto border-t px-6 py-12">
-    <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-      {/* Colunas de conteúdo */}
-    </div>
-  </div>
-</footer>
+### Design de Cards Premium
+```css
+.card-premium {
+  @apply bg-card border border-subtle;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-premium:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Sem bordas arredondadas excessivas */
+.rounded-subtle { border-radius: 4px; }
+.rounded-regular { border-radius: 8px; }
+.rounded-smooth { border-radius: 12px; }
 ```
 
-**Características:**
-- Fundo diferenciado: `bg-zinc-700` (light) / `dark:bg-background` (dark)
-- Layout grid responsivo
-- Texto em `text-white` para contraste
+---
 
-## Padrões de Aplicação de Tema
+## 🔘 Botões Sofisticados
 
-### 1. Classes Condicionais por Tema
+### Botão Principal Elegante
+```css
+.btn-primary {
+  background: #d500f9;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 24px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-```tsx
-// Exemplo de aplicação condicional
-className="bg-gradient-to-r from-[#d500f9] to-black dark:bg-gradient-to-l dark:from-black/10 dark:to-zinc-200/10"
+.btn-primary:hover {
+  background: #e400e5;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(213, 0, 249, 0.25);
+}
 
-// Estados de hover específicos
-className="hover:bg-blue-500 hover:text-white"
+### Botão Secundário Minimalista
+```css
+.btn-secondary {
+  background: transparent;
+  color: oklch(0.850 0.004 49.25);
+  border: 1px solid oklch(0.180 0.004 49.25);
+  border-radius: 6px;
+  padding: 12px 24px;
+  font-weight: 400;
+  transition: all 0.3s ease;
+}
 
-// Bordas e fundos adaptativos
-className="border border-blue-500 bg-transparent dark:bg-input/30 dark:border-input"
+.btn-secondary:hover {
+  background: oklch(0.120 0.004 49.25);
+  border-color: oklch(0.220 0.004 49.25);
+  color: oklch(0.920 0.004 49.25);
+}
 ```
 
-### 2. Tokens Semânticos
+### Botão Ghost (Invisível)
+```css
+.btn-ghost {
+  background: transparent;
+  color: oklch(0.650 0.004 49.25);
+  border: none;
+  padding: 8px 16px;
+  font-weight: 400;
+  transition: all 0.2s ease;
+}
 
-Sempre priorizar tokens semânticos sobre cores hardcoded:
-
-**✅ Correto - Cores da Empresa:**
-```tsx
-// Usando cores da empresa
-className="bg-primary text-primary-foreground"    // Roxo principal
-className="bg-blue text-blue-foreground"          // Azul padrão
-className="bg-green text-green-foreground"        // Verde
-
-// Tokens semânticos do sistema
-className="bg-background text-foreground border-border"
+.btn-ghost:hover {
+  color: oklch(0.850 0.004 49.25);
+  background: rgba(255, 255, 255, 0.05);
+}
 ```
 
-**❌ Evitar - Cores Hardcoded:**
-```tsx
-className="bg-white text-black border-gray-200"       // Não responsivo ao tema
-className="bg-blue-500 text-white"                    // Não usa cores da empresa
-className="text-[#d500f9]"                           // Hardcoded, não adapta ao dark mode
+### Botão Cancelar (Outline Sofisticado)
+```css
+.btn-cancel {
+  background: transparent;
+  color: oklch(0.650 0.004 49.25);
+  border: 1px solid oklch(0.220 0.004 49.25);
+  border-radius: 6px;
+  padding: 12px 24px;
+  font-weight: 400;
+  transition: all 0.3s ease;
+}
+
+.btn-cancel:hover {
+  color: oklch(0.720 0.008 15) /* vermelho sutil */;
+  border-color: oklch(0.220 0.008 15);
+  background: rgba(239, 68, 68, 0.05);
+}
 ```
 
-**🎯 Guia de Uso das Cores da Empresa:**
-```tsx
-// Primário (Roxo #d500f9) - Use para:
-// - Elementos principais da marca
-// - CTAs primários
-// - Destaques importantes
-className="bg-primary text-primary-foreground"
+---
 
-// Azul (#2962ff) - Use para:
-// - Botões de ação secundária
-// - Links e navegação
-// - Estados informativos
-className="bg-blue text-blue-foreground"
+## 📝 Inputs Elegantes
 
-// Verde (#34a853) - Use para:
-// - Estados de sucesso
-// - Confirmações positivas
-// - Indicadores de progresso
-className="bg-green text-green-foreground"
+### Design de Forms Premium
+```css
+.input-premium {
+  background: oklch(0.120 0.004 49.25);
+  border: 1px solid oklch(0.180 0.004 49.25);
+  border-radius: 6px;
+  color: oklch(0.920 0.004 49.25);
+  padding: 12px 16px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.input-premium:focus {
+  outline: none;
+  border-color: rgba(213, 0, 249, 0.3);
+  box-shadow: 0 0 0 3px rgba(213, 0, 249, 0.1);
+}
+
+.input-premium::placeholder {
+  color: oklch(0.450 0.004 49.25);
+}
 ```
 
-### 3. Transparência e Opacidade
+---
 
-```tsx
-// Fundos com transparência para melhor adaptação
-className="bg-background/80"
+## ✨ Tipografia Sofisticada
 
-// Bordas com opacidade no dark mode
-className="border-border dark:border-input"
+### Fontes e Hierarquia
+```css
+/* Sistema tipográfico clean */
+.font-display {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 300;
+  letter-spacing: -0.5px;
+}
 
-// Estados hover com opacidade
-className="hover:bg-primary/90"
+.font-body {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.font-accent {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* Tamanhos elegantes */
+.text-xs { font-size: 12px; line-height: 1.4; }
+.text-sm { font-size: 14px; line-height: 1.5; }
+.text-base { font-size: 16px; line-height: 1.6; }
+.text-lg { font-size: 18px; line-height: 1.5; }
+.text-xl { font-size: 20px; line-height: 1.4; }
+.text-2xl { font-size: 24px; line-height: 1.3; }
+.text-3xl { font-size: 32px; line-height: 1.2; }
 ```
 
-### 4. Gradientes Adaptativos
+---
 
-```tsx
-// Gradientes que se adaptam ao tema
-className="bg-gradient-to-r from-[#d500f9] to-black dark:bg-gradient-to-l dark:from-black/10 dark:to-zinc-200/10"
+## 🎬 Animações Sutis
+
+### Transições Sofisticadas
+```css
+/* Animações minimalistas */
+.transition-elegant {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.transition-smooth {
+  transition: all 0.2s ease-out;
+}
+
+/* Hover effects sutis */
+.hover-lift:hover {
+  transform: translateY(-2px);
+}
+
+.hover-glow:hover {
+  box-shadow: 0 4px 20px rgba(213, 0, 249, 0.15);
+}
 ```
 
-## Componentes Especiais
+---
 
-### 1. Language Select
+## 🎯 Aplicações Premium
 
-```tsx
-<select className="appearance-none rounded-md border border-border bg-muted py-2 pl-3 pr-8 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors">
+### Componentes de Alto Padrão
+```css
+/* Navigation elegante */
+.nav-premium {
+  background: oklch(0.090 0.004 49.25);
+  border-bottom: 1px solid oklch(0.140 0.004 49.25);
+  backdrop-filter: blur(10px);
+}
+
+/* Cards de conteúdo */
+.content-card {
+  background: oklch(0.120 0.004 49.25);
+  border: 1px solid oklch(0.160 0.004 49.25);
+  border-radius: 8px;
+  padding: 32px;
+}
+
+/* Badges sofisticados */
+.badge-premium {
+  background: rgba(213, 0, 249, 0.1);
+  color: #d500f9;
+  border: 1px solid rgba(213, 0, 249, 0.2);
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
 ```
 
-### 2. Mobile Menu
+---
 
-Utiliza drawer/sheet components com tema adaptativo:
-```tsx
-<MobileMenu />
+## 📋 Referências de Design Premium
+
+### Classes Principais
+- `bg-primary` → Preto suave sofisticado
+- `text-primary` → Branco suave elegante
+- `border-subtle` → Bordas quase invisíveis
+- `btn-primary` → Botão magenta elegante
+- `card-premium` → Cards minimalistas
+
+### Cores da Paleta Premium
+```css
+/* Fundos */
+--bg-primary: oklch(0.090 0.004 49.25);
+--bg-secondary: oklch(0.120 0.004 49.25);
+--bg-tertiary: oklch(0.160 0.004 49.25);
+
+/* Textos */
+--text-primary: oklch(0.980 0.004 49.25);
+--text-secondary: oklch(0.850 0.004 49.25);
+--text-tertiary: oklch(0.650 0.004 49.25);
+
+/* Acentos */
+--accent-primary: #d500f9;
+--accent-subtle: rgba(213, 0, 249, 0.1);
 ```
 
-### 3. Theme Toggler
+---
 
-Componente com animação de transição:
-```tsx
-<AnimatedThemeToggler className="inline-flex h-10 w-10 items-center justify-center" />
-```
-
-## Boas Práticas
-
-### 1. Consistência de Tokens
-- Sempre usar tokens semânticos (`--foreground`, `--background`, etc.)
-- Evitar cores hardcoded
-- Usar opacidade quando necessário (`/80`, `/50`)
-
-### 2. Estados Responsivos
-- Desktop first com breakpoints `md:`, `lg:`
-- Menu mobile dedicado
-- Layout grid adaptativo
-
-### 3. Acessibilidade
-- Contraste adequado em ambos os temas
-- Estados de foco visíveis
-- Labels apropriados para theme toggle
-
-### 4. Performance
-- Uso de `backdrop-blur` apenas quando necessário
-- Transições CSS performáticas
-- View Transitions API para mudança de tema
-
-### 5. Manutenibilidade
-- Centralização de tokens no `styles.css`
-- Componentes reutilizáveis
-- Padrões consistentes de nomenclatura
-
-## Implementação em Novos Componentes
-
-Ao criar novos componentes, seguir esta checklist:
-
-1. **✅ Usar tokens semânticos** - `bg-background`, `text-foreground`
-2. **✅ Definir estados dark** - `dark:bg-card`, `dark:text-foreground`
-3. **✅ Implementar hover states** - `hover:bg-accent`
-4. **✅ Considerar responsividade** - `md:hidden`, `lg:flex`
-5. **✅ Manter consistência** - Seguir padrões existentes
-6. **✅ Testar ambos os temas** - Light e dark mode
-7. **✅ Validar acessibilidade** - Contraste e navegação
-
-Este documento serve como referência para manter a consistência visual e funcional do sistema de tema da aplicação iSelfToken.
-
-
-
-
-
+*Guia de padrões CSS otimizado para design minimalista e alto padrão iSelfToken*
