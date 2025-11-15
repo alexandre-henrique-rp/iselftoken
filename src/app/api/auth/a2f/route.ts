@@ -1,61 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import * as jose from 'jose';
 import { SetSession2fa } from '@/context/auth';
 
 
-export async function PUT(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-
-    const body = await request.json();
-    console.log("🚀 ~ PUT ~ body:", body)
-
-    const TokenClient = body.token;
-
-    // Validar se TokenClient foi fornecido
-    if (!TokenClient) {
-      return NextResponse.json(
-        { error: 'Token não fornecido' },
-        { status: 400 },
-      );
-    }
-
-    // Tentar verificar o token com tratamento de erro específico
-    const tokenData = await VerifyToken(TokenClient);
-  
-
-    const { cog, red, Id } = tokenData;
-
-    if (!cog || !red || !Id) {
-      return NextResponse.json(
-        { error: 'Token inválido' },
-        { status: 400 },
-      );
-    }
-
-    if (cog !== body.client_code) {
-      return NextResponse.json(
-        { error: 'Código inválido' },
-        { status: 400 },
-      );
-    }
-    // Validar se o redirectPath é uma string válida
-    if (!red || typeof red !== 'string') {
-
-      return NextResponse.json(
-        { error: 'Caminho de redirecionamento inválido' },
-        { status: 400 },
-      );
-    }
-
-    if(red === '/home' || red === '/admin') {
-      await SetSession2fa(true, {path: '/', expires: 60 * 60 * 24 * 7})
-    }
-    
+    await SetSession2fa(true, { path: '/', expires: 60 * 60 * 24 * 7 })
     return NextResponse.json(
-      { message: 'Código verificado', url: red },
+      { message: 'A2F ativado com sucesso' },
       { status: 200 },
     );
-
   } catch (error) {
     console.error('Erro geral no PUT A2F:', error);
     return NextResponse.json(
@@ -65,31 +18,3 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-async function VerifyToken(token: string) {
-  // Validar se o token existe e não está vazio
-  if (!token || typeof token !== 'string' || token.trim() === '') {
-    throw new Error('Token inválido ou não fornecido');
-  }
-
-  // Validar se o token tem o formato JWT básico (3 partes separadas por ponto)
-  const tokenParts = token.split('.');
-  if (tokenParts.length !== 3) {
-    throw new Error('Token JWT deve ter 3 partes separadas por ponto');
-  }
-
-  // Validar se o secret existe
-  const secretKey = process.env.NEXTAUTH_SECRET;
-  if (!secretKey) {
-    throw new Error('NEXTAUTH_SECRET não configurado');
-  }
-
-  try {
-    const secret = new TextEncoder().encode(secretKey);
-    const { payload } = await jose.jwtVerify(token, secret);
-    const { codigo, redirectPath, usuario_id } = payload;
-    return { cog: codigo, red: redirectPath, Id: usuario_id || null };
-  } catch (error) {
-    console.error('Erro ao verificar JWT:', error);
-    throw new Error('Token JWT inválido ou expirado');
-  }
-}

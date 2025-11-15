@@ -7,6 +7,7 @@ import LoginForm from '@/components/auth/LoginForm';
 import AuthLayoutPremium from '@/components/auth/layout/AuthLayoutPremium';
 
 export default function LoginPage() {
+  
   return (
     <AuthLayoutPremium
       title="iSelfToken"

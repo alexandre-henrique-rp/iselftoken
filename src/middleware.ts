@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { DeleteSession, GetSessionServer } from './context/auth';
+import { DeleteSession, GetSession2fa, GetSessionServer } from './context/auth';
 import { publicRoutes } from './rotas/public';
 import { fundadorRoutes } from './rotas/private/fundador';
 import { investorRoutes } from './rotas/private/investidor';
@@ -18,6 +18,7 @@ const ConsultorRoutesList = consultorRoutes.map((route) => route.path);
 
 export async function middleware(req: NextRequest) {
   const session = await GetSessionServer();
+  const A2f = await GetSession2fa();
 
   const { pathname } = req.nextUrl;
 
@@ -28,7 +29,9 @@ export async function middleware(req: NextRequest) {
   // Bypass para rotas de API e autenticação
   if (
     pathname.startsWith('/api/') ||
+    pathname === '/auth' ||
     pathname.startsWith('/auth/') ||
+    pathname === '/login' ||
     pathname.startsWith('/startup/') ||
     pathname.startsWith('/privat/startup/')
   ) {
@@ -54,22 +57,10 @@ export async function middleware(req: NextRequest) {
     const role = session.user.role;
     // console.log("🚀 ~ middleware ~ role:", role)
     // "investidor" | "startup" | "admin" | "afiliado"
-    if (role === 'fundador') {
-      const allowed = StartupRoutesList.some(
-        (base) => pathname === base || pathname.startsWith(base + '/'),
-      );
-      if (allowed) {
-        return NextResponse.next();
-      }
+    if (A2f === false ) {
+      return NextResponse.redirect(new URL('/auth', req.url));
     }
-    if (role === 'investidor') {
-      const allowed = InvestorRoutesList.some(
-        (base) => pathname === base || pathname.startsWith(base + '/'),
-      );
-      if (allowed) {
-        return NextResponse.next();
-      }
-    }
+   
     if (role === 'admin') {
       const allowed = AdminRoutesList.some(
         (base) => pathname === base || pathname.startsWith(base + '/'),
@@ -78,27 +69,9 @@ export async function middleware(req: NextRequest) {
         return NextResponse.next();
       }
     }
-    if (role === 'consultor') {
-      const allowed = ConsultorRoutesList.some(
-        (base) => pathname === base || pathname.startsWith(base + '/'),
-      );
-      if (allowed) {
-        return NextResponse.next();
-      }
-    }
+    return NextResponse.next();
   }
 
-  // Se chegou até aqui, o usuário não tem permissão para acessar a rota
-  // Redirecionar para a rota padrão baseada no role
-  if (session) {
-    const role = session.user.role;
-
-    if (role === 'admin') {
-      return NextResponse.redirect(new URL('/admin', req.url));
-    }
-
-    return NextResponse.redirect(new URL('/home', req.url));
-  }
 
   // Fallback para rotas públicas
   if (isPublicRoute) {

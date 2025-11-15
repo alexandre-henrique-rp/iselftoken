@@ -1,20 +1,8 @@
-/**
- * Página de Autenticação por Token Premium
- * Layout split-screen moderno seguindo padrões iSelfToken
- */
-
 import A2FPageClient from '@/components/auth/A2FPageClient';
 import AuthLayoutPremium from '@/components/auth/layout/AuthLayoutPremium';
 
-interface AuthParams {
-  params: Promise<{
-    token: string;
-  }>;
-}
+export default async function A2FPage() {
 
-export default async function A2FPage({ params }: AuthParams) {
-  const resolvedParams = await params;
-  
   return (
     <AuthLayoutPremium
       title="iSelfToken"
@@ -31,7 +19,7 @@ export default async function A2FPage({ params }: AuthParams) {
           </p>
         </div>
         
-        <A2FPageClient token={resolvedParams.token} />
+        <A2FPageClient />
       </div>
     </AuthLayoutPremium>
   );

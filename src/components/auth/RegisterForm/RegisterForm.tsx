@@ -1,22 +1,13 @@
-/**
- * RegisterForm - Formulário de cadastro premium simplificado
- * Sem campos de localização, focado na experiência essencial
- */
-
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import InputPremium from '../ui/InputPremium';
 import ButtonPremium from '../ui/ButtonPremium';
 import CheckboxPremium from '../ui/CheckboxPremium';
 import PasswordStrength from '../ui/PasswordStrength';
-import { 
-  FormData, 
-  FormErrors, 
-  RegisterFormProps 
-} from './types';
+
 import {
   validateForm,
   validateNome,
@@ -24,143 +15,192 @@ import {
   validateTelefone,
   validateSenha,
   validateConfirmarSenha,
-  validateTermos
+  validateTermos,
 } from './validation';
 import { usePhoneMask } from '@/hooks/usePhoneMask';
+import generateA2fCode from '@/lib/a2f';
 
-const RegisterForm: React.FC<RegisterFormProps> = ({
-  onSubmit,
-  loading: externalLoading = false
-}) => {
+const RegisterForm = () => {
   const router = useRouter();
   const { handlePhoneChange } = usePhoneMask();
-  
+
   // Estado do formulário
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<UserType.Register>({
     nome: '',
     email: '',
     telefone: '',
     senha: '',
     confirmarSenha: '',
     termosAceitos: false,
-    politicaAceita: false
+    politicaAceita: false,
   });
 
-  // Estado de erros
-  const [errors, setErrors] = useState<FormErrors>({});
-  
+
   // Estado de loading local
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<UserType.FormErrors>({});
+
+  useEffect(() => {
+    localStorage.removeItem('method');
+    localStorage.removeItem('redirect');
+    localStorage.removeItem('formData');
+    localStorage.removeItem('codigo');
+  }, []);
 
   // Validação em tempo real com debounce
-  const validateField = useCallback((field: keyof FormData, value: string | boolean) => {
-    let error = null;
-    
-    switch (field) {
-      case 'nome':
-        if (typeof value === 'string') error = validateNome(value);
-        break;
-      case 'email':
-        if (typeof value === 'string') error = validateEmail(value);
-        break;
-      case 'telefone':
-        if (typeof value === 'string') error = validateTelefone(value);
-        break;
-      case 'senha':
-        if (typeof value === 'string') error = validateSenha(value);
-        break;
-      case 'confirmarSenha':
-        if (typeof value === 'string') error = validateConfirmarSenha(value, formData.senha);
-        break;
-      case 'termosAceitos':
-        if (typeof value === 'boolean') error = validateTermos(value);
-        break;
-    }
-    
-    setErrors(prev => ({
-      ...prev,
-      [field]: error
-    }));
-    
-    return error;
-  }, [formData.senha]);
+  const validateField = useCallback(
+    (field: keyof UserType.Register, value: string | boolean) => {
+      let error = null;
+
+      switch (field) {
+        case 'nome':
+          if (typeof value === 'string') error = validateNome(value);
+          break;
+        case 'email':
+          if (typeof value === 'string') error = validateEmail(value);
+          break;
+        case 'telefone':
+          if (typeof value === 'string') error = validateTelefone(value);
+          break;
+        case 'senha':
+          if (typeof value === 'string') error = validateSenha(value);
+          break;
+        case 'confirmarSenha':
+          if (typeof value === 'string')
+            error = validateConfirmarSenha(value, formData.senha);
+          break;
+        case 'termosAceitos':
+          if (typeof value === 'boolean') error = validateTermos(value);
+          break;
+      }
+
+      setErrors((prev) => ({
+        ...prev,
+        [field]: error,
+      }));
+
+      return error;
+    },
+    [formData.senha],
+  );
 
   // Handler para mudança nos campos
-  const handleInputChange = useCallback((field: keyof FormData, value: string | boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-    
-    // Validação em tempo real (exceto para confirmação de senha)
-    if (field !== 'confirmarSenha' || (field === 'confirmarSenha' && typeof value === 'string' && value)) {
-      validateField(field, value);
-    }
-  }, [validateField]);
+  const handleInputChange = useCallback(
+    (field: keyof UserType.Register, value: string | boolean) => {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+
+      // Validação em tempo real (exceto para confirmação de senha)
+      if (
+        field !== 'confirmarSenha' ||
+        (field === 'confirmarSenha' && typeof value === 'string' && value)
+      ) {
+        validateField(field, value);
+      }
+    },
+    [validateField],
+  );
 
   // Handler específico para inputs de texto
-  const handleTextInputChange = useCallback((field: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    handleInputChange(field, e.target.value);
-  }, [handleInputChange]);
+  const handleTextInputChange = useCallback(
+    (field: keyof UserType.Register) =>
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        handleInputChange(field, e.target.value);
+      },
+    [handleInputChange],
+  );
 
   // Handler específico para telefone com máscara automática
-  const handleTelefoneChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const formattedPhone = handlePhoneChange(e.target.value);
-    handleInputChange('telefone', formattedPhone);
-  }, [handlePhoneChange, handleInputChange]);
+  const handleTelefoneChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const formattedPhone = handlePhoneChange(e.target.value);
+      handleInputChange('telefone', formattedPhone);
+    },
+    [handlePhoneChange, handleInputChange],
+  );
 
   // Handler específico para checkboxes
-  const handleCheckboxChange = useCallback((field: keyof FormData) => (checked: boolean) => {
-    handleInputChange(field, checked);
-  }, [handleInputChange]);
+  const handleCheckboxChange = useCallback(
+    (field: keyof UserType.Register) => (checked: boolean) => {
+      handleInputChange(field, checked);
+    },
+    [handleInputChange],
+  );
 
   // Submissão do formulário
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validar todos os campos
-    const validationErrors = validateForm(formData);
-    setErrors(validationErrors);
-    
-    if (Object.keys(validationErrors).length > 0) {
-      toast('Corrija os erros no formulário', {
-        description: 'Verifique os campos destacados'
-      });
-      return;
-    }
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
 
-    try {
-      setLoading(true);
-      const result = await onSubmit(formData);
-      
-      // Mostrar sucesso antes de redirecionar
-      toast('Cadastro realizado com sucesso!', {
-        description: 'Redirecionando para planos...'
-      });
-      
-      // Redirecionar para URL retornada em caso de sucesso
-      if (result.success && result.url) {
-        setTimeout(() => {
-          window.location.href = result.url;
-        }, 500); // Pequeno delay para o toast ser visto
+      // Validar todos os campos
+      const validationErrors = validateForm(formData);
+      setErrors(validationErrors);
+
+      if (Object.keys(validationErrors).length > 0) {
+        toast('Corrija os erros no formulário', {
+          description: 'Verifique os campos destacados',
+        });
+        return;
       }
-    } catch (error) {
-      toast('Erro no cadastro', {
-        description: error instanceof Error ? error.message : 'Tente novamente'
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [formData, onSubmit]);
+
+      try {
+        setLoading(true);
+        const codigo = generateA2fCode();
+        // ENVIAR O FORM PARA LOCAL STORAGE
+        localStorage.setItem('formData', JSON.stringify(formData));
+        localStorage.setItem('codigo', codigo);
+        localStorage.setItem('redirect', '/login');
+        localStorage.setItem('method', 'register');
+
+        const result = await fetch(`/api/newcode`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            nome: formData.nome,
+            email: formData.email,
+            codigo: codigo,
+          }),
+        });
+
+        if (!result.ok) {
+          throw new Error(
+            'Erro ao salvar dados do cadastro, codigo: ' + codigo,
+          );
+        }
+
+        // Mostrar sucesso antes de redirecionar
+        toast('Cadastro realizado com sucesso!', {
+          description: 'Redirecionando para planos...',
+        });
+
+        setTimeout(() => {
+          router.push('/auth');
+        }, 500); // Pequeno delay para o toast ser visto
+      } catch (error) {
+        toast('Erro no cadastro', {
+          description:
+            error instanceof Error ? error.message : 'Tente novamente',
+        });
+      } finally {
+        setLoading(false);
+      }
+    },
+    [formData, router],
+  );
 
   // Verificar se formulário está completo
-  const isFormComplete = formData.nome && 
-                        formData.email && 
-                        formData.telefone && 
-                        formData.senha && 
-                        formData.confirmarSenha && 
-                        formData.termosAceitos && 
-                        formData.politicaAceita;
+  const isFormComplete =
+    formData.nome &&
+    formData.email &&
+    formData.telefone &&
+    formData.senha &&
+    formData.confirmarSenha &&
+    formData.termosAceitos &&
+    formData.politicaAceita;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -267,7 +307,12 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
               <button
                 type="button"
                 className="text-purple-400 underline underline-offset-4 transition-colors hover:text-purple-300 hover:underline-offset-2"
-                onClick={() => router.push('/politicas')}
+                onClick={() =>
+                  window.open(
+                    'https://iselftoken.net/privacy-policy/',
+                    '_blank',
+                  )
+                }
               >
                 Política de Privacidade
               </button>{' '}
@@ -280,16 +325,15 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
         />
       </div>
 
-      {/* Botão de Submissão */}
+      {/* Botão de Submissão - Botão Principal Elegante */}
       <ButtonPremium
         type="submit"
-        variant="primary"
         size="lg"
-        loading={loading || externalLoading}
-        disabled={!isFormComplete || loading || externalLoading}
-        className="w-full text-[#d500f9] hover:text-white"
+        loading={loading}
+        disabled={!isFormComplete || loading}
+        className="w-full bg-[#d500f9] text-white transition-all duration-300 ease-out hover:bg-[#e400e5] hover:text-white hover:shadow-lg hover:shadow-purple-500/40 active:shadow-md"
       >
-        {loading || externalLoading ? 'Processando cadastro...' : 'Criar conta'}
+        {loading ? 'Processando cadastro...' : 'Criar conta'}
       </ButtonPremium>
     </form>
   );

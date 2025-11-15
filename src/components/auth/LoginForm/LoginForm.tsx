@@ -1,118 +1,157 @@
-/**
- * LoginForm - Formulário de login premium
- * Design minimalista seguindo padrões iSelfToken
- */
-
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import InputPremium from '../ui/InputPremium';
 import ButtonPremium from '../ui/ButtonPremium';
-import { Button } from '@/components/ui/button';
+import generateA2fCode from '@/lib/a2f';
+import { useSession } from '@/hooks/useSession';
 
 interface LoginFormData {
   email: string;
   senha: string;
 }
 
-interface LoginFormProps {
-  onSubmit?: (data: LoginFormData) => Promise<{ success: boolean; url: string }>;
-}
-
-const LoginForm: React.FC<LoginFormProps> = ({
-  onSubmit
-}) => {
+const LoginForm = () => {
   const router = useRouter();
-  
+  // gerar codigo para autenticação
+  const { logout } = useSession();
+  const codigo = generateA2fCode();
+
   // Estado do formulário
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
-    senha: ''
+    senha: '',
   });
 
   // Estado de loading
   const [loading, setLoading] = useState(false);
 
   // Handler para mudança nos campos
-  const handleInputChange = useCallback((field: keyof LoginFormData, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  }, []);
+  const handleInputChange = useCallback(
+    (field: keyof LoginFormData, value: string) => {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+    },
+    [],
+  );
+
+  useEffect(() => {
+    (async () => {
+      localStorage.removeItem('method');
+      localStorage.removeItem('redirect');
+      localStorage.removeItem('formData');
+      localStorage.removeItem('codigo');
+      await logout();
+    })();
+  }, [logout]);
 
   // Handler específico para inputs
-  const handleTextInputChange = useCallback((field: keyof LoginFormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    handleInputChange(field, e.target.value);
-  }, [handleInputChange]);
+  const handleTextInputChange = useCallback(
+    (field: keyof LoginFormData) =>
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        handleInputChange(field, e.target.value);
+      },
+    [handleInputChange],
+  );
 
   // Submissão do formulário
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validação básica
-    if (!formData.email || !formData.senha) {
-      toast('Preencha todos os campos', {
-        description: 'Email e senha são obrigatórios'
-      });
-      return;
-    }
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
 
-    // Validação de email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      toast('Email inválido', {
-        description: 'Digite um email válido'
-      });
-      return;
-    }
+      // Validação básica
+      if (!formData.email || !formData.senha) {
+        toast('Preencha todos os campos', {
+          description: 'Email e senha são obrigatórios',
+        });
+        return;
+      }
 
-    try {
-      setLoading(true);
-      
-      // Usa onSubmit customizado ou comportamento padrão
-      if (onSubmit) {
-        const result = await onSubmit(formData);
-        if (result.success && result.url) {
-          window.location.href = result.url;
-        }
-      } else {
+      // Validação de email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        toast('Email inválido', {
+          description: 'Digite um email válido',
+        });
+        return;
+      }
+
+      try {
+        setLoading(true);
         // Comportamento padrão
-        const response = await fetch("/api/auth", {
-          method: "POST",
+        const response = await fetch('/api/auth', {
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             email: formData.email,
             password: formData.senha,
-            redirectPath: "/"
           }),
         });
-        
+
         const result = await response.json();
-        
+        console.log('🚀 ~ LoginForm ~ result:', result);
+
         if (response.ok) {
           toast('Login realizado com sucesso!', {
-            description: 'Redirecionando para o dashboard'
+            description: 'Redirecionando para o dashboard',
           });
-          router.push(result.url || '/');
+          const user = result.data;
+          localStorage.setItem('method', 'login');
+          localStorage.setItem('redirect', '/home');
+          localStorage.setItem('formData', JSON.stringify(user));
+          localStorage.setItem('codigo', codigo);
+          await sendEmail(user.email, user.name, codigo);
+
+          router.push('/auth');
         } else {
           throw new Error(result.message || 'Erro ao fazer login');
         }
+      } catch (error) {
+        toast('Erro no login', {
+          description:
+            error instanceof Error ? error.message : 'Tente novamente',
+        });
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      toast('Erro no login', {
-        description: error instanceof Error ? error.message : 'Tente novamente'
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [formData, onSubmit, router]);
+    },
+    [codigo, formData.email, formData.senha, router],
+  );
 
+  const sendEmail = async (email: string, nome: string, codigo: string) => {
+    const emailSend = await fetch('/api/newcode', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({
+        email: email,
+        nome: nome,
+        codigo: codigo,
+      }),
+    });
+
+    const result = await emailSend.json();
+
+    if (!emailSend.ok) {
+      toast('Erro ao enviar email', {
+        description: result.message,
+      });
+      return;
+    }
+
+    toast('Email enviado com sucesso', {
+      description: 'Verifique seu email',
+    });
+  };
   // Verificar se formulário está completo
   const isFormComplete = formData.email && formData.senha;
 
@@ -154,14 +193,13 @@ const LoginForm: React.FC<LoginFormProps> = ({
         </Link>
       </div>
 
-      {/* Botão de Submissão */}
+      {/* Botão de Submissão - Botão Principal Elegante */}
       <ButtonPremium
         type="submit"
-        variant="primary"
         size="lg"
         loading={loading}
         disabled={!isFormComplete || loading}
-        className="f9] w-full text-[#d500f9] hover:text-white"
+        className="w-full bg-[#d500f9] text-white transition-all duration-300 ease-out hover:bg-[#e400e5] hover:text-white hover:shadow-lg hover:shadow-purple-500/40 active:shadow-md"
       >
         {loading ? 'Entrando...' : 'Entrar'}
       </ButtonPremium>
@@ -176,20 +214,19 @@ const LoginForm: React.FC<LoginFormProps> = ({
         </div>
       </div>
 
-      {/* Link para Cadastro */}
+      {/* Link para Cadastro - Botão Cancelar (Outline Sofisticado) */}
       <Link href="/register" className="w-full">
         <ButtonPremium
           type="button"
-          variant="primary"
           size="lg"
-          className="w-full border-2 border-[#d500f9] text-[#d500f9] hover:border-[#d500f9] hover:text-white"
+          className="w-full border border-[#d500f9] bg-transparent text-[#d500f9] shadow-[0_0_15px_#d500f9] transition-all duration-300 ease-out hover:bg-[#d500f9]/10 hover:text-white hover:shadow-[0_0_25px_#d500f9] active:shadow-[0_0_15px_#d500f9]"
         >
           Crie sua conta
         </ButtonPremium>
       </Link>
 
       {/* Termos */}
-      <div className="text-center text-sm text-gray-400 mt-4">
+      <div className="mt-4 text-center text-sm text-gray-400">
         Ao entrar, você concorda com os{' '}
         <Link
           href="/termos-de-uso"

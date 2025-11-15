@@ -9,7 +9,7 @@ import { Loader2 } from 'lucide-react';
 
 interface ButtonPremiumProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /** Variante visual do botão */
-  variant?: 'primary' | 'secondary' | 'ghost' | 'outline';
+  variant?: 'primary' | 'secondary' | 'ghost' | 'cancel' | 'outline';
   /** Tamanho do botão */
   size?: 'sm' | 'md' | 'lg';
   /** Estado de loading */
@@ -39,46 +39,51 @@ const ButtonPremium = forwardRef<HTMLButtonElement, ButtonPremiumProps>(
       lg: 'px-8 py-4 text-base'
     };
 
-    // Configurações de variante
+    // Configurações de variante conforme padrões de CSS
     const variantStyles = {
+      // Botão Principal Elegante - #d500f9 com transição suave
       primary: {
         background: '#d500f9',
         color: 'white',
         border: 'none',
-        hover: 'hover:bg-purple-600 active:bg-purple-700',
-        shadow: 'shadow-2xl shadow-purple-500/60 hover:shadow-2xl hover:shadow-purple-500/70'
+        hover: 'hover:bg-[#e400e5] hover:shadow-lg',
+        shadow: 'shadow-md shadow-purple-500/25'
       },
+      // Botão Secundário Minimalista - fundo transparente com borda sutil
       secondary: {
-        background: 'oklch(0.120 0.004 49.25)',
-        color: 'oklch(0.920 0.004 49.25)',
-        border: '1px solid oklch(0.180 0.004 49.25)',
-        hover: 'hover:bg-gray-800 hover:border-gray-600',
-        shadow: 'shadow-md'
-      },
-      secoutline: {
         background: 'transparent',
-        color: '#d500f9',
-        border: '1px solid #d500f9',
-        hover: 'hover:bg-purple-500 hover:text-white active:bg-purple-600',
-        shadow: 'shadow-md hover:shadow-lg hover:shadow-purple-500/30'
+        color: 'oklch(0.850 0.004 49.25)',
+        border: '1px solid oklch(0.180 0.004 49.25)',
+        hover: 'hover:bg-[oklch(0.120_0.004_49.25)] hover:border-[oklch(0.220_0.004_49.25)] hover:text-[oklch(0.920_0.004_49.25)]',
+        shadow: 'none'
       },
+      // Botão Ghost (Invisível) - sem fundo nem borda
       ghost: {
         background: 'transparent',
         color: 'oklch(0.650 0.004 49.25)',
         border: 'none',
-        hover: 'hover:bg-gray-800/50 hover:text-gray-300',
+        hover: 'hover:text-[oklch(0.850_0.004_49.25)] hover:bg-white/5',
         shadow: 'none'
       },
+      // Botão Cancelar - outline sofisticado com efeito hover magenta
+      cancel: {
+        background: 'transparent',
+        color: 'oklch(0.650 0.004 49.25)',
+        border: '1px solid oklch(0.220 0.004 49.25)',
+        hover: 'hover:text-[#d500f9] hover:border-[#d500f9] hover:shadow-lg hover:shadow-purple-500/18',
+        shadow: 'shadow-md shadow-black/30'
+      },
+      // Botão Outline - alias para cancel para compatibilidade
       outline: {
         background: 'transparent',
         color: '#d500f9',
         border: '1px solid #d500f9',
-        hover: 'hover:bg-purple-500 hover:text-white active:bg-purple-600',
-        shadow: 'shadow-md hover:shadow-lg hover:shadow-purple-500/30'
+        hover: 'hover:bg-purple-500/10 hover:shadow-lg hover:shadow-purple-500/30',
+        shadow: 'shadow-md shadow-purple-500/20'
       }
     };
 
-    const currentVariant = variantStyles[variant];
+    const currentVariant = variantStyles[variant || 'primary'];
     const currentSize = sizeStyles[size];
 
     return (
@@ -86,34 +91,28 @@ const ButtonPremium = forwardRef<HTMLButtonElement, ButtonPremiumProps>(
         ref={ref}
         className={cn(
           // Base styles
-          'relative inline-flex items-center justify-center',
-          'font-medium rounded-md transition-all duration-300',
-          'focus:outline-none focus:ring-2 focus:ring-offset-2',
+          'relative flex items-center justify-center',
+          'font-medium rounded-[6px] transition-all duration-300 ease-out',
+          'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500/50',
           'disabled:cursor-not-allowed disabled:opacity-50',
-          'transform hover:scale-[1.02] active:scale-[0.98]',
+          // Animações: hover e click
+          'hover:scale-[1.02] active:scale-[0.98]',
+          'transform hover:-translate-y-px active:translate-y-0',
           
           // Size
           currentSize,
           
-          // Variant
-          currentVariant.background,
-          currentVariant.color,
-          currentVariant.border,
-          currentVariant.hover,
-          currentVariant.shadow,
-          
-          // Focus ring
-          'focus:ring-purple-500/50',
+          // Variant (aplicado apenas se não houver className customizado)
+          !className && currentVariant.background,
+          !className && currentVariant.color,
+          !className && currentVariant.border,
+          !className && currentVariant.hover,
+          !className && currentVariant.shadow,
           
           className
         )}
         style={{
           letterSpacing: '0.5px',
-          backdropFilter: 'blur(10px)',
-          // Box-shadow customizado para envolver todo o botão
-          boxShadow: variant === 'primary' 
-            ? '0 4px 20px rgba(213, 0, 249, 0.6), 0 -2px 10px rgba(213, 0, 249, 0.3)'
-            : undefined,
         }}
         disabled={disabled || loading}
         {...props}

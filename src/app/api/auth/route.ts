@@ -13,8 +13,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { email, password } = body;
 
-    // gerar codigo para autenticação
-    const codigo = generateA2fCode();
+  
 
     // autenticar com api
     const response = await fetch(`${process.env.NEXTAUTH_API_URL}/login`, {
@@ -36,72 +35,6 @@ export async function POST(request: Request) {
       );
     }
 
-    const session2fa = await GetSession2fa();
-    if (session2fa) {
-      const role = data.data.user.role;
-      // criar sessão
-      await CreateSessionToken({
-        user: data.data.user,
-        token: data.data.token,
-        refreshToken: data.data.refreshToken,
-      });
-      const red = role === 'admin' ? '/admin' : '/home';
-      return NextResponse.json(
-        { message: 'Autenticado com sucesso', url: red },
-        { status: 200 },
-      );
-    }
-    const role = data.data.user.role;
-    const red = role === 'admin' ? '/admin' : '/home';
-
-    // gerar payload
-    const payload = {
-      codigo: codigo,
-      redirectPath: red,
-      usuario_id: data.data.user.id,
-    };
-
-    // codificar url com codigo com jwt
-    const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
-
-    // expirar em 20 minutos
-    const token = await new jose.SignJWT(payload as unknown as jose.JWTPayload)
-      .setProtectedHeader({ alg: 'HS256' })
-      .setIssuedAt()
-      .setExpirationTime('20m')
-      .sign(secret);
-
-    // url de redirecionamento
-    const url = `/auth/${token}`;
-
-    // enviar codigo para email
-    const messageResponse = await fetch(
-      `${process.env.NEXTAUTH_API_URL}/messagewithnewcode`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        body: JSON.stringify({
-          nome: data.data.user.nome,
-          email: data.data.user.email,
-          codigo: codigo,
-        }),
-      },
-    );
-    const messageData = await messageResponse.json();
-
-    if (!messageResponse.ok) {
-      return NextResponse.json(
-        {
-          message: messageData.message || 'Erro ao enviar codigo para email',
-          error: null,
-        },
-        { status: messageResponse.status },
-      );
-    }
-
     // criar sessão
     await CreateSessionToken({
       user: data.data.user,
@@ -111,7 +44,7 @@ export async function POST(request: Request) {
 
     // retornar resposta
     return NextResponse.json(
-      { message: 'Autenticado com sucesso', url: url },
+      { message: 'Autenticado com sucesso', data: data.data.user },
       { status: 200 },
     );
   } catch (error) {

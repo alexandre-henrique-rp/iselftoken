@@ -166,6 +166,44 @@ border-accent-active: rgba(213, 0, 249, 0.4) /* Estados ativos */
   box-shadow: 0 4px 12px rgba(213, 0, 249, 0.25);
 }
 
+### Botão Sucesso Luxuoso
+```css
+.btn-success {
+  background: #d500f9;
+  color: oklch(0.980 0.004 49.25);
+  border: none;
+  border-radius: 8px;
+  padding: 12px 28px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    background 0.25s ease;
+  box-shadow: 0 6px 18px rgba(213, 0, 249, 0.35);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.btn-success:hover {
+  background: linear-gradient(135deg, #d500f9, #e400e5);
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 10px 28px rgba(213, 0, 249, 0.45);
+}
+
+.btn-success:active {
+  animation: success-press 0.22s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.btn-success:disabled {
+  background: oklch(0.160 0.004 49.25);
+  color: oklch(0.450 0.004 49.25);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
 ### Botão Secundário Minimalista
 ```css
 .btn-secondary {
@@ -208,16 +246,30 @@ border-accent-active: rgba(213, 0, 249, 0.4) /* Estados ativos */
   background: transparent;
   color: oklch(0.650 0.004 49.25);
   border: 1px solid oklch(0.220 0.004 49.25);
-  border-radius: 6px;
-  padding: 12px 24px;
-  font-weight: 400;
-  transition: all 0.3s ease;
+  border-radius: 8px;
+  padding: 12px 26px;
+  font-weight: 500;
+  letter-spacing: 0.4px;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.25s ease,
+    color 0.25s ease;
+  box-shadow: 0 0 0 1px oklch(0.220 0.004 49.25),
+    0 6px 16px rgba(0, 0, 0, 0.3);
 }
 
 .btn-cancel:hover {
-  color: oklch(0.720 0.008 15) /* vermelho sutil */;
-  border-color: oklch(0.220 0.008 15);
-  background: rgba(239, 68, 68, 0.05);
+  color: #d500f9;
+  border-color: #d500f9;
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 1px rgba(213, 0, 249, 0.4),
+    0 10px 24px rgba(213, 0, 249, 0.18);
+}
+
+.btn-cancel:active {
+  transform: translateY(1px);
+  box-shadow: 0 0 0 1px rgba(213, 0, 249, 0.5),
+    0 4px 12px rgba(213, 0, 249, 0.25);
 }
 ```
 
@@ -305,6 +357,21 @@ border-accent-active: rgba(213, 0, 249, 0.4) /* Estados ativos */
 
 .hover-glow:hover {
   box-shadow: 0 4px 20px rgba(213, 0, 249, 0.15);
+}
+
+@keyframes success-press {
+  0% {
+    transform: translateY(-1px) scale(1.01);
+    box-shadow: 0 10px 28px rgba(213, 0, 249, 0.45);
+  }
+  60% {
+    transform: translateY(1px) scale(0.97);
+    box-shadow: 0 4px 12px rgba(213, 0, 249, 0.25);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    box-shadow: 0 6px 18px rgba(213, 0, 249, 0.35);
+  }
 }
 ```
 
