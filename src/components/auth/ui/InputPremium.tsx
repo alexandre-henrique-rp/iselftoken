@@ -83,7 +83,7 @@ const InputPremium = forwardRef<HTMLInputElement, InputPremiumProps>(
             role="alert"
           >
             <svg 
-              className="h-3 w-3 flex-shrink-0" 
+              className="h-3 w-3 shrink-0" 
               fill="currentColor" 
               viewBox="0 0 20 20"
             >

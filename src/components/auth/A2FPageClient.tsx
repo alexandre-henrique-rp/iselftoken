@@ -302,7 +302,7 @@ const A2FPageClient = () => {
         });
       }
     },
-    [formData, codigo, redirect, router, solicitarNovoCodigo, tentativasRestantes],
+    [codigo, method, solicitarNovoCodigo, tentativasRestantes, formData, router, redirect],
   );
 
   if (loading || isLoading) {
