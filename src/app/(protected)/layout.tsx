@@ -1,13 +1,13 @@
 import { AppSidebar } from '@/components/app-sidebar';
+import { DynamicBreadcrumb } from '@/components/dynamic-breadcrumb';
+import { Separator } from '@/components/ui/separator';
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { WhatsappHelpButton } from '@/components/WhatsappHelpButton';
-import { DeleteSession, GetSessionServer } from '@/context/auth';
-import { Separator } from '@/components/ui/separator';
-import { DynamicBreadcrumb } from '@/components/dynamic-breadcrumb';
+import { GetSessionServer } from '@/context/auth';
 import { redirect } from 'next/navigation';
 
 interface Props {
@@ -18,11 +18,10 @@ interface Props {
 export default async function ProtectedLayout({ children }: Props) {
   const sessionData = await GetSessionServer();
   if (!sessionData) {
-    await DeleteSession();
     redirect('/login');
   }
 
-  const session  = sessionData;
+  const session = sessionData;
   const role = session.user?.role;
 
   return (

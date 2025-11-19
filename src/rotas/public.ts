@@ -58,5 +58,17 @@ export const publicRoutes = [
     "nome": "Plans",
     "path": "/business/plans",
     "menu": "public"
+  },
+  {
+    "id": 11,
+    "nome": "API_AUTH",
+    "path": "/api/auth",
+    "menu": "public"
+  },
+  {
+    "id": 12,
+    "nome": "newcode",
+    "path": "/api/newcode",
+    "menu": "public"
   }
 ]

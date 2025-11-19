@@ -1,7 +1,7 @@
 import { Rotas } from "@/types/rotasTypes";
 import { Bell, ChartNoAxesCombined, Home, NotebookPen, User } from "lucide-react";
 
-export const investorRoutes: Rotas.Types[] = [
+export const userRoutes: Rotas.Types[] = [
   {
     id: 1,
     nome: 'Home',
@@ -64,5 +64,14 @@ export const investorRoutes: Rotas.Types[] = [
     isActive: false,
     menu: 'private',
     icon: null,
+  },
+  {
+    id: 8,
+    nome: 'Planos',
+    path: '/business/plans',
+    url: '/business/plans',
+    isActive: true,
+    menu: 'user',
+    icon: NotebookPen,
   },
 ];

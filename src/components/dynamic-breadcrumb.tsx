@@ -10,9 +10,9 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { adminRoutes } from '@/rotas/private/admin';
-import { fundadorRoutes } from '@/rotas/private/fundador';
-import { consultorRoutes } from '@/rotas/private/consultor';
-import { investorRoutes } from '@/rotas/private/investidor';
+import { financeiroRoutes } from '@/rotas/private/finaceiro';
+import { userRoutes } from '@/rotas/private/user';
+import { complianceRouter } from '@/rotas/private/compliance';
 
 interface dynamicBreadcrumbProps {
   role: string;
@@ -26,13 +26,13 @@ export function DynamicBreadcrumb({ role }: dynamicBreadcrumbProps) {
   const pathname = usePathname();
 
   const MenuFilter =
-    role === 'fundador'
-      ? fundadorRoutes
-      : role === 'admin'
-        ? adminRoutes
-        : role === 'afiliado'
-          ? consultorRoutes
-          : investorRoutes;
+    role === 'admin'
+      ? adminRoutes
+      : role === 'financeiro'
+        ? financeiroRoutes
+        : role === 'compliance'
+          ? complianceRouter
+          : userRoutes;
 
   const routes = MenuFilter;
 

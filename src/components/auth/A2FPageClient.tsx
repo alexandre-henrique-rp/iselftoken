@@ -1,15 +1,15 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useSession } from '@/hooks/useSession';
+import generateA2fCode from '@/lib/a2f';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as jose from 'jose';
-import InputPremium from './ui/InputPremium';
 import ButtonPremium from './ui/ButtonPremium';
-import { useSession } from '@/hooks/useSession';
+import InputPremium from './ui/InputPremium';
 
 // Constantes do componente
 const CODE_LENGTH = 6;
@@ -21,6 +21,19 @@ interface A2FInputs {
   code: string;
 }
 
+// Definir um tipo para formData para evitar 'any'
+interface FormData {
+  nome?: string;
+  email?: string;
+  // Adicione outras propriedades que formData possa ter
+}
+
+interface NewCodeRequestBody {
+  nome?: string;
+  email?: string;
+  codigo: string;
+}
+
 const A2FPageClient = () => {
   const router = useRouter();
   const { loading } = useSession();
@@ -28,7 +41,7 @@ const A2FPageClient = () => {
   const [expirationTime, setExpirationTime] = useState<number | null>(null);
   const [showExpiredMessage, setShowExpiredMessage] = useState(false);
   const [tentativasRestantes, setTentativasRestantes] = useState(MAX_ATTEMPTS);
-  const [formData, setFormData] = useState<UserType.Register | null>(null);
+  const [formData, setFormData] = useState<FormData | null>(null);
   const [codigo, setCodigo] = useState<string | null>(null);
   const [redirect, setRedirect] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -57,7 +70,7 @@ const A2FPageClient = () => {
   // Inicializa o tempo de expiração e carrega dados do localStorage
   useEffect(() => {
     setExpirationTime(Date.now() + EXPIRATION_MS);
-    
+
     // Carregar dados do localStorage apenas no cliente
     if (typeof window !== 'undefined') {
       setFormData(JSON.parse(localStorage.getItem('formData') || '{}'));
@@ -65,11 +78,11 @@ const A2FPageClient = () => {
       setRedirect(localStorage.getItem('redirect'));
       setMethod(localStorage.getItem('method'));
     }
-    
+
     setIsLoading(false);
   }, []);
 
-  // Solicitar novo código
+  // Função responsável por solicitar um novo código de verificação e atualizar o estado do componente
   const solicitarNovoCodigo = useCallback(async () => {
     if (!formData) {
       toast('Dados incompletos', {
@@ -79,48 +92,39 @@ const A2FPageClient = () => {
     }
 
     try {
-      const res = await fetch('/api/newcode', {
+      const generatedCode = generateA2fCode();
+      const requestBody: NewCodeRequestBody = {
+        nome: formData?.nome,
+        email: formData?.email,
+        codigo: generatedCode,
+      };
+
+      const response = await fetch('/api/newcode', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
         },
-        body: JSON.stringify({
-          nome: formData?.nome,
-          email: formData?.email,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
-      const data = await res.json();
-      if (!res.ok) {
+      const responseData = await response.json();
+      if (!response.ok) {
         toast('Não foi possível enviar o código', {
-          description: data.message,
+          description: responseData.message,
         });
         return;
       }
 
-      // Decodificar token JWT para extrair o código
-      try {
-        const decoded = jose.decodeJwt(data.token) as { codigo: string };
-        const newCodigo = decoded.codigo;
-        
-        // Atualizar localStorage e estado
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('codigo', newCodigo);
-        }
-        setCodigo(newCodigo);
-      } catch (decodeError) {
-        console.error('Erro ao decodificar token:', decodeError);
-        toast('Erro ao processar código', {
-          description: 'Tente novamente',
-        });
-        return;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('codigo', generatedCode);
       }
 
-      // Reinicia o countdown, esconde mensagem de expiração e reseta tentativas
+      setCodigo(generatedCode);
       setExpirationTime(Date.now() + EXPIRATION_MS);
       setShowExpiredMessage(false);
       setTentativasRestantes(MAX_ATTEMPTS);
+
       toast('Código reenviado', {
         description: 'Verifique seu e-mail',
       });
@@ -216,8 +220,11 @@ const A2FPageClient = () => {
   const onSubmit = useCallback(
     async (data: A2FInputs) => {
       try {
-        // Se não há código no localStorage, solicitar novo código
-        if (!codigo) {
+        const storedCode =
+          typeof window !== 'undefined' ? localStorage.getItem('codigo') : null;
+        const activeCode = codigo ?? storedCode;
+
+        if (!activeCode) {
           toast('Nenhum código ativo', {
             description: 'Solicitando um novo código...',
           });
@@ -225,7 +232,7 @@ const A2FPageClient = () => {
           return;
         }
 
-        if (codigo !== data.code) {
+        if (data.code !== activeCode) {
           const novasTentativas = tentativasRestantes - 1;
           setTentativasRestantes(novasTentativas);
 
@@ -234,7 +241,7 @@ const A2FPageClient = () => {
               description: `Tentativas restantes: ${novasTentativas}`,
             });
           } else {
-           throw new Error('Tentativas esgotadas');
+            throw new Error('Tentativas esgotadas');
           }
           return;
         }
@@ -254,7 +261,8 @@ const A2FPageClient = () => {
         } catch (a2fError) {
           console.error('Erro ao ativar A2F:', a2fError);
           toast('Erro na autenticação', {
-            description: 'Não foi possível ativar a verificação de dois fatores',
+            description:
+              'Não foi possível ativar a verificação de dois fatores',
           });
           return;
         }
@@ -297,12 +305,23 @@ const A2FPageClient = () => {
         }, 2000);
       } catch (error) {
         console.error('Erro na requisição:', error);
-        toast(error instanceof Error ? error.message : 'Erro ao verificar código', {
-          action: { label: 'Reenviar código', onClick: solicitarNovoCodigo },
-        });
+        toast(
+          error instanceof Error ? error.message : 'Erro ao verificar código',
+          {
+            action: { label: 'Reenviar código', onClick: solicitarNovoCodigo },
+          },
+        );
       }
     },
-    [codigo, method, solicitarNovoCodigo, tentativasRestantes, formData, router, redirect],
+    [
+      codigo,
+      method,
+      solicitarNovoCodigo,
+      tentativasRestantes,
+      formData,
+      router,
+      redirect,
+    ],
   );
 
   if (loading || isLoading) {

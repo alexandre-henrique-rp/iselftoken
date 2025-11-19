@@ -4,5 +4,4 @@
  */
 
 export { default } from './RegisterForm';
-export * from './types';
 export * from './validation';

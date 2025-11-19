@@ -17,10 +17,10 @@ import {
 } from "@/components/ui/sidebar"
 import { NavProjects } from "./nav-projects"
 import { adminRoutes } from "@/rotas/private/admin"
-import { fundadorRoutes } from "@/rotas/private/fundador"
-import { consultorRoutes } from "@/rotas/private/consultor"
-import { investorRoutes } from "@/rotas/private/investidor"
 import { Rotas } from "@/types/rotasTypes"
+import { financeiroRoutes } from "@/rotas/private/finaceiro"
+import { complianceRouter } from "@/rotas/private/compliance"
+import { userRoutes } from "@/rotas/private/user"
 
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
@@ -29,8 +29,16 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 }
 
 export function AppSidebar({ role, session, ...props }: AppSidebarProps) {
+ 
+  const MenuFilter =
+    role === 'admin'
+      ? adminRoutes
+      : role === 'financeiro'
+        ? financeiroRoutes
+        : role === 'compliance'
+          ? complianceRouter
+          : userRoutes;
 
-  const MenuFilter = role === "fundador" ? fundadorRoutes : role === "admin" ? adminRoutes : role === "afiliado" ? consultorRoutes : investorRoutes;
 
   // Type-safe filtering functions
   const getItemsByMenu = (menuType: 'geral' | 'interno' | 'config' | 'user' | 'private'): Rotas.Types[] => {
@@ -70,7 +78,7 @@ export function AppSidebar({ role, session, ...props }: AppSidebarProps) {
         <NavSecondary items={getItemsByMenu("config")} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={session} />
+        <NavUser user={session} itens={getItemsByMenu('user')} />
       </SidebarFooter>
     </Sidebar>
   )

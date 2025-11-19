@@ -7,7 +7,6 @@ import Link from 'next/link';
 import InputPremium from '../ui/InputPremium';
 import ButtonPremium from '../ui/ButtonPremium';
 import generateA2fCode from '@/lib/a2f';
-import { useSession } from '@/hooks/useSession';
 
 interface LoginFormData {
   email: string;
@@ -16,8 +15,6 @@ interface LoginFormData {
 
 const LoginForm = () => {
   const router = useRouter();
-  // gerar codigo para autenticação
-  const { logout } = useSession();
   const codigo = generateA2fCode();
 
   // Estado do formulário
@@ -46,9 +43,8 @@ const LoginForm = () => {
       localStorage.removeItem('redirect');
       localStorage.removeItem('formData');
       localStorage.removeItem('codigo');
-      await logout();
     })();
-  }, [logout]);
+  }, []);
 
   // Handler específico para inputs
   const handleTextInputChange = useCallback(

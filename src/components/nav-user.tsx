@@ -21,12 +21,14 @@ import { AnimatedThemeToggler } from '@/components/magicui/animated-theme-toggle
 import { useSession } from '@/hooks/useSession';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { Rotas } from '@/types/rotasTypes';
 
 interface NavUserProps {
   user: SessionNext.Client;
+  itens: Rotas.Types[];
 }
 
-export function NavUser({ user }: NavUserProps) {
+export function NavUser({ user, itens }: NavUserProps) {
   const { isMobile } = useSidebar();
   const { logout } = useSession();
   const route = useRouter();
@@ -113,10 +115,16 @@ export function NavUser({ user }: NavUserProps) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
 
-            <DropdownMenuItem onClick={handlePerfil}>
-              <User className="mr-2 h-4 w-4" />
-              Perfil
-            </DropdownMenuItem>
+            {itens.map((item) => (
+              <>
+                <DropdownMenuItem>
+                  <a href={item.url} className="flex items-center w-full gap-3">
+                    {item.icon && <item.icon className="mr-2 h-4 w-4 shrink-0" />}
+                    <span>{item.nome}</span>
+                  </a>
+                </DropdownMenuItem>
+              </>
+            ))}
 
             <DropdownMenuItem className="flex items-center justify-between">
               <span className="flex items-center">Tema</span>

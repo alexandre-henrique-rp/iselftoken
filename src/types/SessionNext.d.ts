@@ -11,7 +11,7 @@ declare namespace SessionNext {
     name: string
     email: string
     avatar: string | null
-    role: "investidor" | "fundador" | "admin" | "consultor" | "afiliado"
+    role: "user" | "admin" | "financeiro" | "compliance"
   }
 }
     
@@ -20,5 +20,5 @@ type User = {
   name: string
   email: string
   avatar: string | null
-  role: "investidor" | "fundador" | "admin" | "consultor" | "afiliado"
+  role: "user" | "admin" | "financeiro" | "compliance"
 }

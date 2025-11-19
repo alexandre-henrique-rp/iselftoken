@@ -1,7 +1,7 @@
 import { Rotas } from "@/types/rotasTypes";
 import { Bell, Home, User, Wallet } from "lucide-react";
 
-export const consultorRoutes: Rotas.Types[] = [
+export const financeiroRoutes: Rotas.Types[] = [
   {
     id: 1,
     nome: 'Home',
