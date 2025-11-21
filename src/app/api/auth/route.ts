@@ -42,9 +42,11 @@ export async function POST(request: Request) {
       refreshToken: data.data.refreshToken,
     });
 
+    const af2 = await GetSession2fa();
+
     // retornar resposta
     return NextResponse.json(
-      { message: 'Autenticado com sucesso', data: data.data.user },
+      { message: 'Autenticado com sucesso', data: data.data.user, Af2: af2 },
       { status: 200 },
     );
   } catch (error) {

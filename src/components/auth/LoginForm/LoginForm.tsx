@@ -92,12 +92,16 @@ const LoginForm = () => {
         });
 
         const result = await response.json();
-        console.log('🚀 ~ LoginForm ~ result:', result);
 
         if (response.ok) {
           toast('Login realizado com sucesso!', {
             description: 'Redirecionando para o dashboard',
           });
+
+          if(result.Af2){
+            router.push('/auth');
+            return
+          }
           const user = result.data;
           localStorage.setItem('method', 'login');
           localStorage.setItem('redirect', '/home');

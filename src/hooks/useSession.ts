@@ -13,6 +13,7 @@ export type SessionPayload = Record<string, unknown> & {
 
 export type UseSessionResult = {
   user: User | null
+  apiUser: UserApi | null
   loading: boolean
   error: string | null
   refresh: () => Promise<void>
@@ -21,6 +22,7 @@ export type UseSessionResult = {
 
 export function useSession(): UseSessionResult {
   const [user, setUser] = useState<User | null>(null)
+  const [apiUser, setApiUser] = useState<UserApi | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
   const mountedRef = useRef<boolean>(false)
@@ -98,8 +100,48 @@ export function useSession(): UseSessionResult {
     }
   }, [router])
 
+  const fetchApiUser = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const res = await fetch("/api/auth/apiUser", {
+        method: "GET",
+        headers: { Accept: "application/json" },
+        cache: "no-store",
+      })
+
+      if (!res.ok) {
+        throw new Error(`Falha ao obter sessão (status ${res.status})`)
+      }
+
+      // A rota retorna a sessão diretamente (não embrulhada)
+      const sess = (await res.json()) as SessionNext.Session | null
+
+
+      if (mountedRef.current) {
+        const currentUser = sess?.user ?? null
+        setUser(currentUser)
+      }
+    } catch (err) {
+      if (mountedRef.current) {
+        const message = err instanceof Error ? err.message : "Erro desconhecido"
+        setError(message)
+        setUser(null)
+      }
+    } finally {
+      if (mountedRef.current) setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    mountedRef.current = true
+    fetchSession()
+    return () => { mountedRef.current = false }
+  }, [fetchSession])
+
   return useMemo(
-    () => ({ user, loading, error, refresh, logout }),
-    [user, loading, error, refresh, logout]
+    () => ({ user, apiUser, loading, error, refresh, logout }),
+    [user, apiUser, loading, error, refresh, logout]
   )
 }

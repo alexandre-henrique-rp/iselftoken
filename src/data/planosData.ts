@@ -11,6 +11,7 @@ export const planosData: Plano[] = [
     nome: 'ISELF-AFILIADO',
     preco: 'R$ 85,00',
     periodo: '/ano',
+    descricao: 'Plano para afiliados, onde sua indicação vale dinheiro',
     beneficios: [
       'Compra de tokens para investimento',
       'Revenda de tokens adquiridos com lucro',
@@ -26,6 +27,7 @@ export const planosData: Plano[] = [
     nome: 'ISELF-INVESTIDOR',
     preco: 'R$ 50,00',
     periodo: '/ano',
+    descricao: 'Plano para investidores, onde você compra tokens para investimento',
     beneficios: [
       'Compra de tokens para investimento',
       'Revenda de tokens adquiridos com lucro',
@@ -41,6 +43,7 @@ export const planosData: Plano[] = [
     nome: 'ISELF-FUNDADOR',
     preco: 'R$ 100,00',
     periodo: '/ano',
+    descricao:'Plano para fundadores, onde colocar sua startup para arrecadar investimentos',
     beneficios: [
       'Compra de tokens para investimento',
       'Revenda de tokens adquiridos com lucro',

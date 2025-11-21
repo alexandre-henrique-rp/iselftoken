@@ -1,37 +1,45 @@
-import * as jose from "jose";
-import { cookies } from "next/headers";
+import * as jose from 'jose';
+import { cookies } from 'next/headers';
 
 // opensessiontoken responsável ler o payload do token
-export async function openSessionToken<T = jose.JWTPayload>(token: string): Promise<T> {
-  const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET)
-  const {payload} = await jose.jwtVerify(token, secret)
-  return payload as T
+export async function openSessionToken<T = jose.JWTPayload>(
+  token: string,
+): Promise<T> {
+  const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
+  const { payload } = await jose.jwtVerify(token, secret);
+  return payload as T;
 }
 
+type SessionCreatePayload = {
+  user: User;
+  token: string;
+  refreshToken: string;
+};
+
 // createSession responsável por criar o session
-export async function CreateSessionToken(payload: SessionNext.Session) {
-  const { user, ...rest } = payload
-  
-  const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET)
-  const token = await new jose.SignJWT({rest} as unknown as jose.JWTPayload)
-    .setProtectedHeader({ alg: "HS256" })
+export async function CreateSessionToken(payload: SessionCreatePayload) {
+  const { user, ...rest } = payload;
+
+  const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
+  const token = await new jose.SignJWT({ rest } as unknown as jose.JWTPayload)
+    .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
-    .setExpirationTime("6h")
-    .sign(secret)
+    .setExpirationTime('6h')
+    .sign(secret);
   const { exp } = await openSessionToken(token);
 
   const cookieStore = await cookies();
   const expiresAt = new Date((exp as number) * 1000);
 
-  cookieStore.set("user", JSON.stringify(user), {
+  cookieStore.set('user', JSON.stringify(user), {
     expires: expiresAt,
-    path: "/",
+    path: '/',
     httpOnly: true,
-  })
+  });
 
-  cookieStore.set("session-token", token, {
+  cookieStore.set('session-token', token, {
     expires: expiresAt,
-    path: "/",
+    path: '/',
     httpOnly: true,
   });
 }
@@ -39,8 +47,8 @@ export async function CreateSessionToken(payload: SessionNext.Session) {
 export async function GetSessionServer(): Promise<SessionNext.Session | null> {
   try {
     const cookieStore = await cookies();
-    const tokenCookie = cookieStore.get("session-token");
-    const userCookie = cookieStore.get("user");
+    const tokenCookie = cookieStore.get('session-token');
+    const userCookie = cookieStore.get('user');
 
     if (!tokenCookie) {
       return null;
@@ -50,22 +58,32 @@ export async function GetSessionServer(): Promise<SessionNext.Session | null> {
     }
 
     const user = JSON.parse(userCookie.value) as SessionNext.Client;
+    const apiUser = async () => {
+      const user = JSON.parse(userCookie.value) as SessionNext.Client;
+      const apiUser = await fetch(
+        `${process.env.NEXTAUTH_API_URL}/users/${user.id}`,
+      );
+      if (!apiUser.ok) {
+        return null;
+      }
+      const apiUserData = await apiUser.json();
+      return apiUserData;
+    };
     const token = tokenCookie.value;
     const payload = await openSessionToken(token);
 
     const expires = new Date((payload.exp as number) * 1000).toISOString();
-  
-    
-    return { 
+
+    return {
       user: user,
+      apiUser: await apiUser(),
       expires,
       token,
-      refreshToken: payload.refreshToken as string
+      refreshToken: payload.refreshToken as string,
     };
-
   } catch (error) {
     // Este log vai mostrar se a verificação/descriptografia do token falhou
-    console.log("Erro ao obter sessão:", error);
+    console.log('Erro ao obter sessão:', error);
     return null;
   }
 }
@@ -73,10 +91,9 @@ export async function GetSessionServer(): Promise<SessionNext.Session | null> {
 //DestroySession responsável por destruir o session
 export async function DeleteSession() {
   const cookieStore = await cookies();
-  cookieStore.delete("session-token");
-  cookieStore.delete("user");
+  cookieStore.delete('session-token');
+  cookieStore.delete('user');
 }
-
 
 export async function SetSession2fa(
   value: boolean,
@@ -86,23 +103,23 @@ export async function SetSession2fa(
     secure?: boolean;
     sameSite?: 'lax' | 'strict' | 'none';
     domain?: string;
-  }
+  },
 ): Promise<void> {
   const cookieStore = await cookies();
-  cookieStore.set("session_2fa", value.toString(), {
-    expires: options?.expires ? new Date(Date.now() + options.expires * 1000) : undefined,
+  cookieStore.set('session_2fa', value.toString(), {
+    expires: options?.expires
+      ? new Date(Date.now() + options.expires * 1000)
+      : undefined,
     httpOnly: true,
     path: options?.path ?? '/',
   });
 }
 
 export async function GetSession2fa(): Promise<boolean> {
-  const cookieStore = await cookies()
-  const c = cookieStore.get("session_2fa")
+  const cookieStore = await cookies();
+  const c = cookieStore.get('session_2fa');
   if (!c) {
-    return false
+    return false;
   }
-  return c.value === "true"
+  return c.value === 'true';
 }
-
-

@@ -10,6 +10,7 @@ export interface Plano {
   nome: string;
   preco: string;
   periodo: string;
+  descricao: string;
   beneficios: string[];
   icone: React.ReactNode | IconePlano; // Aceita JSX ou string
   recomendado?: boolean;

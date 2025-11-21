@@ -67,6 +67,15 @@ export const userRoutes: Rotas.Types[] = [
   },
   {
     id: 8,
+    nome: 'Business',
+    path: '/business',
+    url: '/business',
+    isActive: false,
+    menu: 'private',
+    icon: null,
+  },
+  {
+    id: 9,
     nome: 'Planos',
     path: '/business/plans',
     url: '/business/plans',
