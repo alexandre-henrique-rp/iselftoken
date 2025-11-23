@@ -2,12 +2,15 @@
 
 import { getPlanosVisiveis } from '@/data/planosData';
 import { useSession } from '@/hooks/useSession';
-import { IconePlano } from '@/types/planos';
-import { getIconePlano } from '@/utils/planosIcons';
 import CheckoutStorageService from '@/services/CheckoutStorageService';
 import { CheckoutData } from '@/types/Checkout';
+import { IconePlano } from '@/types/planos';
+import { getIconePlano } from '@/utils/planosIcons';
 import { Check, Star } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+
+// Força renderização dinâmica para evitar erro de static generation com cookies
+export const dynamic = 'force-dynamic';
 
 /**
  * Página responsável por exibir os planos disponíveis e redirecionar o usuário ao checkout.
@@ -65,7 +68,8 @@ const BusinessPlansPage = () => {
       const windowWidth = 1024;
       const windowHeight = 768;
       const windowLeft = window.screenX + (window.outerWidth - windowWidth) / 2;
-      const windowTop = window.screenY + (window.outerHeight - windowHeight) / 2;
+      const windowTop =
+        window.screenY + (window.outerHeight - windowHeight) / 2;
 
       // Abrir checkout usando o serviço
       const checkoutWindow = CheckoutStorageService.abrirCheckout(
@@ -201,12 +205,14 @@ const BusinessPlansPage = () => {
               onMouseOver={(e) => {
                 if (!plano.recomendado) {
                   e.currentTarget.style.borderColor = '#d500f9';
-                  e.currentTarget.style.transform = 'translateY(-4px) scale(0.95)';
+                  e.currentTarget.style.transform =
+                    'translateY(-4px) scale(0.95)';
                   e.currentTarget.style.boxShadow =
                     '0 12px 40px rgba(213, 0, 249, 0.15)';
                   e.currentTarget.style.background = 'oklch(0.160 0.004 49.25)';
                 } else {
-                  e.currentTarget.style.transform = 'translateY(-14px) scale(1.18)';
+                  e.currentTarget.style.transform =
+                    'translateY(-14px) scale(1.18)';
                   e.currentTarget.style.boxShadow =
                     '0 16px 50px rgba(213, 0, 249, 0.25)';
                 }
@@ -219,7 +225,8 @@ const BusinessPlansPage = () => {
                   e.currentTarget.style.boxShadow = 'none';
                   e.currentTarget.style.background = 'oklch(0.140 0.004 49.25)';
                 } else {
-                  e.currentTarget.style.transform = 'translateY(-10px) scale(1.15)';
+                  e.currentTarget.style.transform =
+                    'translateY(-10px) scale(1.15)';
                   e.currentTarget.style.boxShadow =
                     '0 8px 32px rgba(213, 0, 249, 0.2)';
                 }

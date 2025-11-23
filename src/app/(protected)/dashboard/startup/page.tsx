@@ -7,6 +7,9 @@ import type { StartupFormData } from '@/types/startup';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
+// Força renderização dinâmica para evitar erro de static generation com cookies
+export const dynamic = 'force-dynamic';
+
 export default function NovaStartupPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
