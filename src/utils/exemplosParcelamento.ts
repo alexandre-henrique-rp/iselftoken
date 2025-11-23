@@ -2,22 +2,17 @@
  * Exemplos práticos das regras de parcelamento no checkout
  */
 
-import { LocalStorageService } from '@/types/localStorage';
+// TODO: Implementar LocalStorageService quando disponível
+console.log('Exemplos de parcelamento que seriam salvos:');
 
 /**
  * Exemplo 1: Plano básico - Apenas 1x
  */
 export const exemploPlanoBasico = () => {
   console.log('💳 Exemplo: Plano Básico R$ 50,00');
-  
-  LocalStorageService.salvarPlanoSelecionado({
-    plano: 'iself-investidor',
-    produto: 'PLANO BÁSICO MENSAL',
-    valor: 'R$ 50,00',
-    validade: 1,
-    obs: 'Acesso essencial à plataforma'
-  });
-  
+
+  // TODO: Salvar plano básico R$ 50,00 no LocalStorageService quando disponível
+
   // Resultado no checkout:
   // Parcelamento: [1x de R$ 50,00 sem juros]
   // (Apenas 1 opção, pois valor < R$ 100)
@@ -28,15 +23,9 @@ export const exemploPlanoBasico = () => {
  */
 export const exemploPlanoIntermediario = () => {
   console.log('💳 Exemplo: Plano Intermediário R$ 297,00');
-  
-  LocalStorageService.salvarPlanoSelecionado({
-    plano: 'iself-investidor',
-    produto: 'PLANO INTERMEDIÁRIO',
-    valor: 'R$ 297,00',
-    validade: 12,
-    obs: 'Acesso completo com suporte prioritário'
-  });
-  
+
+  // TODO: Salvar plano intermediário R$ 297,00 no LocalStorageService quando disponível
+
   // Resultado no checkout:
   // Parcelamento: [
   //   1x de R$ 297,00 sem juros,
@@ -51,15 +40,9 @@ export const exemploPlanoIntermediario = () => {
  */
 export const exemploPlanoAvancado = () => {
   console.log('💳 Exemplo: Plano Avançado R$ 997,00');
-  
-  LocalStorageService.salvarPlanoSelecionado({
-    plano: 'iself-fundador',
-    produto: 'PLANO AVANÇADO ANUAL',
-    valor: 'R$ 997,00',
-    validade: 12,
-    obs: 'Todos os benefícios + mentoria personalizada'
-  });
-  
+
+  // TODO: Salvar plano avançado R$ 997,00 no LocalStorageService quando disponível
+
   // Resultado no checkout:
   // Parcelamento: [
   //   1x de R$ 997,00 sem juros,
@@ -81,15 +64,9 @@ export const exemploPlanoAvancado = () => {
  */
 export const exemploPlanoEnterprise = () => {
   console.log('💳 Exemplo: Plano Enterprise R$ 5.000,00');
-  
-  LocalStorageService.salvarPlanoSelecionado({
-    plano: 'iself-fundador',
-    produto: 'PLANO ENTERPRISE VITALÍCIO',
-    valor: 'R$ 5.000,00',
-    validade: 60,
-    obs: 'Acesso vitalício + consultoria ilimitada + suporte dedicado'
-  });
-  
+
+  // TODO: Salvar plano enterprise R$ 5.000,00 no LocalStorageService quando disponível
+
   // Resultado no checkout:
   // Parcelamento: [
   //   1x de R$ 5.000,00 sem juros,
@@ -106,31 +83,14 @@ export const exemploPlanoEnterprise = () => {
  */
 export const exemploValoresLimites = () => {
   console.log('💳 Exemplo: Valores limites');
-  
+
   // Exatamente R$ 100,00
-  LocalStorageService.salvarPlanoSelecionado({
-    plano: 'iself-investidor',
-    produto: 'PLANO START',
-    valor: 'R$ 100,00',
-    validade: 1
-  });
-  
-  // Exatamente R$ 500,00
-  LocalStorageService.salvarPlanoSelecionado({
-    plano: 'iself-afiliado',
-    produto: 'PLANO PRO',
-    valor: 'R$ 500,00',
-    validade: 6
-  });
-  
-  // Exatamente R$ 3000,00
-  LocalStorageService.salvarPlanoSelecionado({
-    plano: 'iself-fundador',
-    produto: 'PLANO MESTRE',
-    valor: 'R$ 3.000,00',
-    validade: 24
-  });
-  
+  // TODO: Salvar plano R$ 100,00 no LocalStorageService quando disponível
+
+  // TODO: Salvar plano R$ 500,00 no LocalStorageService quando disponível
+
+  // TODO: Salvar plano R$ 3.000,00 no LocalStorageService quando disponível
+
   console.log('✅ Valores limites testados');
 };
 
@@ -153,22 +113,20 @@ export const tabelaRegras = () => {
  * Função utilitária para criar produto com regras de parcelamento
  */
 export const criarProdutoComParcelamento = (
-  plano: 'iself-investidor' | 'iself-fundador' | 'iself-afiliado',
+  plano: 'Investidor' | 'Fundador' | 'Afiliado',
   produto: string,
   valor: string,
   validade: number,
   obs?: string
 ) => {
-  LocalStorageService.salvarPlanoSelecionado({
-    plano,
-    produto,
-    valor,
-    validade,
-    obs
-  });
-  
+  console.log(`plano selecionado: ${plano}`);
+  console.log(`produto selecionado: ${produto}`);
+  console.log(`valor selecionado: ${valor}`);
+  console.log(`validade selecionada: ${validade}`);
+  console.log(`obs selecionado: ${obs}`);
+
   const valorNumerico = parseFloat(valor.replace('R$', '').replace('.', '').replace(',', '.').trim());
-  
+
   let maxParcelas = 1;
   if (valorNumerico >= 100 && valorNumerico < 500) {
     maxParcelas = 3;
@@ -177,7 +135,7 @@ export const criarProdutoComParcelamento = (
   } else if (valorNumerico >= 3000) {
     maxParcelas = 15;
   }
-  
+
   console.log(`✅ Produto "${produto}" criado com sucesso!`);
   console.log(`💰 Valor: ${valor} - Parcelamento: 1x a ${maxParcelas}x`);
   console.log(`🌐 Navegue para /checkout para ver as opções`);

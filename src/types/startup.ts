@@ -7,6 +7,7 @@ export interface Country {
   native: string
   currency: string
   currency_symbol: string
+  region?: string
 }
 
 export interface Startup {
@@ -69,36 +70,83 @@ export interface StartupStats {
   }
 }
 
+export interface RedeSocial {
+  id: number
+  nome: string
+  url: string
+}
+
+export interface BancoInfo {
+  nome: string
+  agencia: string
+  conta: string
+  tipo: string
+  nome_titular: string
+}
+
 export interface StartupFormData {
   nome: string
-  pais: string
+  razao_social: string
   cnpj: string
-  data_fundacao: Date
+  pais: {
+    iso3: string
+    nome: string
+    emoji: string
+  }
   area_atuacao: string
   estagio: string
-  site?: string
-  redes_sociais: {
-    facebook?: string
-    instagram?: string
-    linkedin?: string
-    twitter?: string
-    youtube?: string
-  }
-  logo?: string
-  video_pitch?: string
-  pitch_pdf?: string
+  campanha: CampanhaStartup[]
+  valuation_calculado: number
+  redes: RedeSocial[]
+  status: string
+  data_fundacao: string
+  site: string
+  logo_url: string
   descritivo_basico: string
-  imagem_marketplace?: string
-  descricao_objetivo: string
-  dados_bancarios: {
-    banco: string
-    agencia: string
-    conta: string
-    tipo: 'Conta Corrente' | 'Conta Poupança' | 'Digital'
-    titular: string
+  total_captado: number
+  pdf_url: string
+  youtube_url: string
+  banco: BancoInfo
+  // Pitch Detalhado
+  problema?: string
+  solucao?: string
+  diferencial?: string
+  modelo_receita?: string
+  mercado_alvo?: string
+  compradores?: string
+  // Campos adicionais para Edição Avançada
+  recursos?: {
+    fundados: number
+    desenvolvimento: number
+    comercial: number
+    marketing: number
+    nuvem: number
+    juridico: number
+    reserva: number
   }
-  meta_captacao: number
-  equity_oferecido: number
+  socios?: Array<{ id: number; nome: string; porcentagem: number; percentual_time: string }>
+  teams?: Array<{ id: number; nome: string; cargo: string; foto_url: string }>
+  part_lucro?: boolean
+  part_lucro_regras?: string
+  beneficios?: boolean
+  beneficios_regras?: string
+  termos?: boolean
+  repasse?: boolean
+  premio?: boolean
+  premio_dt?: string
+  premio_pg?: string
+  ativo?: string
+  ativo_adm?: string
+  selos?: Array<{ id: number; nome: string; url: string }>
+}
+
+export interface CampanhaStartup {
+  id: number,
+  status: 'Ativo' | 'Pausado' | 'Cancelado' | 'Inativo', // ex: Ativa
+  dt_inicio: string, // ex: 2023-06-15
+  dt_fim: string, // 6 messes depois do inicio ex: 2023-12-15
+  meta_captacao: number, // ex: 500000
+  equity_oferecido: number, // ex: 15
 }
 
 export interface StartupFilters {
@@ -166,7 +214,7 @@ export interface StartupInvestor {
 
 export const AREA_ATUACAO_OPTIONS = [
   'Fintech',
-  'Healthtech', 
+  'Healthtech',
   'Edtech',
   'Agrotech',
   'Retailtech',
@@ -196,5 +244,5 @@ export const STATUS_OPTIONS = [
 ] as const
 
 export type AreaAtuacao = typeof AREA_ATUACAO_OPTIONS[number]
-export type Estagio = typeof ESTAGIO_OPTIONS[number]  
+export type Estagio = typeof ESTAGIO_OPTIONS[number]
 export type StartupStatus = typeof STATUS_OPTIONS[number]

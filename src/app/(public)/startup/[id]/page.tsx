@@ -1,15 +1,15 @@
-import { notFound } from 'next/navigation';
-import StartupHeader from '@/components/StartupHeader';
-import FinancialInfo from '@/components/FinancialInfo';
+import AnalysisVideo from '@/components/AnalysisVideo';
 import EquityCard1 from '@/components/EquityCard1';
 import EquityCard2 from '@/components/EquityCard2';
+import FinancialInfo from '@/components/FinancialInfo';
 import PitchVideo from '@/components/PitchVideo';
-import AnalysisVideo from '@/components/AnalysisVideo';
+import StartupHeader from '@/components/StartupHeader';
 import StartupSummary from '@/components/StartupSummary';
 import { GetSessionServer } from '@/context/auth';
+import { featuredStartups } from '@/data/startups';
 import { getYouTubeId } from '@/lib/youtube-utils';
 import { StartupTypes } from '@/types/ProfileTypes';
-import { featuredStartups } from '@/data/startups';
+import { notFound } from 'next/navigation';
 
 interface StartupPageProps {
   params: Promise<{ id: string }>;
@@ -104,11 +104,15 @@ export default async function StartupPage({
             <EquityCard2
               affiliateToken={token}
               userRole={
-                session?.user.role
-                  ? 'investidor'
-                  : session?.user.role === 'fundador'
-                    ? 'startup'
-                    : session?.user.role
+                session?.user.role === 'user'
+                  ? 'investidor' // Usuários comuns são investidores
+                  : session?.user.role === 'admin'
+                    ? 'admin'
+                    : session?.user.role === 'financeiro'
+                      ? 'consultor' // Financeiro atua como consultor
+                      : session?.user.role === 'compliance'
+                        ? 'consultor' // Compliance atua como consultor
+                        : undefined
               }
               isAuthenticated={session?.user ? true : false}
             />

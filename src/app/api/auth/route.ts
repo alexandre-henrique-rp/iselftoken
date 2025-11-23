@@ -5,8 +5,6 @@ import {
   GetSessionServer,
 } from '@/context/auth';
 import { NextResponse } from 'next/server';
-import * as jose from 'jose';
-import generateA2fCode from '@/lib/a2f';
 
 export async function POST(request: Request) {
   try {

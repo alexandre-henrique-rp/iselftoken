@@ -3,19 +3,15 @@
  * Este arquivo serve como documentação para implementação futura
  */
 
-import { LocalStorageService } from '@/types/localStorage';
+// TODO: Implementar LocalStorageService quando disponível
+console.log('Exemplos de produtos que seriam salvos:');
 
 /**
  * Exemplo 1: Plano padrão (sem produto personalizado)
  */
 export const exemploPlanoPadrao = () => {
-  LocalStorageService.salvarPlanoSelecionado({
-    plano: 'iself-investidor',
-    valor: 'R$ 50,00',
-    validade: 12
-    // produto e obs são opcionais
-  });
-  
+  // TODO: Salvar plano padrão R$ 50,00 no LocalStorageService quando disponível
+
   // Resultado no checkout:
   // Nome: ISELF INVESTIDOR (usa plano)
   // Validade: 12 meses
@@ -26,14 +22,8 @@ export const exemploPlanoPadrao = () => {
  * Exemplo 2: Produto personalizado
  */
 export const exemploProdutoPersonalizado = () => {
-  LocalStorageService.salvarPlanoSelecionado({
-    plano: 'iself-investidor',
-    produto: 'PACOTE STARTUP ESPECIAL', // Sobrescreve o nome do plano
-    valor: 'R$ 297,00',
-    validade: 12,
-    obs: 'Pacote exclusivo para startups com mentoria personalizada e acesso prioritário a investidores'
-  });
-  
+  // TODO: Salvar produto personalizado no LocalStorageService quando disponível
+
   // Resultado no checkout:
   // Nome: PACOTE STARTUP ESPECIAL (usa produto)
   // Validade: 12 meses
@@ -44,14 +34,8 @@ export const exemploProdutoPersonalizado = () => {
  * Exemplo 3: Curso online
  */
 export const exemploCursoOnline = () => {
-  LocalStorageService.salvarPlanoSelecionado({
-    plano: 'iself-investidor', // Mantido para compatibilidade
-    produto: 'CURSO TRADING AVANÇADO',
-    valor: 'R$ 997,00',
-    validade: 24,
-    obs: 'Acesso vitalício ao curso + 3 meses de suporte individual + certificado de conclusão'
-  });
-  
+  // TODO: Salvar curso online no LocalStorageService quando disponível
+
   // Resultado no checkout:
   // Nome: CURSO TRADING AVANÇADO
   // Validade: 24 meses
@@ -62,14 +46,8 @@ export const exemploCursoOnline = () => {
  * Exemplo 4: Consultoria pontual
  */
 export const exemploConsultoria = () => {
-  LocalStorageService.salvarPlanoSelecionado({
-    plano: 'iself-fundador',
-    produto: 'CONSULTORIA FINANCEIRA 1H',
-    valor: 'R$ 397,00',
-    validade: 1,
-    obs: 'Sessão de 1 hora com especialista em investimentos + análise de portfólio + plano de ação personalizado'
-  });
-  
+  // TODO: Salvar consultoria no LocalStorageService quando disponível
+
   // Resultado no checkout:
   // Nome: CONSULTORIA FINANCEIRA 1H
   // Validade: 1 mês
@@ -80,14 +58,8 @@ export const exemploConsultoria = () => {
  * Exemplo 5: Assinatura mensal
  */
 export const exemploAssinaturaMensal = () => {
-  LocalStorageService.salvarPlanoSelecionado({
-    plano: 'iself-afiliado',
-    produto: 'ASSINATURA PREMIUM MENSAL',
-    valor: 'R$ 29,90',
-    validade: 1,
-    obs: 'Renovação automática a cada mês. Cancele quando quiser. Inclui todos os benefícios da plataforma.'
-  });
-  
+  // TODO: Salvar assinatura mensal no LocalStorageService quando disponível
+
   // Resultado no checkout:
   // Nome: ASSINATURA PREMIUM MENSAL
   // Validade: 1 mês
@@ -98,14 +70,8 @@ export const exemploAssinaturaMensal = () => {
  * Exemplo 6: Evento/Palestra
  */
 export const exemploEvento = () => {
-  LocalStorageService.salvarPlanoSelecionado({
-    plano: 'iself-investidor',
-    produto: 'INGRESSO CONFERÊNCIA ISELF 2024',
-    valor: 'R$ 197,00',
-    validade: 6, // 6 meses para acessar gravações
-    obs: 'Acesso ao evento presencial + materiais digitais + gravações disponíveis por 6 meses + networking exclusivo'
-  });
-  
+  // TODO: Salvar evento no LocalStorageService quando disponível
+
   // Resultado no checkout:
   // Nome: INGRESSO CONFERÊNCIA ISELF 2024
   // Validade: 6 meses
@@ -116,19 +82,21 @@ export const exemploEvento = () => {
  * Função utilitária para criar produtos dinamicamente
  */
 export const criarProduto = (
-  plano: 'iself-investidor' | 'iself-fundador' | 'iself-afiliado',
+  plano: 'Investidor' | 'Fundador' | 'Afiliado',
   produto: string,
   valor: string,
   validade: number,
   obs?: string
 ) => {
-  LocalStorageService.salvarPlanoSelecionado({
-    plano,
-    produto, // Nome personalizado do produto
-    valor,
-    validade,
-    obs // Observações opcionais
-  });
+  console.log(`✅ Produto "${produto}" criado!`);
+  console.log(`💰 Valor: ${valor}`);
+  console.log(`🌐 Navegue para /checkout para ver o resultado`);
+  console.log(`plano selecionado: ${plano}`);
+  console.log(`produto selecionado: ${produto}`);
+  console.log(`valor selecionado: ${valor}`);
+  console.log(`validade selecionada: ${validade}`);
+  console.log(`obs selecionado: ${obs}`);
+ 
 };
 
 /**
@@ -137,7 +105,7 @@ export const criarProduto = (
 export const exemploDinamico = () => {
   // Criando um produto personalizado
   criarProduto(
-    'iself-investidor',
+    'Investidor',
     'MASTERCLASS CRIPTOMOEDAS',
     'R$ 497,00',
     12,

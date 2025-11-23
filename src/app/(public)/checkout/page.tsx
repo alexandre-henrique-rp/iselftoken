@@ -1,10 +1,10 @@
 'use client';
 
-import { ArrowLeft, CreditCard, Lock, Smartphone, Timer } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { CheckoutData } from '@/types/Checkout';
 import CheckoutStorageService from '@/services/CheckoutStorageService';
+import { CheckoutData } from '@/types/Checkout';
+import { ArrowLeft, CreditCard, Lock, Smartphone, Timer } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 /**
  * Página de Checkout Reutilizável
@@ -13,7 +13,7 @@ import CheckoutStorageService from '@/services/CheckoutStorageService';
  * Os dados são recebidos via localStorage através do CheckoutStorageService.
  *
  * @see /docs/CHECKOUT.md para documentação completa de uso
- * 
+ *
  * Campos obrigatórios:
  * - userName: string
  *   Exemplo: "João Silva"
@@ -27,11 +27,11 @@ import CheckoutStorageService from '@/services/CheckoutStorageService';
  *   Exemplo: "plano"
  * - productDescription: string
  *   Exemplo: "Acesso completo"
- * 
+ *
  * Campos opcionais:
  * - validity: number
  * - obs: string
- * 
+ *
  */
 export default function CheckoutPage() {
   const router = useRouter();
@@ -164,14 +164,9 @@ export default function CheckoutPage() {
 
   // Handlers
   const handleBack = () => {
-    if (confirm('Deseja realmente sair do checkout? Os dados serão perdidos.')) {
-      CheckoutStorageService.limparDadosCheckout();
-      window.close();
-    }
-  };
-
-  const handleExit = () => {
-    if (confirm('Deseja cancelar o pagamento?')) {
+    if (
+      confirm('Deseja realmente sair do checkout? Os dados serão perdidos.')
+    ) {
       CheckoutStorageService.limparDadosCheckout();
       window.close();
     }
@@ -261,9 +256,7 @@ export default function CheckoutPage() {
   const valorNumerico = parseCurrency(checkoutData.valor);
 
   return (
-    <div className="h-screen bg-black text-white overflow-hidden">
-      
-
+    <div className="h-screen overflow-hidden bg-black text-white">
       {/* Main Content */}
       <div className="flex h-[calc(100vh-57px)]">
         {/* Lado Esquerdo - Formulário */}
@@ -449,7 +442,7 @@ export default function CheckoutPage() {
 
                       {/* Código PIX */}
                       <div className="mb-3 w-full rounded-lg border border-gray-700 bg-gray-900 px-3 py-2">
-                        <div className="break-all text-center font-mono text-[10px] text-gray-400">
+                        <div className="text-center font-mono text-[10px] break-all text-gray-400">
                           1234-5678-9012-3456-7890-1234-5678-9012
                         </div>
                       </div>
@@ -579,7 +572,7 @@ export default function CheckoutPage() {
             )}
 
             {checkoutData.obs && (
-              <div className="mt-2 text-[10px] italic text-gray-400">
+              <div className="mt-2 text-[10px] text-gray-400 italic">
                 {checkoutData.obs}
               </div>
             )}

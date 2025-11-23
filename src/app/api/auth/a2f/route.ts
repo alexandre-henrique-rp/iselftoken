@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { SetSession2fa } from '@/context/auth';
 
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     await SetSession2fa(true, { path: '/', expires: 60 * 60 * 24 * 7 })
     return NextResponse.json(

@@ -8,7 +8,7 @@ interface StartupHomeProps {
   // Lista de itens da tabela conforme schema compartilhado
   data: z.infer<typeof schema>[];
 }
-
+//
 export default function StartupHome({ data }: StartupHomeProps) {
   return (
     <div>

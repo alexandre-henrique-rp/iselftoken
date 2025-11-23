@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronsUpDown, LogOut, User } from 'lucide-react';
+import { ChevronsUpDown, LogOut } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -20,7 +20,6 @@ import {
 import { AnimatedThemeToggler } from '@/components/magicui/animated-theme-toggler';
 import { useSession } from '@/hooks/useSession';
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
 import { Rotas } from '@/types/rotasTypes';
 
 interface NavUserProps {
@@ -31,7 +30,6 @@ interface NavUserProps {
 export function NavUser({ user, itens }: NavUserProps) {
   const { isMobile } = useSidebar();
   const { logout } = useSession();
-  const route = useRouter();
 
   const handleLogout = async () => {
     try {
@@ -62,9 +60,6 @@ export function NavUser({ user, itens }: NavUserProps) {
 
   const iniciais = IniciaisSession();
 
-  const handlePerfil = () => {
-    route.push('/perfil');
-  };
 
   return (
     <SidebarMenu>

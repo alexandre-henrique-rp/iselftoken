@@ -86,11 +86,15 @@ export default async function StartupPage({ params }: StartupPageProps) {
             {/* Seção 4: Informações de Equity - Card 2 */}
             <EquityCard2
               userRole={
-                session?.user.role
-                  ? 'investidor'
-                  : session?.user.role === 'fundador'
-                    ? 'startup'
-                    : session?.user.role
+                session?.user.role === 'user'
+                  ? 'investidor' // Usuários comuns são investidores
+                  : session?.user.role === 'admin'
+                    ? 'admin'
+                    : session?.user.role === 'financeiro'
+                      ? 'consultor' // Financeiro atua como consultor
+                      : session?.user.role === 'compliance'
+                        ? 'consultor' // Compliance atua como consultor
+                        : undefined
               }
               isAuthenticated={session?.user ? true : false}
             />

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GetSession2fa, GetSessionServer } from './context/auth';
 import { publicRoutes } from './rotas/public';
-import { adminRoutes } from './rotas/private/admin';
+// import { adminRoutes } from './rotas/private/admin';
 
 const publicRoutesList = publicRoutes.map((route) => route.path);
 
-const AdminRoutesList = adminRoutes.map((route) => route.path);
+// const AdminRoutesList = adminRoutes.map((route) => route.path);
 
 const PageNotAf2 = [
   '/auth',

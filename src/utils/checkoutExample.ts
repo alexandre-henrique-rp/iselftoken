@@ -3,32 +3,31 @@
  * Este arquivo serve como documentação para implementação futura
  */
 
-import { LocalStorageService } from '@/types/localStorage';
 import { calcularDataExpiracao, gerarTextoValidade, planoEstaExpirado } from './validadePlano';
 
 /**
  * Exemplo de implementação no checkout
  */
 export const exemploCheckout = () => {
-  // Recuperar dados do plano selecionado
-  const planoSelecionado = LocalStorageService.recuperarPlanoSelecionado();
-  
-  if (!planoSelecionado) {
-    console.error('Nenhum plano selecionado');
-    return;
-  }
-  
+  // Dados mock para exemplo - TODO: Substituir por LocalStorageService quando disponível
+  const planoSelecionado = {
+    plano: 'iself-investidor-mensal',
+    valor: 'R$ 19,90',
+    validade: 1,
+    timestamp: new Date().toISOString()
+  };
+
   // Exibir informações do plano com validade
   console.log('=== DADOS DO PLANO ===');
   console.log('Plano:', planoSelecionado.plano);
   console.log('Valor:', planoSelecionado.valor);
   console.log('Validade:', planoSelecionado.validade, 'meses');
   console.log('Status:', gerarTextoValidade(planoSelecionado));
-  
+
   // Calcular data de expiração
   const dataExpiracao = calcularDataExpiracao(planoSelecionado.validade);
   console.log('Data de expiração:', new Date(dataExpiracao).toLocaleDateString('pt-BR'));
-  
+
   // Verificar se plano está expirado (útil para renovação)
   if (planoEstaExpirado(planoSelecionado)) {
     console.log('⚠️ Plano expirado - Oferecer renovação');
@@ -41,50 +40,37 @@ export const exemploCheckout = () => {
  * Exemplo de como usar para diferentes tipos de produtos
  */
 export const exemploFlexibilidade = () => {
+  // TODO: Implementar LocalStorageService quando disponível
+  console.log('Exemplos de planos que seriam salvos:');
+
   // Plano mensal
-  LocalStorageService.salvarPlanoSelecionado({
-    plano: 'iself-investidor-mensal',
-    valor: 'R$ 19,90',
-    validade: 1 // 1 mês
-  });
-  
+  console.log('- Plano mensal: iself-investidor-mensal, R$ 19,90, 1 mês');
+
   // Plano semestral
-  LocalStorageService.salvarPlanoSelecionado({
-    plano: 'iself-fundador-semestral',
-    valor: 'R$ 297,00',
-    validade: 6 // 6 meses
-  });
-  
+  console.log('- Plano semestral: iself-fundador-semestral, R$ 297,00, 6 meses');
+
   // Plano anual
-  LocalStorageService.salvarPlanoSelecionado({
-    plano: 'iself-afiliado-anual',
-    valor: 'R$ 497,00',
-    validade: 12 // 12 meses
-  });
-  
+  console.log('- Plano anual: iself-afiliado-anual, R$ 497,00, 12 meses');
+
   // Curso com validade específica
-  LocalStorageService.salvarPlanoSelecionado({
-    plano: 'curso-trading-avancado',
-    valor: 'R$ 1.997,00',
-    validade: 24 // 24 meses (acesso vitalício temporário)
-  });
-  
+  console.log('- Curso: curso-trading-avancado, R$ 1.997,00, 24 meses');
+
   // Consultoria pontual
-  LocalStorageService.salvarPlanoSelecionado({
-    plano: 'consultoria-1-hora',
-    valor: 'R$ 297,00',
-    validade: 1 // 1 mês para agendamento
-  });
+  console.log('- Consultoria: consultoria-1-hora, R$ 297,00, 1 mês');
 };
 
 /**
  * Exemplo de implementação em componente React
  */
 export const dadosParaCheckout = () => {
-  const plano = LocalStorageService.recuperarPlanoSelecionado();
-  
-  if (!plano) return null;
-  
+  // Dados mock para exemplo - TODO: Substituir por LocalStorageService quando disponível
+  const plano = {
+    plano: 'iself-investidor-mensal',
+    valor: 'R$ 19,90',
+    validade: 1,
+    timestamp: new Date().toISOString()
+  };
+
   return {
     produto: {
       nome: plano.plano,

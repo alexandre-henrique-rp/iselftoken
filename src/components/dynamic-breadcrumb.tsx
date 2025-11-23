@@ -1,6 +1,5 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,9 +9,10 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { adminRoutes } from '@/rotas/private/admin';
+import { complianceRouter } from '@/rotas/private/compliance';
 import { financeiroRoutes } from '@/rotas/private/finaceiro';
 import { userRoutes } from '@/rotas/private/user';
-import { complianceRouter } from '@/rotas/private/compliance';
+import { usePathname } from 'next/navigation';
 
 interface dynamicBreadcrumbProps {
   role: string;
@@ -76,7 +76,7 @@ export function DynamicBreadcrumb({ role }: dynamicBreadcrumbProps) {
     <Breadcrumb>
       <BreadcrumbList>
         {breadcrumbs.map((crumb, index) => (
-          <div key={crumb.href} className="flex items-center">
+          <div key={`${crumb.href}-${index}`} className="flex items-center">
             <BreadcrumbItem className={index === 0 ? 'hidden md:block' : ''}>
               {crumb.isLast ? (
                 <BreadcrumbPage>{crumb.title}</BreadcrumbPage>

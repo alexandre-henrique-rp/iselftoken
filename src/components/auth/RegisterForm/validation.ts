@@ -3,7 +3,6 @@
  * Validações em tempo real com feedback elegante
  */
 
-import { FormData, FormErrors } from './types';
 import { validatePhone } from '@/hooks/usePhoneMask';
 
 /**
@@ -26,13 +25,13 @@ export const validateNome = (nome: string): string | null => {
  */
 export const validateEmail = (email: string): string | null => {
   if (!email?.trim()) return 'E-mail é obrigatório';
-  
+
   // Regex mais robusta para validação de email
   const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-  
+
   if (!emailRegex.test(email)) return 'E-mail inválido';
   if (email.length > 254) return 'E-mail muito longo';
-  
+
   return null;
 };
 
@@ -43,12 +42,12 @@ export const validateEmail = (email: string): string | null => {
  */
 export const validateTelefone = (telefone: string): string | null => {
   if (!telefone?.trim()) return 'Telefone é obrigatório';
-  
+
   // Usa validação especializada do hook
   if (!validatePhone(telefone)) {
     return 'Telefone inválido - formato: (XX) XXXXX-XXXX';
   }
-  
+
   return null;
 };
 
@@ -97,8 +96,8 @@ export const validateTermos = (termosAceitos: boolean): string | null => {
  * @param data Dados do formulário
  * @returns Objeto com erros ou vazio se tudo válido
  */
-export const validateForm = (data: FormData): FormErrors => {
-  const errors: FormErrors = {};
+export const validateForm = (data: UserType.Register): UserType.FormErrors => {
+  const errors: UserType.FormErrors = {};
 
   const nomeError = validateNome(data.nome);
   if (nomeError) errors.nome = nomeError;
@@ -126,7 +125,7 @@ export const validateForm = (data: FormData): FormErrors => {
  * @param data Dados do formulário
  * @returns true se válido, false se houver erros
  */
-export const isFormValid = (data: FormData): boolean => {
+export const isFormValid = (data: UserType.Register): boolean => {
   const errors = validateForm(data);
   return Object.keys(errors).length === 0;
 };
@@ -138,15 +137,15 @@ export const isFormValid = (data: FormData): boolean => {
  */
 export const calculatePasswordStrength = (senha: string): number => {
   let strength = 0;
-  
+
   if (!senha) return 0;
-  
+
   if (senha.length >= 12) strength++;
   if (senha.length >= 16) strength++;
   if (/[A-Z]/.test(senha) && /[a-z]/.test(senha)) strength++;
   if (/[0-9]/.test(senha)) strength++;
   if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(senha)) strength++;
-  
+
   return Math.min(strength, 4);
 };
 

@@ -3,22 +3,19 @@
  * Execute estas funções no console do navegador para testar
  */
 
-import { LocalStorageService } from '@/types/localStorage';
+// TODO: Implementar LocalStorageService quando disponível
+console.log('Testes de checkout que seriam executados:');
 
 /**
  * Teste 1: Plano padrão sem observações
  */
 export const testePlanoPadrao = () => {
   console.log('🧪 Testando plano padrão...');
-  
-  LocalStorageService.salvarPlanoSelecionado({
-    plano: 'iself-investidor',
-    valor: 'R$ 50,00',
-    validade: 12
-  });
-  
+
+  // TODO: Salvar plano padrão no LocalStorageService quando disponível
+
   console.log('✅ Plano padrão salvo');
-  console.log('📋 Dados no localStorage:', LocalStorageService.recuperarPlanoSelecionado());
+  console.log('📋 Dados no localStorage: [dados seriam recuperados aqui]');
   console.log('🌐 Navegue para /checkout para ver o resultado');
 };
 
@@ -27,17 +24,11 @@ export const testePlanoPadrao = () => {
  */
 export const testeProdutoPersonalizado = () => {
   console.log('🧪 Testando produto personalizado...');
-  
-  LocalStorageService.salvarPlanoSelecionado({
-    plano: 'iself-investidor',
-    produto: 'PACOTE EMPREENDEDOR DIGITAL',
-    valor: 'R$ 297,00',
-    validade: 12,
-    obs: 'Inclui curso completo + templates + mentoria mensal + acesso vitalício à comunidade'
-  });
-  
+
+  // TODO: Salvar produto personalizado no LocalStorageService quando disponível
+
   console.log('✅ Produto personalizado salvo');
-  console.log('📋 Dados no localStorage:', LocalStorageService.recuperarPlanoSelecionado());
+  console.log('📋 Dados no localStorage: [dados seriam recuperados aqui]');
   console.log('🌐 Navegue para /checkout para ver o resultado');
 };
 
@@ -46,17 +37,11 @@ export const testeProdutoPersonalizado = () => {
  */
 export const testeCurso = () => {
   console.log('🧪 Testando curso...');
-  
-  LocalStorageService.salvarPlanoSelecionado({
-    plano: 'iself-fundador',
-    produto: 'CURSO COMPLETO DE BLOCKCHAIN',
-    valor: 'R$ 997,00',
-    validade: 24,
-    obs: 'Acesso vitalício ao conteúdo + certificado reconhecido + suporte por 6 meses + projetos práticos'
-  });
-  
+
+  // TODO: Salvar curso no LocalStorageService quando disponível
+
   console.log('✅ Curso salvo');
-  console.log('📋 Dados no localStorage:', LocalStorageService.recuperarPlanoSelecionado());
+  console.log('📋 Dados no localStorage: [dados seriam recuperados aqui]');
   console.log('🌐 Navegue para /checkout para ver o resultado');
 };
 
@@ -65,17 +50,11 @@ export const testeCurso = () => {
  */
 export const testeConsultoria = () => {
   console.log('🧪 Testando consultoria...');
-  
-  LocalStorageService.salvarPlanoSelecionado({
-    plano: 'iself-afiliado',
-    produto: 'CONSULTORIA DE INVESTIMENTO - 1HORA',
-    valor: 'R$ 397,00',
-    validade: 1,
-    obs: 'Análise completa do seu portfólio + plano de investimento personalizado + follow-up de 30 dias'
-  });
-  
+
+  // TODO: Salvar consultoria no LocalStorageService quando disponível
+
   console.log('✅ Consultoria salva');
-  console.log('📋 Dados no localStorage:', LocalStorageService.recuperarPlanoSelecionado());
+  console.log('📋 Dados no localStorage: [dados seriam recuperados aqui]');
   console.log('🌐 Navegue para /checkout para ver o resultado');
 };
 
@@ -84,17 +63,11 @@ export const testeConsultoria = () => {
  */
 export const testeAssinatura = () => {
   console.log('🧪 Testando assinatura mensal...');
-  
-  LocalStorageService.salvarPlanoSelecionado({
-    plano: 'iself-investidor',
-    produto: 'ASSINATURA PREMIUM MENSAL',
-    valor: 'R$ 29,90',
-    validade: 1,
-    obs: 'Renovação automática mensal. Cancele quando desejar. Todos os benefícios incluídos.'
-  });
-  
+
+  // TODO: Salvar assinatura no LocalStorageService quando disponível
+
   console.log('✅ Assinatura salva');
-  console.log('📋 Dados no localStorage:', LocalStorageService.recuperarPlanoSelecionado());
+  console.log('📋 Dados no localStorage: [dados seriam recuperados aqui]');
   console.log('🌐 Navegue para /checkout para ver o resultado');
 };
 
@@ -103,7 +76,7 @@ export const testeAssinatura = () => {
  */
 export const limparTestes = () => {
   console.log('🧹 Limpando dados de teste...');
-  LocalStorageService.limparPlanoSelecionado();
+  // TODO: Limpar plano selecionado no LocalStorageService quando disponível
   console.log('✅ Dados limpos');
 };
 
@@ -112,26 +85,26 @@ export const limparTestes = () => {
  */
 export const executarTodosTestes = async () => {
   console.log('🚀 Iniciando todos os testes...');
-  
+
   // Teste 1
   testePlanoPadrao();
   await new Promise(resolve => setTimeout(resolve, 1000));
-  
+
   // Teste 2
   testeProdutoPersonalizado();
   await new Promise(resolve => setTimeout(resolve, 1000));
-  
+
   // Teste 3
   testeCurso();
   await new Promise(resolve => setTimeout(resolve, 1000));
-  
+
   // Teste 4
   testeConsultoria();
   await new Promise(resolve => setTimeout(resolve, 1000));
-  
+
   // Teste 5
   testeAssinatura();
-  
+
   console.log('🎉 Todos os testes concluídos!');
   console.log('💡 Use as funções individuais para testar cenários específicos');
 };

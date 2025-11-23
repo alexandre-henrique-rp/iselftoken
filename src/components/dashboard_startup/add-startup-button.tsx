@@ -14,7 +14,7 @@ export function AddStartupButton() {
   const router = useRouter()
 
   const handleClick = () => {
-    router.push('/dashboard_startups/startup')
+    router.push('/dashboard/startup')
   }
 
   return (

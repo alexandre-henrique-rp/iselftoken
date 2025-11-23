@@ -3,22 +3,23 @@
  * PIX e Cartão têm o mesmo valor
  */
 
-import { LocalStorageService } from '@/types/localStorage';
+// TODO: Implementar LocalStorageService quando disponível
+console.log('Exemplos de checkout que seriam salvos:');
 
 /**
  * Exemplo 1: Plano básico - PIX e Cartão iguais
  */
 export const exemploValoresIguais = () => {
   console.log('💳 Exemplo: Valores iguais para PIX e Cartão');
-  
-  LocalStorageService.salvarPlanoSelecionado({
-    plano: 'iself-investidor',
-    produto: 'PLANO BÁSICO',
-    valor: 'R$ 197,00',
-    validade: 12,
-    obs: 'Acesso completo à plataforma'
-  });
-  
+
+  // LocalStorageService.salvarPlanoSelecionado({
+  //   plano: 'iself-investidor',
+  //   produto: 'PLANO BÁSICO',
+  //   valor: 'R$ 197,00',
+  //   validade: 12,
+  //   obs: 'Acesso completo à plataforma'
+  // });
+
   // Resultado no checkout:
   // 
   // CARTÃO DE CRÉDITO:
@@ -89,14 +90,14 @@ export const exemploBeneficiosPIX = () => {
 export const exemploDiferentesPrecos = () => {
   console.log('💰 Exemplos com diferentes valores:');
   console.log('');
-  
+
   const exemplos = [
     { nome: 'PLANO START', valor: 'R$ 50,00', parcelas: '1x' },
     { nome: 'PLANO PRO', valor: 'R$ 297,00', parcelas: '1x a 3x' },
     { nome: 'PLANO BUSINESS', valor: 'R$ 997,00', parcelas: '1x a 10x' },
     { nome: 'PLANO ENTERPRISE', valor: 'R$ 5.000,00', parcelas: '1x a 15x' }
   ];
-  
+
   exemplos.forEach(ex => {
     console.log(`📦 ${ex.nome}:`);
     console.log(`   💵 Valor: ${ex.valor}`);
@@ -135,20 +136,27 @@ export const exemploFluxoUsuario = () => {
  * Função utilitária atualizada
  */
 export const criarProdutoSemDesconto = (
-  plano: 'iself-investidor' | 'iself-fundador' | 'iself-afiliado',
+  plano: 'Investidor' | 'Fundador' | 'Afiliado',
   produto: string,
   valor: string,
   validade: number,
   obs?: string
 ) => {
-  LocalStorageService.salvarPlanoSelecionado({
-    plano,
-    produto,
-    valor,
-    validade,
-    obs
-  });
-  
+  // TODO: Implementar LocalStorageService quando disponível
+  console.log(`Plano que seria salvo: ${plano}, ${valor}, ${validade} meses`);
+  console.log(`Produto que seria salvo: ${produto}`);
+  console.log(`Valor que seria salvo: ${valor}`);
+  console.log(`Validade que seria salvo: ${validade}`);
+  console.log(`Obs que seria salvo: ${obs}`);
+
+  // LocalStorageService.salvarPlanoSelecionado({
+  //   plano,
+  //   produto,
+  //   valor,
+  //   validade,
+  //   obs
+  // });
+
   console.log(`✅ Produto "${produto}" criado!`);
   console.log(`💰 Valor: ${valor}`);
   console.log(`💳 Cartão: ${valor} (com parcelamento)`);

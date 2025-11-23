@@ -1,5 +1,5 @@
 import { Rotas } from "@/types/rotasTypes";
-import { Bell, ChartNoAxesCombined, Home, NotebookPen, User } from "lucide-react";
+import { Bell, ChartNoAxesCombined, Factory, Home, NotebookPen, User } from "lucide-react";
 
 export const userRoutes: Rotas.Types[] = [
   {
@@ -83,4 +83,31 @@ export const userRoutes: Rotas.Types[] = [
     menu: 'user',
     icon: NotebookPen,
   },
+  {
+    id: 10,
+    nome: 'Startup',
+    path: '/dashboard',
+    url: '/dashboard',
+    isActive: true,
+    menu: 'geral',
+    icon: Factory,
+  },
+  {
+    id: 11,
+    nome: 'Startup create',
+    path: '/dashboard/startup',
+    url: '/dashboard/startup',
+    isActive: false,
+    menu: 'private',
+    icon: null,
+  },
+  {
+    id: 11,
+    nome: 'Startup by id',
+    path: '/dashboard/startup/:id',
+    url: '/dashboard/startup/:id',
+    isActive: false,
+    menu: 'private',
+    icon: null,
+  }
 ];

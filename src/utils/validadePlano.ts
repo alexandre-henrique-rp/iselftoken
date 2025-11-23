@@ -3,7 +3,13 @@
  * Calcula datas de expiração e verificações
  */
 
-import { PlanoSelecionadoData } from '@/types/localStorage';
+
+// Interface local para substituir PlanoSelecionadoData
+interface PlanoSelecionado {
+  validade: number;
+  timestamp: string;
+}
+
 
 /**
  * Calcula a data de expiração baseada na validade em meses
@@ -12,15 +18,15 @@ import { PlanoSelecionadoData } from '@/types/localStorage';
  * @returns Data de expiração em formato ISO
  */
 export const calcularDataExpiracao = (
-  validadeMeses: number, 
+  validadeMeses: number,
   dataBase?: Date
 ): string => {
   const data = dataBase || new Date();
   const dataExpiracao = new Date(data);
-  
+
   // Adiciona os meses
   dataExpiracao.setMonth(dataExpiracao.getMonth() + validadeMeses);
-  
+
   return dataExpiracao.toISOString();
 };
 
@@ -29,10 +35,10 @@ export const calcularDataExpiracao = (
  * @param planoSelecionado Dados do plano selecionado
  * @returns true se expirado, false se válido
  */
-export const planoEstaExpirado = (planoSelecionado: PlanoSelecionadoData): boolean => {
+export const planoEstaExpirado = (planoSelecionado: PlanoSelecionado): boolean => {
   const dataExpiracao = calcularDataExpiracao(planoSelecionado.validade, new Date(planoSelecionado.timestamp));
   const agora = new Date();
-  
+
   return agora > new Date(dataExpiracao);
 };
 
@@ -41,11 +47,11 @@ export const planoEstaExpirado = (planoSelecionado: PlanoSelecionadoData): boole
  * @param planoSelecionado Dados do plano selecionado
  * @returns Número de dias restantes
  */
-export const calcularDiasRestantes = (planoSelecionado: PlanoSelecionadoData): number => {
+export const calcularDiasRestantes = (planoSelecionado: PlanoSelecionado): number => {
   const dataExpiracao = calcularDataExpiracao(planoSelecionado.validade, new Date(planoSelecionado.timestamp));
   const agora = new Date();
   const diffMs = new Date(dataExpiracao).getTime() - agora.getTime();
-  
+
   // Converte milissegundos para dias
   return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 };
@@ -55,10 +61,10 @@ export const calcularDiasRestantes = (planoSelecionado: PlanoSelecionadoData): n
  * @param planoSelecionado Dados do plano selecionado
  * @returns Data formatada (ex: "31/12/2024")
  */
-export const formatarDataExpiracao = (planoSelecionado: PlanoSelecionadoData): string => {
+export const formatarDataExpiracao = (planoSelecionado: PlanoSelecionado): string => {
   const dataExpiracao = calcularDataExpiracao(planoSelecionado.validade, new Date(planoSelecionado.timestamp));
   const data = new Date(dataExpiracao);
-  
+
   return data.toLocaleDateString('pt-BR', {
     day: '2-digit',
     month: '2-digit',
@@ -71,17 +77,17 @@ export const formatarDataExpiracao = (planoSelecionado: PlanoSelecionadoData): s
  * @param planoSelecionado Dados do plano selecionado
  * @returns Texto formatado do status
  */
-export const gerarTextoValidade = (planoSelecionado: PlanoSelecionadoData): string => {
+export const gerarTextoValidade = (planoSelecionado: PlanoSelecionado): string => {
   if (planoEstaExpirado(planoSelecionado)) {
     return 'Plano expirado';
   }
-  
+
   const diasRestantes = calcularDiasRestantes(planoSelecionado);
   const dataExpiracao = formatarDataExpiracao(planoSelecionado);
-  
+
   if (diasRestantes <= 30) {
     return `Expira em ${diasRestantes} dias (${dataExpiracao})`;
   }
-  
+
   return `Válido até ${dataExpiracao}`;
 };
