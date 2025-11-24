@@ -1,14 +1,14 @@
 export const dynamic = 'force-dynamic';
 
-import { Suspense } from 'react';
-import { Metadata } from 'next';
-import { StartupFilters } from '@/types/startup';
-import { StartupStatsCardsSkeleton } from '@/components/dashboard_startup/startup-stats-cards-skeleton';
+import { StartupDataTable } from '@/components/dashboard_startup/startup-data-table';
 import { StartupDataTableSkeleton } from '@/components/dashboard_startup/startup-data-table-skeleton';
 import { StartupStatsCards } from '@/components/dashboard_startup/startup-stats-cards';
-import { StartupDataTable } from '@/components/dashboard_startup/startup-data-table';
+import { StartupStatsCardsSkeleton } from '@/components/dashboard_startup/startup-stats-cards-skeleton';
 import { mockStartups, mockStartupStats } from '@/data/mock/startups-mock';
 import { Delay } from '@/lib/utils';
+import { StartupFilters } from '@/types/startup';
+import { Metadata } from 'next';
+import { Suspense } from 'react';
 
 export const metadata: Metadata = {
   title: 'Dashboard - Gerenciamento de Startups | iSelfToken',
@@ -21,7 +21,6 @@ const GetDados = async (filters?: StartupFilters) => {
   // const startups = await ReqStartups.json();
   const startups = [...mockStartups];
   await Delay(500);
-  console.log('🚀 ~ GetDados ~ startups:', startups);
 
   // Apply pagination
   const page = filters?.page || 1;
@@ -117,8 +116,8 @@ export default async function DashboardStartupsPage({
 }
 
 async function StartupStatsCardsWrapper() {
-  const stats = await GetDados();
-  return <StartupStatsCards stats={stats.stats} />;
+  const data = await GetDados();
+  return <StartupStatsCards startups={data.startups.startups} />;
 }
 
 async function StartupDataTableWrapper({

@@ -157,7 +157,7 @@ export default function StartupCampaignForm({
         campanha: [
           {
             id: 0,
-            status: 'Ativo',
+            status: 'Ativa',
             dt_inicio: new Date().toISOString(),
             dt_fim: new Date(
               new Date().setMonth(new Date().getMonth() + 6),

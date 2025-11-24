@@ -43,6 +43,11 @@ const startupSchema = z.object({
     nome: z.string(),
     emoji: z.string(),
   }),
+  // Localização
+  estado: z.string().optional(),
+  idiomas: z.string().optional(),
+  tamanho_mercado: z.number().optional(),
+  concorrentes: z.string().optional(),
   // Pitch Detalhado
   problema: z.string().optional(),
   solucao: z.string().optional(),
@@ -250,6 +255,10 @@ export default function StartupEditForm({ initialData }: StartupEditFormProps) {
       },
       campanha: initialData.campanha || [],
       pais: initialData.pais || { iso3: 'BRA', nome: 'Brasil', emoji: '🇧🇷' },
+      estado: initialData.estado || '',
+      idiomas: initialData.idiomas || '',
+      tamanho_mercado: initialData.tamanho_mercado || 0,
+      concorrentes: initialData.concorrentes || '',
       banco: initialData.banco || {
         nome: '',
         agencia: '',
@@ -291,6 +300,35 @@ export default function StartupEditForm({ initialData }: StartupEditFormProps) {
     append: appendSelo,
     remove: removeSelo,
   } = useFieldArray({ control, name: 'selos' });
+
+  // Estados para upload de documentos
+  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>(
+    {},
+  );
+  const [isUploading, setIsUploading] = useState(false);
+
+  // Função de upload de documentos
+  const handleDocumentUpload = async (documentType: string) => {
+    setIsUploading(true);
+    setUploadProgress((prev) => ({ ...prev, [documentType]: 0 }));
+
+    try {
+      // Simulação de upload com progress
+      for (let i = 0; i <= 100; i += 10) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        setUploadProgress((prev) => ({ ...prev, [documentType]: i }));
+      }
+
+      // Aqui entraria o upload real
+      alert(`${documentType.toUpperCase()} enviado com sucesso!`);
+      setUploadProgress((prev) => ({ ...prev, [documentType]: 0 }));
+    } catch (error) {
+      console.error('Erro no upload:', error);
+      alert('Erro ao enviar documento');
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   // Load Countries
   useEffect(() => {
@@ -407,7 +445,7 @@ export default function StartupEditForm({ initialData }: StartupEditFormProps) {
               <TabButton id="localizacao" label="Localização" icon={Globe} />
               <TabButton id="financeiro" label="Financeiro" icon={DollarSign} />
               <TabButton id="time" label="Time" icon={Users} />
-              <TabButton id="config" label="Config" icon={Settings} />
+              <TabButton id="regras" label="Regras" icon={Settings} />
             </div>
           </div>
         </div>
@@ -420,7 +458,7 @@ export default function StartupEditForm({ initialData }: StartupEditFormProps) {
           <TabButton id="localizacao" label="Local" icon={Globe} />
           <TabButton id="financeiro" label="Finan" icon={DollarSign} />
           <TabButton id="time" label="Time" icon={Users} />
-          <TabButton id="config" label="Config" icon={Settings} />
+          <TabButton id="regras" label="Regras" icon={Settings} />
         </div>
       </div>
 
@@ -649,21 +687,89 @@ export default function StartupEditForm({ initialData }: StartupEditFormProps) {
               </CardPremium>
 
               <CardPremium title="Mídia e Documentos">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div>
-                    <LabelPremium>PDF Pitch Deck</LabelPremium>
-                    <InputPremium
-                      {...register('pdf_url')}
-                      placeholder="URL do PDF"
-                    />
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div>
+                      <LabelPremium>PDF Pitch Deck</LabelPremium>
+                      <div className="space-y-2">
+                        <InputPremium
+                          {...register('pdf_url')}
+                          placeholder="URL do PDF ou faça upload"
+                        />
+                        <button
+                          type="button"
+                          className="flex items-center gap-2 text-xs text-[#d500f9] hover:underline disabled:opacity-50"
+                          onClick={() => handleDocumentUpload('pdf')}
+                          disabled={isUploading}
+                        >
+                          <Upload size={12} />{' '}
+                          {isUploading ? 'Enviando...' : 'Upload PDF'}
+                        </button>
+                        {uploadProgress.pdf && (
+                          <div className="h-2 w-full rounded-full bg-gray-200">
+                            <div
+                              className="h-2 rounded-full bg-[#d500f9] transition-all"
+                              style={{ width: `${uploadProgress.pdf}%` }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <LabelPremium>Vídeo YouTube</LabelPremium>
+                      <InputPremium
+                        {...register('youtube_url')}
+                        placeholder="URL do vídeo"
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <LabelPremium>Vídeo YouTube</LabelPremium>
-                    <InputPremium
-                      {...register('youtube_url')}
-                      placeholder="URL do vídeo"
-                    />
-                  </div>
+                </div>
+              </CardPremium>
+
+              <CardPremium
+                title="Selos e Certificações"
+                action={
+                  <button
+                    type="button"
+                    onClick={() =>
+                      appendSelo({ id: Date.now(), nome: '', url: '' })
+                    }
+                    className="flex items-center gap-1 text-xs text-[#d500f9] hover:underline"
+                  >
+                    <Plus size={12} /> Adicionar Selo
+                  </button>
+                }
+              >
+                <div className="space-y-3">
+                  {selosFields.map((field, index) => (
+                    <div
+                      key={field.id}
+                      className="border-border bg-background/50 flex items-center gap-4 rounded-lg border p-3"
+                    >
+                      <div className="grid flex-1 grid-cols-1 gap-4 md:grid-cols-2">
+                        <InputPremium
+                          {...register(`selos.${index}.nome`)}
+                          placeholder="Nome do selo (ex: Startup Brasil)"
+                        />
+                        <InputPremium
+                          {...register(`selos.${index}.url`)}
+                          placeholder="URL do selo"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeSelo(index)}
+                        className="text-muted-foreground hover:text-red-500"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  ))}
+                  {selosFields.length === 0 && (
+                    <p className="text-muted-foreground py-4 text-center text-sm italic">
+                      Nenhum selo adicionado.
+                    </p>
+                  )}
                 </div>
               </CardPremium>
             </div>
@@ -673,42 +779,94 @@ export default function StartupEditForm({ initialData }: StartupEditFormProps) {
           {activeTab === 'localizacao' && (
             <div className="space-y-6">
               <CardPremium title="Localização e Mercado">
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <div>
+                      <LabelPremium>País de Origem</LabelPremium>
+                      <Controller
+                        control={control}
+                        name="pais"
+                        render={({ field }) => (
+                          <select
+                            className="border-border bg-background text-foreground w-full rounded-lg border px-4 py-2.5 text-sm focus:border-[#d500f9] focus:outline-none"
+                            value={field.value?.iso3}
+                            onChange={(e) => {
+                              const selected = countries.find(
+                                (c) => c.iso3 === e.target.value,
+                              );
+                              if (selected) {
+                                field.onChange({
+                                  iso3: selected.iso3,
+                                  nome: selected.name,
+                                  emoji: selected.emoji,
+                                });
+                              }
+                            }}
+                          >
+                            <option value="">Selecione...</option>
+                            {countries.map((c) => (
+                              <option key={c.id} value={c.iso3}>
+                                {c.emoji} {c.name}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      />
+                    </div>
+                    <div>
+                      <LabelPremium>Região/Estado</LabelPremium>
+                      <InputPremium
+                        placeholder="Ex: São Paulo, Brasil"
+                        {...register('estado')}
+                      />
+                    </div>
+                  </div>
+
                   <div>
-                    <LabelPremium>País de Origem</LabelPremium>
-                    <Controller
-                      control={control}
-                      name="pais"
-                      render={({ field }) => (
-                        <select
-                          className="border-border bg-background text-foreground w-full rounded-lg border px-4 py-2.5 text-sm focus:border-[#d500f9] focus:outline-none"
-                          value={field.value?.iso3}
-                          onChange={(e) => {
-                            const selected = countries.find(
-                              (c) => c.iso3 === e.target.value,
-                            );
-                            if (selected) {
-                              field.onChange({
-                                iso3: selected.iso3,
-                                nome: selected.name,
-                                emoji: selected.emoji,
-                              });
-                            }
-                          }}
-                        >
-                          <option value="">Selecione...</option>
-                          {countries.map((c) => (
-                            <option key={c.id} value={c.iso3}>
-                              {c.emoji} {c.name}
-                            </option>
-                          ))}
-                        </select>
-                      )}
+                    <LabelPremium>Mercado Alvo Geográfico</LabelPremium>
+                    <TextareaPremium
+                      rows={2}
+                      {...register('mercado_alvo')}
+                      placeholder="Descreva seus mercados principais (ex: América Latina, Sudeste do Brasil, etc.)"
+                    />
+                  </div>
+
+                  <div>
+                    <LabelPremium>Idiomas Atendidos</LabelPremium>
+                    <TextareaPremium
+                      rows={2}
+                      placeholder="Ex: Português (Brasil), Espanhol (LATAM), Inglês (Global)"
+                      {...register('idiomas')}
+                    />
+                  </div>
+                </div>
+              </CardPremium>
+
+              <CardPremium title="Informações de Mercado">
+                <div className="space-y-4">
+                  <div>
+                    <LabelPremium>Tamanho do Mercado (em BRL)</LabelPremium>
+                    <InputPremium
+                      type="number"
+                      placeholder="Ex: 1000000000"
+                      {...register('tamanho_mercado', { valueAsNumber: true })}
                     />
                   </div>
                   <div>
-                    <LabelPremium>Mercado Alvo</LabelPremium>
-                    <InputPremium placeholder="Ex: B2B, SaaS..." />
+                    <LabelPremium>Principais Concorrentes</LabelPremium>
+                    <TextareaPremium
+                      rows={3}
+                      {...register('concorrentes')}
+                      placeholder="Liste seus principais concorrentes..."
+                    />
+                  </div>
+                  <div>
+                    <LabelPremium>Diferenciais Competitivos</LabelPremium>
+                    <TextareaPremium
+                      rows={3}
+                      {...register('diferencial')}
+                      placeholder="O que torna sua startup única no mercado?"
+                    />
                   </div>
                 </div>
               </CardPremium>
@@ -721,7 +879,7 @@ export default function StartupEditForm({ initialData }: StartupEditFormProps) {
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <CardPremium title="Valuation & Captação">
                   <div className="space-y-4">
-                    <div className="rounded-xl border border-[#d500f9]/30 bg-gradient-to-br from-[#d500f9]/10 to-[#d500f9]/5 p-6">
+                    <div className="rounded-xl border border-[#d500f9]/30 bg-linear-to-br from-[#d500f9]/10 to-[#d500f9]/5 p-6">
                       <div className="text-muted-foreground mb-2 text-xs font-medium tracking-wider uppercase">
                         Valuation Calculado
                       </div>
@@ -756,6 +914,7 @@ export default function StartupEditForm({ initialData }: StartupEditFormProps) {
                     {renderResourceSlider('desenvolvimento', 'Desenvolvimento')}
                     {renderResourceSlider('comercial', 'Comercial')}
                     {renderResourceSlider('marketing', 'Marketing')}
+                    {renderResourceSlider('nuvem', 'Nuvem/Infraestrutura')}
                     {renderResourceSlider('juridico', 'Jurídico')}
                     {renderResourceSlider('reserva', 'Reserva')}
 
@@ -772,6 +931,10 @@ export default function StartupEditForm({ initialData }: StartupEditFormProps) {
                         A soma deve ser exatamente 100%
                       </p>
                     )}
+                    <p className="text-muted-foreground mt-2 text-xs italic">
+                      💡 Configure como os investimentos serão distribuídos
+                      entre as áreas da startup
+                    </p>
                   </div>
                 </CardPremium>
               </div>
@@ -834,7 +997,7 @@ export default function StartupEditForm({ initialData }: StartupEditFormProps) {
                           </span>
                           <span
                             className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                              camp.status === 'Ativo'
+                              camp.status === 'Ativa'
                                 ? 'bg-green-500/10 text-green-500'
                                 : 'bg-gray-500/10 text-gray-500'
                             }`}
@@ -1004,8 +1167,8 @@ export default function StartupEditForm({ initialData }: StartupEditFormProps) {
             </div>
           )}
 
-          {/* ABA: CONFIG */}
-          {activeTab === 'config' && (
+          {/* ABA: REGRAS */}
+          {activeTab === 'regras' && (
             <div className="space-y-6">
               <CardPremium title="Regras de Negócio">
                 <div className="space-y-4">
@@ -1055,7 +1218,7 @@ export default function StartupEditForm({ initialData }: StartupEditFormProps) {
                         className="h-5 w-5 rounded border-gray-300 accent-[#d500f9]"
                       />
                       <span className="text-foreground text-sm font-medium">
-                        Benefícios Extras
+                        Benefícios Extras para Investidores
                       </span>
                     </label>
 
@@ -1094,6 +1257,84 @@ export default function StartupEditForm({ initialData }: StartupEditFormProps) {
                       Aceite dos Termos Legais
                     </span>
                   </label>
+                </div>
+              </CardPremium>
+
+              <CardPremium
+                title="Prêmios e Reconhecimentos"
+                action={
+                  <button
+                    type="button"
+                    className="flex items-center gap-1 text-xs text-[#d500f9] hover:underline"
+                  >
+                    <Plus size={12} /> Adicionar Prêmio
+                  </button>
+                }
+              >
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div>
+                      <LabelPremium>Possui Prêmios</LabelPremium>
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          {...register('premio')}
+                          className="h-5 w-5 rounded border-gray-300 accent-[#d500f9]"
+                        />
+                        <span className="text-sm">Sim, possui prêmios</span>
+                      </label>
+                    </div>
+                    {watch('premio') && (
+                      <>
+                        <div>
+                          <LabelPremium>Data do Prêmio</LabelPremium>
+                          <InputPremium
+                            type="date"
+                            {...register('premio_dt')}
+                          />
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  {watch('premio') && (
+                    <div>
+                      <LabelPremium>Descrição do Prêmio</LabelPremium>
+                      <TextareaPremium
+                        {...register('premio_pg')}
+                        placeholder="Descreva o prêmio recebido..."
+                        rows={2}
+                      />
+                    </div>
+                  )}
+                </div>
+              </CardPremium>
+
+              <CardPremium title="Status Administrativo">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div>
+                    <LabelPremium>Status da Startup</LabelPremium>
+                    <select
+                      {...register('ativo')}
+                      className="border-border bg-background text-foreground w-full rounded-lg border px-4 py-2.5 text-sm focus:border-[#d500f9] focus:outline-none"
+                    >
+                      <option value="ativo">Ativo</option>
+                      <option value="inativo">Inativo</option>
+                      <option value="suspenso">Suspenso</option>
+                    </select>
+                  </div>
+                  <div>
+                    <LabelPremium>Status Administrativo</LabelPremium>
+                    <select
+                      {...register('ativo_adm')}
+                      className="border-border bg-background text-foreground w-full rounded-lg border px-4 py-2.5 text-sm focus:border-[#d500f9] focus:outline-none"
+                    >
+                      <option value="aprovado">Aprovado</option>
+                      <option value="pendente">Pendente</option>
+                      <option value="rejeitado">Rejeitado</option>
+                      <option value="em_analise">Em Análise</option>
+                    </select>
+                  </div>
                 </div>
               </CardPremium>
 

@@ -21,20 +21,20 @@ export interface Startup {
   }
   area_atuacao: string
   estagio: string
-  meta_captacao: number
-  equity_oferecido: number
-  valuation_calculado: number
   status: 'Em Análise' | 'Aprovada' | 'Ativa' | 'Pausada' | 'Rejeitada'
   data_fundacao: string
-  site?: string
-  logo_url?: string
-  descritivo_basico: string
-  total_captado: number
-  total_investidores: number
-  tokens: number
-  current_tokens: number
+  campanha: CampanhaStartup[]
   created_at: string
   updated_at: string
+}
+
+export type CampanhaStartup = {
+  id: number,
+  status: 'Em Análise' | 'Aprovada' | 'Ativa' | 'Pausada' | 'Pausado' | 'Rejeitada' | 'Inativo' | 'Concluído', // ex: Ativa
+  dt_inicio: string, // ex: 2023-06-15
+  dt_fim: string, // 6 messes depois do inicio ex: 2023-12-15
+  meta_captacao: number, // ex: 500000
+  equity_oferecido: number, // ex: 15
 }
 
 export interface StartupStats {
@@ -114,6 +114,11 @@ export interface StartupFormData {
   modelo_receita?: string
   mercado_alvo?: string
   compradores?: string
+  // Localização e Mercado
+  estado?: string
+  idiomas?: string
+  tamanho_mercado?: number
+  concorrentes?: string
   // Campos adicionais para Edição Avançada
   recursos?: {
     fundados: number
@@ -138,15 +143,6 @@ export interface StartupFormData {
   ativo?: string
   ativo_adm?: string
   selos?: Array<{ id: number; nome: string; url: string }>
-}
-
-export interface CampanhaStartup {
-  id: number,
-  status: 'Ativo' | 'Pausado' | 'Cancelado' | 'Inativo', // ex: Ativa
-  dt_inicio: string, // ex: 2023-06-15
-  dt_fim: string, // 6 messes depois do inicio ex: 2023-12-15
-  meta_captacao: number, // ex: 500000
-  equity_oferecido: number, // ex: 15
 }
 
 export interface StartupFilters {

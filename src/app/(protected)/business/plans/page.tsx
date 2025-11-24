@@ -1,10 +1,11 @@
 'use client';
 
+import Checkout from '@/components/chekout';
 import { getPlanosVisiveis } from '@/data/planosData';
 import { useSession } from '@/hooks/useSession';
-import CheckoutStorageService from '@/services/CheckoutStorageService';
+// import CheckoutStorageService from '@/services/CheckoutStorageService';
 import { CheckoutData } from '@/types/Checkout';
-import { IconePlano } from '@/types/planos';
+import { IconePlano, Plano } from '@/types/planos';
 import { getIconePlano } from '@/utils/planosIcons';
 import { Check, Star } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -21,6 +22,12 @@ const BusinessPlansPage = () => {
   const [cardsVisiveis, setCardsVisiveis] = useState<Record<string, boolean>>(
     {},
   );
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState<
+    'success' | 'error' | null
+  >(null);
+  const [showCheckoutDialog, setShowCheckoutDialog] = useState(false);
+  const [selectedPlano, setSelectedPlano] = useState<Plano | null>(null);
 
   useEffect(() => {
     setCardsVisiveis({});
@@ -45,42 +52,94 @@ const BusinessPlansPage = () => {
 
   const handleSelecionarPlano = useCallback(
     (planoId: string) => {
-      const plano = planos.find((p) => p.id === planoId);
-
-      if (!plano || !apiUser) {
-        console.error('Plano ou usuário não encontrado');
+      if (!apiUser) {
+        console.error('❌ Usuário não autenticado');
+        alert('Você precisa estar logado para selecionar um plano.');
         return;
       }
 
-      // Preparar dados do checkout
-      const checkoutData: CheckoutData = {
-        userName: apiUser.nome || '',
-        userId: String(apiUser.id || ''),
-        valor: plano.preco || 'R$ 0,00',
-        productName: plano.nome || '',
-        productType: 'plano',
-        productDescription: plano.descricao || '',
-        validity: 12,
-        obs: plano.beneficios.join(', '),
+      const plano = planos.find((p) => p.id === planoId);
+
+      if (!plano) {
+        console.error('❌ Plano não encontrado');
+        console.error(
+          '❌ IDs disponíveis:',
+          planos.map((p) => p.id),
+        );
+        alert('Plano não encontrado. Tente novamente.');
+        return;
+      }
+
+      // Armazenar plano selecionado
+      setSelectedPlano(plano);
+
+      // Simulação de processamento de pagamento
+      const processPayment = async () => {
+        try {
+          // Abrir checkout em nova janela
+          const checkoutData: CheckoutData = {
+            userName: apiUser.nome || '',
+            userId: String(apiUser.id || ''),
+            valor: plano.preco || 'R$ 0,00',
+            productName: plano.nome || '',
+            productType: 'plano',
+            productDescription: plano.descricao || '',
+            quantidade: 1, // Padrão: 1 unidade para planos
+            validity: 12,
+            obs: plano.beneficios.join(', '),
+          };
+
+          // Mostrar dialog de checkout
+          setShowCheckoutDialog(true);
+
+          // Abrir checkout em nova janela
+          const checkoutWindow = Checkout(checkoutData);
+
+          // Verificar se a janela foi aberta
+          if (!checkoutWindow || checkoutWindow.closed) {
+            setShowCheckoutDialog(false);
+            alert(
+              'Não foi possível abrir a janela de pagamento. Verifique se os popups estão bloqueados.',
+            );
+            return;
+          }
+
+          // Monitorar se a janela foi fechada (verificação a cada segundo)
+          const checkWindowClosed = setInterval(() => {
+            if (checkoutWindow.closed) {
+              clearInterval(checkWindowClosed);
+              setShowCheckoutDialog(false);
+
+              // Verificar se o pagamento foi finalizado através do localStorage
+              const paymentCompleted = localStorage.getItem(
+                'checkout_payment_completed',
+              );
+              const paymentResult = localStorage.getItem(
+                'checkout_payment_result',
+              );
+
+              if (paymentCompleted === 'true' && paymentResult) {
+                // Pagamento foi finalizado, mostrar resultado
+                const result = JSON.parse(paymentResult);
+                setPaymentStatus(result.success ? 'success' : 'error');
+                setShowPaymentDialog(true);
+
+                // Limpar dados do localStorage
+                localStorage.removeItem('checkout_payment_completed');
+                localStorage.removeItem('checkout_payment_result');
+              }
+              // Se não foi finalizado, não faz nada (não mostra dialog)
+            }
+          }, 1000);
+        } catch (error) {
+          console.error('❌ Erro ao processar pagamento:', error);
+          setShowCheckoutDialog(false);
+          setPaymentStatus('error');
+          setShowPaymentDialog(true);
+        }
       };
 
-      // Calcular posição centralizada da janela
-      const windowWidth = 1024;
-      const windowHeight = 768;
-      const windowLeft = window.screenX + (window.outerWidth - windowWidth) / 2;
-      const windowTop =
-        window.screenY + (window.outerHeight - windowHeight) / 2;
-
-      // Abrir checkout usando o serviço
-      const checkoutWindow = CheckoutStorageService.abrirCheckout(
-        checkoutData,
-        `width=${windowWidth},height=${windowHeight},left=${windowLeft},top=${windowTop},resizable=yes,scrollbars=yes`,
-      );
-
-      if (!checkoutWindow) {
-        console.error('Não foi possível abrir a janela de checkout');
-        alert('Por favor, permita popups para este site.');
-      }
+      processPayment();
     },
     [apiUser, planos],
   );
@@ -93,6 +152,17 @@ const BusinessPlansPage = () => {
     () => (planos.length === 2 ? '800px' : '1200px'),
     [planos.length],
   );
+
+  const handleClosePaymentDialog = () => {
+    setShowPaymentDialog(false);
+    setPaymentStatus(null);
+  };
+
+  const handleTryAgain = () => {
+    setShowPaymentDialog(false);
+    setPaymentStatus(null);
+    // Aqui você poderia abrir o checkout novamente
+  };
 
   return (
     <div
@@ -650,7 +720,380 @@ const BusinessPlansPage = () => {
             break-inside: avoid !important;
           }
         }
+
+        @keyframes spin {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+
+        @keyframes pulse {
+          0%,
+          80%,
+          100% {
+            opacity: 0.3;
+            transform: scale(0.8);
+          }
+          40% {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
       `}</style>
+
+      {/* Dialog de Checkout Aberto */}
+      {showCheckoutDialog && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 999,
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: '#1a1a1a',
+              borderRadius: '16px',
+              padding: '48px',
+              maxWidth: '450px',
+              width: '90%',
+              textAlign: 'center',
+              border: '2px solid #d500f9',
+            }}
+          >
+            {/* Ícone de Loading */}
+            <div
+              style={{
+                width: '80px',
+                height: '80px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 32px',
+                backgroundColor: '#d500f920',
+                animation: 'spin 2s linear infinite',
+              }}
+            >
+              <div
+                style={{
+                  width: '60px',
+                  height: '60px',
+                  borderRadius: '50%',
+                  border: '4px solid #d500f9',
+                  borderTop: '4px solid transparent',
+                  animation: 'spin 1s linear infinite',
+                }}
+              />
+            </div>
+
+            {/* Título */}
+            <h2
+              style={{
+                fontSize: '28px',
+                fontWeight: '600',
+                color: '#ffffff',
+                margin: '0 0 16px',
+              }}
+            >
+              Processando Pagamento
+            </h2>
+
+            {/* Mensagem */}
+            <p
+              style={{
+                fontSize: '18px',
+                color: '#9ca3af',
+                marginBottom: '24px',
+                lineHeight: '1.6',
+              }}
+            >
+              Complete o pagamento na janela que foi aberta.
+              <br />
+              Esta tela permanecerá aberta até você finalizar.
+            </p>
+
+            {/* Informações */}
+            <div
+              style={{
+                backgroundColor: '#374151',
+                borderRadius: '12px',
+                padding: '16px',
+                marginBottom: '32px',
+                textAlign: 'left',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  marginBottom: '12px',
+                  fontSize: '14px',
+                  color: '#d1d5db',
+                }}
+              >
+                <span>📋 Produto:</span>
+                <span style={{ fontWeight: '500', color: '#ffffff' }}>
+                  {selectedPlano?.nome || 'Plano Selecionado'}
+                </span>
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  fontSize: '14px',
+                  color: '#d1d5db',
+                }}
+              >
+                <span>💰 Valor:</span>
+                <span style={{ fontWeight: '500', color: '#10b981' }}>
+                  {selectedPlano?.preco || 'R$ 0,00'}
+                </span>
+              </div>
+            </div>
+
+            {/* Loading Dots */}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '8px',
+                marginBottom: '16px',
+              }}
+            >
+              {[0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  style={{
+                    width: '12px',
+                    height: '12px',
+                    borderRadius: '50%',
+                    backgroundColor: '#d500f9',
+                    animation: `pulse 1.5s ease-in-out ${i * 0.2}s infinite`,
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* Texto de espera */}
+            <p
+              style={{
+                fontSize: '14px',
+                color: '#6b7280',
+                fontStyle: 'italic',
+                margin: 0,
+              }}
+            >
+              Aguardando conclusão do pagamento...
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Dialog de Status do Pagamento */}
+      {showPaymentDialog && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}
+          onClick={handleClosePaymentDialog}
+        >
+          <div
+            style={{
+              backgroundColor: '#1a1a1a',
+              borderRadius: '16px',
+              padding: '32px',
+              maxWidth: '400px',
+              width: '90%',
+              textAlign: 'center',
+              border:
+                paymentStatus === 'success'
+                  ? '2px solid #10b981'
+                  : '2px solid #ef4444',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Ícone de Status */}
+            <div
+              style={{
+                width: '64px',
+                height: '64px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 24px',
+                backgroundColor:
+                  paymentStatus === 'success' ? '#10b98120' : '#ef444420',
+              }}
+            >
+              {paymentStatus === 'success' ? (
+                <div
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    backgroundColor: '#10b981',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '20px',
+                    color: '#ffffff',
+                  }}
+                >
+                  ✓
+                </div>
+              ) : (
+                <div
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    backgroundColor: '#ef4444',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '20px',
+                    color: '#ffffff',
+                  }}
+                >
+                  ✗
+                </div>
+              )}
+            </div>
+
+            {/* Título */}
+            <h2
+              style={{
+                fontSize: '24px',
+                fontWeight: '600',
+                color: '#ffffff',
+                margin: '0 0 16px',
+              }}
+            >
+              {paymentStatus === 'success'
+                ? 'Pagamento Efetuado com Sucesso!'
+                : 'Falha no Processamento'}
+            </h2>
+
+            {/* Mensagem */}
+            <p
+              style={{
+                fontSize: '16px',
+                color: '#9ca3af',
+                marginBottom: '32px',
+                lineHeight: '1.5',
+              }}
+            >
+              {paymentStatus === 'success'
+                ? 'Seu pagamento foi processado com sucesso e seu plano já está ativo! Você receberá um e-mail de confirmação em breve.'
+                : 'Não foi possível processar seu pagamento. Verifique os dados do cartão ou tente novamente com outra forma de pagamento.'}
+            </p>
+
+            {/* Botões */}
+            <div
+              style={{
+                display: 'flex',
+                gap: '12px',
+                flexDirection: 'column',
+              }}
+            >
+              {paymentStatus === 'success' ? (
+                <button
+                  onClick={handleClosePaymentDialog}
+                  style={{
+                    backgroundColor: '#10b981',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '12px 24px',
+                    fontSize: '16px',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.backgroundColor = '#059669';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.backgroundColor = '#10b981';
+                  }}
+                >
+                  Entendido
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={handleTryAgain}
+                    style={{
+                      backgroundColor: '#d500f9',
+                      color: '#ffffff',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '12px 24px',
+                      fontSize: '16px',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.backgroundColor = '#c026d3';
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.backgroundColor = '#d500f9';
+                    }}
+                  >
+                    Tentar Novamente
+                  </button>
+                  <button
+                    onClick={handleClosePaymentDialog}
+                    style={{
+                      backgroundColor: 'transparent',
+                      color: '#9ca3af',
+                      border: '1px solid #374151',
+                      borderRadius: '8px',
+                      padding: '12px 24px',
+                      fontSize: '16px',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.backgroundColor = '#374151';
+                      e.currentTarget.style.color = '#ffffff';
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                      e.currentTarget.style.color = '#9ca3af';
+                    }}
+                  >
+                    Cancelar
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

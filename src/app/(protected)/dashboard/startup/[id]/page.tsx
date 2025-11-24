@@ -31,7 +31,7 @@ const getStartup = async (id: string) => {
       campanha: [
         {
           id: 1,
-          status: 'Ativo' as const,
+          status: 'Ativa' as const,
           dt_inicio: '2024-01-15',
           dt_fim: '2024-06-15',
           meta_captacao: 500000,

@@ -1,37 +1,106 @@
 'use client';
 
-import CheckoutStorageService from '@/services/CheckoutStorageService';
-import { CheckoutData } from '@/types/Checkout';
-import { ArrowLeft, CreditCard, Lock, Smartphone, Timer } from 'lucide-react';
+import CupomService from '@/services/CupomService';
+import { CheckoutData, CupomData } from '@/types/Checkout';
+import {
+  ArrowLeft,
+  Check,
+  CreditCard,
+  Lock,
+  Smartphone,
+  Tag,
+  Timer,
+  X,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+// Funções locais para substituir CheckoutStorageService
+const STORAGE_KEY = 'checkout_data';
+
+const recuperarDadosCheckout = (): CheckoutData | null => {
+  try {
+    const storedData = localStorage.getItem(STORAGE_KEY);
+    if (!storedData) return null;
+
+    const parsedData = JSON.parse(storedData);
+
+    // Validação básica
+    if (!parsedData.userName || !parsedData.userId || !parsedData.valor) {
+      return null;
+    }
+
+    return parsedData;
+  } catch (error) {
+    console.error('Erro ao recuperar dados:', error);
+    return null;
+  }
+};
+
+const limparDadosCheckout = (): void => {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch (error) {
+    console.error('Erro ao limpar dados:', error);
+  }
+};
+
+const parseValorMonetario = (valorString: string): number => {
+  try {
+    const valorLimpo = valorString
+      .replace('R$', '')
+      .replace(/\./g, '')
+      .replace(',', '.')
+      .trim();
+    return parseFloat(valorLimpo);
+  } catch {
+    return 0;
+  }
+};
+
+const formatarValorMonetario = (valor: number): string => {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(valor);
+};
+
+const calcularValorServicosAdicionais = (
+  checkoutData: CheckoutData,
+): number => {
+  if (
+    !checkoutData.addServicesDescription ||
+    checkoutData.addServicesDescription.length === 0
+  ) {
+    return 0;
+  }
+  return checkoutData.addServicesDescription.reduce((acc, servico) => {
+    const quantidadeServico = servico.quantidade || 1;
+    return acc + servico.value * quantidadeServico;
+  }, 0);
+};
+
 /**
- * Página de Checkout Reutilizável
+ * Página de Checkout Profissional
  *
  * Esta página processa pagamentos para qualquer tipo de produto.
- * Os dados são recebidos via localStorage através do CheckoutStorageService.
+ * Os dados são recebidos via localStorage.
  *
- * @see /docs/CHECKOUT.md para documentação completa de uso
+ * Dimensão: 1025x768 pixels (otimizada para popup)
  *
  * Campos obrigatórios:
- * - userName: string
- *   Exemplo: "João Silva"
- * - userId: string
- *   Exemplo: "usr_12345"
- * - valor: string
- *   Exemplo: "R$ 1.500,00"
- * - productName: string
- *   Exemplo: "Plano Premium"
- * - productType: string
- *   Exemplo: "plano"
- * - productDescription: string
- *   Exemplo: "Acesso completo"
+ * - userName: string (Ex: "João Silva")
+ * - userId: string (Ex: "usr_12345")
+ * - valor: string (Ex: "R$ 1.500,00")
+ * - productName: string (Ex: "Plano Premium")
+ * - productType: string (Ex: "plano")
+ * - productDescription: string (Ex: "Acesso completo")
  *
  * Campos opcionais:
+ * - quantidade: number (padrão: 1)
  * - validity: number
  * - obs: string
- *
+ * - addServicesDescription: [{ description: string, value: number, quantidade?: number}]
  */
 export default function CheckoutPage() {
   const router = useRouter();
@@ -40,6 +109,11 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<'credit' | 'pix'>(
     'credit',
   );
+  const [cupom, setCupom] = useState<CupomData | null>(null);
+  const [cupomCode, setCupomCode] = useState('');
+  const [isLoadingCupom, setIsLoadingCupom] = useState(false);
+  const [showCupomInput, setShowCupomInput] = useState(false);
+
   const [formData, setFormData] = useState({
     cardNumber: '',
     cardName: '',
@@ -48,6 +122,7 @@ export default function CheckoutPage() {
     installments: '1',
     termsAccepted: false,
   });
+
   const [pixGenerated, setPixGenerated] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
@@ -56,18 +131,18 @@ export default function CheckoutPage() {
 
   // Carrega dados do checkout ao montar o componente
   useEffect(() => {
-    const data = CheckoutStorageService.recuperarDadosCheckout();
+    const data = recuperarDadosCheckout();
 
     if (!data) {
-      // Redireciona se não houver dados
       alert('Nenhum dado de checkout encontrado. Redirecionando...');
-      window.close(); // Tenta fechar a janela
-      router.replace('/'); // Fallback se não conseguir fechar
+      window.close();
+      router.replace('/');
       return;
     }
 
     setCheckoutData(data);
     setIsLoading(false);
+    console.log('📋 Dados do checkout carregados:', data);
   }, [router]);
 
   // Timer para countdown do PIX
@@ -79,8 +154,7 @@ export default function CheckoutPage() {
         setTimeRemaining((prevTime) => {
           if (prevTime <= 1) {
             setTimerActive(false);
-            // Timer expirado - limpar dados e fechar/redirecionar
-            CheckoutStorageService.limparDadosCheckout();
+            limparDadosCheckout();
             alert('Tempo expirado! A sessão de pagamento foi encerrada.');
             window.close();
             return 0;
@@ -97,16 +171,11 @@ export default function CheckoutPage() {
 
   // Funções de formatação
   const parseCurrency = (valor: string): number => {
-    return parseFloat(
-      valor.replace('R$', '').replace(/\./g, '').replace(',', '.').trim(),
-    );
+    return parseValorMonetario(valor);
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(value);
+    return formatarValorMonetario(value);
   };
 
   const formatTime = (seconds: number): string => {
@@ -120,6 +189,20 @@ export default function CheckoutPage() {
     const chunks = cleaned.match(/.{1,4}/g) || [];
     return chunks.join(' ').substring(0, 19);
   };
+
+  // Cálculo de valores
+  const valorBase = checkoutData ? parseCurrency(checkoutData.valor) : 0;
+  const quantidade = checkoutData?.quantidade || 1;
+  const valorBaseTotal = valorBase * quantidade;
+  const valorServicosAdicionais = checkoutData
+    ? calcularValorServicosAdicionais(checkoutData)
+    : 0;
+  const valorSubtotal = valorBaseTotal + valorServicosAdicionais;
+  const valorDesconto =
+    cupom && cupom.isValid
+      ? CupomService.calcularDesconto(cupom, valorSubtotal)
+      : 0;
+  const valorTotal = valorSubtotal - valorDesconto;
 
   // Opções de parcelamento baseadas no valor
   const getOpcoesParcelamento = (valor: number) => {
@@ -167,7 +250,7 @@ export default function CheckoutPage() {
     if (
       confirm('Deseja realmente sair do checkout? Os dados serão perdidos.')
     ) {
-      CheckoutStorageService.limparDadosCheckout();
+      limparDadosCheckout();
       window.close();
     }
   };
@@ -177,10 +260,45 @@ export default function CheckoutPage() {
     setFormData((prev) => ({ ...prev, cardNumber: formatted }));
   };
 
+  const handleApplyCupom = async () => {
+    if (!cupomCode.trim()) {
+      alert('Digite um código de cupom');
+      return;
+    }
+
+    setIsLoadingCupom(true);
+
+    try {
+      const cupomValidado = await CupomService.validarCupom(
+        cupomCode,
+        valorSubtotal,
+      );
+      setCupom(cupomValidado);
+
+      if (cupomValidado.isValid) {
+        console.log('🎉 Cupom aplicado com sucesso:', cupomValidado);
+      } else {
+        console.log('❌ Cupom inválido:', cupomValidado.message);
+      }
+    } catch (error) {
+      console.error('❌ Erro ao aplicar cupom:', error);
+      alert('Erro ao validar cupom. Tente novamente.');
+    } finally {
+      setIsLoadingCupom(false);
+    }
+  };
+
+  const handleRemoveCupom = () => {
+    setCupom(null);
+    setCupomCode('');
+    console.log('🗑️ Cupom removido');
+  };
+
   const handleGeneratePix = () => {
     setPixGenerated(true);
     setTimerActive(true);
     setTimeRemaining(30 * 60);
+    console.log('📱 Código PIX gerado');
   };
 
   const handleCopyPixCode = async () => {
@@ -189,8 +307,9 @@ export default function CheckoutPage() {
       await navigator.clipboard.writeText(pixCode);
       setCopiedCode(true);
       setTimeout(() => setCopiedCode(false), 3000);
+      console.log('📋 Código PIX copiado para área de transferência');
     } catch (err) {
-      console.error('Erro ao copiar código PIX:', err);
+      console.error('❌ Erro ao copiar código PIX:', err);
     }
   };
 
@@ -210,18 +329,44 @@ export default function CheckoutPage() {
     setIsProcessing(true);
 
     try {
-      // Aqui você pode implementar a lógica de integração com API de pagamento
-      // Por enquanto, simulando processamento
+      console.log('💳 Processando pagamento...', {
+        method: paymentMethod,
+        amount: valorTotal,
+        cupom: cupom?.code,
+        hasAdditionalServices: valorServicosAdicionais > 0,
+      });
+
+      // Simulação de processamento
       await new Promise((resolve) => setTimeout(resolve, 3000));
 
-      // Limpar dados após sucesso
-      CheckoutStorageService.limparDadosCheckout();
+      // Simular resultado do pagamento (80% sucesso para demonstração)
+      const success = Math.random() > 0.2;
 
-      // Sucesso - pode redirecionar ou fechar janela
-      alert('Pagamento processado com sucesso!');
+      // Salvar resultado no localStorage para a janela pai ler
+      localStorage.setItem('checkout_payment_completed', 'true');
+      localStorage.setItem(
+        'checkout_payment_result',
+        JSON.stringify({
+          success,
+          message: success
+            ? 'Pagamento aprovado com sucesso!'
+            : 'Falha no processamento do pagamento',
+          method: paymentMethod,
+          amount: valorTotal,
+        }),
+      );
+
+      limparDadosCheckout();
+
+      if (success) {
+        alert('Pagamento processado com sucesso!');
+      } else {
+        alert('Falha no processamento do pagamento. Tente novamente.');
+      }
+
       window.close();
     } catch (error) {
-      console.error('Erro ao processar pagamento:', error);
+      console.error('❌ Erro ao processar pagamento:', error);
       alert('Erro ao processar pagamento. Tente novamente.');
     } finally {
       setIsProcessing(false);
@@ -232,7 +377,10 @@ export default function CheckoutPage() {
   if (isLoading) {
     return (
       <div className="flex min-h-screen w-full items-center justify-center bg-black">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-purple-600 border-t-transparent" />
+        <div className="text-center">
+          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-purple-600 border-t-transparent"></div>
+          <p className="text-gray-400">Carregando checkout...</p>
+        </div>
       </div>
     );
   }
@@ -253,10 +401,21 @@ export default function CheckoutPage() {
     );
   }
 
-  const valorNumerico = parseCurrency(checkoutData.valor);
-
   return (
-    <div className="h-screen overflow-hidden bg-black text-white">
+    <div className="h-screen w-[1025px] overflow-hidden bg-black text-white">
+      {/* Header */}
+      <div className="flex h-[57px] items-center justify-between border-b border-gray-800 px-6">
+        <div className="flex items-center gap-4">
+          <h1 className="text-lg font-light text-white">CHECKOUT</h1>
+          <div className="h-4 w-px bg-gray-700"></div>
+          <span className="text-xs text-gray-400">Pagamento Seguro</span>
+        </div>
+        <div className="flex items-center gap-2 text-[10px] text-gray-500">
+          <Lock className="h-3 w-3" />
+          <span>SSL Encrypted</span>
+        </div>
+      </div>
+
       {/* Main Content */}
       <div className="flex h-[calc(100vh-57px)]">
         {/* Lado Esquerdo - Formulário */}
@@ -327,7 +486,7 @@ export default function CheckoutPage() {
                     }
                     className="w-full rounded-lg border border-gray-700 bg-gray-900 px-3 py-2.5 text-sm text-white transition-colors focus:border-purple-600 focus:outline-none"
                   >
-                    {getOpcoesParcelamento(valorNumerico).map((opcao) => (
+                    {getOpcoesParcelamento(valorTotal).map((opcao) => (
                       <option key={opcao.parcelas} value={opcao.parcelas}>
                         {opcao.texto}
                       </option>
@@ -476,11 +635,7 @@ export default function CheckoutPage() {
                         }`}
                       />
                       <div
-                        className={`text-xs ${
-                          timeRemaining < 300
-                            ? 'text-red-400'
-                            : 'text-yellow-400'
-                        }`}
+                        className={`text-xs ${timeRemaining < 300 ? 'text-red-400' : 'text-yellow-400'}`}
                       >
                         Aguardando... {formatTime(timeRemaining)}
                         {timeRemaining < 300 && (
@@ -494,6 +649,70 @@ export default function CheckoutPage() {
                 )}
               </div>
             )}
+
+            {/* Cupom de Desconto */}
+            <div className="space-y-3">
+              {!showCupomInput && !cupom && (
+                <button
+                  type="button"
+                  onClick={() => setShowCupomInput(true)}
+                  className="flex items-center gap-2 text-xs text-purple-600 transition-colors hover:text-purple-500"
+                >
+                  <Tag className="h-3 w-3" />
+                  Adicionar cupom de desconto
+                </button>
+              )}
+
+              {(showCupomInput || cupom) && (
+                <div className="rounded-lg border border-gray-700 bg-gray-900 p-3">
+                  <div className="flex items-center gap-2">
+                    <Tag className="h-4 w-4 text-purple-600" />
+                    <input
+                      type="text"
+                      value={cupomCode}
+                      onChange={(e) =>
+                        setCupomCode(e.target.value.toUpperCase())
+                      }
+                      placeholder="Código do cupom"
+                      disabled={!!cupom}
+                      className="flex-1 bg-transparent text-sm text-white placeholder-gray-500 focus:outline-none"
+                    />
+                    {!cupom ? (
+                      <button
+                        type="button"
+                        onClick={handleApplyCupom}
+                        disabled={isLoadingCupom || !cupomCode.trim()}
+                        className="rounded bg-purple-600 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-purple-700 disabled:cursor-not-allowed disabled:bg-gray-700"
+                      >
+                        {isLoadingCupom ? '...' : 'Aplicar'}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleRemoveCupom}
+                        className="rounded border border-red-600 px-2 py-1 text-xs font-medium text-red-600 transition-colors hover:bg-red-600/10"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    )}
+                  </div>
+
+                  {cupom && (
+                    <div
+                      className={`mt-2 text-xs ${cupom.isValid ? 'text-green-400' : 'text-red-400'}`}
+                    >
+                      {cupom.isValid && (
+                        <Check className="mr-1 inline h-3 w-3" />
+                      )}
+                      {CupomService.formatarMensagemDesconto(
+                        cupom,
+                        valorSubtotal,
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
 
             {/* Termos */}
             <div className="flex items-start gap-2">
@@ -524,7 +743,9 @@ export default function CheckoutPage() {
               }
               className="w-full rounded-lg bg-purple-600 py-3 text-sm font-medium text-white transition-colors hover:bg-purple-700 disabled:cursor-not-allowed disabled:bg-gray-800 disabled:text-gray-500"
             >
-              {isProcessing ? 'Processando...' : 'Finalizar Pagamento'}
+              {isProcessing
+                ? 'Processando...'
+                : `Finalizar Pagamento ${formatCurrency(valorTotal)}`}
             </button>
 
             {/* Texto Segurança */}
@@ -552,6 +773,11 @@ export default function CheckoutPage() {
               <div className="min-w-0 flex-1">
                 <div className="text-sm font-semibold text-purple-600">
                   {checkoutData.productName}
+                  {quantidade > 1 && (
+                    <span className="ml-2 text-xs font-normal text-gray-400">
+                      (x{quantidade})
+                    </span>
+                  )}
                 </div>
                 <div className="text-xs text-gray-400">
                   {checkoutData.productType}
@@ -578,14 +804,57 @@ export default function CheckoutPage() {
             )}
           </div>
 
-          <div className="mb-4 border-b border-gray-800"></div>
+          {/* Serviços Adicionais */}
+          {valorServicosAdicionais > 0 && (
+            <>
+              <div className="mb-4">
+                <h3 className="mb-2 text-xs font-medium text-gray-300">
+                  Serviços Adicionais
+                </h3>
+                <div className="space-y-2">
+                  {checkoutData.addServicesDescription?.map(
+                    (servico, index) => {
+                      const quantidadeServico = servico.quantidade || 1;
+                      const valorTotalServico =
+                        servico.value * quantidadeServico;
+                      return (
+                        <div
+                          key={index}
+                          className="flex justify-between text-xs text-gray-400"
+                        >
+                          <span>
+                            {servico.description}
+                            {quantidadeServico > 1 && (
+                              <span className="ml-1 text-gray-500">
+                                (x{quantidadeServico})
+                              </span>
+                            )}
+                          </span>
+                          <span>{formatCurrency(valorTotalServico)}</span>
+                        </div>
+                      );
+                    },
+                  )}
+                </div>
+              </div>
+              <div className="mb-4 border-b border-gray-800"></div>
+            </>
+          )}
 
           {/* Valores */}
           <div className="mb-4 space-y-2">
             <div className="flex justify-between text-xs text-gray-300">
               <span>Subtotal</span>
-              <span>{checkoutData.valor}</span>
+              <span>{formatCurrency(valorSubtotal)}</span>
             </div>
+
+            {valorDesconto > 0 && (
+              <div className="flex justify-between text-xs text-green-400">
+                <span>Desconto ({cupom?.code})</span>
+                <span>-{formatCurrency(valorDesconto)}</span>
+              </div>
+            )}
+
             <div className="flex justify-between text-xs text-gray-300">
               <span>Taxa</span>
               <span>R$ 0,00</span>
@@ -598,7 +867,7 @@ export default function CheckoutPage() {
           <div className="mb-6 flex justify-between text-xl font-light text-white">
             <span>TOTAL</span>
             <span className="text-purple-600">
-              {formatCurrency(valorNumerico)}
+              {formatCurrency(valorTotal)}
             </span>
           </div>
 

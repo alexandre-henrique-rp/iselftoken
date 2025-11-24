@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -12,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 import {
   Table,
   TableBody,
@@ -20,20 +20,19 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import {
-  Search,
-  ChevronLeft,
-  ChevronRight,
-  Building2,
-} from 'lucide-react';
-import { Startup, StartupFilters } from '@/types/startup';
-import { formatCurrency, formatCNPJ } from '@/lib/utils';
-import { AddStartupButton } from './add-startup-button';
-import { StartupActionButtons } from './startup-action-buttons';
-import { StartupDataTableSkeleton } from './startup-data-table-skeleton';
 import { useDebounce } from '@/hooks/use-debounce';
+import {
+  formatCNPJ,
+  // formatCurrency,
+} from '@/lib/utils';
+import { Startup, StartupFilters } from '@/types/startup';
+import { Building2, ChartNoAxesCombined, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
+import { AddStartupButton } from './add-startup-button';
+import { StartupDataTableSkeleton } from './startup-data-table-skeleton';
+import { Edit, Trash2 } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 
 interface StartupDataTableProps {
   initialData: Startup[];
@@ -125,7 +124,15 @@ export function StartupDataTable({
     setStartups(initialData);
     setTotal(totalCount);
     setLoading(false);
-  }, [currentPage, debouncedSearch, status, areaAtuacao, estagio, initialData, totalCount]);
+  }, [
+    currentPage,
+    debouncedSearch,
+    status,
+    areaAtuacao,
+    estagio,
+    initialData,
+    totalCount,
+  ]);
 
   // Update URL when filters change
   useEffect(() => {
@@ -149,7 +156,15 @@ export function StartupDataTable({
 
     // Simulate API call
     fetchStartups();
-  }, [debouncedSearch, status, areaAtuacao, estagio, currentPage, fetchStartups, router]);
+  }, [
+    debouncedSearch,
+    status,
+    areaAtuacao,
+    estagio,
+    currentPage,
+    fetchStartups,
+    router,
+  ]);
 
   const handleStatusChange = (value: string) => {
     setStatus(value);
@@ -178,37 +193,20 @@ export function StartupDataTable({
     setCurrentPage(1);
   };
 
-  // const getStatusBadgeVariant = (status: string) => {
-  //   switch (status) {
-  //     case 'Aprovada':
-  //       return 'default';
-  //     case 'Ativa':
-  //       return 'default';
-  //     case 'Em Análise':
-  //       return 'secondary';
-  //     case 'Pausada':
-  //       return 'outline';
-  //     case 'Rejeitada':
-  //       return 'destructive';
-  //     default:
-  //       return 'secondary';
-  //   }
-  // };
-
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
       case 'Aprovada':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+        return 'bg-[#d500f9]/10 text-[#d500f9] border border-[#d500f9]/20';
       case 'Ativa':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+        return 'bg-[#00ad4e]/10 text-[#00ad4e] border border-[#00ad4e]/20';
       case 'Em Análise':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+        return 'bg-muted text-muted-foreground border border-border';
       case 'Pausada':
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+        return 'bg-[#f0ec00]/30 text-[#f0ec00] border border-[#f0ec00]/20';
       case 'Rejeitada':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+        return 'bg-destructive/10 text-destructive border border-destructive/20';
       default:
-        return '';
+        return 'bg-muted text-muted-foreground border border-border';
     }
   };
 
@@ -301,10 +299,8 @@ export function StartupDataTable({
                   <TableHead>CNPJ</TableHead>
                   <TableHead>Área</TableHead>
                   <TableHead>Estágio</TableHead>
-                  <TableHead>Meta de Captação</TableHead>
-                  <TableHead>total de token</TableHead>
-                  <TableHead>Token disponível</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>campanha</TableHead>
                   <TableHead className="w-[100px]">Ações</TableHead>
                 </TableRow>
               </TableHeader>
@@ -378,21 +374,63 @@ export function StartupDataTable({
                       <TableCell>{startup.area_atuacao}</TableCell>
                       <TableCell>{startup.estagio}</TableCell>
                       <TableCell>
-                        {formatCurrency(startup.meta_captacao)}
-                      </TableCell>
-                      <TableCell>
-                        {formatCurrency(startup.tokens)}
-                      </TableCell>
-                      <TableCell>
-                        {formatCurrency(startup.current_tokens)}
-                      </TableCell>
-                      <TableCell>
                         <Badge className={getStatusBadgeColor(startup.status)}>
                           {startup.status}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <StartupActionButtons startup={startup} />
+                        {startup.campanha
+                          .filter((campanha) => campanha.status === 'Ativa')
+                          .map((campanha) => campanha.status)
+                          .join(', ')}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="outline"
+                                onClick={() =>
+                                  router.push(
+                                    `/dashboard/startups/${startup.id}`,
+                                  )
+                                }
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Editar</p>
+                            </TooltipContent>
+                          </Tooltip>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="outline"
+                                onClick={() =>
+                                  router.push(
+                                    `/dashboard/campanha/${startup.id}`,
+                                  )
+                                }
+                              >
+                                <ChartNoAxesCombined className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Campanha</p>
+                            </TooltipContent>
+                          </Tooltip>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="outline">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Excluir</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))
@@ -479,7 +517,7 @@ export function StartupDataTable({
                         Meta de Captação:
                       </span>
                       <p className="text-lg font-bold">
-                        {formatCurrency(startup.meta_captacao)}
+                        {/* {formatCurrency(startup.meta_captacao)} */}
                       </p>
                     </div>
 
@@ -488,7 +526,7 @@ export function StartupDataTable({
                         Total de Tokens:
                       </span>
                       <p className="text-lg font-bold">
-                        {formatCurrency(startup.tokens)}
+                        {/* {formatCurrency(startup.tokens)} */}
                       </p>
                     </div>
 
@@ -497,12 +535,12 @@ export function StartupDataTable({
                         Tokens Disponível:
                       </span>
                       <p className="text-lg font-bold">
-                        {formatCurrency(startup.current_tokens)}
+                        {/* {formatCurrency(startup.current_tokens)} */}
                       </p>
                     </div>
 
                     <div className="flex justify-end pt-2">
-                      <StartupActionButtons startup={startup} />
+                      {/* <StartupActionButtons startup={startup} /> */}
                     </div>
                   </div>
                 </CardContent>

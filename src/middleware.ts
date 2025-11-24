@@ -15,19 +15,14 @@ const PageNotAf2 = [
 export async function middleware(req: NextRequest) {
   const session = await GetSessionServer();
   const hasTwoFactor = await GetSession2fa();
-  console.log("🚀 ~ middleware ~ hasTwoFactor:", hasTwoFactor)
 
   const { pathname } = req.nextUrl;
 
   const IsPublic = publicRoutesList.some((route) => pathname.startsWith(route));
   const NotAf2 = PageNotAf2.includes(pathname)
-  console.log("🚀 ~ middleware ~ NotAf2:", NotAf2)
-
-
 
   if (hasTwoFactor && session && NotAf2) {
     const role = session.user.role
-    console.log("🚀 ~ middleware ~ role:", role)
     if (role === 'admin') {
       return NextResponse.redirect(new URL('/admin', req.url))
     }

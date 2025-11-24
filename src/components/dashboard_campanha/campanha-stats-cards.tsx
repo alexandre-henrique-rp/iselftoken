@@ -1,30 +1,40 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Startup } from '@/types/startup';
-import { AlertCircle, Building, CheckCircle, Target } from 'lucide-react';
+import { CampanhaStartup } from '@/types/startup';
+import { DollarSign, Pause, Play, Target } from 'lucide-react';
 
-interface StartupStatsCardsProps {
-  startups?: Startup[];
+interface CampanhaStatsCardsProps {
+  campanhas?: (CampanhaStartup & {
+    startup: { id: number; nome: string; area_atuacao: string; status: string };
+  })[];
 }
 
-export function StartupStatsCards({ startups = [] }: StartupStatsCardsProps) {
-  // Calcular métricas baseadas nos dados reais das startups
-  const totalStartups = startups.length;
-  const startupsAtivas = startups.filter(
-    (s) => s.status === 'Ativa' || s.status === 'Aprovada',
+export function CampanhaStatsCards({
+  campanhas = [],
+}: CampanhaStatsCardsProps) {
+  // Calcular métricas baseadas nos dados reais das campanhas
+  const totalCampanhas = campanhas.length;
+  const campanhasAtivas = campanhas.filter((c) => c.status === 'Ativa').length;
+  const campanhasPausadas = campanhas.filter(
+    (c) => c.status === 'Pausado',
   ).length;
-  const startupsComPendencia = startups.filter(
-    (s) => s.status !== 'Ativa' && s.status !== 'Aprovada',
-  ).length;
-  const campanhasAtivas = startups.reduce((total, startup) => {
-    return total + startup.campanha.filter((c) => c.status === 'Ativa').length;
-  }, 0);
+  const valorTotalMeta = campanhas.reduce(
+    (total, campanha) => total + campanha.meta_captacao,
+    0,
+  );
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(value);
+  };
 
   const cards = [
     {
-      title: 'Total de Startups',
-      value: totalStartups.toString(),
-      description: 'Startups registradas na plataforma',
-      icon: Building,
+      title: 'Total de Campanhas',
+      value: totalCampanhas.toString(),
+      description: 'Campanhas criadas na plataforma',
+      icon: Target,
       gradient: 'bg-linear-to-br from-purple-600/20 to-pink-600/20',
       borderColor: 'border-purple-500/30',
       iconBg: 'bg-linear-to-br from-purple-600 to-pink-600',
@@ -32,10 +42,10 @@ export function StartupStatsCards({ startups = [] }: StartupStatsCardsProps) {
       valueColor: 'text-purple-600',
     },
     {
-      title: 'Startups Ativas',
-      value: startupsAtivas.toString(),
-      description: 'Startups aprovadas e operando',
-      icon: CheckCircle,
+      title: 'Campanhas Ativas',
+      value: campanhasAtivas.toString(),
+      description: 'Campanhas em andamento',
+      icon: Play,
       gradient: 'bg-linear-to-br from-green-600/20 to-emerald-600/20',
       borderColor: 'border-green-500/30',
       iconBg: 'bg-linear-to-br from-green-600 to-emerald-600',
@@ -43,10 +53,10 @@ export function StartupStatsCards({ startups = [] }: StartupStatsCardsProps) {
       valueColor: 'text-green-600',
     },
     {
-      title: 'Startups com Pendência',
-      value: startupsComPendencia.toString(),
-      description: 'Aguardando análise ou com restrições',
-      icon: AlertCircle,
+      title: 'Campanhas Pausadas',
+      value: campanhasPausadas.toString(),
+      description: 'Campanhas temporariamente pausadas',
+      icon: Pause,
       gradient: 'bg-linear-to-br from-orange-600/20 to-amber-600/20',
       borderColor: 'border-orange-500/30',
       iconBg: 'bg-linear-to-br from-orange-600 to-amber-600',
@@ -54,10 +64,10 @@ export function StartupStatsCards({ startups = [] }: StartupStatsCardsProps) {
       valueColor: 'text-orange-600',
     },
     {
-      title: 'Campanhas Ativas',
-      value: campanhasAtivas.toString(),
-      description: 'Campanhas de captação em andamento',
-      icon: Target,
+      title: 'Meta Total',
+      value: formatCurrency(valorTotalMeta),
+      description: 'Soma das metas de todas as campanhas',
+      icon: DollarSign,
       gradient: 'bg-linear-to-br from-blue-600/20 to-cyan-600/20',
       borderColor: 'border-blue-500/30',
       iconBg: 'bg-linear-to-br from-blue-600 to-cyan-600',

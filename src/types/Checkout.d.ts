@@ -35,6 +35,11 @@ export interface CheckoutData {
   productDescription: string;
 
   /**
+   * Quantidade do produto (opcional, padrão: 1)
+   */
+  quantidade?: number;
+
+  /**
    * Validade do produto em meses (opcional)
    * Usado para calcular benefícios ou duração
    */
@@ -44,6 +49,32 @@ export interface CheckoutData {
    * Observações adicionais sobre o produto (opcional)
    */
   obs?: string;
+
+  /**
+   * Serviços adicionais (opcional)
+   * Lista de serviços extras com seus valores
+   */
+  addServicesDescription?: AdditionalService[];
+}
+
+/**
+ * Interface para serviços adicionais
+ */
+export interface AdditionalService {
+  description: string;
+  value: number;
+  quantidade?: number;
+}
+
+/**
+ * Interface para dados de cupom de desconto
+ */
+export interface CupomData {
+  code: string;
+  discountType: 'percentage' | 'fixed';
+  discountValue: number;
+  isValid: boolean;
+  message?: string;
 }
 
 /**
