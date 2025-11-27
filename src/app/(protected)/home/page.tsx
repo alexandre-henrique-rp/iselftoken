@@ -1,5 +1,7 @@
 import { AdCarousel } from '@/components/home/AdCarousel';
+import { MinimalStartupCard } from '@/components/home/MinimalStartupCard';
 import { StartupSection } from '@/components/home/StartupSection';
+import { VerifiedStartupCard } from '@/components/home/VerifiedStartupCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getBannersFromFolder } from '@/data/banner-service';
 import {
@@ -48,6 +50,7 @@ const VerifiedStartupsLoader = async () => {
       startups={startups}
       layout="carousel"
       viewAllLink="/explorar?filter=verificadas"
+      renderCard={(startup) => <VerifiedStartupCard startup={startup} />}
     />
   );
 };
@@ -58,8 +61,10 @@ const AcceleratedStartupsLoader = async () => {
     <StartupSection
       title="Em Aceleração"
       startups={startups}
-      layout="carousel"
+      layout="grid"
       viewAllLink="/explorar?filter=aceleradas"
+      renderCard={(startup) => <MinimalStartupCard startup={startup} />}
+      className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5"
     />
   );
 };
@@ -70,8 +75,10 @@ const ApprovalPhaseStartupsLoader = async () => {
     <StartupSection
       title="Novas Oportunidades"
       startups={startups}
-      layout="carousel"
+      layout="grid"
       viewAllLink="/explorar?filter=aprovacao"
+      renderCard={(startup) => <MinimalStartupCard startup={startup} />}
+      className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5"
     />
   );
 };
@@ -94,17 +101,17 @@ export default async function Home() {
           <VerifiedStartupsLoader />
         </Suspense>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-          <div className="w-full min-w-0">
-            <Suspense fallback={<SectionSkeleton />}>
-              <AcceleratedStartupsLoader />
-            </Suspense>
-          </div>
-          <div className="w-full min-w-0">
-            <Suspense fallback={<SectionSkeleton />}>
-              <ApprovalPhaseStartupsLoader />
-            </Suspense>
-          </div>
+        {/* Seções Empilhadas (uma abaixo da outra) com cards compactos */}
+        <div className="w-full min-w-0">
+          <Suspense fallback={<SectionSkeleton />}>
+            <AcceleratedStartupsLoader />
+          </Suspense>
+        </div>
+
+        <div className="w-full min-w-0">
+          <Suspense fallback={<SectionSkeleton />}>
+            <ApprovalPhaseStartupsLoader />
+          </Suspense>
         </div>
       </main>
     </div>

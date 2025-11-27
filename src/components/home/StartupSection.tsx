@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { EmblaCarousel, EmblaSlide } from '@/components/ui/carousel-embla';
 import { Startup } from '@/data/home-data';
+import { cn } from '@/lib/utils';
 import { ArrowRight } from 'lucide-react';
 import { StartupCard } from './StartupCard';
 
@@ -9,6 +10,8 @@ interface StartupSectionProps {
   startups: Startup[];
   layout?: 'grid' | 'carousel';
   viewAllLink?: string;
+  renderCard?: (startup: Startup) => React.ReactNode;
+  className?: string;
 }
 
 export function StartupSection({
@@ -16,6 +19,8 @@ export function StartupSection({
   startups,
   layout = 'carousel',
   viewAllLink = '#',
+  renderCard,
+  className,
 }: StartupSectionProps) {
   return (
     <section className="space-y-6 py-8">
@@ -35,10 +40,19 @@ export function StartupSection({
       </div>
 
       {layout === 'grid' ? (
-        <div className="grid grid-cols-1 gap-6 px-4 sm:grid-cols-2 md:px-0 lg:grid-cols-3 xl:grid-cols-3">
+        <div
+          className={cn(
+            'grid grid-cols-1 gap-6 px-4 sm:grid-cols-2 md:px-0 lg:grid-cols-3 xl:grid-cols-3',
+            className,
+          )}
+        >
           {startups.map((startup) => (
             <div key={startup.id} className="h-full">
-              <StartupCard startup={startup} featured />
+              {renderCard ? (
+                renderCard(startup)
+              ) : (
+                <StartupCard startup={startup} featured />
+              )}
             </div>
           ))}
         </div>
@@ -51,7 +65,11 @@ export function StartupSection({
                 className="sm:flex-[0_0_50%] lg:flex-[0_0_33.33%] xl:flex-[0_0_25%]"
               >
                 <div className="h-full p-1">
-                  <StartupCard startup={startup} />
+                  {renderCard ? (
+                    renderCard(startup)
+                  ) : (
+                    <StartupCard startup={startup} />
+                  )}
                 </div>
               </EmblaSlide>
             ))}
