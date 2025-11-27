@@ -33,6 +33,19 @@ export default function Checkout({
   obs,
   addServicesDescription = [],
 }: CheckoutProps) {
+  console.log('🛒 Iniciando Checkout com:', {
+    userName,
+    userId,
+    valor,
+    productName,
+    productType,
+    productDescription,
+    quantidade,
+    validity,
+    obs,
+    addServicesDescription,
+  });
+
   // Cria objeto com dados completos do checkout
   const checkoutData: CheckoutData = {
     userName,
@@ -47,14 +60,44 @@ export default function Checkout({
     addServicesDescription,
   };
 
+  console.log('📦 Dados completos do checkout:', checkoutData);
+
   // Salva dados no localStorage usando o serviço
-  CheckoutStorageService.salvarDadosCheckout(checkoutData);
+  try {
+    CheckoutStorageService.salvarDadosCheckout(checkoutData);
+    console.log('✅ Dados salvos no localStorage com sucesso');
+  } catch (error) {
+    console.error('❌ Erro ao salvar dados no localStorage:', error);
+    throw error;
+  }
+
+  // Verificar se os dados foram salvos corretamente
+  try {
+    const dadosSalvos = localStorage.getItem('checkout_data');
+    console.log('🔍 Verificando dados salvos:', dadosSalvos);
+
+    if (dadosSalvos) {
+      const parseados = JSON.parse(dadosSalvos);
+      console.log('✅ Dados salvos e parseados:', parseados);
+    } else {
+      console.error('❌ Nenhum dado encontrado no localStorage após salvar');
+    }
+  } catch (error) {
+    console.error('❌ Erro ao verificar dados salvos:', error);
+  }
 
   // Calcula posição centralizada da janela
   const windowWidth = 1025;
   const windowHeight = 768;
   const windowLeft = window.screenX + (window.outerWidth - windowWidth) / 2;
   const windowTop = window.screenY + (window.outerHeight - windowHeight) / 2;
+
+  console.log('🪟 Abrindo janela de checkout:', {
+    windowWidth,
+    windowHeight,
+    windowLeft,
+    windowTop,
+  });
 
   // Abre nova janela com checkout
   const checkoutWindow = window.open(
@@ -66,6 +109,9 @@ export default function Checkout({
   // Foco na nova janela
   if (checkoutWindow) {
     checkoutWindow.focus();
+    console.log('✅ Janela de checkout aberta e focada');
+  } else {
+    console.error('❌ Falha ao abrir janela de checkout');
   }
 
   console.log('🛒 Checkout aberto com dados:', checkoutData);

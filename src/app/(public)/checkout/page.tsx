@@ -20,19 +20,54 @@ const STORAGE_KEY = 'checkout_data';
 
 const recuperarDadosCheckout = (): CheckoutData | null => {
   try {
+    console.log('🔍 Tentando recuperar dados do localStorage...');
+
     const storedData = localStorage.getItem(STORAGE_KEY);
-    if (!storedData) return null;
+    console.log('📦 Dados brutos do localStorage:', storedData);
 
-    const parsedData = JSON.parse(storedData);
-
-    // Validação básica
-    if (!parsedData.userName || !parsedData.userId || !parsedData.valor) {
+    if (!storedData) {
+      console.error('❌ Nenhum dado encontrado no localStorage');
       return null;
     }
 
-    return parsedData;
+    const parsedData = JSON.parse(storedData);
+    console.log('📋 Dados parseados:', parsedData);
+
+    // Validação básica mais robusta
+    if (!parsedData || typeof parsedData !== 'object') {
+      console.error('❌ Dados parseados não são um objeto válido');
+      return null;
+    }
+
+    const camposObrigatorios = [
+      'userName',
+      'userId',
+      'valor',
+      'productName',
+      'productType',
+      'productDescription',
+    ];
+    for (const campo of camposObrigatorios) {
+      if (!parsedData[campo] || typeof parsedData[campo] !== 'string') {
+        console.error(
+          `❌ Campo obrigatório inválido ou ausente: ${campo}`,
+          parsedData[campo],
+        );
+        return null;
+      }
+    }
+
+    console.log('✅ Dados do checkout validados com sucesso');
+    return parsedData as CheckoutData;
   } catch (error) {
-    console.error('Erro ao recuperar dados:', error);
+    console.error('❌ Erro ao recuperar dados do checkout:', error);
+    // Tentar limpar dados corrompidos
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      console.log('🗑️ Dados corrompidos removidos do localStorage');
+    } catch (cleanupError) {
+      console.error('❌ Erro ao limpar localStorage:', cleanupError);
+    }
     return null;
   }
 };
@@ -47,13 +82,59 @@ const limparDadosCheckout = (): void => {
 
 const parseValorMonetario = (valorString: string): number => {
   try {
+    console.log('💰 Parseando valor monetário:', valorString);
+
+    if (!valorString || typeof valorString !== 'string') {
+      console.error('❌ Valor inválido:', valorString);
+      return 0;
+    }
+
+    // Remove apenas o símbolo R$ e espaços, mantém pontos e vírgulas
     const valorLimpo = valorString
       .replace('R$', '')
-      .replace(/\./g, '')
-      .replace(',', '.')
+      .replace(/\s/g, '') // Remove espaços
       .trim();
-    return parseFloat(valorLimpo);
-  } catch {
+
+    console.log('🧹 Valor limpo (mantendo pontos):', valorLimpo);
+
+    // Se não tiver vírgula decimal, assume que é valor inteiro
+    if (!valorLimpo.match(/,/)) {
+      console.log('🔄 Valor inteiro detectado, adicionando .00');
+      const valorNumerico = parseFloat(valorLimpo);
+      console.log('✅ Valor parseado (inteiro):', valorNumerico);
+      return valorNumerico;
+    }
+
+    // Se não tiver pontos de milhar (formato correto), substitui vírgula por ponto
+    if (!valorLimpo.match(/\./)) {
+      const valorComPonto = valorLimpo.replace(',', '.');
+      console.log('🔄 Convertido para ponto decimal:', valorComPonto);
+      const valorNumerico = parseFloat(valorComPonto);
+      console.log('✅ Valor parseado:', valorNumerico);
+      return valorNumerico;
+    }
+
+    // Se tiver pontos, assume que é formato brasileiro e remove pontos primeiro
+    const valorSemPontos = valorLimpo.replace(/\./g, '');
+    const valorComPonto = valorSemPontos.replace(',', '.');
+    console.log(
+      '🔄 Removendo pontos de milhar:',
+      valorSemPontos,
+      '→',
+      valorComPonto,
+    );
+
+    const valorNumerico = parseFloat(valorComPonto);
+
+    if (isNaN(valorNumerico) || !isFinite(valorNumerico)) {
+      console.error('❌ Valor não é um número válido:', valorNumerico);
+      return 0;
+    }
+
+    console.log('✅ Valor parseado com sucesso:', valorNumerico);
+    return valorNumerico;
+  } catch (error) {
+    console.error('❌ Erro ao parsear valor monetário:', error);
     return 0;
   }
 };
@@ -131,18 +212,50 @@ export default function CheckoutPage() {
 
   // Carrega dados do checkout ao montar o componente
   useEffect(() => {
-    const data = recuperarDadosCheckout();
+    console.log('🚀 Iniciando carregamento da página de checkout...');
 
-    if (!data) {
-      alert('Nenhum dado de checkout encontrado. Redirecionando...');
+    try {
+      const data = recuperarDadosCheckout();
+
+      if (!data) {
+        console.error('❌ Nenhum dado de checkout encontrado');
+        alert('Nenhum dado de checkout encontrado. Redirecionando...');
+        window.close();
+        router.replace('/');
+        return;
+      }
+
+      console.log('✅ Dados do checkout carregados:', data);
+
+      // Validar dados específicos
+      if (!data.userName || !data.userId || !data.valor) {
+        console.error('❌ Dados essenciais ausentes:', {
+          userName: data.userName,
+          userId: data.userId,
+          valor: data.valor,
+        });
+        alert('Dados incompletos. Tente novamente.');
+        window.close();
+        return;
+      }
+
+      // Validar valor
+      const valorParseado = parseValorMonetario(data.valor);
+      if (valorParseado <= 0) {
+        console.error('❌ Valor inválido:', data.valor, '->', valorParseado);
+        alert('Valor inválido. Tente novamente.');
+        window.close();
+        return;
+      }
+
+      setCheckoutData(data);
+      setIsLoading(false);
+      console.log('🎉 Checkout inicializado com sucesso!');
+    } catch (error) {
+      console.error('❌ Erro crítico ao inicializar checkout:', error);
+      alert('Erro ao carregar página de pagamento. Tente novamente.');
       window.close();
-      router.replace('/');
-      return;
     }
-
-    setCheckoutData(data);
-    setIsLoading(false);
-    console.log('📋 Dados do checkout carregados:', data);
   }, [router]);
 
   // Timer para countdown do PIX
@@ -193,7 +306,7 @@ export default function CheckoutPage() {
   // Cálculo de valores
   const valorBase = checkoutData ? parseCurrency(checkoutData.valor) : 0;
   const quantidade = checkoutData?.quantidade || 1;
-  const valorBaseTotal = valorBase * quantidade;
+  const valorBaseTotal = valorBase; // O valor já vem como total do localStorage
   const valorServicosAdicionais = checkoutData
     ? calcularValorServicosAdicionais(checkoutData)
     : 0;

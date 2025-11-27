@@ -1,16 +1,23 @@
 'use client';
 
+import Checkout from '@/components/chekout';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Calculator, DollarSign, ShoppingCart, TrendingUp } from 'lucide-react';
+import {
+  getLimitesMetaCaptacao,
+  validarMetaCaptacao,
+} from '@/config/meta-captacao-limits';
+import { useSession } from '@/hooks/useSession';
+import { CircleDollarSignIcon } from 'lucide-react';
 import { useState } from 'react';
 
 interface NovaCampanhaModalProps {
@@ -18,6 +25,7 @@ interface NovaCampanhaModalProps {
   onOpenChange: (open: boolean) => void;
   startupId: number;
   startupNome: string;
+  startupEstagio?: string;
 }
 
 export function NovaCampanhaModal({
@@ -25,23 +33,31 @@ export function NovaCampanhaModal({
   onOpenChange,
   startupId,
   startupNome,
+  startupEstagio = 'Ideação', // Valor padrão
 }: NovaCampanhaModalProps) {
-  const [metaCaptacao, setMetaCaptacao] = useState<string>('');
+  const { apiUser } = useSession();
+  const [metaCaptacao, setMetaCaptacao] = useState<number>(0);
+  const [metaCaptacaoMasked, setMetaCaptacaoMasked] = useState<string>('');
   const [equityOferecido, setEquityOferecido] = useState<string>('');
-  const [quantidadeTokensReserva, setQuantidadeTokensReserva] =
-    useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
 
   // Constantes
-  const VALOR_TOKEN = 200; // R$ 200 por token (campanha)
-  const VALOR_RESERVA_TOKEN = 5; // R$ 5 por token (reserva)
+  const VALOR_TOKEN = 200; // R$ 200 por token (valor para investidores)
+  const VALOR_RESERVA_TOKEN = 5; // R$ 5 por token (taxa de reserva)
 
   // Cálculos
-  const metaNumerica = parseFloat(metaCaptacao) || 0;
+  const metaNumerica = metaCaptacao || 0;
   const equityNumerico = parseFloat(equityOferecido) || 0;
+  // 1. Meta ÷ 200 = Quantidade de tokens da campanha
   const quantidadeTokensCampanha = metaNumerica / VALOR_TOKEN;
-  const quantidadeReservaNumerica = parseInt(quantidadeTokensReserva) || 0;
+  // 2. Quantidade de reserva = Quantidade de tokens da campanha (mesma divisão)
+  const quantidadeReservaNumerica = Math.floor(quantidadeTokensCampanha);
+  // 3. Quantidade × R$ 5 = Valor da reserva
   const valorTotalReserva = quantidadeReservaNumerica * VALOR_RESERVA_TOKEN;
+
+  // Obter limites baseados no estágio
+  const limitesMeta = getLimitesMetaCaptacao(startupEstagio);
+  const metaValidacao = validarMetaCaptacao(metaNumerica, startupEstagio);
 
   // Formatação
   const formatCurrency = (value: number) => {
@@ -55,104 +71,177 @@ export function NovaCampanhaModal({
     return new Intl.NumberFormat('pt-BR').format(value);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Validação do formulário
+  const isFormValid =
+    metaValidacao.valido &&
+    equityNumerico >= 1 &&
+    equityNumerico <= 50 &&
+    metaNumerica > 0; // A quantidade de reserva é calculada automaticamente
+
+  const handleReservarTokens = async () => {
     setIsLoading(true);
 
-    // Validações
-    if (!metaCaptacao || !equityOferecido || !quantidadeTokensReserva) {
-      alert('Por favor, preencha todos os campos.');
-      setIsLoading(false);
-      return;
-    }
-
-    if (metaNumerica < 10000) {
-      alert('A meta de captação deve ser de no mínimo R$ 10.000.');
-      setIsLoading(false);
-      return;
-    }
-
-    if (equityNumerico < 1 || equityNumerico > 50) {
-      alert('O equity oferecido deve estar entre 1% e 50%.');
-      setIsLoading(false);
-      return;
-    }
-
-    if (quantidadeReservaNumerica < 1) {
-      alert('A quantidade de tokens de reserva deve ser de no mínimo 1.');
-      setIsLoading(false);
-      return;
-    }
-
-    if (quantidadeReservaNumerica > quantidadeTokensCampanha) {
-      alert(
-        `A quantidade de tokens de reserva não pode ser maior que a quantidade de tokens da campanha (${formatNumber(Math.floor(quantidadeTokensCampanha))}).`,
-      );
-      setIsLoading(false);
-      return;
-    }
-
-    // Simulação de criação da campanha e compra de reserva
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    // Dados da campanha
-    const novaCampanha = {
-      startupId,
-      meta_captacao: metaNumerica,
-      equity_oferecido: equityNumerico,
-      quantidade_tokens: quantidadeTokensCampanha,
-      valor_token: VALOR_TOKEN,
-      quantidade_reserva_tokens: quantidadeReservaNumerica,
-      valor_reserva_total: valorTotalReserva,
-      status: 'Em Análise',
-      dt_inicio: new Date().toISOString().split('T')[0],
-      dt_fim: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split('T')[0], // 6 meses
+    // Capturar todos os dados do formulário
+    const dadosCapturados = {
+      // Dados do usuário
+      usuario: {
+        id: apiUser?.id?.toString() || 'unknown',
+        nome: apiUser?.nome || 'Usuário não identificado',
+        email: apiUser?.email || 'email@naoinformado.com',
+      },
+      // Dados da startup
+      startup: {
+        id: startupId,
+        nome: startupNome,
+        estagio: startupEstagio,
+      },
+      // Dados da campanha
+      campanha: {
+        metaCaptacao: metaNumerica,
+        equityOferecido: equityNumerico,
+        quantidadeTokensCampanha: Math.floor(quantidadeTokensCampanha),
+        valorToken: VALOR_TOKEN,
+      },
+      // Dados da reserva
+      reserva: {
+        quantidadeTokens: quantidadeReservaNumerica,
+        valorTotalReserva: valorTotalReserva,
+        valorTokenReserva: VALOR_RESERVA_TOKEN,
+        metodoPagamento: 'credit',
+      },
+      // Timestamp
+      timestamp: new Date().toISOString(),
     };
 
-    console.log('Nova campanha criada:', novaCampanha);
+    // Console log com todos os dados capturados
+    console.log('🎯 Dados Capturados para Reserva de Tokens:', dadosCapturados);
 
-    // Fechar modal e limpar formulário
-    onOpenChange(false);
-    setMetaCaptacao('');
-    setEquityOferecido('');
-    setQuantidadeTokensReserva('');
+    // Validar dados antes de enviar para checkout
+    if (!apiUser?.nome || !apiUser?.id) {
+      console.error('❌ Dados do usuário incompletos:', apiUser);
+      alert('Dados do usuário não encontrados. Faça login novamente.');
+      setIsLoading(false);
+      return;
+    }
+
+    if (valorTotalReserva <= 0) {
+      console.error('❌ Valor da reserva inválido:', valorTotalReserva);
+      alert('Valor da reserva inválido. Verifique os dados.');
+      setIsLoading(false);
+      return;
+    }
+
+    if (quantidadeReservaNumerica <= 0) {
+      console.error(
+        '❌ Quantidade de tokens inválida:',
+        quantidadeReservaNumerica,
+      );
+      alert('Quantidade de tokens inválida. Verifique os dados.');
+      setIsLoading(false);
+      return;
+    }
+
+    // Chamar função Checkout com os dados formatados
+    try {
+      const checkoutData = {
+        userName: apiUser.nome,
+        userId: apiUser.id.toString(),
+        valor: `R$ ${valorTotalReserva}`, // Formatar sem pontos de milhar
+        productName: `Reserva de ${quantidadeReservaNumerica} tokens - ${startupNome}`,
+        productType: 'Reserva de Tokens',
+        productDescription: `Reserva de ${quantidadeReservaNumerica} tokens da campanha de ${startupNome} no estágio ${startupEstagio}`,
+        quantidade: quantidadeReservaNumerica,
+        validity: 365, // 1 ano de validade
+        obs: `Meta de captação: ${formatCurrency(metaNumerica)} | Equity: ${equityNumerico}%`,
+      };
+      const checkoutWindow = Checkout(checkoutData);
+
+      if (checkoutWindow) {
+        console.log('✅ Janela de checkout aberta com sucesso');
+      } else {
+        console.error('❌ Falha ao abrir janela de checkout');
+        alert(
+          'Não foi possível abrir a janela de pagamento. Verifique se o bloqueador de pop-ups está desativado.',
+        );
+      }
+    } catch (error) {
+      console.error('❌ Erro ao chamar Checkout:', error);
+      alert('Ocorreu um erro ao processar o pagamento. Tente novamente.');
+    }
+
+    // Resetar e fechar modal
     setIsLoading(false);
+    onOpenChange(false);
 
-    // Mostrar mensagem de sucesso
-    alert(
-      `Campanha criada com sucesso!\n\nResumo:\n• Meta: ${formatCurrency(metaNumerica)}\n• Equity: ${equityNumerico}%\n• Tokens da Campanha: ${formatNumber(Math.floor(quantidadeTokensCampanha))}\n• Tokens de Reserva: ${formatNumber(quantidadeReservaNumerica)}\n• Valor da Reserva: ${formatCurrency(valorTotalReserva)}\n• Valor por Token (Campanha): ${formatCurrency(VALOR_TOKEN)}\n• Valor por Token (Reserva): ${formatCurrency(VALOR_RESERVA_TOKEN)}`,
-    );
+    // Resetar formulário
+    setMetaCaptacao(0);
+    setEquityOferecido('');
   };
 
   const handleCancel = () => {
     onOpenChange(false);
-    setMetaCaptacao('');
+    setMetaCaptacao(0);
     setEquityOferecido('');
-    setQuantidadeTokensReserva('');
   };
 
-  if (!open) return null;
+  const handleMetaCaptacaoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value;
+
+    // Se estiver vazio, resetar para zero
+    if (!inputValue.trim()) {
+      setMetaCaptacao(0);
+      setMetaCaptacaoMasked('');
+      return;
+    }
+
+    // Remover todos os caracteres não numéricos
+    const numerosApenas = inputValue.replace(/[^\d]/g, '');
+
+    // Se não tiver números, resetar
+    if (!numerosApenas) {
+      setMetaCaptacao(0);
+      setMetaCaptacaoMasked('');
+      return;
+    }
+
+    // Converter para número
+    const valorNumerico = parseInt(numerosApenas, 10);
+
+    // Validar se é um número válido
+    if (isNaN(valorNumerico) || valorNumerico < 0) {
+      return; // Não atualiza se for inválido
+    }
+
+    // Limitar a valores razoáveis (máximo 10 milhões)
+    if (valorNumerico > 10000000) {
+      return;
+    }
+
+    // Formatar como moeda brasileira (sem casas decimais)
+    const valorFormatado = new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(valorNumerico);
+
+    setMetaCaptacao(valorNumerico);
+    setMetaCaptacaoMasked(valorFormatado);
+  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-lg bg-white shadow-xl">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[95vh] w-[95vw] overflow-y-auto p-0 lg:w-[85vw] xl:w-[80vw] 2xl:w-[75vw]">
         {/* Header */}
-        <div className="border-b px-6 py-4">
+        <DialogHeader className="border-b px-8 py-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-purple-100 p-2">
-                <TrendingUp className="h-6 w-6 text-purple-600" />
-              </div>
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900">
-                  Nova Campanha de Captação
-                </h2>
-                <p className="text-sm text-gray-500">
-                  Crie uma nova campanha para <strong>{startupNome}</strong>
-                </p>
-              </div>
+            <div>
+              <DialogTitle className="text-xl font-semibold text-gray-900">
+                Criar Campanha de Investimento
+              </DialogTitle>
+              <DialogDescription>
+                Investimento em tokens para <strong>{startupNome}</strong>
+              </DialogDescription>
             </div>
             <Button
               variant="ghost"
@@ -163,245 +252,203 @@ export function NovaCampanhaModal({
               ✕
             </Button>
           </div>
-        </div>
+        </DialogHeader>
 
-        {/* Content */}
-        <form onSubmit={handleSubmit} className="space-y-6 p-6">
-          {/* Dados da Campanha */}
-          <div className="space-y-4">
-            <h3 className="flex items-center gap-2 text-lg font-semibold">
-              <Calculator className="h-5 w-5" />
-              Dados da Campanha
-            </h3>
+        <div className="grid grid-cols-1 gap-8 p-8 lg:grid-cols-3">
+          {/* Main Content - 2/3 width */}
+          <div className="space-y-6 lg:col-span-2">
+            <div className="space-y-6">
+              <div>
+                <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold">
+                  <CircleDollarSignIcon className="h-5 w-5" />
+                  Reservar Tokens
+                </h3>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="meta_captacao">Meta de Captação (R$)</Label>
-                <Input
-                  id="meta_captacao"
-                  type="number"
-                  placeholder="500000"
-                  value={metaCaptacao}
-                  onChange={(e) => setMetaCaptacao(e.target.value)}
-                  min="10000"
-                  step="1000"
-                  required
-                />
-                <p className="text-muted-foreground text-xs">
-                  Mínimo: R$ 10.000
-                </p>
+                {/* Product Card Style */}
+                <Card className="mb-6">
+                  <CardContent className="p-6">
+                    <div className="mb-4 flex items-center gap-4">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-linear-to-br from-purple-500 to-purple-600">
+                        <CircleDollarSignIcon className="h-8 w-8 text-white" />
+                      </div>
+                      <div>
+                        <h4 className="text-lg font-semibold">{startupNome}</h4>
+                        <p className="text-gray-600">
+                          Campanha de Captação de Tokens
+                        </p>
+                        <div className="mt-1 flex items-center gap-2">
+                          <span className="rounded-full bg-purple-100 px-2 py-1 text-xs font-medium text-purple-800">
+                            {startupEstagio}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <div className="grid h-24 grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="meta_captacao">Meta de Captação (R$)</Label>
+                    <Input
+                      id="meta_captacao"
+                      type="text"
+                      placeholder={formatCurrency(limitesMeta.sugerido)}
+                      value={metaCaptacaoMasked}
+                      onChange={handleMetaCaptacaoChange}
+                      min={limitesMeta.minimo}
+                      max={limitesMeta.maximo}
+                      required
+                      className={metaValidacao.valido ? '' : 'border-red-500'}
+                    />
+                    {!metaValidacao.valido && (
+                      <p className="text-xs text-red-500">
+                        {metaValidacao.erro}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="equity">Equity Oferecido (%)</Label>
+                    <Input
+                      id="equity"
+                      type="number"
+                      placeholder="15"
+                      value={equityOferecido}
+                      onChange={(e) => setEquityOferecido(e.target.value)}
+                      min="1"
+                      max="50"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Preview Cards */}
+                {metaNumerica > 0 && (
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <Card className="border-purple-200 bg-purple-50">
+                      <CardContent className="p-4 text-center">
+                        <div className="text-2xl font-bold text-purple-700">
+                          {formatNumber(Math.floor(quantidadeTokensCampanha))}
+                        </div>
+                        <div className="text-sm text-purple-600">
+                          Tokens (Campanha + Reserva)
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-green-200 bg-green-50">
+                      <CardContent className="p-4 text-center">
+                        <div className="text-2xl font-bold text-green-700">
+                          {formatCurrency(valorTotalReserva)}
+                        </div>
+                        <div className="text-sm text-green-600">
+                          Valor da Reserva
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
               </div>
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="equity_oferecido">Equity Oferecido (%)</Label>
-                <Input
-                  id="equity_oferecido"
-                  type="number"
-                  placeholder="15"
-                  value={equityOferecido}
-                  onChange={(e) => setEquityOferecido(e.target.value)}
-                  min="1"
-                  max="50"
-                  step="0.1"
-                  required
-                />
-                <p className="text-muted-foreground text-xs">Entre 1% e 50%</p>
-              </div>
+            {/* Navigation Buttons */}
+            <div className="mt-8 flex justify-end border-t pt-6">
+              <Button
+                onClick={handleReservarTokens}
+                disabled={isLoading || !isFormValid}
+                className="bg-purple-600 hover:bg-purple-700"
+              >
+                {isLoading
+                  ? 'Processando...'
+                  : `Reservar Tokens - ${formatCurrency(valorTotalReserva)}`}
+                <CircleDollarSignIcon className="ml-2 h-4 w-4" />
+              </Button>
             </div>
           </div>
 
-          {/* Cálculos de Tokens da Campanha */}
-          {metaNumerica > 0 && (
-            <div className="space-y-4">
-              <h3 className="flex items-center gap-2 text-lg font-semibold">
-                <Calculator className="h-5 w-5" />
-                Tokens da Campanha
-              </h3>
-
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-muted-foreground text-sm font-medium">
-                      Quantidade de Tokens
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-blue-600">
-                      {formatNumber(Math.floor(quantidadeTokensCampanha))}
+          {/* Sidebar - 1/3 width */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-8 space-y-6">
+              {/* Cart Summary */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <div className="h-5 w-5 rounded-full bg-purple-500" />
+                    Resumo da Compra
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Startup:</span>
+                      <span className="text-sm font-medium">{startupNome}</span>
                     </div>
-                    <CardDescription className="text-xs">
-                      Tokens disponíveis para investimento
-                    </CardDescription>
-                  </CardContent>
-                </Card>
 
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-muted-foreground text-sm font-medium">
-                      Valor por Token
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-green-600">
-                      {formatCurrency(VALOR_TOKEN)}
-                    </div>
-                    <CardDescription className="text-xs">
-                      Valor fixo por token na campanha
-                    </CardDescription>
-                  </CardContent>
-                </Card>
+                    {metaNumerica > 0 && (
+                      <>
+                        <div className="my-2 border-t" />
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">
+                            Meta de Captação:
+                          </span>
+                          <span className="text-sm font-medium">
+                            {formatCurrency(metaNumerica)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">
+                            Equity Oferecido:
+                          </span>
+                          <span className="text-sm font-medium">
+                            {equityNumerico}%
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">
+                            Tokens (Campanha + Reserva):
+                          </span>
+                          <span className="text-sm font-medium">
+                            {formatNumber(Math.floor(quantidadeTokensCampanha))}
+                          </span>
+                        </div>
+                      </>
+                    )}
 
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-muted-foreground text-sm font-medium">
-                      Equity por Token
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-purple-600">
-                      {(
-                        equityNumerico / Math.floor(quantidadeTokensCampanha)
-                      ).toFixed(4)}
-                      %
-                    </div>
-                    <CardDescription className="text-xs">
-                      % da empresa por token
-                    </CardDescription>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          )}
-
-          {/* Reserva de Tokens */}
-          {quantidadeTokensCampanha > 0 && (
-            <div className="space-y-4">
-              <h3 className="flex items-center gap-2 text-lg font-semibold">
-                <ShoppingCart className="h-5 w-5" />
-                Compra de Reserva de Tokens
-              </h3>
-
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="quantidade_reserva">
-                    Quantidade de Tokens para Reserva
-                  </Label>
-                  <Input
-                    id="quantidade_reserva"
-                    type="number"
-                    placeholder="10"
-                    value={quantidadeTokensReserva}
-                    onChange={(e) => setQuantidadeTokensReserva(e.target.value)}
-                    min="1"
-                    max={Math.floor(quantidadeTokensCampanha)}
-                    required
-                  />
-                  <p className="text-muted-foreground text-xs">
-                    Máximo: {formatNumber(Math.floor(quantidadeTokensCampanha))}{' '}
-                    tokens
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Valor Total da Reserva</Label>
-                  <div className="text-2xl font-bold text-orange-600">
-                    {formatCurrency(valorTotalReserva)}
-                  </div>
-                  <p className="text-muted-foreground text-xs">
-                    {formatCurrency(VALOR_RESERVA_TOKEN)} por token
-                  </p>
-                </div>
-              </div>
-
-              <Card className="border-orange-200 bg-orange-50">
-                <CardContent className="pt-6">
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center gap-2">
-                      <ShoppingCart className="h-4 w-4 text-orange-600" />
-                      <span className="font-medium text-orange-800">
-                        Resumo da Compra:
+                    <div className="my-2 border-t" />
+                    <div className="flex justify-between">
+                      <span className="font-medium">Total a Pagar:</span>
+                      <span className="text-lg font-bold text-purple-600">
+                        {formatCurrency(valorTotalReserva)}
                       </span>
-                    </div>
-                    <div className="ml-6 space-y-1 text-orange-700">
-                      <div>
-                        • Tokens de Reserva:{' '}
-                        {formatNumber(quantidadeReservaNumerica)}
-                      </div>
-                      <div>
-                        • Valor por Token: {formatCurrency(VALOR_RESERVA_TOKEN)}
-                      </div>
-                      <div>
-                        • Valor Total: {formatCurrency(valorTotalReserva)}
-                      </div>
-                      <div>
-                        • Tokens Restantes para Campanha:{' '}
-                        {formatNumber(
-                          Math.floor(quantidadeTokensCampanha) -
-                            quantidadeReservaNumerica,
-                        )}
-                      </div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Benefits */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Benefícios</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <div className="h-4 w-4 rounded-full bg-green-500" />
+                    <span>Tokens garantidos</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <div className="h-4 w-4 rounded-full bg-green-500" />
+                    <span>Acesso prioritário</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <div className="h-4 w-4 rounded-full bg-green-500" />
+                    <span>Suporte dedicado</span>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          )}
-
-          {/* Fórmula do Cálculo */}
-          {metaNumerica > 0 && (
-            <Card className="bg-muted/50">
-              <CardContent className="pt-6">
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="h-4 w-4" />
-                    <span className="font-medium">Fórmulas:</span>
-                  </div>
-                  <div className="text-muted-foreground ml-6 space-y-1">
-                    <div>• Tokens da Campanha = Meta de Captação ÷ R$ 200</div>
-                    <div>
-                      • Tokens da Campanha = {formatCurrency(metaNumerica)} ÷{' '}
-                      {formatCurrency(VALOR_TOKEN)} ={' '}
-                      {formatNumber(Math.floor(quantidadeTokensCampanha))}{' '}
-                      tokens
-                    </div>
-                    <div>• Valor da Reserva = Tokens de Reserva × R$ 5</div>
-                    <div>
-                      • Valor da Reserva ={' '}
-                      {formatNumber(quantidadeReservaNumerica)} ×{' '}
-                      {formatCurrency(VALOR_RESERVA_TOKEN)} ={' '}
-                      {formatCurrency(valorTotalReserva)}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Actions */}
-          <div className="flex justify-end gap-3 border-t pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleCancel}
-              disabled={isLoading}
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              disabled={
-                isLoading ||
-                !metaCaptacao ||
-                !equityOferecido ||
-                !quantidadeTokensReserva
-              }
-              className="bg-purple-600 hover:bg-purple-700"
-            >
-              {isLoading ? 'Processando...' : 'Criar Campanha e Pagar Reserva'}
-            </Button>
           </div>
-        </form>
-      </div>
-    </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

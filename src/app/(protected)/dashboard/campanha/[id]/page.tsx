@@ -216,6 +216,7 @@ async function CampanhaDataTableWrapper({
       initialFilters={filters}
       startupId={startupId}
       startupNome={data.startup?.nome || ''}
+      startupEstagio={data.startup?.estagio}
     />
   );
 }

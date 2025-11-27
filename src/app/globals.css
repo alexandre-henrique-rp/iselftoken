@@ -141,3 +141,25 @@
     animation: none;
     mix-blend-mode: normal;
 }
+
+/* Modal improvements */
+@media (min-width: 1024px) {
+  [data-slot="dialog-content"] {
+    max-width: 90vw !important;
+    width: 90vw !important;
+  }
+}
+
+@media (min-width: 1280px) {
+  [data-slot="dialog-content"] {
+    max-width: 85vw !important;
+    width: 85vw !important;
+  }
+}
+
+@media (min-width: 1536px) {
+  [data-slot="dialog-content"] {
+    max-width: 80vw !important;
+    width: 80vw !important;
+  }
+}

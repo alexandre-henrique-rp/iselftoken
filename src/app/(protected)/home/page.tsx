@@ -1,83 +1,112 @@
-import React, { Suspense } from 'react';
 import { AdCarousel } from '@/components/home/AdCarousel';
-import { AppleCarouselWrapper } from '@/components/home/AppleCarouselWrapper';
+import { StartupSection } from '@/components/home/StartupSection';
+import { Skeleton } from '@/components/ui/skeleton';
+import { getBannersFromFolder } from '@/data/banner-service';
 import {
-  getFeaturedStartups,
-  getVerifiedStartups,
   getAcceleratedStartups,
   getApprovalPhaseStartups,
-  getAdBanners
+  getFeaturedStartups,
+  getVerifiedStartups,
 } from '@/data/home-data';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Suspense } from 'react';
 
-const CarouselSkeleton = () => (
-  <div className="py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
-    <Skeleton className="h-6 sm:h-8 w-1/2 sm:w-1/3 mb-6 sm:mb-8" />
-    <div className="flex gap-2 sm:gap-4 overflow-hidden">
-      <div className="min-w-0 flex-[0_0_100%] sm:flex-[0_0_85%] md:flex-[0_0_50%] lg:flex-[0_0_33.3333%]">
-        <Skeleton className="h-[300px] sm:h-[350px] md:h-[400px] w-full rounded-lg" />
-      </div>
-      <div className="min-w-0 flex-[0_0_100%] sm:flex-[0_0_85%] md:flex-[0_0_50%] lg:flex-[0_0_33.3333%] hidden md:block">
-        <Skeleton className="h-[300px] sm:h-[350px] md:h-[400px] w-full rounded-lg" />
-      </div>
-      <div className="min-w-0 flex-[0_0_100%] sm:flex-[0_0_85%] md:flex-[0_0_50%] lg:flex-[0_0_33.3333%] hidden lg:block">
-        <Skeleton className="h-[300px] sm:h-[350px] md:h-[400px] w-full rounded-lg" />
-      </div>
+const SectionSkeleton = () => (
+  <div className="space-y-6 px-4 py-8 md:px-0">
+    <div className="flex justify-between">
+      <Skeleton className="h-8 w-64" />
+      <Skeleton className="hidden h-8 w-32 sm:block" />
+    </div>
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {[1, 2, 3, 4].map((i) => (
+        <div key={i} className="space-y-4">
+          <Skeleton className="aspect-4/3 w-full rounded-lg" />
+          <Skeleton className="h-4 w-3/4" />
+          <Skeleton className="h-4 w-1/2" />
+        </div>
+      ))}
     </div>
   </div>
 );
 
-const AdCarouselLoader = async () => {
-  const banners = await getAdBanners();
-  return <AdCarousel banners={banners} />;
-};
-
 const FeaturedStartupsLoader = async () => {
   const startups = await getFeaturedStartups();
-  return <AppleCarouselWrapper title="Startups em Destaque" startups={startups} />;
+  return (
+    <StartupSection
+      title="Destaques da Semana"
+      startups={startups}
+      layout="grid"
+      viewAllLink="/explorar?filter=destaques"
+    />
+  );
 };
 
 const VerifiedStartupsLoader = async () => {
   const startups = await getVerifiedStartups();
-  return <AppleCarouselWrapper title="Startups Verificadas" startups={startups} />;
+  return (
+    <StartupSection
+      title="Startups Verificadas"
+      startups={startups}
+      layout="carousel"
+      viewAllLink="/explorar?filter=verificadas"
+    />
+  );
 };
 
 const AcceleratedStartupsLoader = async () => {
   const startups = await getAcceleratedStartups();
-  return <AppleCarouselWrapper title="Startups Aceleradas" startups={startups} />;
+  return (
+    <StartupSection
+      title="Em Aceleração"
+      startups={startups}
+      layout="carousel"
+      viewAllLink="/explorar?filter=aceleradas"
+    />
+  );
 };
 
 const ApprovalPhaseStartupsLoader = async () => {
   const startups = await getApprovalPhaseStartups();
-  return <AppleCarouselWrapper title="Startups em Fase de Aprovação" startups={startups} />;
+  return (
+    <StartupSection
+      title="Novas Oportunidades"
+      startups={startups}
+      layout="carousel"
+      viewAllLink="/explorar?filter=aprovacao"
+    />
+  );
 };
 
-export const dynamic = 'force-dynamic';
-
 export default async function Home() {
-  return (
-    <div className="w-full min-h-screen">
-      <Suspense fallback={<Skeleton className="h-64 sm:h-80 md:h-96 w-full" />}>
-        <AdCarouselLoader />
-      </Suspense>
+  const banners = await getBannersFromFolder();
 
-      <div className="max-w-[1380px] mx-auto">
-        <Suspense fallback={<CarouselSkeleton />}>
+  return (
+    <div className="bg-background min-h-screen w-full pb-20">
+      <div className="relative w-full">
+        <AdCarousel banners={banners} />
+        <div className="from-background pointer-events-none absolute right-0 bottom-0 left-0 h-24 bg-linear-to-t to-transparent" />
+      </div>
+      <main className="relative z-10 container mx-auto mt-8 space-y-8 md:space-y-12 lg:max-w-[1400px]">
+        <Suspense fallback={<SectionSkeleton />}>
           <FeaturedStartupsLoader />
         </Suspense>
 
-        <Suspense fallback={<CarouselSkeleton />}>
+        <Suspense fallback={<SectionSkeleton />}>
           <VerifiedStartupsLoader />
         </Suspense>
 
-        <Suspense fallback={<CarouselSkeleton />}>
-          <AcceleratedStartupsLoader />
-        </Suspense>
-
-        <Suspense fallback={<CarouselSkeleton />}>
-          <ApprovalPhaseStartupsLoader />
-        </Suspense>
-      </div>
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+          <div className="w-full min-w-0">
+            <Suspense fallback={<SectionSkeleton />}>
+              <AcceleratedStartupsLoader />
+            </Suspense>
+          </div>
+          <div className="w-full min-w-0">
+            <Suspense fallback={<SectionSkeleton />}>
+              <ApprovalPhaseStartupsLoader />
+            </Suspense>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }

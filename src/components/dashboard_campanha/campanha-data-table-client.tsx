@@ -20,6 +20,7 @@ interface CampanhaDataTableClientProps {
   initialFilters: StartupFilters;
   startupId: number;
   startupNome: string;
+  startupEstagio?: string;
 }
 
 export function CampanhaDataTableClient({
@@ -28,6 +29,7 @@ export function CampanhaDataTableClient({
   initialFilters,
   startupId,
   startupNome,
+  startupEstagio,
 }: CampanhaDataTableClientProps) {
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -44,6 +46,7 @@ export function CampanhaDataTableClient({
         onOpenChange={setModalOpen}
         startupId={startupId}
         startupNome={startupNome}
+        startupEstagio={startupEstagio}
       />
     </>
   );
