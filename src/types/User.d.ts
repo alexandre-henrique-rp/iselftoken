@@ -39,8 +39,11 @@ declare namespace UserType {
         ativo: boolean;
       }
     ];
+    startups?: number[]; // lista de array do ids das startups relacionadas
+    tokens?: number[]; // lista de array do ids dos tokens
     edicao: boolean;
   }
+  
   interface Update {
     nome: string;
     email: string;

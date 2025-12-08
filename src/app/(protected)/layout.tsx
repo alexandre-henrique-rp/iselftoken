@@ -7,7 +7,7 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { WhatsappHelpButton } from '@/components/WhatsappHelpButton';
-import { GetSessionServer } from '@/context/auth';
+import { GetSessionServer, UserSessionData, } from '@/context/auth';
 import { redirect } from 'next/navigation';
 
 interface Props {
@@ -17,9 +17,12 @@ interface Props {
 // Layout protegido: valida a sessão no servidor para evitar loading no client
 export default async function ProtectedLayout({ children }: Props) {
   const sessionData = await GetSessionServer();
-  if (!sessionData) {
+  const UserData = await UserSessionData();
+  console.log("🚀 ~ ProtectedLayout ~ UserData:", UserData)
+  if (!sessionData || !UserData) {
     redirect('/login');
   }
+  
 
   const session = sessionData;
   const role = session.user?.role;

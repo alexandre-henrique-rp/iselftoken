@@ -267,27 +267,6 @@ const A2FPageClient = () => {
           return;
         }
 
-        // Processar registro se houver dados do formulário
-        if (method === 'register') {
-          const req = await fetch('/api/register', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Accept: 'application/json',
-            },
-            body: JSON.stringify(formData),
-          });
-
-          const res = await req.json();
-
-          if (!req.ok) {
-            toast('Erro no registro', {
-              description: res.message,
-            });
-            return;
-          }
-        }
-
         // Sucesso - redirecionar
         toast('Código verificado com sucesso!', {
           description: 'Redirecionando para o dashboard...',

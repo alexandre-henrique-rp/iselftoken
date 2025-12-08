@@ -11,8 +11,6 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { email, password } = body;
 
-  
-
     // autenticar com api
     const response = await fetch(`${process.env.NEXTAUTH_API_URL}/login`, {
       method: 'POST',
@@ -24,6 +22,7 @@ export async function POST(request: Request) {
     });
 
     // verificar resposta
+    console.log("🚀 ~ POST ~ data:", response)
     const data = await response.json();
 
     if (!response.ok) {

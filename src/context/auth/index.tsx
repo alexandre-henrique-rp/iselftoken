@@ -93,6 +93,9 @@ export async function DeleteSession() {
   const cookieStore = await cookies();
   cookieStore.delete('session-token');
   cookieStore.delete('user');
+  cookieStore.delete('user_data');
+  cookieStore.delete('user_planos');
+  cookieStore.delete('user_pacotes');
 }
 
 export async function SetSession2fa(
@@ -122,4 +125,88 @@ export async function GetSession2fa(): Promise<boolean> {
     return false;
   }
   return c.value === 'true';
+}
+
+async function GetUserCookieExists(): Promise<boolean> {
+  const cookieStore = await cookies();
+  const c = cookieStore.get('user_data');
+  const p = cookieStore.get('user_planos');
+  const pa = cookieStore.get('user_pacotes');
+  if (!c || !p || !pa) {
+    return false;
+  }
+  return true;
+}
+async function GetUserCookie(){
+  const cookieStore = await cookies();
+  const c = cookieStore.get('user_data');
+  const p = cookieStore.get('user_planos');
+  const pa = cookieStore.get('user_pacotes');
+  if (!c || !p || !pa) {
+    return null;
+  }
+  return {
+    ...JSON.parse(c.value),
+    planos: JSON.parse(p.value),
+    pacotes: JSON.parse(pa.value),
+  };
+}
+
+async function SetUserCookie(user: UserType.Get) {
+  const { planos, pacotes, ...rest } = user;
+  const cookieStore = await cookies();
+  cookieStore.set('user_data', JSON.stringify(rest), {
+    expires: new Date(Date.now() + 60 * 60 * 1000),
+    httpOnly: true,
+    path: '/',
+  });
+  cookieStore.set('user_planos', JSON.stringify(planos), {
+    expires: new Date(Date.now() + 60 * 60 * 1000),
+    httpOnly: true,
+    path: '/',
+  });
+  cookieStore.set('user_pacotes', JSON.stringify(pacotes), {
+    expires: new Date(Date.now() + 60 * 60 * 1000),
+    httpOnly: true,
+    path: '/',
+  });
+}
+
+export async function UserSessionData() {
+  const userCookieExists = await GetUserCookieExists();
+  if (!userCookieExists) {
+    const api = await UserApi();
+    if (!api) {
+      return null;
+    }
+    await SetUserCookie(api);
+    return await GetUserCookie();
+  } 
+  return await GetUserCookie();
+}
+
+async function UserApi() {
+  const session = await GetSessionServer();
+  if (!session) {
+    return null;
+  }
+  const userApi = await fetch(
+    `${process.env.NEXTAUTH_API_URL}/users/${session.user.id}`,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      next: {
+        tags: ['perfil'],
+        // revalidar em 1hora
+        revalidate: 60 * 60,
+      },
+    },
+  );
+  if (!userApi.ok) {
+    return null;
+  }
+  const userData = await userApi.json();
+  return userData.data;
 }

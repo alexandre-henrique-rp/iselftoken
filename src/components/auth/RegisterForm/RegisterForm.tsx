@@ -149,37 +149,43 @@ const RegisterForm = () => {
         setLoading(true);
         const codigo = generateA2fCode();
         // ENVIAR O FORM PARA LOCAL STORAGE
-        localStorage.setItem('formData', JSON.stringify(formData));
         localStorage.setItem('codigo', codigo);
         localStorage.setItem('redirect', '/login');
         localStorage.setItem('method', 'register');
 
-        const result = await fetch(`/api/newcode`, {
+        const result = await fetch(`/api/register`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            nome: formData.nome,
-            email: formData.email,
+            ...formData,
             codigo: codigo,
+            confirmacaoSenha: formData.confirmarSenha,
           }),
         });
+        console.log("🚀 ~ RegisterForm ~ result:", result)
 
         if (!result.ok) {
+          const data = await result.json()
+          if (data) {
+            throw new Error(JSON.stringify(data, null, 2))
+          }
           throw new Error(
             'Erro ao salvar dados do cadastro, codigo: ' + codigo,
           );
         }
+        
 
         // Mostrar sucesso antes de redirecionar
         toast('Cadastro realizado com sucesso!', {
           description: 'Redirecionando para planos...',
+          duration: 5000
         });
 
-        setTimeout(() => {
-          router.push('/auth');
-        }, 500); // Pequeno delay para o toast ser visto
+        // setTimeout(() => {
+        //   router.push('/auth');
+        // }, 500); // Pequeno delay para o toast ser visto
       } catch (error) {
         toast('Erro no cadastro', {
           description:
