@@ -7,22 +7,46 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { WhatsappHelpButton } from '@/components/WhatsappHelpButton';
-import { GetSessionServer, UserSessionData, } from '@/context/auth';
+import { GetSessionServer, UserSessionData } from '@/context/auth';
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 interface Props {
   children: React.ReactNode;
 }
 
-// Layout protegido: valida a sessão no servidor para evitar loading no client
+/**
+ * Layout protegido: valida a sessão no servidor para evitar loading no client
+ * Também valida se o usuário possui um plano ativo
+ */
 export default async function ProtectedLayout({ children }: Props) {
   const sessionData = await GetSessionServer();
   const UserData = await UserSessionData();
-  console.log("🚀 ~ ProtectedLayout ~ UserData:", UserData)
+
+  // Validação de sessão
   if (!sessionData || !UserData) {
     redirect('/login');
   }
-  
+
+  // Obter URL atual do middleware
+  const headersList = await headers();
+  const pathname = headersList.get('x-pathname') || '';
+
+  // Validação de plano: redireciona se não tiver plano ativo
+  // Não redireciona se já estiver na página de planos
+  const hasActivePlan =
+    UserData.planos &&
+    Array.isArray(UserData.planos) &&
+    UserData.planos.length > 0;
+  const isOnPlansPage = pathname.includes('/business/plans');
+
+  console.log('🚀 ~ ProtectedLayout ~ hasActivePlan:', hasActivePlan);
+  console.log('🚀 ~ ProtectedLayout ~ isOnPlansPage:', isOnPlansPage);
+
+  if (!hasActivePlan && !isOnPlansPage) {
+    console.log('🚀 ~ Redirecionando para /business/plans');
+    redirect('/business/plans');
+  }
 
   const session = sessionData;
   const role = session.user?.role;

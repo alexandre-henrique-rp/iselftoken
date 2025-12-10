@@ -21,6 +21,10 @@ export async function middleware(req: NextRequest) {
   const IsPublic = publicRoutesList.some((route) => pathname.startsWith(route));
   const NotAf2 = PageNotAf2.includes(pathname)
 
+  // Criar resposta com pathname nos headers
+  const response = NextResponse.next();
+  response.headers.set('x-pathname', pathname);
+
   if (hasTwoFactor && session && NotAf2) {
     const role = session.user.role
     if (role === 'admin') {
@@ -36,11 +40,10 @@ export async function middleware(req: NextRequest) {
   }
 
   if (IsPublic) {
-    return NextResponse.next();
+    return response;
   }
 
-
-
+  return response;
 }
 
 export const config = {

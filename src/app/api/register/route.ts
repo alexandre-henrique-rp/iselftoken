@@ -9,11 +9,9 @@ import { z } from "zod";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    console.log("🚀 ~ POST ~ body:", body)
 
     // Validação dos dados recebidos
     const validatedData = registerSchema.parse(body);
-    console.log("🚀 ~ POST ~ validatedData:", validatedData)
 
     const cadastro = await fetch(`${process.env.NEXTAUTH_API_URL}/register/user`, {
       method: 'POST',
@@ -22,8 +20,6 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify(validatedData),
     });
-
-    console.log("🚀 ~ POST ~ cadastro:", cadastro)
 
     if (!cadastro.ok) {
       // const user = await cadastro.json() || await cadastro.text();
@@ -36,7 +32,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const user = await cadastro.json();
+    const resp = await cadastro.text();
+    const user = JSON.parse(resp)
     console.log('________________________________________________________')
     console.log("🚀 ~ POST ~ user:", user)
 
@@ -45,7 +42,7 @@ export async function POST(req: NextRequest) {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ usuario_id: user.data.id }),
+      body: JSON.stringify({ usuario_id: user.data.usuario_id }),
     });
 
     // Simulação de sucesso

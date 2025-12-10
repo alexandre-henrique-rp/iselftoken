@@ -183,9 +183,9 @@ const RegisterForm = () => {
           duration: 5000
         });
 
-        // setTimeout(() => {
-        //   router.push('/auth');
-        // }, 500); // Pequeno delay para o toast ser visto
+        setTimeout(() => {
+          router.push('/auth');
+        }, 500); // Pequeno delay para o toast ser visto
       } catch (error) {
         toast('Erro no cadastro', {
           description:

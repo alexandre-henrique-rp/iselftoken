@@ -15,10 +15,12 @@ interface InputPremiumProps extends React.InputHTMLAttributes<HTMLInputElement> 
   required?: boolean;
   /** Estado de loading (desabilita input) */
   loading?: boolean;
+  /** Ícone opcional à esquerda */
+  icon?: React.ReactNode;
 }
 
 const InputPremium = forwardRef<HTMLInputElement, InputPremiumProps>(
-  ({ label, error, required = false, loading = false, className, ...props }, ref) => {
+  ({ label, error, required = false, loading = false, icon, className, ...props }, ref) => {
     return (
       <div className="space-y-2">
         {/* Label com indicador visual obrigatório */}
@@ -38,42 +40,79 @@ const InputPremium = forwardRef<HTMLInputElement, InputPremiumProps>(
           )}
         </label>
 
-        {/* Input com design premium */}
-        <input
-          ref={ref}
-          className={cn(
-            // Base styles
-            "w-full px-4 py-3 text-sm rounded-md",
-            "transition-all duration-300 ease-out",
-            "placeholder:text-gray-500",
-            "focus:outline-none focus:ring-2",
-            "disabled:cursor-not-allowed disabled:opacity-50",
-            
-            // Background e borda
-            "bg-gray-900/50 border border-gray-800",
-            "hover:bg-gray-900/70 hover:border-gray-700",
-            
-            // Focus states
-            "focus:bg-gray-900 focus:border-purple-500/50 focus:ring-purple-500/20",
-            
-            // Error states
-            error && [
-              "border-red-500/30 bg-red-950/20",
-              "hover:bg-red-950/30 hover:border-red-500/40",
-              "focus:bg-red-950/40 focus:border-red-500/50 focus:ring-red-500/20"
-            ],
-            
-            className
+        <div className="relative">
+          {/* Ícone à esquerda */}
+          {icon && (
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+              {icon}
+            </div>
           )}
-          style={{
-            color: 'oklch(0.920 0.004 49.25)',
-            backdropFilter: 'blur(10px)',
-          }}
-          disabled={loading}
-          aria-invalid={!!error}
-          aria-describedby={error ? `${props.id}-error` : undefined}
-          {...props}
-        />
+
+          {/* Input com design premium */}
+          <input
+            ref={ref}
+            className={cn(
+              // Base styles
+              "w-full px-4 py-3 text-sm rounded-md",
+              "transition-all duration-300 ease-out",
+              "placeholder:text-gray-500",
+              "focus:outline-none focus:ring-2",
+              "disabled:cursor-not-allowed disabled:opacity-50",
+              
+              // Ajuste de padding se houver ícone
+              icon ? "pl-10" : "px-4",
+              
+              // Background e borda
+              "bg-gray-900/50 border border-gray-800",
+              "hover:bg-gray-900/70 hover:border-gray-700",
+              
+              // Focus states
+              "focus:bg-gray-900 focus:border-purple-500/50 focus:ring-purple-500/20",
+              
+              // Error states
+              error && [
+                "border-red-500/30 bg-red-950/20",
+                "hover:bg-red-950/30 hover:border-red-500/40",
+                "focus:bg-red-950/40 focus:border-red-500/50 focus:ring-red-500/20"
+              ],
+              
+              className
+            )}
+            style={{
+              color: 'oklch(0.920 0.004 49.25)',
+              backdropFilter: 'blur(10px)',
+            }}
+            disabled={loading}
+            aria-invalid={!!error}
+            aria-describedby={error ? `${props.id}-error` : undefined}
+            {...props}
+          />
+
+          {/* Indicador de loading */}
+          {loading && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              <svg 
+                className="h-4 w-4 animate-spin text-purple-400" 
+                fill="none" 
+                viewBox="0 0 24 24"
+              >
+                <circle 
+                  className="opacity-25" 
+                  cx="12" 
+                  cy="12" 
+                  r="10" 
+                  stroke="currentColor" 
+                  strokeWidth="4"
+                />
+                <path 
+                  className="opacity-75" 
+                  fill="currentColor" 
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                />
+              </svg>
+            </div>
+          )}
+        </div>
 
         {/* Mensagem de erro */}
         {error && (
@@ -95,31 +134,6 @@ const InputPremium = forwardRef<HTMLInputElement, InputPremiumProps>(
             </svg>
             {error}
           </p>
-        )}
-
-        {/* Indicador de loading */}
-        {loading && (
-          <div className="absolute right-3 top-9">
-            <svg 
-              className="h-4 w-4 animate-spin text-purple-400" 
-              fill="none" 
-              viewBox="0 0 24 24"
-            >
-              <circle 
-                className="opacity-25" 
-                cx="12" 
-                cy="12" 
-                r="10" 
-                stroke="currentColor" 
-                strokeWidth="4"
-              />
-              <path 
-                className="opacity-75" 
-                fill="currentColor" 
-                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-              />
-            </svg>
-          </div>
         )}
       </div>
     );

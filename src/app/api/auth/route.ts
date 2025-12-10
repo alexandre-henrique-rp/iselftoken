@@ -3,6 +3,7 @@ import {
   DeleteSession,
   GetSession2fa,
   GetSessionServer,
+  SetUserCookie,
 } from '@/context/auth';
 import { NextResponse } from 'next/server';
 
@@ -38,6 +39,28 @@ export async function POST(request: Request) {
       token: data.data.token,
       refreshToken: data.data.refreshToken,
     });
+
+    // Buscar dados completos do usuário da API e cachear
+    try {
+      const userDataResponse = await fetch(
+        `${process.env.NEXTAUTH_API_URL}/users/${data.data.user.id}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+        }
+      );
+
+      if (userDataResponse.ok) {
+        const userData = await userDataResponse.json();
+        // Cachear dados do usuário nos cookies
+        await SetUserCookie(userData.data);
+      }
+    } catch (error) {
+      // Falha ao cachear não deve impedir o login
+      console.log('Erro ao cachear dados do usuário:', error);
+    }
 
     const af2 = await GetSession2fa();
 

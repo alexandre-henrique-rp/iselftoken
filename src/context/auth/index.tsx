@@ -127,17 +127,7 @@ export async function GetSession2fa(): Promise<boolean> {
   return c.value === 'true';
 }
 
-async function GetUserCookieExists(): Promise<boolean> {
-  const cookieStore = await cookies();
-  const c = cookieStore.get('user_data');
-  const p = cookieStore.get('user_planos');
-  const pa = cookieStore.get('user_pacotes');
-  if (!c || !p || !pa) {
-    return false;
-  }
-  return true;
-}
-async function GetUserCookie(){
+async function GetUserCookie() {
   const cookieStore = await cookies();
   const c = cookieStore.get('user_data');
   const p = cookieStore.get('user_planos');
@@ -152,7 +142,12 @@ async function GetUserCookie(){
   };
 }
 
-async function SetUserCookie(user: UserType.Get) {
+/**
+ * Define cookies do usuário
+ * IMPORTANTE: Esta função só pode ser chamada de Route Handlers
+ * NÃO deve ser chamada diretamente de componentes React Server Components
+ */
+export async function SetUserCookie(user: UserType.Get) {
   const { planos, pacotes, ...rest } = user;
   const cookieStore = await cookies();
   cookieStore.set('user_data', JSON.stringify(rest), {
@@ -172,17 +167,22 @@ async function SetUserCookie(user: UserType.Get) {
   });
 }
 
+/**
+ * Obtém dados do usuário da sessão
+ * Primeiro tenta ler dos cookies, se não existir busca da API
+ * Não modifica cookies aqui para evitar erros em RSC
+ */
 export async function UserSessionData() {
-  const userCookieExists = await GetUserCookieExists();
-  if (!userCookieExists) {
-    const api = await UserApi();
-    if (!api) {
-      return null;
-    }
-    await SetUserCookie(api);
-    return await GetUserCookie();
-  } 
-  return await GetUserCookie();
+  // Tenta ler dos cookies primeiro
+  const userCookieData = await GetUserCookie();
+  if (userCookieData) {
+    return userCookieData;
+  }
+
+  // Se não existe nos cookies, busca da API diretamente
+  // O cache do Next.js vai gerenciar a performance
+  const api = await UserApi();
+  return api;
 }
 
 async function UserApi() {

@@ -396,7 +396,7 @@ const BusinessPlansPage = () => {
                 <div
                   style={{
                     color: 'oklch(0.750 0.004 49.25)',
-                    fontSize: '13px',
+                    fontSize: '12px',
                     lineHeight: '1.5',
                     marginBottom: '14px',
                     textAlign: 'center',
@@ -410,7 +410,7 @@ const BusinessPlansPage = () => {
               <div
                 style={{
                   color: 'oklch(0.850 0.004 49.25)',
-                  fontSize: '13px',
+                  fontSize: '12px',
                   fontWeight: '500',
                   marginBottom: '10px',
                   alignSelf: 'flex-start',
@@ -438,7 +438,7 @@ const BusinessPlansPage = () => {
                       gap: '8px',
                       marginBottom: '8px',
                       color: 'oklch(0.850 0.004 49.25)',
-                      fontSize: '13px',
+                      fontSize: '11px',
                       lineHeight: '1.4',
                     }}
                   >
@@ -470,7 +470,7 @@ const BusinessPlansPage = () => {
                     : 'oklch(0.090 0.004 49.25)',
                   border: 'none',
                   borderRadius: '6px',
-                  fontSize: '14px',
+                  fontSize: '12px',
                   fontWeight: '500',
                   cursor: 'pointer',
                   transition: 'all 0.3s ease',
@@ -563,7 +563,8 @@ const BusinessPlansPage = () => {
         @media (max-width: 1200px) {
           main {
             gap: 20px !important;
-            max-width: 900px !important;
+            max-width: 95% !important;
+            grid-template-columns: 1fr 1fr !important;
           }
 
           article {
@@ -574,11 +575,12 @@ const BusinessPlansPage = () => {
         /* Responsivo - Mobile Landscape/Tablet Portrait */
         @media (max-width: 1024px) {
           div[style*='height: 100vh'] {
-            padding: 20px !important;
+            padding: 20px 16px !important;
           }
 
           header {
-            margin-bottom: 12px !important;
+            margin-bottom: 24px !important;
+            max-width: 100% !important;
           }
 
           h1 {
@@ -593,29 +595,31 @@ const BusinessPlansPage = () => {
 
           main {
             grid-template-columns: 1fr !important;
-            gap: 16px !important;
+            gap: 24px !important;
             max-width: 600px !important;
-            padding-top: 12px !important;
-            padding-bottom: 20px !important;
+            width: 100% !important;
+            padding-top: 0 !important;
+            padding-bottom: 32px !important;
           }
 
           article {
-            padding: 20px 18px !important;
+            padding: 24px !important;
             transform: translateY(0) scale(1) !important;
+            width: 100% !important;
           }
 
           h3 {
-            font-size: 16px !important;
+            font-size: 18px !important;
             margin: 20px 0 12px 0 !important;
           }
 
           div[style*='font-size: 28px'] {
-            font-size: 24px !important;
+            font-size: 26px !important;
           }
 
           button {
-            height: 44px !important;
-            font-size: 13px !important;
+            height: 48px !important;
+            font-size: 14px !important;
           }
         }
 
@@ -626,7 +630,7 @@ const BusinessPlansPage = () => {
           }
 
           header {
-            margin-bottom: 10px !important;
+            margin-bottom: 20px !important;
           }
 
           h1 {
@@ -640,27 +644,27 @@ const BusinessPlansPage = () => {
           }
 
           main {
-            gap: 12px !important;
-            padding-top: 10px !important;
-            padding-bottom: 16px !important;
+            gap: 16px !important;
+            max-width: 100% !important;
           }
 
           article {
-            padding: 16px !important;
+            padding: 20px !important;
           }
 
           h3 {
-            font-size: 15px !important;
+            font-size: 16px !important;
             margin: 16px 0 10px 0 !important;
           }
 
           div[style*='font-size: 28px'],
-          div[style*='font-size: 24px'] {
-            font-size: 20px !important;
+          div[style*='font-size: 24px'],
+          div[style*='font-size: 26px'] {
+            font-size: 24px !important;
           }
 
           span[style*='font-size: 13px'] {
-            font-size: 11px !important;
+            font-size: 12px !important;
           }
 
           div[style*='font-size: 13px'] {
@@ -668,17 +672,17 @@ const BusinessPlansPage = () => {
           }
 
           li {
-            font-size: 12px !important;
+            font-size: 13px !important;
             margin-bottom: 8px !important;
           }
 
           button {
-            height: 42px !important;
-            font-size: 12px !important;
+            height: 44px !important;
+            font-size: 13px !important;
           }
 
           ul {
-            margin: 0 0 16px 0 !important;
+            margin: 0 0 20px 0 !important;
           }
         }
 
@@ -693,7 +697,7 @@ const BusinessPlansPage = () => {
           }
 
           article {
-            padding: 14px !important;
+            padding: 16px !important;
           }
 
           div[style*='padding: 6px 20px'] {
