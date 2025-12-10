@@ -98,6 +98,8 @@ export default function ResetPasswordPage() {
     setLoading(true);
     try {
       console.log('Redefinindo senha:', { password, token });
+      const id = localStorage.getItem('userId');
+      console.log("🚀 ~ onSubmit ~ id:", id)
 
       // TODO: Implementar lógica de envio para API aqui
       // Exemplo:
