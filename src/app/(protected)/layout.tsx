@@ -34,10 +34,8 @@ export default async function ProtectedLayout({ children }: Props) {
 
   // Validação de plano: redireciona se não tiver plano ativo
   // Não redireciona se já estiver na página de planos
-  const hasActivePlan =
-    UserData.planos &&
-    Array.isArray(UserData.planos) &&
-    UserData.planos.length > 0;
+  const hasActivePlan =UserData.planos?.length > 0 ? true : false;
+  console.log("🚀 ~ ProtectedLayout ~ hasActivePlan:", hasActivePlan)
   const isOnPlansPage = pathname.includes('/business/plans');
 
   console.log('🚀 ~ ProtectedLayout ~ hasActivePlan:', hasActivePlan);

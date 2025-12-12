@@ -17,8 +17,9 @@ export const newPasswordSchema = z.object({
     .regex(/[a-z]/, "A senha deve conter pelo menos uma letra minúscula")
     .regex(/[0-9]/, "A senha deve conter pelo menos um número")
     .regex(/[^A-Za-z0-9]/, "A senha deve conter pelo menos um caractere especial"),
-  confirmacaoSenha: z.string(),
-}).refine((data) => data.senha === data.confirmacaoSenha, {
+  confirmarSenha: z.string(),
+  // token: z.string(),
+}).refine((data) => data.senha === data.confirmarSenha, {
   message: "As senhas não conferem",
   path: ["confirmacaoSenha"],
 });

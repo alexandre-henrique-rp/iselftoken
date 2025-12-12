@@ -5,48 +5,54 @@ import { z } from "zod";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  ctx: RouteContext<'/api/reload-password/[id]'>
 ) {
-  try {
-    const body = await req.json()
-    const { id } = await params;
+  return req.json()
+    .then(async (body) => {
+      console.log("🚀 ~ POST ~ body:", body)
+      const { id } = await ctx.params;
 
-    const validate: NewPasswordType = newPasswordSchema.parse(body)
+      const validate: NewPasswordType = newPasswordSchema.parse(body)
+      console.log("🚀 ~ POST ~ validate:", validate)
 
-    const api = await fetch(`${process.env.NEXTAUTH_API_URL}/change-password/${id}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(validate),
-    });
-    
-    const data = await api.json()
-    
-    if (!api.ok) {
-      throw new Error(data.message || 'Erro ao processar solicitação na API externa')
-    }
-
-    return NextResponse.json({ message: 'Solicitação processada com sucesso', data: data }, { status: 200 })
-
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        {
-          error: 'Dados inválidos',
-          details: error.issues.map(err => ({
-            path: err.path.join('.'),
-            message: err.message
-          }))
+      return fetch(`${process.env.NEXTAUTH_API_URL}/change-password/${id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-        { status: 400 }
-      );
-    }
+        body: JSON.stringify(validate),
+      });
+    })
+    .then(async (api) => {
+      console.log("🚀 ~ POST ~ api:", api)
 
-    console.error('Erro na alteração de senha:', error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Erro interno ao solicitar alteração de senha' },
-      { status: 500 }
-    );
-  }
+      const data = await api.json();
+      console.log("🚀 ~ POST ~ data:", data)
+
+      if (!api.ok) {
+        throw new Error('Erro ao processar solicitação na API externa');
+      }
+
+      return NextResponse.json({ message: 'Solicitação processada com sucesso' }, { status: 200 })
+    })
+    .catch((error) => {
+      if (error instanceof z.ZodError) {
+        return NextResponse.json(
+          {
+            error: 'Dados inválidos',
+            details: error.issues.map(err => ({
+              path: err.path.join('.'),
+              message: err.message
+            }))
+          },
+          { status: 400 }
+        );
+      }
+
+      console.error('Erro na alteração de senha:', error);
+      return NextResponse.json(
+        { error: error instanceof Error ? error.message : 'Erro interno ao solicitar alteração de senha' },
+        { status: 500 }
+      );
+    });
 }

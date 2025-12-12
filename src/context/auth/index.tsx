@@ -128,18 +128,25 @@ export async function GetSession2fa(): Promise<boolean> {
 }
 
 async function GetUserCookie() {
-  const cookieStore = await cookies();
-  const c = cookieStore.get('user_data');
-  const p = cookieStore.get('user_planos');
-  const pa = cookieStore.get('user_pacotes');
-  if (!c || !p || !pa) {
+  try {
+    const cookieStore = await cookies();
+    const c = cookieStore.get('user_data');
+    const p = cookieStore.get('user_planos');
+    const pa = cookieStore.get('user_pacotes');
+
+    if (!c?.value || !p?.value || !pa?.value) {
+      return null;
+    }
+
+    return {
+      ...JSON.parse(c.value),
+      planos: JSON.parse(p.value),
+      pacotes: JSON.parse(pa.value),
+    };
+  } catch {
+    // Se falhar o parse do cookie, retorna null para buscar da API
     return null;
   }
-  return {
-    ...JSON.parse(c.value),
-    planos: JSON.parse(p.value),
-    pacotes: JSON.parse(pa.value),
-  };
 }
 
 /**

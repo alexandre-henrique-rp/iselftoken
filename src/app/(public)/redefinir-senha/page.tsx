@@ -29,6 +29,7 @@ export default function ResetPasswordPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
   const [errors, setErrors] = useState<{
     password?: string | null;
     confirmPassword?: string | null;
@@ -42,6 +43,7 @@ export default function ResetPasswordPage() {
   const validateField = useCallback(
     (field: 'password' | 'confirmPassword', value: string) => {
       let error = null;
+      setApiError(null); // Limpa erro da API ao editar campos
       if (field === 'password') {
         error = validateSenha(value);
       } else if (field === 'confirmPassword') {
@@ -75,6 +77,7 @@ export default function ResetPasswordPage() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setApiError(null);
 
     // Validação final
     const passwordError = validateSenha(password);
@@ -99,11 +102,25 @@ export default function ResetPasswordPage() {
     try {
       console.log('Redefinindo senha:', { password, token });
       const id = localStorage.getItem('userId');
-      console.log("🚀 ~ onSubmit ~ id:", id)
+      console.log('🚀 ~ onSubmit ~ id:', id);
 
-      // TODO: Implementar lógica de envio para API aqui
-      // Exemplo:
-      // const response = await fetch('/api/reset-password', { ... });
+      const response = await fetch(`/api/reload-password/${id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          senha: password,
+          confirmarSenha: confirmPassword,
+        }),
+      });
+
+      const data = await response.json();
+      console.log('Senha redefinida com sucesso:', data);
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Erro ao redefinir senha');
+      }
 
       toast.success('Senha redefinida com sucesso!', {
         description: 'Você será redirecionado para o login.',
@@ -114,7 +131,9 @@ export default function ResetPasswordPage() {
       }, 2000);
     } catch (error) {
       console.error(error);
-      toast.error('Erro ao redefinir senha');
+      setApiError(
+        error instanceof Error ? error.message : 'Erro ao redefinir senha',
+      );
     } finally {
       setLoading(false);
     }
@@ -163,6 +182,12 @@ export default function ResetPasswordPage() {
             required
             autoComplete="new-password"
           />
+
+          {apiError && (
+            <div className="rounded-md border border-red-500/20 bg-red-500/10 p-3 text-center text-sm text-red-500">
+              {apiError}
+            </div>
+          )}
 
           <ButtonPremium
             type="submit"

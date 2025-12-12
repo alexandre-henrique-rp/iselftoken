@@ -33,6 +33,7 @@ export default function RecoverPasswordForm() {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors },
   } = useForm<RecoverPasswordInputs>({
     resolver: zodResolver(recoverPasswordSchema),
@@ -56,16 +57,21 @@ export default function RecoverPasswordForm() {
         }),
       });
 
-      const resp = await api.json();
+      const text = await api.text();
+      const resp = text ? JSON.parse(text) : {};
+
       if (!api.ok) {
-        throw new Error('Erro ao solicitar recuperação de senha');
+        const errorMessage =
+          resp.message ||
+          'Não foi possível solicitar a recuperação de senha. Verifique seus dados e tente novamente.';
+
+        setError('email', { type: 'manual', message: errorMessage });
+        return;
       }
 
-      if (resp.status !== 'success') {
-        throw new Error(resp.message);
+      if (resp.data?.id) {
+        localStorage.setItem('userId', resp.data.id);
       }
-
-      localStorage.setItem('userId', resp.id);
 
       toast.success('Link de recuperação enviado! Verifique seu email.');
 

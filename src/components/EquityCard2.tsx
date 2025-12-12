@@ -46,7 +46,7 @@ export default function EquityCard2({ affiliateToken, userRole, isAuthenticated 
                 type="text" 
                 readOnly 
                 value={`${pathname}?token=...`}
-                className="flex-grow rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                className="grow rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400"
               />
               <Button variant="outline" size="icon" onClick={handleShare}>
                 <Copy className="h-4 w-4" />

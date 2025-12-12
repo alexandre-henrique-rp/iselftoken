@@ -16,15 +16,26 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify(validate),
     });
-    const data = await api.json()
+
+    let data;
+    try {
+      data = await api.json();
+    } catch {
+      data = { message: 'Erro ao processar resposta da API externa' };
+    }
+
     console.log("🚀 ~ POST ~ data:", data)
+
     if (!api.ok) {
-      throw new Error(data.message)
+      return NextResponse.json(
+        { message: data.message || data.error || 'Erro interno ao solicitar alteração de senha' },
+        { status: api.status >= 200 && api.status <= 599 ? api.status : 500 }
+      );
     }
 
     return NextResponse.json({ message: 'codigo solicitado com sucesso', data: data }, { status: 200 })
 
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         {
@@ -39,9 +50,14 @@ export async function POST(req: NextRequest) {
     }
 
     console.error('Erro no registro:', error);
+
+    const status = error?.status && typeof error.status === 'number' && error.status >= 200 && error.status <= 599
+      ? error.status
+      : 500;
+
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Erro interno ao solicitar alteração de senha' },
-      { status: error ? (error as any).status : 500 }
+      { message: error instanceof Error ? error.message : 'Erro interno ao solicitar alteração de senha' },
+      { status }
     );
   }
 }

@@ -22,6 +22,7 @@ import { useSession } from '@/hooks/useSession';
 import { toast } from 'sonner';
 import { Rotas } from '@/types/rotasTypes';
 
+
 interface NavUserProps {
   user: SessionNext.Client;
   itens: Rotas.Types[];

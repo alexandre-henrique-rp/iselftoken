@@ -29,6 +29,7 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 }
 
 export function AppSidebar({ role, session, ...props }: AppSidebarProps) {
+ console.log("🚀 ~ AppSidebar ~ session:", session)
  
   const MenuFilter =
     role === 'admin'
@@ -38,7 +39,6 @@ export function AppSidebar({ role, session, ...props }: AppSidebarProps) {
         : role === 'compliance'
           ? complianceRouter
           : userRoutes;
-
 
   // Type-safe filtering functions
   const getItemsByMenu = (menuType: 'geral' | 'interno' | 'config' | 'user' | 'private'): Rotas.Types[] => {
