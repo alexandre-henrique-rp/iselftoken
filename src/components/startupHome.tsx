@@ -8,7 +8,11 @@ interface StartupHomeProps {
   // Lista de itens da tabela conforme schema compartilhado
   data: z.infer<typeof schema>[];
 }
+<<<<<<< Updated upstream
 
+=======
+//
+>>>>>>> Stashed changes
 export default function StartupHome({ data }: StartupHomeProps) {
   return (
     <div>

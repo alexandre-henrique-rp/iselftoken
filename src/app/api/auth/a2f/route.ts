@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+<<<<<<< Updated upstream
 import { GetSessionServer } from '@/context/auth';
 import SendEmailModule from '@/modules/email';
 import buildA2fHtmlTemplate from '@/model/email/html/auth-a2f';
@@ -64,9 +65,28 @@ export async function GET() {
     console.log(error);
     return NextResponse.json(
       { error: 'Erro ao solicitar A2F' },
+=======
+import { SetSession2fa } from '@/context/auth';
+
+
+export async function POST() {
+  try {
+    await SetSession2fa(true, { path: '/', expires: 60 * 60 * 24 * 7 })
+    return NextResponse.json(
+      { message: 'A2F ativado com sucesso' },
+      { status: 200 },
+    );
+  } catch (error) {
+    console.error('Erro geral no PUT A2F:', error);
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+>>>>>>> Stashed changes
       { status: 500 },
     );
   }
 }
 
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
