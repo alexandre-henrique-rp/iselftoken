@@ -1,0 +1,68 @@
+import { Rotas } from "@/types/rotasTypes";
+import { Bell, Home, User, Wallet } from "lucide-react";
+
+export const financeiroRoutes: Rotas.Types[] = [
+  {
+    id: 1,
+    nome: 'Home',
+    path: '/home',
+    url: '/home',
+    isActive: true,
+    menu: 'geral',
+    icon: Home,
+  },
+  {
+    id: 2,
+    nome: 'Dashboard',
+    path: '/dashboard-consultor',
+    url: '/dashboard-afiliado',
+    isActive: true,
+    menu: 'geral',
+    icon: null,
+  },
+  {
+    id: 3,
+    nome: 'Startup by id',
+    path: '/startup/',
+    url: '/startup/',
+    isActive: true,
+    menu: 'private',
+    icon: null,
+  },
+  {
+    id: 4,
+    nome: 'Perfil',
+    path: '/perfil',
+    url: '/perfil',
+    isActive: true,
+    menu: 'user',
+    icon: User,
+  },
+  {
+    id: 5,
+    nome: 'Notificação',
+    path: '/notification',
+    url: '/notification',
+    isActive: true,
+    menu: 'config',
+    icon: Bell,
+  },
+  {
+    id: 6,
+    nome: 'Treinamento',
+    path: '/treinamento',
+    url: '/treinamento',
+    isActive: true,
+    menu: 'interno',
+    icon: null,
+  },
+  {
+    id: 7,
+    nome: 'Painel financeiro',
+    path: '/painel-financeiro',
+    url: '/painel-financeiro',
+    isActive: true,
+    menu: 'interno',
+    icon: Wallet,
+  },
+];
