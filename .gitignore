@@ -1,0 +1,97 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Environment files (NEVER commit secrets)
+.env
+.env.local
+.env.prod
+.env.*.local
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Runtime data
+storage/
+data/
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage / test
+coverage/
+.nyc_output/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Prisma
+prisma/dev.db
+prisma/dev.db-journal
+prisma/*.db-journal
+
+# Misc
+*.pem
+keys/
+
+# Secrets de provisionamento (injetados fora do repositório)
+/infra/prod/ec2-api/ec2-api.env
+/infra/prod/ec2-frontend/ec2-frontend.env
+/CHAVES/
+/CHAVES.zip
+/CERTIFICADOS/
+/CERTIFICADOS.zip
+/smtp-credentials.csv
+/iselftoken-backend_accessKeys.csv
+/senha .md
+/senha.md
+/.~lock.*
+/eslint.config.mjs.bak
+
+# Certificados mTLS EFI (.p12 / .pem) — NUNCA versionar (CASE.md §PIX EFI)
+/CERTIFICADOS/**/*.p12
+/CERTIFICADOS/**/*.pem
+/**/*.p12
+/**/*.pem
+
+# Config MCP local (contém API keys pessoais)
+/.agents/mcp_config.json
+
+# Terraform state e providers (binários)
+/infra/**/.terraform/
+/infra/**/*.tfstate
+/infra/**/*.tfstate.backup
+/infra/**/.terraform.lock.hcl
+
+# Lock files
+/*.lock
+/infra/**/*.lock
+
+# PDFs de reunião interna (não versionar)
+/07_*.pdf
+
+# Sandbox marker
+/.ai-jail
+
+# Backups locais
+/backup/
+/backups/
+*.bak
+*.backup
+*.tmp

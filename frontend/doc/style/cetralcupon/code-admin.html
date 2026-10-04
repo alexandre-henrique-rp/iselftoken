@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Editar Cupom — Central Admin · iSelfToken</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=block" rel="stylesheet" />
+<script>
+  // Tokens alinhados à Kinetic Architecture — mesma config de code.html (single source of truth)
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        colors: {
+          accent:            '#d500f9',
+          'accent-soft':     '#ea6bff',
+          'accent-light':    '#f084ff',
+          primary:           '#f084ff',
+          'primary-container':'#ea6bff',
+          'primary-dim':     '#c500e6',
+          'on-primary-fixed': '#000000',
+          'on-surface':         '#ffdbf3',
+          'on-surface-variant': '#cc9dc0',
+          surface:           '#1f031d',
+          'surface-dim':     '#170117',
+          'surface-low':     '#270524',
+          'surface-container-low':  '#2a0628',
+          'surface-container':      '#30092c',
+          'surface-high':    '#380e33',
+          'surface-highest': '#41133b',
+          'surface-bright':  '#4a1844',
+          outline:           '#936889',
+          'outline-variant': '#613b5a',
+          error:             '#ff6e84',
+          'error-dim':       '#d73357',
+          success:           '#34d399',
+          warning:           '#fbbf24',
+        },
+        fontFamily: {
+          display: ['Manrope', 'sans-serif'],
+          headline: ['Manrope', 'sans-serif'],
+          body: ['Manrope', 'sans-serif'],
+          label: ['Manrope', 'sans-serif'],
+          mono: ['JetBrains Mono', 'monospace'],
+        },
+      },
+    },
+  };
+</script>
+<style>
+  body {
+    background-color: #1f031d;
+    color: #ffdbf3;
+    font-family: 'Manrope', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+  .watermark {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+    font-size: 16vw;
+    font-weight: 800;
+    color: rgba(213, 0, 249, 0.035);
+    pointer-events: none;
+    z-index: 0;
+    white-space: nowrap;
+    letter-spacing: -0.04em;
+    user-select: none;
+  }
+
+  /* Glass morphism — sem 1px border (vivid_logic §4) */
+  .glass-card {
+    background: rgba(48, 9, 44, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .glass-strong {
+    background: rgba(65, 19, 59, 0.55);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, #d500f9 0%, #ea6bff 60%, #f084ff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Accent button — gradient primary oficial (sem #9c27b0) */
+  .btn-accent {
+    background: linear-gradient(135deg, #f084ff 0%, #ea6bff 60%, #d500f9 100%);
+    color: #000000;
+    font-weight: 700;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .btn-accent:hover {
+    box-shadow: 0 0 32px rgba(213, 0, 249, 0.55), 0 8px 24px rgba(213, 0, 249, 0.35);
+    transform: translateY(-1px) scale(1.01);
+  }
+  /* Outline button — ghost border outline-variant 30% (P1) */
+  .btn-outline {
+    outline: 1px solid rgba(97, 59, 90, 0.30);
+    color: #f084ff;
+    transition: all 0.3s ease;
+  }
+  .btn-outline:hover {
+    background: rgba(213, 0, 249, 0.12);
+    outline-color: rgba(213, 0, 249, 0.6);
+  }
+
+  /* Field ghost — outline-variant 35% (sem border 1px solid) */
+  .field-ghost {
+    background: rgba(48, 9, 44, 0.6);
+    outline: 1px solid rgba(97, 59, 90, 0.35);
+    color: #ffdbf3;
+    transition: all 0.25s ease;
+  }
+  .field-ghost:focus {
+    background: rgba(48, 9, 44, 0.8);
+    outline-color: #d500f9;
+    box-shadow: 0 0 0 3px rgba(213, 0, 249, 0.25);
+  }
+  .field-ghost::placeholder { color: rgba(204, 157, 192, 0.5); }
+
+  /* Tonal divider */
+  .tonal-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(213, 0, 249, 0.18) 50%, transparent 100%);
+  }
+
+  /* Pills — text-xs no mínimo (D19) */
+  .pill-active   { background: rgba(52, 211, 153, 0.14); color: #34d399; font-size: 0.75rem; padding: 0.25rem 0.625rem; }
+  .pill-expired  { background: rgba(255, 110, 132, 0.14); color: #ff6e84; font-size: 0.75rem; padding: 0.25rem 0.625rem; }
+
+  /* Tabs — ARIA tablist pattern (D18) */
+  .tab {
+    color: #cc9dc0;
+    border-bottom: 2px solid transparent;
+    transition: all 0.25s ease;
+    cursor: pointer;
+  }
+  .tab:hover { color: #ffdbf3; }
+  .tab[aria-selected="true"] {
+    color: #ffdbf3;
+    border-bottom-color: #d500f9;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: #1f031d; }
+  ::-webkit-scrollbar-thumb { background: #4a1844; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #d500f9; }
+
+  /* Material symbols — padronizado (D15) */
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+
+  /* Toggle */
+  .toggle-track { background: rgba(65, 19, 59, 0.85); transition: background 0.25s; }
+  .toggle-track.on { background: linear-gradient(135deg, #d500f9, #ea6bff); }
+  .toggle-knob {
+    background: #ffdbf3;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(213, 0, 249, 0.4);
+  }
+  .toggle-track.on .toggle-knob { transform: translateX(28px); }
+
+  /* Modal overlay (foco reforçado) */
+  .modal-overlay {
+    background: rgba(31, 3, 29, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .toast {
+    background: rgba(48, 9, 44, 0.92);
+    backdrop-filter: blur(16px);
+    outline: 1px solid rgba(213, 0, 249, 0.4);
+    box-shadow: 0 12px 36px rgba(213, 0, 249, 0.3);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .toggle-knob { transition: none !important; }
+  }
+</style>
+</head>
+<body class="min-h-screen relative overflow-x-hidden">
+  <div class="watermark font-display" aria-hidden="true">iSelfToken</div>
+
+  <!-- Header — ghost border sutil -->
+  <header class="sticky top-0 z-40 glass-strong" style="outline: 1px solid rgba(97, 59, 90, 0.20); outline-offset: -1px;">
+    <div class="max-w-7xl mx-auto px-6 lg:px-12 h-20 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#f084ff,#ea6bff,#d500f9);box-shadow:0 0 24px rgba(213,0,249,0.55);">
+          <span class="material-symbols-outlined" style="font-size:22px;color:#000" aria-hidden="true">token</span>
+        </div>
+        <div>
+          <div class="font-display text-lg font-extrabold tracking-tight leading-none">iSelfToken</div>
+          <div class="font-label text-xs uppercase tracking-widest mt-1" style="color:#cc9dc0">Painel Administrativo</div>
+        </div>
+      </div>
+      <nav class="hidden md:flex items-center gap-1" aria-label="Navegação principal">
+        <a href="#" class="px-4 py-2 text-sm font-medium rounded-lg transition" style="color:#cc9dc0">Dashboard</a>
+        <a href="#" class="px-4 py-2 text-sm font-medium rounded-lg transition" style="color:#cc9dc0">Startups</a>
+        <a href="#" class="px-4 py-2 text-sm font-medium rounded-lg transition" style="color:#cc9dc0">Pagamentos</a>
+        <a href="#" class="px-4 py-2 text-sm font-semibold rounded-lg relative" style="background:#30092c;color:#ffdbf3">
+          Cupons
+          <span class="absolute -top-1 -right-1 w-2 h-2 rounded-full" style="background:#d500f9;box-shadow:0 0 8px rgba(213,0,249,0.8);" aria-hidden="true"></span>
+        </a>
+      </nav>
+      <div class="flex items-center gap-3">
+        <button type="button" class="w-10 h-10 rounded-xl flex items-center justify-center transition" style="background:#30092c" aria-label="Notificações">
+          <span class="material-symbols-outlined" style="font-size:20px;color:#cc9dc0" aria-hidden="true">notifications</span>
+          <span class="absolute mt-[-18px] ml-[14px] w-2 h-2 rounded-full" aria-hidden="true" style="background:#d500f9"></span>
+        </button>
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm" style="background:linear-gradient(135deg,#ea6bff,#d500f9);color:#000" aria-label="Perfil: Marina Rocha">MR</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- === Modal de edição (P4 — modal semântico com ARIA) === -->
+  <div class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 lg:p-8">
+    <div class="w-full max-w-3xl rounded-2xl shadow-2xl relative overflow-hidden max-h-[90vh] flex flex-col"
+         style="background:#170117; outline: 1px solid rgba(97,59,90,0.30); outline-offset: -1px; box-shadow: 0 0 60px rgba(213,0,249,0.25);"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="modal-title">
+
+      <!-- Modal gradient orbs -->
+      <div class="absolute -right-20 -top-20 w-64 h-64 rounded-full opacity-15 blur-3xl pointer-events-none" style="background:#d500f9"></div>
+      <div class="absolute -left-20 -bottom-20 w-48 h-48 rounded-full opacity-15 blur-3xl pointer-events-none" style="background:#ea6bff"></div>
+
+      <!-- Modal header -->
+      <div class="relative z-10 px-6 lg:px-8 pt-6 pb-5 flex items-start justify-between gap-4 flex-shrink-0" style="outline: 1px solid rgba(97,59,90,0.15); outline-offset: -1px; border-bottom: 0;">
+        <div>
+          <span class="font-label text-xs uppercase tracking-widest font-semibold block mb-2" style="color:#d500f9">Editar cupom · PROMO50</span>
+          <h2 class="font-display text-2xl lg:text-3xl font-extrabold leading-tight" id="modal-title">
+            <span class="text-gradient">PROMO50</span>
+            <span class="font-medium text-base ml-3" style="color:#cc9dc0">50% OFF · múltiplo</span>
+          </h2>
+          <p class="text-sm mt-2" style="color:#cc9dc0">Black Friday 2026 · campanha agressiva para aquisição de novos investidores</p>
+        </div>
+        <button type="button" class="rounded-lg p-2 transition" style="color:#cc9dc0" aria-label="Fechar modal">
+          <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+
+      <!-- Tabs — ARIA tablist (P4) -->
+      <div role="tablist" aria-label="Editar cupom PROMO50" class="relative z-10 px-6 lg:px-8 flex gap-6 flex-shrink-0" style="outline: 1px solid rgba(97,59,90,0.15); outline-offset: -1px;">
+        <button type="button" id="tab-config" role="tab" aria-selected="true" aria-controls="tabpanel-config" class="tab py-4 font-semibold text-sm flex items-center gap-2">
+          <span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">tune</span>
+          Configuração
+        </button>
+        <button type="button" id="tab-uso" role="tab" aria-selected="false" aria-controls="tabpanel-uso" class="tab py-4 font-semibold text-sm flex items-center gap-2">
+          <span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">analytics</span>
+          Uso em tempo real
+        </button>
+        <button type="button" id="tab-auditoria" role="tab" aria-selected="false" aria-controls="tabpanel-auditoria" class="tab py-4 font-semibold text-sm flex items-center gap-2">
+          <span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">history</span>
+          Auditoria
+        </button>
+        <button type="button" id="tab-historico" role="tab" aria-selected="false" aria-controls="tabpanel-historico" class="tab py-4 font-semibold text-sm flex items-center gap-2">
+          <span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">description</span>
+          Histórico
+        </button>
+      </div>
+
+      <!-- Modal body (scrollable) -->
+      <div class="relative z-10 px-6 lg:px-8 py-6 overflow-y-auto flex-1">
+
+        <!-- TAB: Configuração (default) -->
+        <div role="tabpanel" id="tabpanel-config" aria-labelledby="tab-config">
+          <!-- Status atual -->
+          <div class="flex items-center gap-3 mb-6 pb-6" style="outline: 1px solid rgba(97,59,90,0.15); outline-offset: -1px; border-bottom: 0;">
+            <span class="pill-active rounded-full font-bold uppercase tracking-widest flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full pulse-soft" style="background:#34d399" aria-hidden="true"></span>
+              Ativo · 847/1000 usos
+            </span>
+            <span class="text-xs" style="color:#cc9dc0">Última atualização: há 2 horas por <strong style="color:#ffdbf3">marina.r</strong></span>
+          </div>
+
+          <!-- Percentual + código -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+            <div class="md:col-span-1">
+              <label for="modal-percent" class="block font-label text-xs uppercase tracking-widest mb-2 font-semibold" style="color:#cc9dc0">
+                Percentual
+              </label>
+              <div class="relative">
+                <select id="modal-percent" class="field-ghost w-full rounded-xl p-4 pr-12 appearance-none cursor-pointer font-bold text-lg">
+                  <option>20%</option>
+                  <option>30%</option>
+                  <option selected>50%</option>
+                  <option>60%</option>
+                  <option>100%</option>
+                </select>
+                <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" style="color:#cc9dc0" aria-hidden="true">expand_more</span>
+              </div>
+            </div>
+            <div class="md:col-span-2">
+              <label for="modal-code" class="block font-label text-xs uppercase tracking-widest mb-2 font-semibold" style="color:#cc9dc0">
+                Código
+              </label>
+              <div class="flex gap-2">
+                <input id="modal-code" type="text" value="PROMO50" maxlength="32" minlength="3" pattern="[A-Z0-9_\-]+" autocomplete="off"
+                  class="field-ghost flex-1 rounded-xl p-4 font-mono uppercase tracking-widest font-bold" />
+                <button type="button" class="btn-outline rounded-xl px-4 flex items-center justify-center" aria-label="Gerar novo código">
+                  <span class="material-symbols-outlined" aria-hidden="true">autorenew</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Regra de uso — limite global maxUses (P2 — texto coerente) -->
+          <div class="mb-5">
+            <span class="block font-label text-xs uppercase tracking-widest mb-3 font-semibold" style="color:#cc9dc0" id="modal-usage-label">
+              Regra de uso
+            </span>
+            <div class="flex items-center justify-between rounded-xl p-4" style="background:#30092c">
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined" style="font-size:22px;color:#d500f9" aria-hidden="true">group</span>
+                <div>
+                  <div class="font-semibold text-sm">Uso múltiplo · até 1.000 reservas</div>
+                  <div class="text-xs" style="color:#cc9dc0">Cada usuário pode usar 1 vez · limite global configurado em maxUses</div>
+                </div>
+              </div>
+              <button type="button" class="toggle-track on w-14 h-8 rounded-full relative flex items-center px-1" role="switch" aria-checked="true" aria-labelledby="modal-usage-label">
+                <span class="toggle-knob w-6 h-6 rounded-full"></span>
+              </button>
+            </div>
+
+            <div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label for="modal-max-uses" class="block font-label text-xs uppercase tracking-widest mb-2 font-semibold" style="color:#cc9dc0">
+                  Limite global (maxUses)
+                </label>
+                <input id="modal-max-uses" type="number" value="1000" min="1" max="100000" class="field-ghost w-full rounded-xl p-4 font-bold" />
+              </div>
+              <div>
+                <label for="modal-per-user" class="block font-label text-xs uppercase tracking-widest mb-2 font-semibold" style="color:#cc9dc0">
+                  Limite por usuário
+                </label>
+                <input id="modal-per-user" type="number" value="1" min="1" class="field-ghost w-full rounded-xl p-4 font-bold" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Validade (validFrom + validUntil) — P2 -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5">
+            <div>
+              <label for="modal-valid-from" class="block font-label text-xs uppercase tracking-widest mb-2 font-semibold" style="color:#cc9dc0">
+                Válido a partir de <span style="color:#cc9dc0" class="font-normal normal-case">(opcional)</span>
+              </label>
+              <div class="relative">
+                <input id="modal-valid-from" type="date" class="field-ghost w-full rounded-xl p-4 pr-12" />
+                <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" style="color:#cc9dc0" aria-hidden="true">event</span>
+              </div>
+            </div>
+            <div>
+              <label for="modal-valid-until" class="block font-label text-xs uppercase tracking-widest mb-2 font-semibold" style="color:#cc9dc0">
+                Data de expiração <span style="color:#cc9dc0" class="font-normal normal-case">(opcional)</span>
+              </label>
+              <div class="relative">
+                <input id="modal-valid-until" type="date" value="2026-12-31" class="field-ghost w-full rounded-xl p-4 pr-12" />
+                <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" style="color:#cc9dc0" aria-hidden="true">event</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Descrição interna (audit) -->
+          <div class="mb-5">
+            <label for="modal-audit" class="block font-label text-xs uppercase tracking-widest mb-2 font-semibold" style="color:#cc9dc0">
+              Descrição interna <span style="color:#ff6e84">*</span>
+              <span class="ml-2 normal-case font-normal" style="color:#cc9dc0">— audit trail LGPD/CVM 88</span>
+            </label>
+            <textarea id="modal-audit" rows="3" class="field-ghost w-full rounded-xl p-4 resize-none">Black Friday 2026 — campanha agressiva para aquisição de novos investidores. Meta: 1.000 reservas entre 25/11 e 31/12.</textarea>
+          </div>
+
+          <!-- Preview banner -->
+          <div class="rounded-xl p-5 flex items-start gap-4" style="background:linear-gradient(135deg, rgba(213,0,249,0.15), rgba(234,107,255,0.10));outline: 1px solid rgba(213,0,249,0.30); outline-offset: -1px;">
+            <span class="material-symbols-outlined flex-shrink-0" style="font-size:24px;color:#d500f9" aria-hidden="true">preview</span>
+            <div>
+              <div class="font-semibold mb-1 text-sm">Preview do cupom (visão do investidor)</div>
+              <div class="flex items-center gap-4 mt-3">
+                <div class="font-display text-4xl font-black text-gradient">50%</div>
+                <div>
+                  <div class="font-mono font-bold">PROMO50</div>
+                  <div class="text-xs" style="color:#cc9dc0">Expira 31/12/2026 · 153 reservas restantes</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: Uso em tempo real -->
+        <div role="tabpanel" id="tabpanel-uso" aria-labelledby="tab-uso" hidden>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+            <div class="rounded-xl p-4" style="background:#30092c">
+              <div class="text-xs uppercase tracking-widest mb-1" style="color:#cc9dc0">Usos totais</div>
+              <div class="font-display text-3xl font-extrabold">847</div>
+              <div class="text-xs" style="color:#34d399">+12 nas últimas 24h</div>
+            </div>
+            <div class="rounded-xl p-4" style="background:#30092c">
+              <div class="text-xs uppercase tracking-widest mb-1" style="color:#cc9dc0">Reservas pendentes</div>
+              <div class="font-display text-3xl font-extrabold">23</div>
+              <div class="text-xs" style="color:#fbbf24">6 expiram em 1h</div>
+            </div>
+            <div class="rounded-xl p-4" style="background:#30092c">
+              <div class="text-xs uppercase tracking-widest mb-1" style="color:#cc9dc0">Desconto concedido</div>
+              <div class="font-display text-3xl font-extrabold">R$ 8,4k</div>
+              <div class="text-xs" style="color:#cc9dc0">últimos 7 dias</div>
+            </div>
+          </div>
+          <div class="rounded-xl p-5" style="outline: 1px solid rgba(97,59,90,0.15); outline-offset: -1px;">
+            <h3 class="font-bold mb-3">Reservas recentes</h3>
+            <div class="space-y-3 text-sm">
+              <div class="flex items-center justify-between gap-2"><span class="font-mono">#RSV-89XA1</span><span style="color:#cc9dc0">R$ 750 → R$ 375</span><span style="color:#34d399">Pago</span></div>
+              <div class="flex items-center justify-between gap-2"><span class="font-mono">#RSV-89X9K</span><span style="color:#cc9dc0">R$ 500 → R$ 250</span><span style="color:#fbbf24">Pendente</span></div>
+              <div class="flex items-center justify-between gap-2"><span class="font-mono">#RSV-89X80</span><span style="color:#cc9dc0">R$ 1.500 → R$ 750</span><span style="color:#34d399">Pago</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: Auditoria (D6 — corpo adicionado) -->
+        <div role="tabpanel" id="tabpanel-auditoria" aria-labelledby="tab-auditoria" hidden>
+          <div class="rounded-xl overflow-hidden" style="outline: 1px solid rgba(97,59,90,0.15); outline-offset: -1px;">
+            <div class="grid grid-cols-12 px-6 py-3 text-xs font-label uppercase tracking-widest" style="background:#30092c;color:#cc9dc0">
+              <div class="col-span-3">Quando</div>
+              <div class="col-span-3">Ator</div>
+              <div class="col-span-4">Ação</div>
+              <div class="col-span-2">IP</div>
+            </div>
+            <div class="divide-y divide-outline-variant/10">
+              <div class="grid grid-cols-12 items-center px-6 py-3 text-sm">
+                <div class="col-span-3 font-mono" style="color:#cc9dc0">22/08/2026 14:32</div>
+                <div class="col-span-3">marina.r</div>
+                <div class="col-span-4">Atualização de maxUses 1000 → 1000</div>
+                <div class="col-span-2 font-mono" style="color:#cc9dc0">187.45.x.x</div>
+              </div>
+              <div class="grid grid-cols-12 items-center px-6 py-3 text-sm">
+                <div class="col-span-3 font-mono" style="color:#cc9dc0">15/08/2026 09:18</div>
+                <div class="col-span-3">marina.r</div>
+                <div class="col-span-4">Renovação expiração para 31/12/2026</div>
+                <div class="col-span-2 font-mono" style="color:#cc9dc0">187.45.x.x</div>
+              </div>
+              <div class="grid grid-cols-12 items-center px-6 py-3 text-sm">
+                <div class="col-span-3 font-mono" style="color:#cc9dc0">01/11/2025 10:05</div>
+                <div class="col-span-3">rafael.a</div>
+                <div class="col-span-4">Criação do cupom</div>
+                <div class="col-span-2 font-mono" style="color:#cc9dc0">201.20.x.x</div>
+              </div>
+            </div>
+          </div>
+          <p class="text-xs mt-3" style="color:#cc9dc0">Retenção: 5 anos (CVM 88/2022 + LGPD Art. 37). Auditoria imutável gerada automaticamente pelo backend.</p>
+        </div>
+
+        <!-- TAB: Histórico de uso -->
+        <div role="tabpanel" id="tabpanel-historico" aria-labelledby="tab-historico" hidden>
+          <p class="text-sm mb-3" style="color:#cc9dc0">Histórico paginado virá integrado ao endpoint <code class="font-mono">GET /user/coupons/usage?page=&limit=</code>. Placeholder visual:</p>
+          <div class="rounded-xl overflow-hidden" style="outline: 1px solid rgba(97,59,90,0.15); outline-offset: -1px;">
+            <div class="grid grid-cols-12 px-6 py-3 text-xs font-label uppercase tracking-widest" style="background:#30092c;color:#cc9dc0">
+              <div class="col-span-4">Cupom</div>
+              <div class="col-span-4">Startup</div>
+              <div class="col-span-2">Data</div>
+              <div class="col-span-2 text-right">Economia</div>
+            </div>
+            <div class="divide-y divide-outline-variant/10">
+              <div class="grid grid-cols-12 items-center px-6 py-4 hover:opacity-90 transition">
+                <div class="col-span-4 flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg flex items-center justify-center font-bold" style="background:rgba(234,107,255,0.15);color:#ea6bff">50%</div>
+                  <div>
+                    <div class="font-mono font-bold">PROMO50</div>
+                    <div class="text-xs" style="color:#cc9dc0">Uso múltiplo</div>
+                  </div>
+                </div>
+                <div class="col-span-4">
+                  <div class="text-sm font-medium">Quantum Ledger</div>
+                  <div class="text-xs" style="color:#cc9dc0">Rodada Série A</div>
+                </div>
+                <div class="col-span-2 text-xs" style="color:#cc9dc0">12 Mar 2026</div>
+                <div class="col-span-2 text-right font-bold" style="color:#34d399">−R$ 750</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal footer -->
+      <div class="relative z-10 px-6 lg:px-8 py-5 flex flex-col-reverse sm:flex-row items-center justify-between gap-3 flex-shrink-0" style="background:rgba(38,5,36,0.30); outline: 1px solid rgba(97,59,90,0.15); outline-offset: -1px;">
+        <button type="button" class="rounded-xl px-4 py-2.5 font-bold text-sm flex items-center gap-2 transition" style="color:#ff6e84" onmouseover="this.style.background='rgba(255,110,132,0.10)'" onmouseout="this.style.background='transparent'">
+          <span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">power_settings_new</span>
+          Desativar cupom
+        </button>
+        <div class="flex items-center gap-3 w-full sm:w-auto">
+          <button type="button" class="btn-outline rounded-xl px-5 py-2.5 font-bold text-sm flex-1 sm:flex-none">
+            Cancelar
+          </button>
+          <button type="button" class="btn-accent rounded-xl px-6 py-2.5 font-bold text-sm flex items-center gap-2 flex-1 sm:flex-none">
+            <span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">save</span>
+            <span>Salvar alterações</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast sucesso — aria-live region -->
+  <div class="fixed bottom-6 right-6 z-50 toast rounded-2xl p-4 pr-5 flex items-center gap-3 max-w-sm" role="status" aria-live="polite" aria-atomic="true">
+    <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:linear-gradient(135deg,#f084ff,#ea6bff,#d500f9);">
+      <span class="material-symbols-outlined" style="font-size:20px;color:#000" aria-hidden="true">check</span>
+    </div>
+    <div class="flex-1 min-w-0">
+      <div class="font-bold text-sm">PROMO50 atualizado</div>
+      <div class="text-xs" style="color:#cc9dc0">Salvo · audit registrado por marina.r</div>
+    </div>
+    <button type="button" aria-label="Fechar" style="color:#cc9dc0" class="hover:text-on-surface">
+      <span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">close</span>
+    </button>
+  </div>
+
+  <script>
+    // Tablist behavior — gerencia aria-selected + tabpanel hidden
+    const tabs = document.querySelectorAll('[role="tab"]');
+    const panels = document.querySelectorAll('[role="tabpanel"]');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.setAttribute('aria-selected', 'false'));
+        panels.forEach(p => p.setAttribute('hidden', ''));
+        tab.setAttribute('aria-selected', 'true');
+        const panelId = tab.getAttribute('aria-controls');
+        document.getElementById(panelId)?.removeAttribute('hidden');
+      });
+    });
+
+    // Focus trap básico (documentado no DESIGN.md §7.4 — implementação real em React Radix Dialog)
+    const dialog = document.querySelector('[role="dialog"]');
+    if (dialog) {
+      dialog.addEventListener('keydown', (e) => {
+        if (e.key === 'Tab') {
+          // Implementação real React usará focus-trap-react ou @radix-ui/react-dialog
+          // (HTML demo apenas estrutura semântica + ARIA correta)
+        }
+        if (e.key === 'Escape') {
+          // Fechar modal (apenas demo)
+          console.log('[modal] ESC pressed — close handler wired in React');
+        }
+      });
+    }
+  </script>
+</body>
+</html>

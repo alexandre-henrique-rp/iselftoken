@@ -1,0 +1,647 @@
+- generic [active] [ref=e1]:
+  - region "Notifications alt+T"
+  - generic [ref=e2]:
+    - navigation [ref=e3]:
+      - link [ref=e4] [cursor=pointer]:
+        - /url: /
+        - img "iSelfToken" [ref=e5]
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - button "PT" [ref=e8]
+          - generic [ref=e9]: "|"
+          - button "EN" [ref=e10]
+        - img [aria-hidden] [ref=e11] [cursor=pointer]
+        - link "Entrar" [ref=e14] [cursor=pointer]:
+          - /url: /login
+    - main [ref=e15]:
+      - generic [ref=e16]:
+        - generic [ref=e20]:
+          - generic [ref=e21]: Equity Crowdfunding
+          - heading "iSelfToken" [level=1] [ref=e22]
+          - heading "The Evolution of Equity Crowdfunding." [level=2] [ref=e23]
+          - paragraph [ref=e24]: Invista em startups ou capte recursos para transformar seu negócio.
+          - generic [ref=e25]:
+            - link "Quero captar investimento" [ref=e26] [cursor=pointer]:
+              - /url: /login
+            - link "Quero investir" [ref=e27] [cursor=pointer]:
+              - /url: /login
+        - generic: IST
+      - generic [ref=e28]:
+        - generic [ref=e29]:
+          - generic [ref=e30]:
+            - heading "Rodadas em Destaque" [level=3] [ref=e31]
+            - paragraph [ref=e32]: Oportunidades exclusivas selecionadas por especialistas
+          - generic [ref=e33]:
+            - button [ref=e34]
+            - button [ref=e37]
+        - generic [ref=e40]:
+          - generic [ref=e42]:
+            - img "Banner NeuralForge" [ref=e44]
+            - generic [ref=e46]:
+              - generic [ref=e47]:
+                - img "NeuralForge" [ref=e49]
+                - heading "NeuralForge" [level=4] [ref=e50]
+              - paragraph [ref=e51]: IA generativa especializada em automação de contratos jurídicos complexos.
+              - generic [ref=e52]:
+                - img "Startup Verificada" [ref=e53]
+                - img "Startup" [ref=e54]
+                - img "Potencial Unicórnio" [ref=e55]
+                - img "Tração" [ref=e56]
+                - img "AWS Partner" [ref=e57]
+              - generic [ref=e58]:
+                - generic [ref=e59]:
+                  - paragraph [ref=e60]: Equity Disponível
+                  - paragraph [ref=e61]: 70%
+                - generic [ref=e62]:
+                  - paragraph [ref=e63]: Valuation Post
+                  - paragraph [ref=e64]: R$ 22.0M
+              - generic [ref=e66]:
+                - generic [ref=e67]:
+                  - generic [ref=e68]: Total Arrecadado
+                  - generic [ref=e69]:
+                    - text: R$ 12.6M
+                    - generic [ref=e70]: / R$ 4.5M
+                - generic [ref=e71]: 100%
+              - link "Ver Startup" [ref=e74] [cursor=pointer]:
+                - /url: /startup/neuralforge
+          - generic [ref=e76]:
+            - img "Banner PaySwift" [ref=e78]
+            - generic [ref=e80]:
+              - generic [ref=e81]:
+                - img "PaySwift" [ref=e83]
+                - heading "PaySwift" [level=4] [ref=e84]
+              - paragraph [ref=e85]: Solução de liquidação instantânea para o agronegócio via blockchain.
+              - generic [ref=e86]:
+                - img "Startup Verificada" [ref=e87]
+                - img "Startup" [ref=e88]
+                - img "Potencial Unicórnio" [ref=e89]
+                - img "Operação" [ref=e90]
+                - img "AWS Partner" [ref=e91]
+              - generic [ref=e92]:
+                - generic [ref=e93]:
+                  - paragraph [ref=e94]: Equity Disponível
+                  - paragraph [ref=e95]: 80%
+                - generic [ref=e96]:
+                  - paragraph [ref=e97]: Valuation Post
+                  - paragraph [ref=e98]: R$ 30.0M
+              - generic [ref=e100]:
+                - generic [ref=e101]:
+                  - generic [ref=e102]: Total Arrecadado
+                  - generic [ref=e103]:
+                    - text: R$ 16.0M
+                    - generic [ref=e104]: / R$ 6.0M
+                - generic [ref=e105]: 100%
+              - link "Ver Startup" [ref=e108] [cursor=pointer]:
+                - /url: /startup/payswift
+        - generic [ref=e109]:
+          - button [ref=e110]
+          - button [ref=e111]
+      - generic [ref=e112]:
+        - generic [ref=e113]:
+          - generic [ref=e114]:
+            - heading "Recém-Adicionadas" [level=3] [ref=e115]
+            - paragraph [ref=e116]: As últimas startups a entrarem na plataforma
+          - generic [ref=e117]:
+            - button [ref=e118]
+            - button [ref=e121]
+        - generic [ref=e124]:
+          - generic [ref=e126]:
+            - img "Banner CliniLink" [ref=e128]
+            - generic [ref=e130]:
+              - generic [ref=e131]:
+                - img "CliniLink" [ref=e133]
+                - heading "CliniLink" [level=4] [ref=e134]
+              - paragraph [ref=e135]: Integração de prontuários médicos via blockchain permissionada.
+              - generic [ref=e136]:
+                - img "Startup Verificada" [ref=e137]
+                - img "Startup" [ref=e138]
+                - img "Tração" [ref=e139]
+              - generic [ref=e140]:
+                - generic [ref=e141]:
+                  - paragraph [ref=e142]: Equity Disponível
+                  - paragraph [ref=e143]: 22%
+                - generic [ref=e144]:
+                  - paragraph [ref=e145]: Valuation Post
+                  - paragraph [ref=e146]: R$ 14.0M
+              - generic [ref=e148]:
+                - generic [ref=e149]:
+                  - generic [ref=e150]: Total Arrecadado
+                  - generic [ref=e151]:
+                    - text: R$ 4.4M
+                    - generic [ref=e152]: / R$ 3.0M
+                - generic [ref=e153]: 100%
+              - link "Ver Startup" [ref=e156] [cursor=pointer]:
+                - /url: /startup/clinilink
+          - generic [ref=e162]:
+            - generic [ref=e163]:
+              - img "TechInnovate" [ref=e165]
+              - heading "TechInnovate" [level=4] [ref=e166]
+            - paragraph [ref=e167]: Startup especializada em soluções de IA para automação de processos empresariais
+            - generic [ref=e169]:
+              - generic [ref=e170]:
+                - paragraph [ref=e171]: Equity Disponível
+                - paragraph [ref=e172]: 45%
+              - generic [ref=e173]:
+                - paragraph [ref=e174]: Valuation Post
+                - paragraph [ref=e175]: R$ 25.0M
+            - generic [ref=e177]:
+              - generic [ref=e178]:
+                - generic [ref=e179]: Total Arrecadado
+                - generic [ref=e180]:
+                  - text: R$ 2.3M
+                  - generic [ref=e181]: / R$ 5.0M
+              - generic [ref=e182]: 45%
+            - link "Ver Startup" [ref=e185] [cursor=pointer]:
+              - /url: /startup/techinnovate
+          - generic [ref=e187]:
+            - img "Banner PaySwift" [ref=e189]
+            - generic [ref=e191]:
+              - generic [ref=e192]:
+                - img "PaySwift" [ref=e194]
+                - heading "PaySwift" [level=4] [ref=e195]
+              - paragraph [ref=e196]: Solução de liquidação instantânea para o agronegócio via blockchain.
+              - generic [ref=e197]:
+                - img "Startup Verificada" [ref=e198]
+                - img "Startup" [ref=e199]
+                - img "Potencial Unicórnio" [ref=e200]
+                - img "Operação" [ref=e201]
+                - img "AWS Partner" [ref=e202]
+              - generic [ref=e203]:
+                - generic [ref=e204]:
+                  - paragraph [ref=e205]: Equity Disponível
+                  - paragraph [ref=e206]: 80%
+                - generic [ref=e207]:
+                  - paragraph [ref=e208]: Valuation Post
+                  - paragraph [ref=e209]: R$ 30.0M
+              - generic [ref=e211]:
+                - generic [ref=e212]:
+                  - generic [ref=e213]: Total Arrecadado
+                  - generic [ref=e214]:
+                    - text: R$ 16.0M
+                    - generic [ref=e215]: / R$ 6.0M
+                - generic [ref=e216]: 100%
+              - link "Ver Startup" [ref=e219] [cursor=pointer]:
+                - /url: /startup/payswift
+          - generic [ref=e221]:
+            - img "Banner NeuralForge" [ref=e223]
+            - generic [ref=e225]:
+              - generic [ref=e226]:
+                - img "NeuralForge" [ref=e228]
+                - heading "NeuralForge" [level=4] [ref=e229]
+              - paragraph [ref=e230]: IA generativa especializada em automação de contratos jurídicos complexos.
+              - generic [ref=e231]:
+                - img "Startup Verificada" [ref=e232]
+                - img "Startup" [ref=e233]
+                - img "Potencial Unicórnio" [ref=e234]
+                - img "Tração" [ref=e235]
+                - img "AWS Partner" [ref=e236]
+              - generic [ref=e237]:
+                - generic [ref=e238]:
+                  - paragraph [ref=e239]: Equity Disponível
+                  - paragraph [ref=e240]: 70%
+                - generic [ref=e241]:
+                  - paragraph [ref=e242]: Valuation Post
+                  - paragraph [ref=e243]: R$ 22.0M
+              - generic [ref=e245]:
+                - generic [ref=e246]:
+                  - generic [ref=e247]: Total Arrecadado
+                  - generic [ref=e248]:
+                    - text: R$ 12.6M
+                    - generic [ref=e249]: / R$ 4.5M
+                - generic [ref=e250]: 100%
+              - link "Ver Startup" [ref=e253] [cursor=pointer]:
+                - /url: /startup/neuralforge
+          - generic [ref=e255]:
+            - img "Banner TokenVault" [ref=e257]
+            - generic [ref=e259]:
+              - generic [ref=e260]:
+                - img "TokenVault" [ref=e262]
+                - heading "TokenVault" [level=4] [ref=e263]
+              - paragraph [ref=e264]: Custódia institucional de ativos digitais para tesourarias corporativas.
+              - generic [ref=e265]:
+                - img "Startup Verificada" [ref=e266]
+                - img "Startup" [ref=e267]
+                - img "MVP" [ref=e268]
+                - img "Founders Hunter" [ref=e269]
+              - generic [ref=e270]:
+                - generic [ref=e271]:
+                  - paragraph [ref=e272]: Equity Disponível
+                  - paragraph [ref=e273]: 35%
+                - generic [ref=e274]:
+                  - paragraph [ref=e275]: Valuation Post
+                  - paragraph [ref=e276]: R$ 20.0M
+              - generic [ref=e278]:
+                - generic [ref=e279]:
+                  - generic [ref=e280]: Total Arrecadado
+                  - generic [ref=e281]:
+                    - text: R$ 7.0M
+                    - generic [ref=e282]: / R$ 4.0M
+                - generic [ref=e283]: 100%
+              - link "Ver Startup" [ref=e286] [cursor=pointer]:
+                - /url: /startup/tokenvault
+        - generic [ref=e287]:
+          - button [ref=e288]
+          - button [ref=e289]
+          - button [ref=e290]
+          - button [ref=e291]
+          - button [ref=e292]
+          - button [ref=e293]
+          - button [ref=e294]
+          - button [ref=e295]
+          - button [ref=e296]
+          - button [ref=e297]
+          - button [ref=e298]
+      - generic [ref=e300]:
+        - heading "Como Funciona?" [level=3] [ref=e301]
+        - generic [ref=e302]:
+          - generic [ref=e303]:
+            - heading "Para Fundadores" [level=4] [ref=e309]
+            - paragraph [ref=e310]: Capte recursos para acelerar o crescimento da sua startup.
+            - list [ref=e311]:
+              - listitem [ref=e312]:
+                - paragraph [ref=e316]: Abra sua rodada de captação de forma simples e estruturada.
+              - listitem [ref=e317]:
+                - paragraph [ref=e321]: Ofereça participação no negócio por meio de tokens de equity.
+              - listitem [ref=e322]:
+                - paragraph [ref=e326]: Apresente sua startup a uma comunidade de potenciais investidores.
+            - link "Cadastrar minha startup" [ref=e328] [cursor=pointer]:
+              - /url: /register
+          - generic [ref=e331]:
+            - heading "Para Investidores" [level=4] [ref=e335]
+            - paragraph [ref=e336]: Invista em startups e participe do crescimento de novos negócios.
+            - list [ref=e337]:
+              - listitem [ref=e338]:
+                - paragraph [ref=e342]: Encontre oportunidades de investimento em startups selecionadas.
+              - listitem [ref=e343]:
+                - paragraph [ref=e347]: Invista a partir de valores acessíveis e diversifique seu portfólio.
+              - listitem [ref=e348]:
+                - paragraph [ref=e352]: Acompanhe seus investimentos e a evolução das empresas pela plataforma.
+            - link "Explorar oportunidades" [ref=e354] [cursor=pointer]:
+              - /url: /register
+      - generic [ref=e358]:
+        - generic [ref=e359]:
+          - heading "Oportunidades de Investimento" [level=3] [ref=e360]
+          - generic [ref=e361]:
+            - button "All" [ref=e362]
+            - button "Fintech" [ref=e363]
+            - button "AI" [ref=e364]
+            - button "SaaS" [ref=e365]
+            - button "Healthtech" [ref=e366]
+            - button "EdTech" [ref=e367]
+            - button "Biotech" [ref=e368]
+        - generic [ref=e369]:
+          - generic [ref=e370]:
+            - generic [ref=e371]:
+              - img "NeuralForge" [ref=e373]
+              - generic [ref=e374]:
+                - img "Startup Verificada" [ref=e375]
+                - img "Startup" [ref=e376]
+                - img "Potencial Unicórnio" [ref=e377]
+                - img "Tração" [ref=e378]
+            - heading "NeuralForge" [level=5] [ref=e379]
+            - paragraph [ref=e380]: AI
+            - paragraph [ref=e381]: IA generativa especializada em automação de contratos jurídicos complexos.
+            - link "Ver mais" [ref=e382] [cursor=pointer]:
+              - /url: /startup/neuralforge
+          - generic [ref=e385]:
+            - generic [ref=e386]:
+              - img "PaySwift" [ref=e388]
+              - generic [ref=e389]:
+                - img "Startup Verificada" [ref=e390]
+                - img "Startup" [ref=e391]
+                - img "Potencial Unicórnio" [ref=e392]
+                - img "Operação" [ref=e393]
+            - heading "PaySwift" [level=5] [ref=e394]
+            - paragraph [ref=e395]: Fintech
+            - paragraph [ref=e396]: Solução de liquidação instantânea para o agronegócio via blockchain.
+            - link "Ver mais" [ref=e397] [cursor=pointer]:
+              - /url: /startup/payswift
+          - generic [ref=e400]:
+            - generic [ref=e401]:
+              - img "BioGenix" [ref=e403]
+              - generic [ref=e404]:
+                - img "Startup Verificada" [ref=e405]
+                - img "Startup" [ref=e406]
+                - img "Operação" [ref=e407]
+                - img "AWS Partner" [ref=e408]
+            - heading "BioGenix" [level=5] [ref=e409]
+            - paragraph [ref=e410]: Biotech
+            - paragraph [ref=e411]: Edição genética para sementes ultra-resistentes em climas tropicais.
+            - link "Ver mais" [ref=e412] [cursor=pointer]:
+              - /url: /startup/biogenix
+          - generic [ref=e415]:
+            - generic [ref=e416]:
+              - img "CloudPilot" [ref=e418]
+              - generic [ref=e419]:
+                - img "Startup Verificada" [ref=e420]
+                - img "Startup" [ref=e421]
+                - img "Tração" [ref=e422]
+                - img "AWS Partner" [ref=e423]
+            - heading "CloudPilot" [level=5] [ref=e424]
+            - paragraph [ref=e425]: SaaS
+            - paragraph [ref=e426]: Gestão centralizada de frotas logísticas para médias empresas.
+            - link "Ver mais" [ref=e427] [cursor=pointer]:
+              - /url: /startup/cloudpilot
+          - generic [ref=e430]:
+            - generic [ref=e431]:
+              - img "TokenVault" [ref=e433]
+              - generic [ref=e434]:
+                - img "Startup Verificada" [ref=e435]
+                - img "Startup" [ref=e436]
+                - img "MVP" [ref=e437]
+                - img "Founders Hunter" [ref=e438]
+            - heading "TokenVault" [level=5] [ref=e439]
+            - paragraph [ref=e440]: Fintech
+            - paragraph [ref=e441]: Custódia institucional de ativos digitais para tesourarias corporativas.
+            - link "Ver mais" [ref=e442] [cursor=pointer]:
+              - /url: /startup/tokenvault
+          - generic [ref=e445]:
+            - img "TechInnovate" [ref=e448]
+            - heading "TechInnovate" [level=5] [ref=e449]
+            - paragraph [ref=e450]: AI
+            - paragraph [ref=e451]: Startup especializada em soluções de IA para automação de processos empresariais
+            - link "Ver mais" [ref=e452] [cursor=pointer]:
+              - /url: /startup/techinnovate
+          - generic [ref=e455]:
+            - generic [ref=e456]:
+              - img "CliniLink" [ref=e458]
+              - generic [ref=e459]:
+                - img "Startup Verificada" [ref=e460]
+                - img "Startup" [ref=e461]
+                - img "Tração" [ref=e462]
+            - heading "CliniLink" [level=5] [ref=e463]
+            - paragraph [ref=e464]: Healthtech
+            - paragraph [ref=e465]: Integração de prontuários médicos via blockchain permissionada.
+            - link "Ver mais" [ref=e466] [cursor=pointer]:
+              - /url: /startup/clinilink
+          - generic [ref=e469]:
+            - generic [ref=e470]:
+              - img "LearnFlow" [ref=e472]
+              - generic [ref=e473]:
+                - img "Startup Verificada" [ref=e474]
+                - img "Startup" [ref=e475]
+                - img "MVP" [ref=e476]
+            - heading "LearnFlow" [level=5] [ref=e477]
+            - paragraph [ref=e478]: EdTech
+            - paragraph [ref=e479]: Treinamento corporativo imersivo com realidade virtual.
+            - link "Ver mais" [ref=e480] [cursor=pointer]:
+              - /url: /startup/learnflow
+          - generic [ref=e483]:
+            - generic [ref=e484]:
+              - img "RetailOps" [ref=e486]
+              - generic [ref=e487]:
+                - img "Startup Verificada" [ref=e488]
+                - img "Startup" [ref=e489]
+                - img "Operação" [ref=e490]
+            - heading "RetailOps" [level=5] [ref=e491]
+            - paragraph [ref=e492]: SaaS
+            - paragraph [ref=e493]: Sistema unificado de gestão de operações para varejo físico médio.
+            - link "Ver mais" [ref=e494] [cursor=pointer]:
+              - /url: /startup/retailops
+          - generic [ref=e497]:
+            - generic [ref=e498]:
+              - img "LogixChain" [ref=e500]
+              - generic [ref=e501]:
+                - img "Startup Verificada" [ref=e502]
+                - img "Startup" [ref=e503]
+                - img "Acelerada" [ref=e504]
+            - heading "LogixChain" [level=5] [ref=e505]
+            - paragraph [ref=e506]: Other
+            - paragraph [ref=e507]: Cadeia de suprimentos rastreável via blockchain para alimentos premium.
+            - link "Ver mais" [ref=e508] [cursor=pointer]:
+              - /url: /startup/logixchain
+          - generic [ref=e511]:
+            - generic [ref=e512]:
+              - img "NestoPay" [ref=e514]
+              - generic [ref=e515]:
+                - img "Startup Verificada" [ref=e516]
+                - img "Startup" [ref=e517]
+                - img "Ideação" [ref=e518]
+            - heading "NestoPay" [level=5] [ref=e519]
+            - paragraph [ref=e520]: Fintech
+            - paragraph [ref=e521]: Conta digital para imigrantes recentes no Brasil.
+            - link "Ver mais" [ref=e522] [cursor=pointer]:
+              - /url: /startup/nestopay
+      - generic [ref=e525]:
+        - generic [ref=e526]:
+          - generic [ref=e527]:
+            - heading "O que dizem" [level=3] [ref=e528]
+            - paragraph [ref=e529]: Experiências de quem já investe conosco
+          - generic [ref=e530]:
+            - button [ref=e531]
+            - button [ref=e534]
+        - generic [ref=e537]:
+          - generic [ref=e539]:
+            - generic [ref=e543]: Os relatórios de investimentos são detalhados e atualizados. Melhor plataforma de equity crowdfunding que já usei.
+            - generic [ref=e544]:
+              - generic [ref=e545]: IS
+              - generic [ref=e546]:
+                - paragraph [ref=e547]: Isabela Rodrigues Santos
+                - paragraph [ref=e548]: Analista Financeira • Investidora
+                - generic [ref=e549]:
+                  - link "LinkedIn" [ref=e550] [cursor=pointer]:
+                    - /url: https://linkedin.com/in/isabelarodss
+                  - link "Instagram" [ref=e551] [cursor=pointer]:
+                    - /url: https://instagram.com/isabelainvest
+                  - link "Site" [ref=e552] [cursor=pointer]:
+                    - /url: https://isabelars.com.br
+          - generic [ref=e558]:
+            - generic [ref=e562]: O marketplace tem opções para todos os perfis de risco. Já diversifiquei meu portfolio com 5 startups.
+            - generic [ref=e563]:
+              - generic [ref=e564]: MP
+              - generic [ref=e565]:
+                - paragraph [ref=e566]: Marcos Antonio Pereira
+                - paragraph [ref=e567]: Engenheiro • Investidor
+                - link "LinkedIn" [ref=e569] [cursor=pointer]:
+                  - /url: https://linkedin.com/in/marcosantonpereira
+          - generic [ref=e571]:
+            - generic [ref=e575]: Os relatórios de investimentos são detalhados e atualizados. Melhor plataforma de equity crowdfunding que já usei.
+            - generic [ref=e576]:
+              - generic [ref=e577]: IS
+              - generic [ref=e578]:
+                - paragraph [ref=e579]: Isabela Rodrigues Santos
+                - paragraph [ref=e580]: Analista Financeira • Investidora
+                - generic [ref=e581]:
+                  - link "LinkedIn" [ref=e582] [cursor=pointer]:
+                    - /url: https://linkedin.com/in/isabelarodss
+                  - link "Instagram" [ref=e583] [cursor=pointer]:
+                    - /url: https://instagram.com/isabelainvest
+                  - link "Site" [ref=e584] [cursor=pointer]:
+                    - /url: https://isabelars.com.br
+          - generic [ref=e589]:
+            - generic [ref=e593]: O marketplace tem opções para todos os perfis de risco. Já diversifiquei meu portfolio com 5 startups.
+            - generic [ref=e594]:
+              - generic [ref=e595]: MP
+              - generic [ref=e596]:
+                - paragraph [ref=e597]: Marcos Antonio Pereira
+                - paragraph [ref=e598]: Engenheiro • Investidor
+                - link "LinkedIn" [ref=e600] [cursor=pointer]:
+                  - /url: https://linkedin.com/in/marcosantonpereira
+          - generic [ref=e602]:
+            - generic [ref=e606]: Me senti seguro para fazer meu primeiro investimento em startups. O processo é super didático.
+            - generic [ref=e607]:
+              - generic [ref=e608]: GR
+              - generic [ref=e609]:
+                - paragraph [ref=e610]: Gabriel Henrique Reis
+                - paragraph [ref=e611]: Estudante • Investidor Iniciante
+                - generic [ref=e612]:
+                  - link "LinkedIn" [ref=e613] [cursor=pointer]:
+                    - /url: https://linkedin.com/in/gabrielhenriquereis
+                  - link "Instagram" [ref=e614] [cursor=pointer]:
+                    - /url: https://instagram.com/gabrielhrinvest
+                  - link "YouTube" [ref=e615] [cursor=pointer]:
+                    - /url: https://youtube.com/@gabrielreis
+                  - link "Site" [ref=e616] [cursor=pointer]:
+                    - /url: https://gabrielreis.com
+        - generic [ref=e621]:
+          - button [ref=e622]
+          - button [ref=e623]
+          - button [ref=e624]
+          - button [ref=e625]
+          - button [ref=e626]
+          - button [ref=e627]
+          - button [ref=e628]
+          - button [ref=e629]
+          - button [ref=e630]
+          - button [ref=e631]
+          - button [ref=e632]
+          - button [ref=e633]
+      - generic [ref=e634]:
+        - generic [ref=e635]:
+          - generic [ref=e636]:
+            - heading "Opinião das Startups" [level=3] [ref=e637]
+            - paragraph [ref=e638]: O impacto da descentralização na visão de quem constrói
+          - generic [ref=e639]:
+            - button [ref=e640]
+            - button [ref=e643]
+        - generic [ref=e646]:
+          - generic [ref=e648]:
+            - generic [ref=e652]: FinSecure está resolvendo um problema de segurança que todos os bancos enfrentam. O mercado B2B é enorme e o product-market fit está comprovado.
+            - generic [ref=e653]:
+              - generic [ref=e654]: RB
+              - generic [ref=e655]:
+                - paragraph [ref=e656]: Renata Costa Barros
+                - paragraph [ref=e657]: CISO • Advisor
+                - generic [ref=e658]:
+                  - link "LinkedIn" [ref=e659] [cursor=pointer]:
+                    - /url: https://linkedin.com/in/renatacostabarros
+                  - link "Instagram" [ref=e660] [cursor=pointer]:
+                    - /url: https://instagram.com/renatacbsecurity
+          - generic [ref=e662]:
+            - generic [ref=e666]: FoodScan elimina desperdício na cadeia alimentar com tecnologia de ponta. Impacto ambiental enorme e rentabilidade validada.
+            - generic [ref=e667]:
+              - generic [ref=e668]: AF
+              - generic [ref=e669]:
+                - paragraph [ref=e670]: André Luis Fernandes
+                - paragraph [ref=e671]: Serial Entrepreneur • Angel
+                - generic [ref=e672]:
+                  - link "LinkedIn" [ref=e673] [cursor=pointer]:
+                    - /url: https://linkedin.com/in/andreluisfernandes
+                  - link "Site" [ref=e674] [cursor=pointer]:
+                    - /url: https://andrelemos.com
+          - generic [ref=e680]:
+            - generic [ref=e684]: FinSecure está resolvendo um problema de segurança que todos os bancos enfrentam. O mercado B2B é enorme e o product-market fit está comprovado.
+            - generic [ref=e685]:
+              - generic [ref=e686]: RB
+              - generic [ref=e687]:
+                - paragraph [ref=e688]: Renata Costa Barros
+                - paragraph [ref=e689]: CISO • Advisor
+                - generic [ref=e690]:
+                  - link "LinkedIn" [ref=e691] [cursor=pointer]:
+                    - /url: https://linkedin.com/in/renatacostabarros
+                  - link "Instagram" [ref=e692] [cursor=pointer]:
+                    - /url: https://instagram.com/renatacbsecurity
+          - generic [ref=e694]:
+            - generic [ref=e698]: FoodScan elimina desperdício na cadeia alimentar com tecnologia de ponta. Impacto ambiental enorme e rentabilidade validada.
+            - generic [ref=e699]:
+              - generic [ref=e700]: AF
+              - generic [ref=e701]:
+                - paragraph [ref=e702]: André Luis Fernandes
+                - paragraph [ref=e703]: Serial Entrepreneur • Angel
+                - generic [ref=e704]:
+                  - link "LinkedIn" [ref=e705] [cursor=pointer]:
+                    - /url: https://linkedin.com/in/andreluisfernandes
+                  - link "Site" [ref=e706] [cursor=pointer]:
+                    - /url: https://andrelemos.com
+          - generic [ref=e712]:
+            - generic [ref=e716]: AgroInteligência está liderando a transformação digital do campo. O mercado agro brasileiro precisa disso urgentemente.
+            - generic [ref=e717]:
+              - generic [ref=e718]: PC
+              - generic [ref=e719]:
+                - paragraph [ref=e720]: Patrícia Rodrigues Campos
+                - paragraph [ref=e721]: Agrônoma • Investidora
+                - generic [ref=e722]:
+                  - link "LinkedIn" [ref=e723] [cursor=pointer]:
+                    - /url: https://linkedin.com/in/patriciarodriguescampos
+                  - link "Instagram" [ref=e724] [cursor=pointer]:
+                    - /url: https://instagram.com/patriciaagro
+                  - link "YouTube" [ref=e725] [cursor=pointer]:
+                    - /url: https://youtube.com/@patriciarcampos
+        - generic [ref=e726]:
+          - button [ref=e727]
+          - button [ref=e728]
+          - button [ref=e729]
+          - button [ref=e730]
+          - button [ref=e731]
+          - button [ref=e732]
+          - button [ref=e733]
+          - button [ref=e734]
+          - button [ref=e735]
+          - button [ref=e736]
+          - button [ref=e737]
+          - button [ref=e738]
+    - contentinfo [ref=e739]:
+      - generic [ref=e740]:
+        - generic [ref=e741]:
+          - generic [ref=e742]:
+            - img "iSelfToken" [ref=e743]
+            - paragraph [ref=e744]:
+              - generic [ref=e745]: Capital para quem constrói. Oportunidades para quem investe.
+              - text: A iSelfToken conecta startups e investidores por meio de uma nova experiência de equity crowdfunding.
+            - generic [ref=e746]:
+              - link [ref=e747] [cursor=pointer]:
+                - /url: "#"
+              - link [ref=e754] [cursor=pointer]:
+                - /url: "#"
+          - generic [ref=e759]:
+            - heading "Plataforma" [level=6] [ref=e760]
+            - list [ref=e761]:
+              - listitem [ref=e762]:
+                - link "Explorar Rodadas" [ref=e763] [cursor=pointer]:
+                  - /url: /
+              - listitem [ref=e764]:
+                - link "Mercado Secundário" [ref=e765] [cursor=pointer]:
+                  - /url: /
+              - listitem [ref=e766]:
+                - link "Para Empresas" [ref=e767] [cursor=pointer]:
+                  - /url: /
+              - listitem [ref=e768]:
+                - link "Metodologia Scoring" [ref=e769] [cursor=pointer]:
+                  - /url: /
+          - generic [ref=e770]:
+            - heading "Suporte" [level=6] [ref=e771]
+            - list [ref=e772]:
+              - listitem [ref=e773]:
+                - link "Central de Ajuda" [ref=e774] [cursor=pointer]:
+                  - /url: /
+              - listitem [ref=e775]:
+                - link "Termos de Uso" [ref=e776] [cursor=pointer]:
+                  - /url: /termos-de-uso
+              - listitem [ref=e777]:
+                - link "Política de Privacidade" [ref=e778] [cursor=pointer]:
+                  - /url: /politica-privacidade
+              - listitem [ref=e779]:
+                - link "Encarregado de Dados (DPO)" [ref=e780] [cursor=pointer]:
+                  - /url: mailto:dpo@iselftoken.com.br
+              - listitem [ref=e781]:
+                - link "Compliance" [ref=e782] [cursor=pointer]:
+                  - /url: /
+        - generic [ref=e783]:
+          - paragraph [ref=e784]: © 2026 iSelfToken Todos os direitos reservados.
+          - generic [ref=e785]:
+            - generic [ref=e786]: Investimento em startups envolve riscos.
+            - generic [ref=e787]: CVM 88
+            - link "Encarregado de Dados (DPO)" [ref=e788] [cursor=pointer]:
+              - /url: mailto:dpo@iselftoken.com.br
+            - link "Política de Privacidade" [ref=e789] [cursor=pointer]:
+              - /url: /politica-privacidade

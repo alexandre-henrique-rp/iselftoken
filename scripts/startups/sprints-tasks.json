@@ -1,0 +1,937 @@
+{
+  "meta": {
+    "project": "IselfToken v2",
+    "area": "Startups",
+    "created": "2026-09-15",
+    "description": "Planejamento de implementação: sprints e tasks baseados em todos os documentos de scripts/startups/",
+    "totalDocuments": 8
+  },
+  "documents": [
+    {
+      "file": "scripts/startups/fluxo_startup.md",
+      "type": "fluxo",
+      "scope": "Fluxo completo de startup (9 etapas): Landing → Curadoria → Reserva → Fase 1 → Fase 2 → Fase 3 → Pagamento → Aprovação → Repasse"
+    },
+    {
+      "file": "scripts/startups/PRD_STARTUP_PUBLICA_PRIVADA.md",
+      "type": "prd",
+      "scope": "Páginas pública e privada da startup (landing + dashboard investidor)"
+    },
+    {
+      "file": "scripts/startups/SPEC_STARTUP_PUBLICA_PRIVADA.md",
+      "type": "spec",
+      "scope": "Especificação técnica das páginas pública e privada"
+    },
+    {
+      "file": "scripts/startups/PRD_RECEBIMENTO_CAPTACAO.md",
+      "type": "prd",
+      "scope": "Recebimento da captação (prorrogação, parcelamento, relatório, comprovante)"
+    },
+    {
+      "file": "scripts/startups/PRD_CONFIG_TAXAS_VALORES.md",
+      "type": "prd",
+      "scope": "Painel de configuração de taxas e valores da plataforma"
+    },
+    {
+      "file": "scripts/startups/admin-startup-pages-design.md",
+      "type": "design",
+      "scope": "Design /admin/startups (lista) + /admin/startups/:id (detalhe)"
+    },
+    {
+      "file": "scripts/startups/admin-startup-phases-design.md",
+      "type": "design",
+      "scope": "Redesenho Fase 1/2/3 + página Fase 1"
+    },
+    {
+      "file": "scripts/startups/admin-payout-management.md",
+      "type": "design",
+      "scope": "Página /admin/payouts (captação finalizada + solicitações de parcela)"
+    }
+  ],
+  "sprints": [
+    {
+      "id": "S1",
+      "name": "Fundação — Entidades e BFFs Backend",
+      "duration": "2 semanas",
+      "description": "Criar entidades Prisma, módulos NestJS e BFFs necessários para todas as páginas admin (startups, fases, payouts). Base para todos os sprints front-end.",
+      "tasks": [
+        {
+          "id": "S1-T01",
+          "title": "Criar entidade PayoutProcess no Prisma schema",
+          "spec": [
+            "scripts/startups/PRD_RECEBIMENTO_CAPTACAO.md",
+            "scripts/startups/admin-payout-management.md"
+          ],
+          "category": "backend",
+          "priority": "high",
+          "status": "pending",
+          "description": "Adicionar modelo PayoutProcess no schema.sqlite.prisma com campos: id, startupId, campaignId, status, conclusionReason, conclusionNotes, decisionDeadline, concludedAt, payoutDecision, createdAt, updatedAt. Referenciar Campaign e Startup.",
+          "acceptanceCriteria": [
+            "Modelo criado no schema.sqlite.prisma",
+            "Relação com Campaign e Startup definida",
+            "Campos mapeados conforme PRD_RECEBIMENTO §4.2",
+            "Migration SQL criada em prisma/migrations-sqlite/"
+          ]
+        },
+        {
+          "id": "S1-T02",
+          "title": "Criar entidade PayoutReport no Prisma schema",
+          "spec": [
+            "scripts/startups/PRD_RECEBIMENTO_CAPTACAO.md",
+            "scripts/startups/admin-payout-management.md"
+          ],
+          "category": "backend",
+          "priority": "high",
+          "status": "pending",
+          "description": "Adicionar modelo PayoutReport com campos: id, payoutProcessId, installmentId, solicitacaoId, usoRecurso, lucro, marco, mensagem, publicadoTransparencia, createdAt, updatedAt.",
+          "acceptanceCriteria": [
+            "Modelo criado no schema.sqlite.prisma",
+            "Relação 1:1 com Installment",
+            "Campos do relatório mapeados conforme PRD_RECEBIMENTO §8",
+            "Campo publicadoTransparencia boolean"
+          ]
+        },
+        {
+          "id": "S1-T03",
+          "title": "Criar/migrar modelo Installment para campos adicionais",
+          "spec": [
+            "scripts/startups/PRD_RECEBIMENTO_CAPTACAO.md",
+            "scripts/startups/admin-payout-management.md"
+          ],
+          "category": "backend",
+          "priority": "high",
+          "status": "pending",
+          "description": "Verificar modelo Installment existente e adicionar campos necessários: txId, comprovanteUrl, scheduledDate, totalAmount, number, status. Verificar se já existe no schema.",
+          "acceptanceCriteria": [
+            "Installment model verificado/atualizado",
+            "Campos txId, comprovanteUrl, scheduledDate presentes",
+            "Sem quebra de modelo existente"
+          ]
+        },
+        {
+          "id": "S1-T04",
+          "title": "Criar PayoutModule backend (controller + service + DTOs)",
+          "spec": [
+            "scripts/startups/PRD_RECEBIMENTO_CAPTACAO.md",
+            "scripts/startups/admin-payout-management.md"
+          ],
+          "category": "backend",
+          "priority": "high",
+          "status": "pending",
+          "description": "Criar backendnode/src/api/payouts/ com controller (endpoints da seção 7.1 do design), service (lógica de decisão: prorrogar/finalizar + parcelamento + aprovação, com registro de audit log para compliance), DTOs (DefineParcelasDto, DecisionDto, ApproveInstallmentDto, RejectInstallmentDto, MarkPaidDto, ComprovanteUploadDto).",
+          "acceptanceCriteria": [
+            "Module: payout.module.ts",
+            "Controller com 7 endpoints GET/POST",
+            "Service com lógica de gate (relatório obrigatório, comprovante obrigatório)",
+            "DTOs com class-validator",
+            "Register no AdminModule"
+          ]
+        },
+        {
+          "id": "S1-T05",
+          "title": "Criar/expandir AdminStartupsModule backend",
+          "spec": [
+            "scripts/startups/admin-startup-pages-design.md",
+            "scripts/startups/admin-startup-phases-design.md"
+          ],
+          "category": "backend",
+          "priority": "high",
+          "status": "pending",
+          "description": "Criar endpoints GET /admin/startups (lista com filtros + paginação), GET /admin/startups/:id (detalhe completo para página detail), GET /admin/startups/:id/payment-status (retorna status de pagamento Fase 1/2/3 para gates).",
+          "acceptanceCriteria": [
+            "GET /admin/startups com query params (search, status, segment, page, pageSize)",
+            "GET /admin/startups/:id com dados completos (startup + campaign + payout + installments)",
+            "GET /admin/startups/:id/payment-status com status de cada fase",
+            "Controller integrado ao AdminModule"
+          ]
+        },
+        {
+          "id": "S1-T06",
+          "title": "Criar StartupDetailModule backend (público + investidor)",
+          "spec": [
+            "scripts/startups/SPEC_STARTUP_PUBLICA_PRIVADA.md",
+            "scripts/startups/PRD_STARTUP_PUBLICA_PRIVADA.md"
+          ],
+          "category": "backend",
+          "priority": "high",
+          "status": "pending",
+          "description": "Criar backendnode/src/api/startup-detail/ com endpoints: GET /marketplace/public/:slugOrId (público), GET /marketplace/startup/:id (investidor completo), GET /marketplace/startup/:id/dashboard (dados agregados para página privada).",
+          "acceptanceCriteria": [
+            "Controller público sem auth",
+            "Controller investidor com AuthGuard",
+            "DTOs separados público/privado",
+            "Endpoints seguindo contratos da SPEC §3.2"
+          ]
+        },
+        {
+          "id": "S1-T07",
+          "title": "Criar ConfigParameterValue module backend",
+          "spec": [
+            "scripts/startups/PRD_CONFIG_TAXAS_VALORES.md"
+          ],
+          "category": "backend",
+          "priority": "medium",
+          "status": "pending",
+          "description": "Criar backendnode/src/api/config/parameters/ com CRUD completo (list, get, create, update, delete) seguindo S25 padrão (append-only por data). Incluir DTOs e validações.",
+          "acceptanceCriteria": [
+            "Module com controller + service",
+            "Endpoints CRUD completos",
+            "Append-only versionamento",
+            "Integração com ConfigParameterValue model"
+          ]
+        },
+        {
+          "id": "S1-T08",
+          "title": "Criar testes unitários dos módulos backend novos",
+          "spec": [
+            "scripts/startups/PRD_RECEBIMENTO_CAPTACAO.md",
+            "scripts/startups/SPEC_STARTUP_PUBLICA_PRIVADA.md",
+            "scripts/startups/PRD_CONFIG_TAXAS_VALORES.md"
+          ],
+          "category": "backend",
+          "priority": "medium",
+          "status": "pending",
+          "description": "Criar .spec.ts files para PayoutService, StartupDetailService, ConfigParameterService seguindo padrão TDD RED→GREEN.",
+          "acceptanceCriteria": [
+            "PayoutService.spec.ts com 8+ cenários",
+            "StartupDetailService.spec.ts com 6+ cenários",
+            "ConfigParameterService.spec.ts com 5+ cenários",
+            "Cobertura mínima 70%"
+          ]
+        },
+        {
+          "id": "S1-T09",
+          "title": "Criar serviço de notificações de conclusão de captação",
+          "spec": [
+            "scripts/startups/PRD_RECEBIMENTO_CAPTACAO.md",
+            "scripts/startups/fluxo_startup.md"
+          ],
+          "category": "backend",
+          "priority": "high",
+          "status": "pending",
+          "description": "Criar serviço de notificações (email + interna) para: (1) founder quando captação conclui (FUNDED/CLOSED), (2) admin/compliance com link para /admin/payouts, (3) founder quando prorrogação é decidida, (4) founder quando parcelas são definidas. Usar AWS SES + templates existentes.",
+          "acceptanceCriteria": [
+            "Email founder: captação concluída (FUNDED/CLOSED)",
+            "Email admin: link para /admin/payouts com contexto",
+            "Email founder: prorrogação aprovada com novo período",
+            "Email founder: parcelas definidas com link para /founder/startups/:id/financeiro",
+            "Templates reutilizáveis (email-templates existentes)",
+            "Testes unitários do serviço"
+          ]
+        },
+        {
+          "id": "S1-T10",
+          "title": "Criar Audit Log para decisões de payout",
+          "spec": [
+            "scripts/startups/PRD_RECEBIMENTO_CAPTACAO.md",
+            "scripts/startups/fluxo_startup.md"
+          ],
+          "category": "backend",
+          "priority": "high",
+          "status": "pending",
+          "description": "Registrar no AuditLog todas as decisões de payout: prorrogar, finalizar, aprovar/rejeitar installment, marcar como pago. Campos: action, entity (PayoutProcess/Installment), entityId, decision, justification, performedBy (userId + role), timestamp. LGPD: não logar PII, usar userId opaco.",
+          "acceptanceCriteria": [
+            "AuditLog para prorrogar com motivo",
+            "AuditLog para finalizar com definição de parcelas",
+            "AuditLog para aprovar/rejeitar installment",
+            "AuditLog para marcar como pago (com txId)",
+            "userId opaco (não CPF/email)",
+            "Retenção mínima 5 anos (LGPD)"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S2",
+      "name": "Admin — Startups Lista + Detalhe",
+      "duration": "2 semanas",
+      "description": "Redesenho de /admin/startups (tabela com Fase buttons) e /admin/startups/:id (detalhe completo). Feature-flag para rollback seguro.",
+      "tasks": [
+        {
+          "id": "S2-T01",
+          "title": "Redesenhar AdminStartupTable component",
+          "spec": [
+            "scripts/startups/admin-startup-phases-design.md",
+            "scripts/startups/admin-startup-pages-design.md"
+          ],
+          "category": "frontend",
+          "priority": "high",
+          "status": "pending",
+          "description": "Substituir ícones 👁✏️🛡✅❌ por botões Fase 1/2/3 com 3 estados visuais (🔓 ativo / 🔒 trancado). Adicionar tooltip explicativo ao trancado com motivo do gate. Manter paginação, filtros e 4 estados (loading/error/empty/data).",
+          "acceptanceCriteria": [
+            "3 ícones Fase 1/2/3 com cores corretas",
+            "Tooltip ao 🔒 explicando gate",
+            "Skeletons nos estados de loading",
+            "Paginação funcional",
+            "Filtros GET aplicados"
+          ]
+        },
+        {
+          "id": "S2-T02",
+          "title": "Criar PhaseHeader e PhasePaymentCards components",
+          "spec": [
+            "scripts/startups/admin-startup-phases-design.md"
+          ],
+          "category": "frontend",
+          "priority": "high",
+          "status": "pending",
+          "description": "Componentes para Fase 1/2/3: header com título/descrição, cards de pagamento (status, valor, botão pagar/ver comprovante), timeline visual.",
+          "acceptanceCriteria": [
+            "PhaseHeader: título + descrição por fase",
+            "PhasePaymentCard: status, valor, data, botão",
+            "PhasePaymentHistory: histórico de pagamentos",
+            "Integração com PhaseTabs"
+          ]
+        },
+        {
+          "id": "S2-T03",
+          "title": "Criar WizardData e ApprovalSection components",
+          "spec": [
+            "scripts/startups/admin-startup-phases-design.md"
+          ],
+          "category": "frontend",
+          "priority": "high",
+          "status": "pending",
+          "description": "WizardData: lista de 6 campos editáveis (nomeFantasia, cnpj, areaAtuacao, estagio, descricao, modeloNegocio) com dirty state tracking. ApprovalSection: aviso de pagamento + botão Aprovar (habilitado apenas com wizard completo + pagamento PAID).",
+          "acceptanceCriteria": [
+            "6 campos exibidos com valores atuais",
+            "Dirty state tracking visual",
+            "Aprovar habilitado somente quando wizard completo + PAID",
+            "Rejeitar sempre disponível com justificativa"
+          ],
+          "extra": {
+            "rejeitarModal": "Modal com textarea min 20 caracteres"
+          }
+        },
+        {
+          "id": "S2-T04",
+          "title": "Criar /admin/startups/:id detail page",
+          "spec": [
+            "scripts/startups/admin-startup-pages-design.md"
+          ],
+          "category": "frontend",
+          "priority": "high",
+          "status": "pending",
+          "description": "Criar route private/admin.startup-detail-full.tsx com layout completo: header (badge + ações), grid de cards (ID, nomeFantasia, CNPJ, status, fundo, meta, taxa, tokens, estágio, modelo negócio, data início, contato), sidebar (ações: ver live page, editar cadastro, abrir fase), helpers (ver no marketplace, ver transações, ver documentos).",
+          "acceptanceCriteria": [
+            "Todos os 12+ cards de informações",
+            "Sidebar com 3 ações + 3 helpers",
+            "Responsivo (stack em mobile)",
+            "Skeleton loading state",
+            "Glass panels com radius 3xl"
+          ],
+          "extra": {
+            "route": "private/admin.startup-detail-full.tsx",
+            "note": "Separado do admin.startup-detail.tsx existente (1021 LOC) para seguir convenção ≤30 LOC por route"
+          }
+        },
+        {
+          "id": "S2-T05",
+          "title": "Criar PhaseTabs e Fase page components",
+          "spec": [
+            "scripts/startups/admin-startup-phases-design.md"
+          ],
+          "category": "frontend",
+          "priority": "high",
+          "status": "pending",
+          "description": "PhaseTabs (3 abas: Fase 1 Cadastro+Reserva, Fase 2 Edição Cadastro, Fase 3 Detalhes Captação) com estado ativo baseado em fase atual. Incluir PhaseDescription e PhaseDateRange components.",
+          "acceptanceCriteria": [
+            "3 abas com labels corretos",
+            "Aba ativa destacada",
+            "Fase bloqueada mostra lock icon",
+            "Responsivo (scroll horizontal em mobile)"
+          ]
+        },
+        {
+          "id": "S2-T06",
+          "title": "Criar reutilizáveis: AdminStartupHeader, FilterPanel, StatusBadge, TableActions",
+          "spec": [
+            "scripts/startups/admin-startup-pages-design.md"
+          ],
+          "category": "frontend",
+          "priority": "medium",
+          "status": "pending",
+          "description": "Extrair componentes reutilizáveis da página detail para compartilhamento.",
+          "acceptanceCriteria": [
+            "AdminStartupHeader: ícone, nome, status badge, ID",
+            "FilterPanel: pesquisa, status select, segmento select",
+            "StatusBadge: cores primaria/warning/destructive",
+            "TableActions: overflow com 4 ações"
+          ]
+        },
+        {
+          "id": "S2-T07",
+          "title": "Criar BFFs para admin startups (list + detail + payment-status)",
+          "spec": [
+            "scripts/startups/admin-startup-pages-design.md",
+            "scripts/startups/admin-startup-phases-design.md"
+          ],
+          "category": "backend",
+          "priority": "high",
+          "status": "pending",
+          "description": "Criar rotas BFF em app/routes/api/admin-startups/: list, detail, payment-status. Proxies para backend NestJS AdminStartupsController.",
+          "acceptanceCriteria": [
+            "GET /api/admin-startups — lista paginada",
+            "GET /api/admin-startups/:id — detalhe completo",
+            "GET /api/admin-startups/:id/payment-status — status por fase",
+            "Integração com TanStack Query"
+          ]
+        },
+        {
+          "id": "S2-T08",
+          "title": "Registrar rotas no routes.ts",
+          "spec": [
+            "scripts/startups/admin-startup-pages-design.md",
+            "scripts/startups/admin-startup-phases-design.md"
+          ],
+          "category": "frontend",
+          "priority": "high",
+          "status": "pending",
+          "description": "Adicionar no routes.ts: route('admin/startups/:id/1', 'routes/private/admin-startups-phase-1.tsx'), route('admin/startups/:id/2', ...), route('admin/startups/:id/3', ...), route('admin/startups/:id/full', 'routes/private/admin.startup-detail-full.tsx').",
+          "acceptanceCriteria": [
+            "Todas as rotas registradas em routes.ts",
+            "Ordem correta (estáticas antes de :id)",
+            "Feature-flag para rollback"
+          ]
+        },
+        {
+          "id": "S2-T09",
+          "title": "Criar testes para components admin startups",
+          "spec": [
+            "scripts/startups/admin-startup-pages-design.md",
+            "scripts/startups/admin-startup-phases-design.md"
+          ],
+          "category": "testing",
+          "priority": "medium",
+          "status": "pending",
+          "description": "Criar testes unitários Vitest para AdminStartupTable, PhaseTabs, WizardData, ApprovalSection.",
+          "acceptanceCriteria": [
+            "4+ testes por componente principal",
+            "Cobertura de estados (loading, empty, data, error)"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S3",
+      "name": "Admin — Fases 1/2/3",
+      "duration": "2 semanas",
+      "description": "Implementar páginas de fase (Fase 1 completa, Fase 2/3 placeholders) com fluxo de pagamento e aprovação.",
+      "tasks": [
+        {
+          "id": "S3-T01",
+          "title": "Criar /admin/startups/:id/1 — Fase 1 (Cadastro + Reserva)",
+          "spec": [
+            "scripts/startups/admin-startup-phases-design.md",
+            "scripts/startups/fluxo_startup.md"
+          ],
+          "category": "frontend",
+          "priority": "high",
+          "status": "pending",
+          "description": "Página completa Fase 1: PhaseHeader (cadastro + reserva), 2 cards de pagamento (Reserva Token + Taxa Compliance), WizardData (6 campos editáveis + dirty state), ApprovalSection (Aprovar/Rejeitar com justificativa), PaymentHistory, PhaseDescription, PhaseDateRange.",
+          "acceptanceCriteria": [
+            "Cards de pagamento com status e CTAs",
+            "6 campos editáveis com dirty tracking",
+            "Aprovar habilitado = wizard completo + pagamento PAID (função auditoria, não gate de transição)",
+            "Rejeitar com modal justificativa",
+            "Pagamento com redirect para checkout"
+          ]
+        },
+        {
+          "id": "S3-T02",
+          "title": "Implementar gate de pagamento para Fase 2",
+          "spec": [
+            "scripts/startups/admin-startup-phases-design.md",
+            "scripts/startups/fluxo_startup.md"
+          ],
+          "category": "backend",
+          "priority": "high",
+          "status": "pending",
+          "description": "Criar endpoint GET /api/admin/startups/:id/2/gate que retorna status (LOCKED/UNLOCKED + motivo). Aprovar Etapa 2 habilitado quando Etapa 1 aprovada + TAXA_COMPLIANCE = PAID. Fase 2 page acessível quando TaxaCompliance = PAID.",
+          "acceptanceCriteria": [
+            "Endpoint retorna { status, gate, reason }",
+            "Status UNLOCKED quando TaxaCompliance PAID",
+            "Aprovar Etapa 2 habilitado = Etapa 1 aprovada + TaxaCompliance PAID",
+            "Reason explicativo quando LOCKED"
+          ]
+        },
+        {
+          "id": "S3-T03",
+          "title": "Implementar gate de pagamento para Fase 3",
+          "spec": [
+            "scripts/startups/admin-startup-phases-design.md",
+            "scripts/startups/fluxo_startup.md"
+          ],
+          "category": "backend",
+          "priority": "high",
+          "status": "pending",
+          "description": "Criar endpoint GET /api/admin/startups/:id/3/gate que retorna status (LOCKED/UNLOCKED + motivo). Fase 3 libera quando TOKEN_RESERVATION + TAXA_COMPLIANCE + SERVICOS = PAID.",
+          "acceptanceCriteria": [
+            "Endpoint retorna { status, gate, reason }",
+            "Todos os 3 pagamentos = PAID → UNLOCKED",
+            "Reason explicativo quando LOCKED"
+          ]
+        },
+        {
+          "id": "S3-T04",
+          "title": "Criar /admin/startups/:id/2 — Fase 2 (Edição Cadastro)",
+          "spec": [
+            "scripts/startups/admin-startup-phases-design.md",
+            "scripts/startups/fluxo_startup.md"
+          ],
+          "category": "frontend",
+          "priority": "medium",
+          "status": "pending",
+          "description": "Página Fase 2 placeholder: PhaseHeader (edição cadastro), bloco 'Em desenvolvimento' com preview dos campos editáveis, timeline de próximas fases.",
+          "acceptanceCriteria": [
+            "Layout consistente com Fase 1",
+            "Placeholder claro para Fase 2",
+            "Links para Fase 1 (volta) e Fase 3"
+          ]
+        },
+        {
+          "id": "S3-T05",
+          "title": "Criar /admin/startups/:id/3 — Fase 3 (Detalhes Captação)",
+          "spec": [
+            "scripts/startups/admin-startup-phases-design.md",
+            "scripts/startups/fluxo_startup.md"
+          ],
+          "category": "frontend",
+          "priority": "medium",
+          "status": "pending",
+          "description": "Página Fase 3 placeholder: PhaseHeader (detalhes captação), bloco 'Em desenvolvimento' com preview de taxa/serviços, timeline de próximas fases.",
+          "acceptanceCriteria": [
+            "Layout consistente com Fase 1",
+            "Placeholder claro para Fase 3",
+            "Links para Fase 2 (volta)"
+          ]
+        },
+        {
+          "id": "S3-T06",
+          "title": "Criar FasePaymentCard e PhasePaymentHistory components",
+          "spec": [
+            "scripts/startups/admin-startup-phases-design.md",
+            "scripts/startups/fluxo_startup.md"
+          ],
+          "category": "frontend",
+          "priority": "high",
+          "status": "pending",
+          "description": "FasePaymentCard: card individual de pagamento (ícone, nome, status badge, valor, data, botão). PhasePaymentHistory: lista de pagamentos com datas e TXIDs.",
+          "acceptanceCriteria": [
+            "Card com 5 elementos",
+            "Histórico com lista ordenada",
+            "Estados: PENDING, PROCESSING, PAID, FAILED"
+          ]
+        },
+        {
+          "id": "S3-T07",
+          "title": "Criar Fase1CheckoutRedirect e usePhasePayment hook",
+          "spec": [
+            "scripts/startups/admin-startup-phases-design.md"
+          ],
+          "category": "frontend",
+          "priority": "high",
+          "status": "pending",
+          "description": "Hook usePhasePayment que verifica status de pagamento de uma fase e redireciona para checkout quando pagamento pendente. Fase1CheckoutRedirect component para botões que iniciam pagamento.",
+          "acceptanceCriteria": [
+            "Hook retorna { paid, redirectToCheckout }",
+            "Redirect funciona para /checkout/:id/payment",
+            "Tratamento de erro"
+          ]
+        },
+        {
+          "id": "S3-T08",
+          "title": "Criar CreateStartupWizard component",
+          "spec": [
+            "scripts/startups/admin-startup-phases-design.md"
+          ],
+          "category": "frontend",
+          "priority": "medium",
+          "status": "pending",
+          "description": "Wizard inline para criação direta de startup no admin (quando startup não tem cadastro completo). 3 passos: Identidade → Endereço → Bancário. Botão avançar/desativar.",
+          "acceptanceCriteria": [
+            "3 passos com progress bar",
+            "Validação por passo",
+            "Botão avançar/desativar funcional"
+          ]
+        },
+        {
+          "id": "S3-T09",
+          "title": "Criar PaymentReceipt e PhaseApproveModal components",
+          "spec": [
+            "scripts/startups/admin-startup-phases-design.md"
+          ],
+          "category": "frontend",
+          "priority": "medium",
+          "status": "pending",
+          "description": "PaymentReceipt: card individual de pagamento (ícone, nome, status badge PAID/PENDING, valor, data, txId, botão ver comprovante). PhaseApproveModal: modal de confirmação de aprovação (Etapa 1) com mensagem de que é auditoria (não libera Etapa 2).",
+          "acceptanceCriteria": [
+            "PaymentReceipt: ícone + nome + status + valor + data + txId",
+            "PhaseApproveModal: confirmação + mensagem de auditoria",
+            "Integração com Fase 1 page"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S4",
+      "name": "Admin — Gestão de Payouts",
+      "duration": "2 semanas",
+      "description": "Implementar /admin/payouts (captação finalizada + solicitações de parcela) com todas as ações e BFFs.",
+      "tasks": [
+        {
+          "id": "S4-T01",
+          "title": "Criar /admin/payouts page",
+          "spec": [
+            "scripts/startups/admin-payout-management.md"
+          ],
+          "category": "frontend",
+          "priority": "high",
+          "status": "pending",
+          "description": "Página principal com header, filtros (buscar, status, categoria, data range), Categoria 1 (captação finalizada), Categoria 2 (solicitações de parcela). Integrar com TanStack Query.",
+          "acceptanceCriteria": [
+            "2 categorias visíveis",
+            "4 filtros funcionais",
+            "Contadores por categoria",
+            "Responsivo (cards em mobile)"
+          ]
+        },
+        {
+          "id": "S4-T02",
+          "title": "Criar PayoutDecisionCard component",
+          "spec": [
+            "scripts/startups/admin-payout-management.md"
+          ],
+          "category": "frontend",
+          "priority": "high",
+          "status": "pending",
+          "description": "Card de decisão: startup info, resumo captação, botão Prorrogar (modal novo período), botão Finalizar (dropdown Definir Parcelas), countdown janela decisão.",
+          "acceptanceCriteria": [
+            "Todos os dados exibidos",
+            "Prorrogar abre modal",
+            "Finalizar abre dropdown",
+            "Countdown funcional"
+          ]
+        },
+        {
+          "id": "S4-T03",
+          "title": "Criar DefineParcelasModal component",
+          "spec": [
+            "scripts/startups/admin-payout-management.md"
+          ],
+          "category": "frontend",
+          "priority": "high",
+          "status": "pending",
+          "description": "Modal para definir parcelas: quantidade (slider/min 12), juros (select config), preview tabela (valor base + juros + previsão), confirmação.",
+          "acceptanceCriteria": [
+            "Mínimo 12 parcelas enforced",
+            "Preview da tabela visível",
+            "Juros vêm da config Financeiro",
+            "Botão CONFIRMAR E LIBERAR"
+          ]
+        },
+        {
+          "id": "S4-T04",
+          "title": "Criar InstallmentList e InstallmentCard components",
+          "spec": [
+            "scripts/startups/admin-payout-management.md",
+            "scripts/startups/fluxo_startup.md"
+          ],
+          "category": "frontend",
+          "priority": "high",
+          "status": "pending",
+          "description": "InstallmentList: lista de solicitações com filtros internos. InstallmentCard: card detalhe com startup info, relatório, comprovante, ações (aprovar/rejeitar/marcar pago).",
+          "acceptanceCriteria": [
+            "Card mostra todos os dados da seção 4.2",
+            "Relatório exibido (preenchido/vazio)",
+            "Ações habilitadas/desabilitadas por status",
+            "Upload comprovante funcional",
+            "Relatório exibido na Cat 2 (preenchido/vazio/bloqueado) com status visual"
+          ]
+        },
+        {
+          "id": "S4-T05",
+          "title": "Criar ComprovanteUpload e PayoutFilters components",
+          "spec": [
+            "scripts/startups/admin-payout-management.md"
+          ],
+          "category": "frontend",
+          "priority": "high",
+          "status": "pending",
+          "description": "ComprovanteUpload: modal upload PDF/imagem com validação MIME/tamanho. PayoutFilters: barramento de filtros compartilhado.",
+          "acceptanceCriteria": [
+            "Upload aceita PDF/imagem",
+            "Validação MIME e tamanho",
+            "Preview após upload",
+            "4 filtros aplicáveis"
+          ]
+        },
+        {
+          "id": "S4-T06",
+          "title": "Criar PayoutPage, PayoutCategory, PayoutSummary, RepasseTable components",
+          "spec": [
+            "scripts/startups/admin-payout-management.md"
+          ],
+          "category": "frontend",
+          "priority": "high",
+          "status": "pending",
+          "description": "Componentes shell da página conforme seção 6.1 do design.",
+          "acceptanceCriteria": [
+            "PayoutPage: shell + filtros + 2 categorias",
+            "PayoutCategory: wrapper com título + contador",
+            "PayoutSummary: resumo financeiro",
+            "RepasseTable: tabela responsiva"
+          ]
+        },
+        {
+          "id": "S4-T07",
+          "title": "Criar todos os BFFs /admin/payouts e /admin/installments",
+          "spec": [
+            "scripts/startups/admin-payout-management.md"
+          ],
+          "category": "backend",
+          "priority": "high",
+          "status": "pending",
+          "description": "BFFs conforme seção 7.1: GET /api/admin/payouts, POST /api/admin/payouts/:id/decision, POST /api/admin/payouts/:id/parcelas, POST /api/admin/installments/:id/approve, POST /api/admin/installments/:id/reject, POST /api/admin/installments/:id/mark-paid, POST /api/admin/installments/:id/comprovante.",
+          "acceptanceCriteria": [
+            "7 endpoints implementados",
+            "Validação com class-validator",
+            "AuthGuard + AdminGuard",
+            "Retornam ResponseDto.success()/error()"
+          ]
+        },
+        {
+          "id": "S4-T08",
+          "title": "Registrar /admin/payouts no routes.ts",
+          "spec": [
+            "scripts/startups/admin-payout-management.md"
+          ],
+          "category": "frontend",
+          "priority": "high",
+          "status": "pending",
+          "description": "Adicionar route('admin/payouts', 'routes/private/admin.payouts.tsx') em routes.ts.",
+          "acceptanceCriteria": [
+            "Route registrado em routes.ts",
+            "Route file com ≤30 linhas",
+            "Loader + meta essenciais"
+          ]
+        },
+        {
+          "id": "S4-T09",
+          "title": "Criar testes para payout management",
+          "spec": [
+            "scripts/startups/admin-payout-management.md"
+          ],
+          "category": "testing",
+          "priority": "medium",
+          "status": "pending",
+          "description": "Testes unitários para PayoutPage, PayoutDecisionCard, InstallmentCard. Testes e2e para fluxo decisão + fluxo parcela.",
+          "acceptanceCriteria": [
+            "3+ testes por componente",
+            "E2E: fluxo prorrogar",
+            "E2E: fluxo definir parcelas",
+            "E2E: fluxo aprovar/rejeitar"
+          ]
+        },
+        {
+          "id": "S4-T10",
+          "title": "Integrar comprovante na página de transparência",
+          "spec": [
+            "scripts/startups/PRD_RECEBIMENTO_CAPTACAO.md",
+            "scripts/startups/admin-payout-management.md"
+          ],
+          "category": "backend",
+          "priority": "high",
+          "status": "pending",
+          "description": "Conectar comprovante anexado no /admin/payouts com a página de transparência (/founder/startups/:id/transparencia). Quando installment status = PAID, comprovante deve ser exibido no relatório mensal da transparência. Atualizar endpoint de transparência para incluir comprovante.",
+          "acceptanceCriteria": [
+            "Comprovante PAID aparece na transparência",
+            "Relatório mensal exibido com comprovante",
+            "Investidores veem comprovante (permissão correta)",
+            "Fundador edita relatório que aparece na transparência"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S5",
+      "name": "Startup Pública/Privada + Configuração",
+      "duration": "2 semanas",
+      "description": "Implementar landing page pública, dashboard privado do investidor e painel de configuração de taxas.",
+      "tasks": [
+        {
+          "id": "S5-T01",
+          "title": "Criar /s/:slugOrId — Página pública da startup",
+          "spec": [
+            "scripts/startups/PRD_STARTUP_PUBLICA_PRIVADA.md",
+            "scripts/startups/SPEC_STARTUP_PUBLICA_PRIVADA.md"
+          ],
+          "category": "frontend",
+          "priority": "high",
+          "status": "pending",
+          "description": "Landing page pública sem auth: hero, métricas básicas, campanha ativa, CTA para login/cadastro. SSR sem layout. BFF público dedicado.",
+          "acceptanceCriteria": [
+            "Página sem layout de auth",
+            "Hero + métricas + campanha",
+            "CTA para login",
+            "SSR funcional",
+            "SEO adequado"
+          ]
+        },
+        {
+          "id": "S5-T02",
+          "title": "Redesenhar /startups/:id — Página privada do investidor",
+          "spec": [
+            "scripts/startups/PRD_STARTUP_PUBLICA_PRIVADA.md",
+            "scripts/startups/SPEC_STARTUP_PUBLICA_PRIVADA.md"
+          ],
+          "category": "frontend",
+          "priority": "high",
+          "status": "pending",
+          "description": "Redesenhar página privada: startup + campanha ativa carregadas no SSR, sem waterfall. Sidebar de investimento integrada. Dados autorizados completos.",
+          "acceptanceCriteria": [
+            "Sem waterfall inicial",
+            "Startup + campanha no SSR",
+            "InvestmentSidebar funcional",
+            "Dados autorizados",
+            "TanStack Query hidratado"
+          ]
+        },
+        {
+          "id": "S5-T03",
+          "title": "Criar BFFs público e investidor startup",
+          "spec": [
+            "scripts/startups/SPEC_STARTUP_PUBLICA_PRIVADA.md"
+          ],
+          "category": "backend",
+          "priority": "high",
+          "status": "pending",
+          "description": "GET /api/marketplace/startups/:slugOrId (público), GET /api/investor/startups/:id (privado completo), GET /api/investor/startups/:id/dashboard (dados agregados).",
+          "acceptanceCriteria": [
+            "BFF público sem auth",
+            "BFF privado com AuthGuard",
+            "DTOs separados",
+            "Sem expoção de dados sensíveis"
+          ]
+        },
+        {
+          "id": "S5-T04",
+          "title": "Criar /financeiro/repasse/dashboard — Dashboard de repasse do founder",
+          "spec": [
+            "scripts/startups/PRD_RECEBIMENTO_CAPTACAO.md",
+            "scripts/startups/admin-payout-management.md"
+          ],
+          "category": "frontend",
+          "priority": "high",
+          "status": "pending",
+          "description": "Dashboard financeiro do founder: lista de parcelas, status, solicitar parcela, preencher relatório, ver comprovantes. Referenciado em admin-payout §3.6.",
+          "acceptanceCriteria": [
+            "Lista de parcelas com status",
+            "Botão solicitar parcela",
+            "Form relatório do mês",
+            "Visualização de comprovantes"
+          ]
+        },
+        {
+          "id": "S5-T05",
+          "title": "Criar /founder/startups/:id/prorrogacao — Página de prorrogação",
+          "spec": [
+            "scripts/startups/PRD_RECEBIMENTO_CAPTACAO.md",
+            "scripts/startups/admin-payout-management.md"
+          ],
+          "category": "frontend",
+          "priority": "medium",
+          "status": "pending",
+          "description": "Página para founder definir nova captação após prorrogação: valor adicional, nova meta somada, cálculo de reserva, pagamento.",
+          "acceptanceCriteria": [
+            "Valor adicional input",
+            "Nova meta = captado + adicional (read-only)",
+            "Reserva calculada sobre adicional",
+            "Botão pagar nova reserva"
+          ]
+        },
+        {
+          "id": "S5-T06",
+          "title": "Implementar painel /admin/config — Taxas e Valores",
+          "spec": [
+            "scripts/startups/PRD_CONFIG_TAXAS_VALORES.md"
+          ],
+          "category": "frontend",
+          "priority": "medium",
+          "status": "pending",
+          "description": "Redesenhar /admin/config e /financeiro/config: lista de parâmetros, edição append-only, RBAC, histórico de alterações, alerta LGPD para mudanças críticas.",
+          "acceptanceCriteria": [
+            "Lista todos os parâmetros",
+            "Edição com versionamento",
+            "Histórico de alterações",
+            "Alerta LGPD para mudanças críticas"
+          ]
+        },
+        {
+          "id": "S5-T07",
+          "title": "Criar startup-detail BFF investidor e migrar hook use-startup-detail",
+          "spec": [
+            "scripts/startups/SPEC_STARTUP_PUBLICA_PRIVADA.md"
+          ],
+          "category": "frontend",
+          "priority": "high",
+          "status": "pending",
+          "description": "Criar BFF dedicado de investidor (GET /api/investor/startups/:id). Migrar use-startup-detail para usar novo BFF. Centralizar query options em lib/queries.ts.",
+          "acceptanceCriteria": [
+            "Novo BFF criado",
+            "Hook migrado",
+            "Query options centralizadas",
+            "Sem waterfall no cliente"
+          ]
+        },
+        {
+          "id": "S5-T08",
+          "title": "Criar /marketplace/public/:slugOrId BFF público",
+          "spec": [
+            "scripts/startups/SPEC_STARTUP_PUBLICA_PRIVADA.md"
+          ],
+          "category": "backend",
+          "priority": "high",
+          "status": "pending",
+          "description": "Endpoint público para dados da startup sem auth. Usar serverFetch no frontend. DTO mínimo (sem PII).",
+          "acceptanceCriteria": [
+            "Endpoint sem auth",
+            "DTO mínimo sem PII",
+            "Rate limiting",
+            "Cache 5 min"
+          ]
+        },
+        {
+          "id": "S5-T09",
+          "title": "Migrar hardcoded values para ConfigParameterValue",
+          "spec": [
+            "scripts/startups/PRD_CONFIG_TAXAS_VALORES.md"
+          ],
+          "category": "backend",
+          "priority": "high",
+          "status": "pending",
+          "description": "Substituir valores hardcoded no código por ConfigParameterValue: R$ 890,00 (selo verificação), R$ 5.000,00 (early access, seed), R$ 5.000,00 (mínimo investimento), SLA 7 dias úteis, EFI fees. Criar migration para ConfigParameterValue com valores atuais.",
+          "acceptanceCriteria": [
+            "R$ 890,00 (selo) → ConfigParameterValue",
+            "R$ 5.000,00 (early access) → ConfigParameterValue",
+            "R$ 5.000,00 (mínimo investimento) → ConfigParameterValue",
+            "SLA 7 dias → ConfigParameterValue",
+            "EFI fees → ConfigParameterValue",
+            "Criar config_parameter_values seed com valores atuais",
+            "Nenhum hardcoded value crítico restante"
+          ]
+        }
+      ]
+    }
+  ],
+  "rules": {
+    "sprintDuration": "2 semanas",
+    "parallelTracks": "S1 (backend) + S2 (frontend) podem rodar em paralelo a partir do T05 de S1",
+    "featureFlag": "Todas as novas features devem ter feature-flag para rollback",
+    "priorityDistribution": {
+      "high": "core functionality",
+      "medium": "important polish",
+      "low": "nice to have"
+    }
+  }
+}

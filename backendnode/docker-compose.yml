@@ -1,0 +1,42 @@
+name: iselftoken_infra
+
+networks:
+  iselftoken_network:
+    driver: bridge
+
+services:
+  redis:
+    image: redis:7.4-alpine
+    container_name: fintech_redis
+    restart: unless-stopped
+    command: ['redis-server', '--appendonly', 'yes']
+    ports:
+      - '6379:6379'
+    volumes:
+      - ./docker/redis/redis_data:/data
+    networks:
+      - iselftoken_network
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: fintech_rabbitmq
+    restart: unless-stopped
+    environment:
+      # IMPORTANTE: usar RABBITMQ_PASS (mesmo nome consumido pela API em
+      # MessagingModule e no .env.example). Antes o broker usava
+      # RABBITMQ_PASSWORD enquanto a app usava RABBITMQ_PASS — divergência de
+      # nome causava falha de autenticação AMQP.
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-admin}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-admin123}
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    volumes:
+      - ./docker/rabbitmq/rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ['CMD', 'rabbitmq-diagnostics', '-q', 'ping']
+      interval: 15s
+      timeout: 10s
+      retries: 5
+    networks:
+      - iselftoken_network

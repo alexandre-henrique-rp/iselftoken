@@ -1,0 +1,22 @@
+-- ============================================================
+-- Migration: add_repasse_primeira_parcela_dias
+-- Data: 2026-10-04
+-- Contexto: Sprint S36 — Repasse (FIN-09). Permitir configuracao separada
+--           do intervalo entre a data de configuracao e a PRIMEIRA parcela
+--           (ex.: "7 dias para a primeira, depois 30 entre as demais").
+--           Antes: `scheduledDate` da parcela 1 era `today + 1 * intervaloDias`.
+--           Agora: `today + primeiraParcelaDias`, e subsequentes = N-1 + N
+--           incrementos de `intervaloDias` (cumulativo a partir da primeira).
+--
+-- Tambem normaliza a geracao de `scheduledDate` para UTC midnight, evitando
+-- inconsistencia de datas entre o founder (/founder/campaigns/:id/financeiro)
+-- e o admin (/admin/payouts) em timezones diferentes.
+--
+-- Mudanças (ADDITIVAS, sem risco de perda de dados):
+--   1. repasses.primeiraParcelaDias Int? (default null → fallback intervaloDias)
+--
+-- Rollback:
+--   ALTER TABLE "repasses" DROP COLUMN "primeiraParcelaDias";
+-- ============================================================
+
+ALTER TABLE "repasses" ADD COLUMN "primeiraParcelaDias" INTEGER;

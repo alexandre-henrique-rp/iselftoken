@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Meus Cupons — iSelfToken</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=block" rel="stylesheet" />
+<script>
+  // Tokens alinhados à Kinetic Architecture — single source of truth
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        colors: {
+          accent:            '#d500f9',
+          'accent-soft':     '#ea6bff',
+          'accent-light':    '#f084ff',
+          primary:           '#f084ff',
+          'primary-container':'#ea6bff',
+          'primary-dim':     '#c500e6',
+          'on-primary-fixed': '#000000',
+          'on-surface':         '#ffdbf3',
+          'on-surface-variant': '#cc9dc0',
+          surface:           '#1f031d',
+          'surface-dim':     '#170117',
+          'surface-low':     '#270524',
+          'surface-container-low':  '#2a0628',
+          'surface-container':      '#30092c',
+          'surface-high':    '#380e33',
+          'surface-highest': '#41133b',
+          'surface-bright':  '#4a1844',
+          outline:           '#936889',
+          'outline-variant': '#613b5a',
+          error:             '#ff6e84',
+          success:           '#34d399',
+          warning:           '#fbbf24',
+        },
+        fontFamily: {
+          display: ['Manrope', 'sans-serif'],
+          headline: ['Manrope', 'sans-serif'],
+          body: ['Manrope', 'sans-serif'],
+          label: ['Manrope', 'sans-serif'],
+          mono: ['JetBrains Mono', 'monospace'],
+        },
+      },
+    },
+  };
+</script>
+<style>
+  body {
+    background-color: #1f031d;
+    color: #ffdbf3;
+    font-family: 'Manrope', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+  .watermark {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+    font-size: 16vw;
+    font-weight: 800;
+    color: rgba(213, 0, 249, 0.035);
+    pointer-events: none;
+    z-index: 0;
+    white-space: nowrap;
+    letter-spacing: -0.04em;
+    user-select: none;
+  }
+
+  /* Glass morphism — sem 1px solid border */
+  .glass-card {
+    background: rgba(48, 9, 44, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .glass-card:hover {
+    background: rgba(48, 9, 44, 0.55);
+    box-shadow: 0 12px 36px rgba(213, 0, 249, 0.2);
+    transform: translateY(-3px);
+  }
+  .glass-strong {
+    background: rgba(65, 19, 59, 0.55);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, #d500f9 0%, #ea6bff 60%, #f084ff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Hero card — gradient border (decoração especial para cupom destaque) */
+  .hero-coupon {
+    background: linear-gradient(135deg, rgba(48, 9, 44, 0.85) 0%, rgba(65, 19, 59, 0.85) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    position: relative;
+  }
+  .hero-coupon::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, #d500f9, #ea6bff, #f084ff);
+    z-index: -1;
+  }
+
+  /* Accent button — gradient primary oficial (sem #9c27b0) */
+  .btn-accent {
+    background: linear-gradient(135deg, #f084ff 0%, #ea6bff 60%, #d500f9 100%);
+    color: #000000; /* on-primary-fixed */
+    font-weight: 700;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .btn-accent:hover {
+    box-shadow: 0 0 32px rgba(213, 0, 249, 0.55), 0 8px 24px rgba(213, 0, 249, 0.35);
+    transform: translateY(-1px) scale(1.01);
+  }
+  /* Disabled state — cupons esgotados/expirados (P3) */
+  .btn-accent:disabled,
+  .btn-accent[aria-disabled="true"] {
+    background: #380e33;
+    color: #936889;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
+
+  /* Outline button — ghost border outline-variant 30% (P1) */
+  .btn-outline {
+    outline: 1px solid rgba(97, 59, 90, 0.30);
+    color: #f084ff;
+    transition: all 0.3s ease;
+  }
+  .btn-outline:hover {
+    background: rgba(213, 0, 249, 0.12);
+    outline-color: rgba(213, 0, 249, 0.6);
+    box-shadow: 0 0 16px rgba(213, 0, 249, 0.25);
+  }
+
+  /* Field ghost — outline-variant 35% */
+  .field-ghost {
+    background: rgba(48, 9, 44, 0.6);
+    outline: 1px solid rgba(97, 59, 90, 0.35);
+    color: #ffdbf3;
+    transition: all 0.25s ease;
+  }
+  .field-ghost:focus {
+    background: rgba(48, 9, 44, 0.8);
+    outline-color: #d500f9;
+    box-shadow: 0 0 0 3px rgba(213, 0, 249, 0.25);
+  }
+  .field-ghost::placeholder { color: rgba(204, 157, 192, 0.5); }
+  .field-ghost.invalid {
+    box-shadow: 0 0 0 3px rgba(255, 110, 132, 0.20);
+  }
+  .field-error { color: #ff6e84; }
+
+  /* Tonal divider */
+  .tonal-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(213, 0, 249, 0.18) 50%, transparent 100%);
+  }
+
+  .skeleton {
+    background: linear-gradient(90deg,
+      rgba(65, 19, 59, 0.4) 0%,
+      rgba(213, 0, 249, 0.12) 50%,
+      rgba(65, 19, 59, 0.4) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.8s ease-in-out infinite;
+  }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+  .toast {
+    background: rgba(48, 9, 44, 0.92);
+    backdrop-filter: blur(16px);
+    outline: 1px solid rgba(213, 0, 249, 0.4);
+    box-shadow: 0 12px 36px rgba(213, 0, 249, 0.3);
+  }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: #1f031d; }
+  ::-webkit-scrollbar-thumb { background: #4a1844; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #d500f9; }
+
+  /* Material symbols — padronizado (D15) */
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+
+  /* Ticket perforations (decorativo) */
+  .perf-edge {
+    position: relative;
+  }
+  .perf-edge::before, .perf-edge::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    background: #1f031d;
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .perf-edge::before { left: -8px; }
+  .perf-edge::after { right: -8px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton { animation: none !important; }
+  }
+</style>
+</head>
+<body class="min-h-screen relative overflow-x-hidden">
+  <div class="watermark font-display" aria-hidden="true">iSelfToken</div>
+
+  <!-- Header — ghost border sutil via outline-variant -->
+  <header class="sticky top-0 z-40 glass-strong" style="outline: 1px solid rgba(97, 59, 90, 0.20); outline-offset: -1px;">
+    <div class="max-w-7xl mx-auto px-6 lg:px-12 h-20 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#f084ff,#ea6bff,#d500f9);box-shadow:0 0 24px rgba(213,0,249,0.55);">
+          <span class="material-symbols-outlined" style="font-size:22px;color:#000" aria-hidden="true">token</span>
+        </div>
+        <div>
+          <div class="font-display text-lg font-extrabold tracking-tight leading-none">iSelfToken</div>
+          <div class="font-label text-xs uppercase tracking-widest mt-1" style="color:#cc9dc0">Área do investidor</div>
+        </div>
+      </div>
+
+      <!-- Hambúrguer mobile (D12) -->
+      <button type="button" id="mobile-menu-toggle" class="md:hidden w-10 h-10 rounded-xl flex items-center justify-center glass-card" aria-label="Abrir menu" aria-expanded="false" aria-controls="primary-nav">
+        <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+      </button>
+
+      <nav id="primary-nav" class="hidden md:flex items-center gap-1" aria-label="Navegação principal">
+        <a href="#" class="px-4 py-2 text-sm font-medium rounded-lg transition" style="color:#cc9dc0">Investimentos</a>
+        <a href="#" class="px-4 py-2 text-sm font-medium rounded-lg transition" style="color:#cc9dc0">Startups</a>
+        <a href="#" class="px-4 py-2 text-sm font-semibold rounded-lg relative" style="background:#30092c;color:#ffdbf3">
+          Meus Cupons
+          <span class="absolute -top-1 -right-1 w-2 h-2 rounded-full" style="background:#d500f9;box-shadow:0 0 8px rgba(213,0,249,0.8);" aria-hidden="true"></span>
+        </a>
+        <a href="#" class="px-4 py-2 text-sm font-medium rounded-lg transition" style="color:#cc9dc0">Histórico</a>
+      </nav>
+
+      <div class="hidden md:flex items-center gap-3">
+        <button type="button" class="btn-outline rounded-xl px-4 py-2 text-sm font-bold flex items-center gap-2" aria-label="Notificações">
+          <span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">notifications</span>
+        </button>
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm" style="background:linear-gradient(135deg,#ea6bff,#d500f9);color:#000" aria-label="Perfil: João Silva">JS</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="relative z-10">
+    <!-- Hero header -->
+    <section class="max-w-7xl mx-auto px-6 lg:px-12 pt-12 pb-8">
+      <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+        <div>
+          <span class="font-label text-xs uppercase tracking-[0.2em] font-semibold block mb-3" style="color:#d500f9">Benefícios · Cupons</span>
+          <h1 class="font-display text-5xl lg:text-6xl font-extrabold tracking-tighter leading-none text-gradient">
+            Meus Cupons
+          </h1>
+          <p class="font-body text-lg mt-4 max-w-xl leading-relaxed" style="color:#cc9dc0">
+            Seus descontos exclusivos para investir nas startups parceiras. Aplique no checkout para reservar tokens com vantagem.
+          </p>
+        </div>
+        <div class="flex items-center gap-2 text-xs" style="color:#cc9dc0">
+          <span class="material-symbols-outlined" style="font-size:18px;color:#34d399" aria-hidden="true">verified</span>
+          <span><strong class="font-bold" style="color:#ffdbf3">3 cupons</strong> disponíveis</span>
+          <span class="mx-2" style="color:#936889" aria-hidden="true">·</span>
+          <span><strong class="font-bold" style="color:#ffdbf3">7</strong> já utilizados</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Hero: cupom em destaque -->
+    <section class="max-w-7xl mx-auto px-6 lg:px-12 mb-12">
+      <div class="hero-coupon rounded-2xl p-6 lg:p-8 overflow-hidden relative">
+        <div class="absolute -right-20 -top-20 w-64 h-64 rounded-full opacity-20 blur-3xl pointer-events-none" style="background:#d500f9"></div>
+        <div class="absolute -left-20 -bottom-20 w-56 h-56 rounded-full opacity-20 blur-3xl pointer-events-none" style="background:#ea6bff"></div>
+
+        <div class="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+          <div class="md:col-span-7">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-1.5" style="background:rgba(213,0,249,0.20);color:#d500f9;outline: 1px solid rgba(213,0,249,0.40); outline-offset: -1px; padding: 0.25rem 0.75rem;">
+                <span class="material-symbols-outlined" style="font-size:12px" aria-hidden="true">stars</span>
+                Destaque da semana
+              </span>
+              <span class="text-xs" style="color:#cc9dc0">Expira em 5 dias</span>
+            </div>
+            <div class="flex items-baseline gap-3 mb-3">
+              <span class="font-display text-7xl lg:text-8xl font-black leading-none text-gradient">50%</span>
+              <span class="font-display text-xl font-bold" style="color:#cc9dc0">OFF</span>
+            </div>
+            <p class="text-xl font-semibold mb-2">Black Friday Antecipada · WELCOME50</p>
+            <p class="text-sm max-w-md mb-6 leading-relaxed" style="color:#cc9dc0">
+              Use este cupom em qualquer rodada de captação e garanta 50% de desconto no valor da reserva de tokens. Válido para todas as startups parceiras.
+            </p>
+            <div class="flex flex-wrap gap-3">
+              <button type="button" class="btn-accent rounded-xl px-6 py-3 text-base font-bold flex items-center gap-2">
+                <span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">redeem</span>
+                <span>Aplicar cupom</span>
+              </button>
+              <button type="button" class="btn-outline rounded-xl px-6 py-3 text-base font-bold flex items-center gap-2 copy-hero">
+                <span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">content_copy</span>
+                <span>Copiar código</span>
+              </button>
+            </div>
+          </div>
+          <div class="md:col-span-5">
+            <div class="rounded-2xl p-6 relative perf-edge" style="background:#270524; outline: 1px dashed rgba(97,59,90,0.20); outline-offset: -1px;">
+              <div class="text-center">
+                <span class="font-label text-xs uppercase tracking-widest block mb-3" style="color:#cc9dc0">Código de uso</span>
+                <div class="font-mono text-3xl lg:text-4xl font-bold tracking-[0.25em] mb-4" style="color:#d500f9">WELCOME50</div>
+                <div class="grid grid-cols-3 gap-3 text-center">
+                  <div>
+                    <div class="font-label text-xs uppercase tracking-widest" style="color:#cc9dc0">Validade</div>
+                    <div class="font-bold text-sm mt-1">5 dias</div>
+                  </div>
+                  <div class="perf-edge" style="position:relative;">
+                    <div class="font-label text-xs uppercase tracking-widest" style="color:#cc9dc0">Usos</div>
+                    <div class="font-bold text-sm mt-1">1 / 1</div>
+                  </div>
+                  <div>
+                    <div class="font-label text-xs uppercase tracking-widest" style="color:#cc9dc0">Economia</div>
+                    <div class="font-bold text-sm mt-1" style="color:#34d399">R$ 500</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="tonal-divider max-w-7xl mx-auto"></div>
+
+    <!-- Grid de cupons disponíveis -->
+    <section class="max-w-7xl mx-auto px-6 lg:px-12 py-12">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-1 h-8 rounded-full" style="background:linear-gradient(180deg, #d500f9, #ea6bff);"></div>
+        <h2 class="font-display text-2xl font-bold">Cupons disponíveis</h2>
+        <span class="font-label text-xs uppercase tracking-widest ml-2" style="color:#cc9dc0">3 ativos</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Cupom 1 — ativo -->
+        <article class="glass-card rounded-2xl p-6 flex flex-col">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <span class="font-label text-xs uppercase tracking-widest block mb-1" style="color:#cc9dc0">Seu cupom</span>
+              <span class="font-mono text-2xl font-bold tracking-wider" style="color:#d500f9">BOOST30</span>
+            </div>
+            <span class="rounded-full text-xs font-bold uppercase tracking-widest" style="background:rgba(234,107,255,0.15);color:#ea6bff;padding:0.25rem 0.625rem;">30% OFF</span>
+          </div>
+          <p class="text-sm mb-4 flex-1 leading-relaxed" style="color:#cc9dc0">
+            Cupom de lançamento válido para todas as startups do programa Aceleradora 2026.
+          </p>
+          <div class="flex items-center gap-4 text-xs mb-5 pb-5" style="color:#cc9dc0;outline: 1px solid rgba(97,59,90,0.20); outline-offset: -1px; border-bottom: 0;">
+            <span class="flex items-center gap-1.5"><span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">event</span>Expira 15/11</span>
+            <span class="flex items-center gap-1.5"><span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">how_to_reg</span>Ilimitado</span>
+          </div>
+          <div class="flex gap-2">
+            <button type="button" class="btn-outline rounded-lg flex-1 py-2.5 text-sm font-bold flex items-center justify-center gap-1.5" aria-label="Copiar código BOOST30">
+              <span class="material-symbols-outlined" style="font-size:16px" aria-hidden="true">content_copy</span>
+              Copiar
+            </button>
+            <button type="button" class="btn-accent rounded-lg flex-1 py-2.5 text-sm font-bold">
+              Aplicar
+            </button>
+          </div>
+        </article>
+
+        <!-- Cupom 2 — ativo -->
+        <article class="glass-card rounded-2xl p-6 flex flex-col">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <span class="font-label text-xs uppercase tracking-widest block mb-1" style="color:#cc9dc0">Seu cupom</span>
+              <span class="font-mono text-2xl font-bold tracking-wider" style="color:#d500f9">START20</span>
+            </div>
+            <span class="rounded-full text-xs font-bold uppercase tracking-widest" style="background:rgba(234,107,255,0.15);color:#ea6bff;padding:0.25rem 0.625rem;">20% OFF</span>
+          </div>
+          <p class="text-sm mb-4 flex-1 leading-relaxed" style="color:#cc9dc0">
+            Cupom de boas-vindas para novos investidores que nunca compraram tokens.
+          </p>
+          <div class="flex items-center gap-4 text-xs mb-5 pb-5" style="color:#cc9dc0;outline: 1px solid rgba(97,59,90,0.20); outline-offset: -1px; border-bottom: 0;">
+            <span class="flex items-center gap-1.5"><span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">event</span>Expira 31/12</span>
+            <span class="flex items-center gap-1.5"><span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">how_to_reg</span>1 uso</span>
+          </div>
+          <div class="flex gap-2">
+            <button type="button" class="btn-outline rounded-lg flex-1 py-2.5 text-sm font-bold flex items-center justify-center gap-1.5" aria-label="Copiar código START20">
+              <span class="material-symbols-outlined" style="font-size:16px" aria-hidden="true">content_copy</span>
+              Copiar
+            </button>
+            <button type="button" class="btn-accent rounded-lg flex-1 py-2.5 text-sm font-bold">
+              Aplicar
+            </button>
+          </div>
+        </article>
+
+        <!-- Cupom 3 — esgotado (P3 — botões desabilitados, não só visual) -->
+        <article class="glass-card rounded-2xl p-6 flex flex-col opacity-75" data-coupon-status="esgotado">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <span class="font-label text-xs uppercase tracking-widest block mb-1" style="color:#cc9dc0">Seu cupom</span>
+              <span class="font-mono text-2xl font-bold tracking-wider" style="color:#cc9dc0">VIP60</span>
+            </div>
+            <span class="rounded-full text-xs font-bold uppercase tracking-widest" style="background:rgba(251,191,36,0.15);color:#fbbf24;padding:0.25rem 0.625rem;">Esgotado</span>
+          </div>
+          <p class="text-sm mb-4 flex-1 leading-relaxed" style="color:#cc9dc0">
+            Benefício exclusivo de investidores VIP — atingiu o limite de 50 reservas.
+          </p>
+          <div class="flex items-center gap-4 text-xs mb-5 pb-5" style="color:#cc9dc0;outline: 1px solid rgba(97,59,90,0.20); outline-offset: -1px; border-bottom: 0;">
+            <span class="flex items-center gap-1.5"><span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">event</span>Expira 30/11</span>
+            <span class="flex items-center gap-1.5" style="color:#fbbf24"><span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">schedule</span>0/50 restantes</span>
+          </div>
+          <div class="flex gap-2">
+            <button type="button" class="btn-outline rounded-lg flex-1 py-2.5 text-sm font-bold flex items-center justify-center gap-1.5" disabled aria-disabled="true" aria-label="Cupom esgotado — não é possível copiar">
+              <span class="material-symbols-outlined" style="font-size:16px" aria-hidden="true">content_copy</span>
+              Copiar
+            </button>
+            <button type="button" class="btn-accent rounded-lg flex-1 py-2.5 text-sm font-bold" disabled aria-disabled="true">
+              Aplicar
+            </button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <div class="tonal-divider max-w-7xl mx-auto"></div>
+
+    <!-- Histórico pessoal — D3 documentado como paginação virá em /user/coupons/usage?page=&limit= -->
+    <section class="max-w-7xl mx-auto px-6 lg:px-12 py-12">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-1 h-8 rounded-full" style="background:linear-gradient(180deg, #ea6bff, #d500f9);"></div>
+        <h2 class="font-display text-2xl font-bold">Histórico de uso</h2>
+        <span class="font-label text-xs uppercase tracking-widest ml-2" style="color:#cc9dc0">7 cupons</span>
+      </div>
+
+      <div class="glass-card rounded-2xl overflow-hidden">
+        <div class="grid grid-cols-12 px-6 py-3 text-xs font-label uppercase tracking-widest" style="background:#30092c;color:#cc9dc0">
+          <div class="col-span-4">Cupom</div>
+          <div class="col-span-4">Startup</div>
+          <div class="col-span-2">Data</div>
+          <div class="col-span-2 text-right">Economia</div>
+        </div>
+
+        <!-- Histórico SEM divide-y 1px (P1) — separação por tonalidade -->
+        <div role="list">
+          <div role="listitem" class="grid grid-cols-12 items-center px-6 py-4 hover:opacity-90 transition">
+            <div class="col-span-4 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg flex items-center justify-center font-bold" style="background:rgba(234,107,255,0.15);color:#ea6bff">60%</div>
+              <div>
+                <div class="font-mono font-bold">EARLYBIRD</div>
+                <div class="text-xs" style="color:#cc9dc0">Uso único</div>
+              </div>
+            </div>
+            <div class="col-span-4">
+              <div class="text-sm font-medium">EcoTech Solutions</div>
+              <div class="text-xs" style="color:#cc9dc0">Rodada Sementes II</div>
+            </div>
+            <div class="col-span-2 text-xs" style="color:#cc9dc0">12 Set 2026</div>
+            <div class="col-span-2 text-right font-bold" style="color:#34d399">−R$ 360</div>
+          </div>
+
+          <div role="listitem" class="grid grid-cols-12 items-center px-6 py-4 hover:opacity-90 transition" style="background:rgba(48,9,44,0.30)">
+            <div class="col-span-4 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg flex items-center justify-center font-bold" style="background:rgba(234,107,255,0.15);color:#ea6bff">100%</div>
+              <div>
+                <div class="font-mono font-bold">FOUNDER100</div>
+                <div class="text-xs" style="color:#cc9dc0">Cortesia</div>
+              </div>
+            </div>
+            <div class="col-span-4">
+              <div class="text-sm font-medium">Nexus AI</div>
+              <div class="text-xs" style="color:#cc9dc0">Programa Beta</div>
+            </div>
+            <div class="col-span-2 text-xs" style="color:#cc9dc0">05 Ago 2026</div>
+            <div class="col-span-2 text-right font-bold" style="color:#34d399">−R$ 1.000</div>
+          </div>
+
+          <div role="listitem" class="grid grid-cols-12 items-center px-6 py-4 hover:opacity-90 transition">
+            <div class="col-span-4 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg flex items-center justify-center font-bold" style="background:rgba(234,107,255,0.15);color:#ea6bff">50%</div>
+              <div>
+                <div class="font-mono font-bold">BLACKFRIDAY</div>
+                <div class="text-xs" style="color:#cc9dc0">Múltiplo</div>
+              </div>
+            </div>
+            <div class="col-span-4">
+              <div class="text-sm font-medium">Quantum Ledger</div>
+              <div class="text-xs" style="color:#cc9dc0">Rodada Série A</div>
+            </div>
+            <div class="col-span-2 text-xs" style="color:#cc9dc0">28 Nov 2025</div>
+            <div class="col-span-2 text-right font-bold" style="color:#34d399">−R$ 750</div>
+          </div>
+
+          <div role="listitem" class="grid grid-cols-12 items-center px-6 py-4 hover:opacity-90 transition" style="background:rgba(48,9,44,0.30)">
+            <div class="col-span-4 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg flex items-center justify-center font-bold" style="background:rgba(234,107,255,0.15);color:#ea6bff">30%</div>
+              <div>
+                <div class="font-mono font-bold">SUMMER30</div>
+                <div class="text-xs" style="color:#cc9dc0">Múltiplo</div>
+              </div>
+            </div>
+            <div class="col-span-4">
+              <div class="text-sm font-medium">GreenChain</div>
+              <div class="text-xs" style="color:#cc9dc0">Campanha ESG</div>
+            </div>
+            <div class="col-span-2 text-xs" style="color:#cc9dc0">15 Jul 2025</div>
+            <div class="col-span-2 text-right font-bold" style="color:#34d399">−R$ 240</div>
+          </div>
+        </div>
+      </div>
+      <p class="text-xs mt-3 text-center" style="color:#cc9dc0">Histórico completo virá paginado via <code class="font-mono">GET /user/coupons/usage?page=&limit=</code>.</p>
+    </section>
+
+    <!-- Estados da interface (loading / vazio / erro / validação inline) -->
+    <section class="max-w-7xl mx-auto px-6 lg:px-12 pb-20">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-1 h-8 rounded-full" style="background:linear-gradient(180deg, #ea6bff, #d500f9);"></div>
+        <h2 class="font-display text-xl font-bold">Estados da interface</h2>
+        <span class="font-label text-xs uppercase tracking-widest ml-2" style="color:#cc9dc0">Referência visual + exemplos de erro PT-BR (422)</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Loading skeleton -->
+        <div class="glass-card rounded-2xl p-6">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="material-symbols-outlined" style="font-size:20px;color:#d500f9" aria-hidden="true">progress_activity</span>
+            <h3 class="font-display text-lg font-bold">Loading · skeleton</h3>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div class="skeleton h-40 rounded-xl" aria-label="Carregando cupom 1"></div>
+            <div class="skeleton h-40 rounded-xl" aria-label="Carregando cupom 2"></div>
+            <div class="skeleton h-40 rounded-xl" aria-label="Carregando cupom 3"></div>
+            <div class="skeleton h-40 rounded-xl" aria-label="Carregando cupom 4"></div>
+          </div>
+        </div>
+
+        <!-- Empty state -->
+        <div class="glass-card rounded-2xl p-6 flex flex-col items-center justify-center text-center min-h-[260px]">
+          <div class="relative mb-4">
+            <div class="absolute inset-0 rounded-full" style="background:rgba(213,0,249,0.20);filter:blur(16px);"></div>
+            <svg width="80" height="80" viewBox="0 0 80 80" class="relative" aria-hidden="true">
+              <defs>
+                <linearGradient id="empty-grad-user" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#d500f9" />
+                  <stop offset="100%" stop-color="#ea6bff" />
+                </linearGradient>
+              </defs>
+              <rect x="14" y="22" width="52" height="40" rx="6" stroke="url(#empty-grad-user)" stroke-width="3" fill="none"/>
+              <line x1="14" y1="36" x2="66" y2="36" stroke="url(#empty-grad-user)" stroke-width="2" stroke-dasharray="3,3"/>
+              <circle cx="40" cy="50" r="4" stroke="url(#empty-grad-user)" stroke-width="3" fill="none"/>
+            </svg>
+          </div>
+          <h3 class="font-display text-lg font-bold mb-2">Você ainda não tem cupons</h3>
+          <p class="text-sm max-w-xs mb-5" style="color:#cc9dc0">Novos cupons aparecem aqui quando você participa de campanhas ou recebe brindes.</p>
+          <button type="button" class="btn-accent rounded-xl px-5 py-3 text-sm font-bold flex items-center gap-2">
+            <span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">explore</span>
+            <span>Explorar startups</span>
+          </button>
+        </div>
+
+        <!-- Error state -->
+        <div class="rounded-2xl p-6 flex flex-col items-start" style="background:rgba(255,110,132,0.08);outline: 1px solid rgba(255,110,132,0.40); outline-offset: -1px;">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background:rgba(255,110,132,0.15)">
+              <span class="material-symbols-outlined" style="font-size:22px;color:#ff6e84" aria-hidden="true">error</span>
+            </div>
+            <h3 class="font-display text-lg font-bold">Erro · falha ao carregar</h3>
+          </div>
+          <p class="text-sm mb-4 leading-relaxed" style="color:#cc9dc0">
+            Não conseguimos carregar seus cupons agora. Verifique sua conexão e tente novamente em alguns instantes.
+          </p>
+          <div class="font-mono text-xs rounded-lg p-3 mb-4 w-full" style="background:rgba(255,110,132,0.10);color:#ff6e84;outline:1px solid rgba(255,110,132,0.20)">
+            GET /api/coupons/my → 503 Service Unavailable
+          </div>
+          <button type="button" class="btn-outline rounded-xl px-5 py-2.5 text-sm font-bold flex items-center gap-2">
+            <span class="material-symbols-outlined" style="font-size:16px" aria-hidden="true">refresh</span>
+            Tentar novamente
+          </button>
+        </div>
+
+        <!-- Validação inline (campo de cupom no checkout) — P3 mensagens PT-BR distintas -->
+        <div class="glass-card rounded-2xl p-6">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="material-symbols-outlined" style="font-size:20px;color:#fbbf24" aria-hidden="true">report</span>
+            <h3 class="font-display text-lg font-bold">Validação inline · checkout</h3>
+          </div>
+
+          <div class="space-y-4">
+            <!-- 422 cupom_inativo -->
+            <div>
+              <label for="chk-cupom-inativo" class="block font-label text-xs uppercase tracking-widest mb-2 font-semibold" style="color:#cc9dc0">Código do cupom</label>
+              <div class="flex gap-2">
+                <input id="chk-cupom-inativo" type="text" value="OFFLINE30" class="field-ghost invalid flex-1 rounded-xl p-4 font-mono uppercase tracking-widest font-bold" aria-invalid="true" aria-describedby="msg-cupom-inativo" />
+                <button type="button" class="btn-accent rounded-xl px-5 font-bold text-sm" disabled aria-disabled="true">Aplicar</button>
+              </div>
+              <p id="msg-cupom-inativo" class="field-error text-xs flex items-center gap-1.5 mt-2">
+                <span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">cancel</span>
+                Este cupom está desativado. Procure outro cupom válido.
+              </p>
+            </div>
+
+            <!-- 422 cupom_expirado -->
+            <div>
+              <label for="chk-cupom-expirado" class="block font-label text-xs uppercase tracking-widest mb-2 font-semibold" style="color:#cc9dc0">Código do cupom</label>
+              <div class="flex gap-2">
+                <input id="chk-cupom-expirado" type="text" value="LAUNCH20" class="field-ghost invalid flex-1 rounded-xl p-4 font-mono uppercase tracking-widest font-bold" aria-invalid="true" aria-describedby="msg-cupom-expirado" />
+                <button type="button" class="btn-accent rounded-xl px-5 font-bold text-sm" disabled aria-disabled="true">Aplicar</button>
+              </div>
+              <p id="msg-cupom-expirado" class="field-error text-xs flex items-center gap-1.5 mt-2">
+                <span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">cancel</span>
+                Este cupom expirou em 01/07/2026. Procure outro cupom válido.
+              </p>
+            </div>
+
+            <!-- 422 cupom_ainda_nao_valido -->
+            <div>
+              <label for="chk-cupom-ainda-valido" class="block font-label text-xs uppercase tracking-widest mb-2 font-semibold" style="color:#cc9dc0">Código do cupom</label>
+              <div class="flex gap-2">
+                <input id="chk-cupom-ainda-valido" type="text" value="SUMMER26" class="field-ghost invalid flex-1 rounded-xl p-4 font-mono uppercase tracking-widest font-bold" aria-invalid="true" aria-describedby="msg-ainda-valido" />
+                <button type="button" class="btn-accent rounded-xl px-5 font-bold text-sm" disabled aria-disabled="true">Aplicar</button>
+              </div>
+              <p id="msg-ainda-valido" class="field-error text-xs flex items-center gap-1.5 mt-2">
+                <span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">cancel</span>
+                Este cupom só será válido a partir de 15/10/2026.
+              </p>
+            </div>
+
+            <!-- 422 cupom_esgotado -->
+            <div>
+              <label for="chk-cupom-esgotado" class="block font-label text-xs uppercase tracking-widest mb-2 font-semibold" style="color:#cc9dc0">Código do cupom</label>
+              <div class="flex gap-2">
+                <input id="chk-cupom-esgotado" type="text" value="BLACKFRIDAY" class="field-ghost invalid flex-1 rounded-xl p-4 font-mono uppercase tracking-widest font-bold" aria-invalid="true" aria-describedby="msg-esgotado" />
+                <button type="button" class="btn-accent rounded-xl px-5 font-bold text-sm" disabled aria-disabled="true">Aplicar</button>
+              </div>
+              <p id="msg-esgotado" class="field-error text-xs flex items-center gap-1.5 mt-2">
+                <span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">cancel</span>
+                Este cupom já atingiu o limite de usos.
+              </p>
+            </div>
+
+            <!-- 422 cupom_ja_aplicado -->
+            <div>
+              <label for="chk-cupom-ja-aplicado" class="block font-label text-xs uppercase tracking-widest mb-2 font-semibold" style="color:#cc9dc0">Código do cupom</label>
+              <div class="flex gap-2">
+                <input id="chk-cupom-ja-aplicado" type="text" value="PROMO50" class="field-ghost invalid flex-1 rounded-xl p-4 font-mono uppercase tracking-widest font-bold" aria-invalid="true" aria-describedby="msg-ja-aplicado" />
+                <button type="button" class="btn-accent rounded-xl px-5 font-bold text-sm" disabled aria-disabled="true">Aplicar</button>
+              </div>
+              <p id="msg-ja-aplicado" class="field-error text-xs flex items-center gap-1.5 mt-2">
+                <span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">cancel</span>
+                Este cupom já foi aplicado a este pagamento.
+              </p>
+            </div>
+
+            <!-- 422 pagamento_nao_pendente -->
+            <div>
+              <label for="chk-pagamento-nao-pendente" class="block font-label text-xs uppercase tracking-widest mb-2 font-semibold" style="color:#cc9dc0">Código do cupom</label>
+              <div class="flex gap-2">
+                <input id="chk-pagamento-nao-pendente" type="text" value="BACKER25" class="field-ghost invalid flex-1 rounded-xl p-4 font-mono uppercase tracking-widest font-bold" aria-invalid="true" aria-describedby="msg-nao-pendente" />
+                <button type="button" class="btn-accent rounded-xl px-5 font-bold text-sm" disabled aria-disabled="true">Aplicar</button>
+              </div>
+              <p id="msg-nao-pendente" class="field-error text-xs flex items-center gap-1.5 mt-2">
+                <span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">cancel</span>
+                O pagamento não está mais pendente — cupom não pode ser aplicado.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Toast sucesso — aria-live region -->
+  <div class="fixed bottom-6 right-6 z-50 toast rounded-2xl p-4 pr-5 flex items-center gap-3 max-w-sm" role="status" aria-live="polite" aria-atomic="true">
+    <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:linear-gradient(135deg,#f084ff,#ea6bff,#d500f9);">
+      <span class="material-symbols-outlined" style="font-size:20px;color:#000" aria-hidden="true">check</span>
+    </div>
+    <div class="flex-1 min-w-0">
+      <div class="font-bold text-sm">Cupom WELCOME50 copiado!</div>
+      <div class="text-xs" style="color:#cc9dc0">Use no checkout para aplicar 50% OFF.</div>
+    </div>
+    <button type="button" aria-label="Fechar notificação" style="color:#cc9dc0" class="hover:text-on-surface">
+      <span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">close</span>
+    </button>
+  </div>
+
+  <!-- Footer (D14 — "Powered by Kinetic Architecture" removido) -->
+  <footer class="py-6 text-center text-xs" style="color:#cc9dc0">
+    iSelfToken · Meus Cupons · Área do investidor
+  </footer>
+
+  <script>
+    // Hero copy
+    document.querySelector('.copy-hero')?.addEventListener('click', function() {
+      const original = this.innerHTML;
+      this.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">check</span><span>Copiado!</span>';
+      this.style.outline = '1px solid #34d399';
+      this.style.color = '#34d399';
+      setTimeout(() => {
+        this.innerHTML = original;
+        this.style.outline = '';
+        this.style.color = '';
+      }, 2200);
+    });
+
+    // Card copy buttons
+    document.querySelectorAll('.glass-card button[class*="btn-outline"]').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const card = this.closest('article');
+        const code = card.querySelector('.font-mono')?.innerText;
+        if (!code) return;
+        navigator.clipboard?.writeText(code);
+        const orig = this.innerHTML;
+        this.innerHTML = '<span class="material-symbols-outlined" style="font-size:16px;color:#34d399" aria-hidden="true">check</span>';
+        setTimeout(() => { this.innerHTML = orig; }, 2000);
+      });
+    });
+
+    // Mobile menu (D12)
+    const mobileBtn = document.getElementById('mobile-menu-toggle');
+    const nav = document.getElementById('primary-nav');
+    mobileBtn?.addEventListener('click', () => {
+      const expanded = mobileBtn.getAttribute('aria-expanded') === 'true';
+      mobileBtn.setAttribute('aria-expanded', String(!expanded));
+      nav.classList.toggle('hidden');
+    });
+  </script>
+</body>
+</html>

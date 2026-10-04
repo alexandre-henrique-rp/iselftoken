@@ -1,0 +1,20 @@
+{
+  "welcome": "Bem-vindo",
+  "login": "Entrar",
+  "logout": "Sair",
+  "register": "Cadastrar",
+  "profile": "Perfil",
+  "home": "Início",
+  "dashboard": "Dashboard",
+  "startup": {
+    "form": {
+      "categoriaLabel": "Categoria",
+      "categoriaPlaceholder": "Selecione a categoria",
+      "areaLabel": "Área de Atuação",
+      "areaPlaceholder": "Selecione a área",
+      "categoriaObrigatoria": "Selecione uma categoria",
+      "areaObrigatoria": "Selecione uma área",
+      "areaIncompativel": "A Área selecionada não pertence à Categoria escolhida."
+    }
+  }
+}

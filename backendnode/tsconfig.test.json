@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "src/*": ["src/*"],
+      "@prisma/*": ["generated/prisma/*"],
+      "@prisma": ["generated/prisma"]
+    },
+    "allowJs": true,
+    "moduleResolution": "node",
+    "module": "commonjs"
+  },
+  "include": ["test/**/*.ts", "src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Central de Cupons — Admin · iSelfToken</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=block" rel="stylesheet" />
+<script>
+  // Tokens alinhados à Kinetic Architecture (vivid_logic §5) — single source of truth
+  // Migração futura: mover para `@theme { ... }` do Tailwind 4 (ver DESIGN.md §9)
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        colors: {
+          accent:            '#d500f9',
+          'accent-soft':     '#ea6bff',
+          'accent-light':    '#f084ff',
+          primary:           '#f084ff',
+          'primary-container':'#ea6bff',
+          'primary-dim':     '#c500e6',
+          'on-primary-fixed': '#000000', // CTA texto preto (resolve contraste D13: 5,2:1)
+          'on-surface':         '#ffdbf3',
+          'on-surface-variant': '#cc9dc0',
+          surface:           '#1f031d',
+          'surface-dim':     '#170117',
+          'surface-low':     '#270524',
+          'surface-container-low':  '#2a0628',
+          'surface-container':      '#30092c',
+          'surface-high':    '#380e33',
+          'surface-highest': '#41133b',
+          'surface-bright':  '#4a1844',
+          outline:           '#936889',
+          'outline-variant': '#613b5a',
+          error:             '#ff6e84',
+          'error-dim':       '#d73357',
+          success:           '#34d399',
+          warning:           '#fbbf24',
+          'inverse-surface': '#fff7f9',
+          'on-primary':      '#540063',
+        },
+        fontFamily: {
+          display: ['Manrope', 'sans-serif'],
+          headline: ['Manrope', 'sans-serif'],
+          body: ['Manrope', 'sans-serif'],
+          label: ['Manrope', 'sans-serif'],
+          mono: ['JetBrains Mono', 'monospace'],
+        },
+      },
+    },
+  };
+</script>
+<style>
+  body {
+    background-color: #1f031d;
+    color: #ffdbf3;
+    font-family: 'Manrope', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* Watermark rotacionado -15deg em 3% opacity (Kinetic Architecture) */
+  .watermark {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+    font-size: 16vw;
+    font-weight: 800;
+    color: rgba(213, 0, 249, 0.035);
+    pointer-events: none;
+    z-index: 0;
+    white-space: nowrap;
+    letter-spacing: -0.04em;
+    user-select: none;
+  }
+
+  /* Glass morphism oficial vivid_logic */
+  .glass-card {
+    background: rgba(48, 9, 44, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    /* No 1px border (vivid_logic §4) — apenas ghost border opcional no hover */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .glass-card:hover {
+    background: rgba(48, 9, 44, 0.55);
+    box-shadow: 0 12px 36px rgba(213, 0, 249, 0.2);
+    transform: translateY(-2px);
+  }
+  .glass-strong {
+    background: rgba(65, 19, 59, 0.55);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  /* Gradient text */
+  .text-gradient {
+    background: linear-gradient(135deg, #d500f9 0%, #ea6bff 60%, #f084ff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Accent button — gradient primary oficial vivid_logic §2 (sem #9c27b0) */
+  .btn-accent {
+    background: linear-gradient(135deg, #f084ff 0%, #ea6bff 60%, #d500f9 100%);
+    color: #000000; /* on-primary-fixed resolve contraste (5.2:1) */
+    font-weight: 700;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-accent::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #d500f9 0%, #ea6bff 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .btn-accent > * { position: relative; z-index: 1; }
+  .btn-accent:hover {
+    box-shadow: 0 0 32px rgba(213, 0, 249, 0.55), 0 8px 24px rgba(213, 0, 249, 0.35);
+    transform: translateY(-1px) scale(1.01);
+  }
+  .btn-accent:hover::before { opacity: 1; }
+  .btn-accent:active { transform: translateY(0) scale(0.99); }
+  /* Disabled state (P3 — cupons esgotados/expirados) */
+  .btn-accent:disabled,
+  .btn-accent[aria-disabled="true"] {
+    background: #380e33;
+    color: #936889;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
+  .btn-accent:disabled::before { display: none; }
+
+  /* Outline button — ghost border com outline-variant a 20% (P1) */
+  .btn-outline {
+    outline: 1px solid rgba(97, 59, 90, 0.30);
+    color: #f084ff;
+    transition: all 0.3s ease;
+  }
+  .btn-outline:hover {
+    background: rgba(213, 0, 249, 0.12);
+    outline-color: rgba(213, 0, 249, 0.6);
+    box-shadow: 0 0 16px rgba(213, 0, 249, 0.25);
+  }
+
+  /* Field "ghost border" — outline-variant a 35% (P1: sem 1px solid border) */
+  .field-ghost {
+    background: rgba(48, 9, 44, 0.6);
+    outline: 1px solid rgba(97, 59, 90, 0.35);
+    color: #ffdbf3;
+    transition: all 0.25s ease;
+  }
+  .field-ghost:focus {
+    outline: none;
+    border-color: transparent;
+    box-shadow: 0 0 0 3px rgba(213, 0, 249, 0.30), 0 0 0 1px #d500f9 inset;
+  }
+  .field-ghost::placeholder { color: rgba(204, 157, 192, 0.5); }
+  /* Compat: mantém a borda visível em :focus mesmo sem outline */
+  .field-ghost:focus { outline: 2px solid #d500f9; outline-offset: 0; }
+
+  /* Tonal divider: no 1px lines, surface shift instead */
+  .tonal-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(213, 0, 249, 0.18) 50%, transparent 100%);
+  }
+
+  /* Status pills — text-xs no mínimo (D19) */
+  .pill-active   { background: rgba(52, 211, 153, 0.14); color: #34d399; font-size: 0.75rem; padding: 0.25rem 0.625rem; }
+  .pill-inactive { background: rgba(147, 104, 137, 0.20); color: #cc9dc0; font-size: 0.75rem; padding: 0.25rem 0.625rem; }
+  .pill-expired  { background: rgba(255, 110, 132, 0.14); color: #ff6e84; font-size: 0.75rem; padding: 0.25rem 0.625rem; }
+  .pill-exhausted{ background: rgba(251, 191, 36, 0.14);  color: #fbbf24; font-size: 0.75rem; padding: 0.25rem 0.625rem; }
+
+  /* Toggle (limite de 1 uso total global — P2 corrigido) */
+  .toggle-track { background: rgba(65, 19, 59, 0.85); transition: background 0.25s; }
+  .toggle-track.on { background: linear-gradient(135deg, #d500f9, #ea6bff); }
+  .toggle-knob {
+    background: #ffdbf3;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(213, 0, 249, 0.4);
+  }
+  .toggle-track.on .toggle-knob { transform: translateX(28px); }
+
+  /* Chip selector (% filter) — sem border, ghost border apenas em hover */
+  .chip {
+    background: rgba(48, 9, 44, 0.5);
+    outline: 1px solid rgba(97, 59, 90, 0.25);
+    color: #cc9dc0;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    font-size: 0.75rem;
+    padding: 0.375rem 1rem;
+  }
+  .chip:hover {
+    background: rgba(213, 0, 249, 0.08);
+    color: #ffdbf3;
+    outline-color: rgba(213, 0, 249, 0.5);
+  }
+  .chip.active {
+    background: linear-gradient(135deg, rgba(213, 0, 249, 0.25), rgba(234, 107, 255, 0.15));
+    outline: 1px solid #d500f9;
+    color: #ffdbf3;
+    box-shadow: 0 0 12px rgba(213, 0, 249, 0.2);
+  }
+
+  /* Skeleton loading — pulse com glass tint */
+  .skeleton {
+    background: linear-gradient(90deg,
+      rgba(65, 19, 59, 0.4) 0%,
+      rgba(213, 0, 249, 0.12) 50%,
+      rgba(65, 19, 59, 0.4) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.8s ease-in-out infinite;
+  }
+  @keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Toast — aria-live region */
+  .toast {
+    background: rgba(48, 9, 44, 0.92);
+    backdrop-filter: blur(16px);
+    outline: 1px solid rgba(213, 0, 249, 0.4);
+    box-shadow: 0 12px 36px rgba(213, 0, 249, 0.3);
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: #1f031d; }
+  ::-webkit-scrollbar-thumb { background: #4a1844; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #d500f9; }
+
+  /* Material symbols sizing — padronizado (D15) */
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+
+  /* Inline validation (P3 — mensagens PT-BR distintas) */
+  .field-error { color: #ff6e84; }
+  .field-ghost.invalid {
+    box-shadow: 0 0 0 3px rgba(255, 110, 132, 0.20);
+  }
+
+  /* Spinner rotation */
+  @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .spin-slow { animation: spin-slow 1.2s linear infinite; }
+
+  /* === Modal accessibility === */
+  .modal-overlay {
+    background: rgba(31, 3, 29, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .spin-slow, .skeleton, .pulse-soft, .toggle-knob { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body class="min-h-screen relative overflow-x-hidden">
+  <!-- Watermark iSelfToken -->
+  <div class="watermark font-display" aria-hidden="true">iSelfToken</div>
+
+  <!-- Header sticky — sem 1px border, ghost border sutil via outline-variant -->
+  <header class="sticky top-0 z-40 glass-strong" style="outline: 1px solid rgba(97, 59, 90, 0.20); outline-offset: -1px;">
+    <div class="max-w-7xl mx-auto px-6 lg:px-12 h-20 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg" style="background:linear-gradient(135deg,#f084ff,#ea6bff,#d500f9);box-shadow:0 0 24px rgba(213,0,249,0.55);">
+          <span class="material-symbols-outlined" style="font-size:22px;color:#000" aria-hidden="true">token</span>
+        </div>
+        <div>
+          <div class="font-display text-lg font-extrabold tracking-tight leading-none">iSelfToken</div>
+          <div class="font-label text-xs uppercase tracking-widest mt-1" style="color:#cc9dc0">Painel Administrativo</div>
+        </div>
+      </div>
+
+      <!-- Hambúrguer mobile (D12) — substitui hidden md:flex -->
+      <button type="button" id="mobile-menu-toggle" class="md:hidden w-10 h-10 rounded-xl flex items-center justify-center glass-card" aria-label="Abrir menu" aria-expanded="false" aria-controls="primary-nav">
+        <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+      </button>
+
+      <nav id="primary-nav" class="hidden md:flex items-center gap-1" aria-label="Navegação principal">
+        <a href="#" class="px-4 py-2 text-sm font-medium rounded-lg transition" style="color:#cc9dc0">Dashboard</a>
+        <a href="#" class="px-4 py-2 text-sm font-medium rounded-lg transition" style="color:#cc9dc0">Startups</a>
+        <a href="#" class="px-4 py-2 text-sm font-medium rounded-lg transition" style="color:#cc9dc0">Pagamentos</a>
+        <a href="#" class="px-4 py-2 text-sm font-semibold rounded-lg relative" style="background:#30092c;color:#ffdbf3">
+          Cupons
+          <span class="absolute -top-1 -right-1 w-2 h-2 rounded-full" style="background:#d500f9;box-shadow:0 0 8px rgba(213,0,249,0.8);" aria-hidden="true"></span>
+        </a>
+        <a href="#" class="px-4 py-2 text-sm font-medium rounded-lg transition" style="color:#cc9dc0">Usuários</a>
+      </nav>
+
+      <div class="hidden md:flex items-center gap-3">
+        <button type="button" class="w-10 h-10 rounded-xl flex items-center justify-center transition" style="background:#30092c" aria-label="Notificações">
+          <span class="material-symbols-outlined" style="font-size:20px;color:#cc9dc0" aria-hidden="true">notifications</span>
+          <span class="absolute mt-[-18px] ml-[14px] w-2 h-2 rounded-full bg-accent" aria-hidden="true" style="background:#d500f9"></span>
+        </button>
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm" style="background:linear-gradient(135deg,#ea6bff,#d500f9);color:#000" aria-label="Perfil: Marina Rocha">MR</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="relative z-10">
+    <!-- Hero header -->
+    <section class="max-w-7xl mx-auto px-6 lg:px-12 pt-12 pb-10">
+      <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+        <div>
+          <span class="font-label text-xs uppercase tracking-[0.2em] font-semibold block mb-3" style="color:#d500f9">Marketing · Promoções</span>
+          <h1 class="font-display text-5xl lg:text-6xl font-extrabold tracking-tighter leading-none text-gradient">
+            Central de Cupons
+          </h1>
+          <p class="font-body text-lg mt-4 max-w-xl leading-relaxed" style="color:#cc9dc0">
+            Crie, gerencie e audite cupons de desconto para campanhas de captação das startups parceiras.
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+          <button type="button" class="btn-outline rounded-xl px-5 py-3 font-semibold flex items-center gap-2 text-sm">
+            <span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">download</span>
+            Exportar CSV
+          </button>
+          <button type="button" id="open-coupon-modal" class="btn-accent rounded-xl px-5 py-3 font-bold flex items-center gap-2 text-sm">
+            <span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">add</span>
+            <span>Novo Cupom</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Stats grid (4 colunas) -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-10">
+        <div class="glass-card rounded-2xl p-5">
+          <div class="flex items-center justify-between mb-3">
+            <span class="font-label text-xs uppercase tracking-widest" style="color:#cc9dc0">Ativos</span>
+            <span class="material-symbols-outlined" style="font-size:20px;color:#d500f9" aria-hidden="true">confirmation_number</span>
+          </div>
+          <div class="font-display text-3xl font-extrabold">42</div>
+          <div class="text-xs mt-2 font-medium" style="color:#34d399">+8 vs mês anterior</div>
+        </div>
+        <div class="glass-card rounded-2xl p-5">
+          <div class="flex items-center justify-between mb-3">
+            <span class="font-label text-xs uppercase tracking-widest" style="color:#cc9dc0">Usos totais</span>
+            <span class="material-symbols-outlined" style="font-size:20px;color:#ea6bff" aria-hidden="true">how_to_reg</span>
+          </div>
+          <div class="font-display text-3xl font-extrabold">1.847</div>
+          <div class="text-xs mt-2 font-medium" style="color:#cc9dc0">últimos 30 dias</div>
+        </div>
+        <div class="glass-card rounded-2xl p-5">
+          <div class="flex items-center justify-between mb-3">
+            <span class="font-label text-xs uppercase tracking-widest" style="color:#cc9dc0">Desconto concedido</span>
+            <span class="material-symbols-outlined" style="font-size:20px;color:#ea6bff" aria-hidden="true">payments</span>
+          </div>
+          <div class="font-display text-3xl font-extrabold">R$ 87,4k</div>
+          <div class="text-xs mt-2 font-medium" style="color:#cc9dc0">capital poupado</div>
+        </div>
+        <div class="glass-card rounded-2xl p-5">
+          <div class="flex items-center justify-between mb-3">
+            <span class="font-label text-xs uppercase tracking-widest" style="color:#cc9dc0">Expirando em 7d</span>
+            <span class="material-symbols-outlined" style="font-size:20px;color:#fbbf24" aria-hidden="true">schedule</span>
+          </div>
+          <div class="font-display text-3xl font-extrabold">5</div>
+          <div class="text-xs mt-2 font-medium" style="color:#fbbf24">requer atenção</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="tonal-divider"></div>
+
+    <!-- Two-column workspace -->
+    <section class="max-w-7xl mx-auto px-6 lg:px-12 py-12 grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+      <!-- === Gerador de Cupom (5/12) === -->
+      <aside class="lg:col-span-5 lg:sticky lg:top-28 lg:self-start">
+        <div class="glass-strong rounded-2xl p-6 lg:p-8 relative overflow-hidden">
+          <div class="absolute -right-16 -top-16 w-56 h-56 rounded-full opacity-15 blur-3xl pointer-events-none" style="background:#d500f9"></div>
+          <div class="absolute -left-16 -bottom-16 w-48 h-48 rounded-full opacity-15 blur-3xl pointer-events-none" style="background:#ea6bff"></div>
+
+          <div class="relative z-10">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="material-symbols-outlined" style="font-size:28px;color:#d500f9" aria-hidden="true">generating_tokens</span>
+              <h2 class="font-display text-2xl font-bold">Gerador de Cupom</h2>
+            </div>
+            <p class="text-sm mb-8" style="color:#cc9dc0">Configure e emita um código de desconto em segundos.</p>
+
+            <!-- Percentual dropdown (whitelist fixa) -->
+            <div class="mb-5">
+              <label for="discount-select" class="block font-label text-xs uppercase tracking-widest mb-2 font-semibold" style="color:#cc9dc0">
+                Percentual de desconto
+              </label>
+              <div class="relative">
+                <select id="discount-select" class="field-ghost w-full rounded-xl p-4 pr-12 appearance-none cursor-pointer font-bold text-lg">
+                  <option value="20">20% de desconto</option>
+                  <option value="30" selected>30% de desconto</option>
+                  <option value="50">50% de desconto</option>
+                  <option value="60">60% de desconto</option>
+                  <option value="100">100% (cortesia)</option>
+                </select>
+                <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" style="color:#cc9dc0" aria-hidden="true">expand_more</span>
+              </div>
+              <p class="text-xs mt-2" style="color:#cc9dc0">Valores permitidos: 20, 30, 50, 60 ou 100%.</p>
+            </div>
+
+            <!-- Toggle uso (limite global — P2 corrigido) -->
+            <div class="mb-5">
+              <span class="block font-label text-xs uppercase tracking-widest mb-3 font-semibold" style="color:#cc9dc0" id="usage-rule-label">
+                Regra de uso
+              </span>
+              <div class="flex items-center justify-between rounded-xl p-4" style="background:#30092c">
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined" style="font-size:22px;color:#d500f9" aria-hidden="true">person</span>
+                  <div>
+                    <div class="font-semibold text-sm" id="toggle-label">Uso único global</div>
+                    <div class="text-xs" id="toggle-hint" style="color:#cc9dc0">limite global de 1 uso total</div>
+                  </div>
+                </div>
+                <button type="button" id="usage-toggle" role="switch" aria-checked="false" aria-labelledby="usage-rule-label" aria-describedby="toggle-label toggle-hint" class="toggle-track w-14 h-8 rounded-full relative flex items-center px-1">
+                  <span class="toggle-knob w-6 h-6 rounded-full"></span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Código -->
+            <div class="mb-5">
+              <label for="code-input" class="block font-label text-xs uppercase tracking-widest mb-2 font-semibold" style="color:#cc9dc0">
+                Código do cupom
+              </label>
+              <div class="flex gap-2">
+                <input id="code-input" type="text" placeholder="EX: PROMO50" maxlength="32" minlength="3" pattern="[A-Z0-9_\-]+" autocomplete="off" aria-describedby="code-hint"
+                  class="field-ghost flex-1 rounded-xl p-4 font-mono uppercase tracking-widest font-bold" />
+                <button id="generate-code" type="button" class="btn-outline rounded-xl px-4 flex items-center justify-center" aria-label="Gerar código aleatório">
+                  <span class="material-symbols-outlined" aria-hidden="true">autorenew</span>
+                </button>
+              </div>
+              <p id="code-hint" class="text-xs mt-2 flex items-center gap-1" style="color:#34d399">
+                <span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">check_circle</span>
+                Código disponível (3–32 chars · A-Z, 0-9, _, -)
+              </p>
+            </div>
+
+            <!-- MaxUses (P2 — adicionado no gerador) -->
+            <div class="mb-5">
+              <label for="max-uses-input" class="block font-label text-xs uppercase tracking-widest mb-2 font-semibold" style="color:#cc9dc0">
+                Limite global de usos (maxUses) <span style="color:#cc9dc0" class="font-normal normal-case">(default: 1)</span>
+              </label>
+              <input id="max-uses-input" type="number" min="1" max="100000" value="1" aria-describedby="max-uses-hint"
+                class="field-ghost w-full rounded-xl p-4 font-bold" />
+              <p id="max-uses-hint" class="text-xs mt-2" style="color:#cc9dc0">
+                Define o número máximo de vezes que o cupom pode ser usado em toda a plataforma.
+              </p>
+            </div>
+
+            <!-- Validade — validFrom e validUntil (P2 — validFrom adicionado) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5">
+              <div>
+                <label for="valid-from-input" class="block font-label text-xs uppercase tracking-widest mb-2 font-semibold" style="color:#cc9dc0">
+                  Válido a partir de <span style="color:#cc9dc0" class="font-normal normal-case">(opcional)</span>
+                </label>
+                <div class="relative">
+                  <input id="valid-from-input" type="date" class="field-ghost w-full rounded-xl p-4 pr-12" />
+                  <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" style="color:#cc9dc0" aria-hidden="true">event</span>
+                </div>
+              </div>
+              <div>
+                <label for="expires-input" class="block font-label text-xs uppercase tracking-widest mb-2 font-semibold" style="color:#cc9dc0">
+                  Data de expiração <span style="color:#cc9dc0" class="font-normal normal-case">(opcional)</span>
+                </label>
+                <div class="relative">
+                  <input id="expires-input" type="date" class="field-ghost w-full rounded-xl p-4 pr-12" />
+                  <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" style="color:#cc9dc0" aria-hidden="true">event</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Descrição interna (audit) -->
+            <div class="mb-6">
+              <label for="audit-input" class="block font-label text-xs uppercase tracking-widest mb-2 font-semibold" style="color:#cc9dc0">
+                Descrição interna <span style="color:#ff6e84">*</span>
+              </label>
+              <textarea id="audit-input" rows="3" placeholder="Ex: Black Friday 2026 — campanha agressiva para aquisição de novos investidores..."
+                class="field-ghost w-full rounded-xl p-4 resize-none"></textarea>
+              <p class="text-xs mt-2" style="color:#cc9dc0">Auditoria CVM 88/2022 + LGPD: obrigatório registrar justificativa.</p>
+            </div>
+
+            <!-- Submit -->
+            <button id="generate-btn" type="button" class="btn-accent w-full py-4 rounded-xl flex items-center justify-center gap-3 text-base font-bold group">
+              <span class="material-symbols-outlined group-hover:rotate-180 transition-transform duration-700" aria-hidden="true">autorenew</span>
+              <span>Gerar Cupom</span>
+            </button>
+
+            <!-- Resultado gerado (visible por default p/ demo) -->
+            <div id="generated-result" class="mt-5 rounded-xl p-5" style="background:#270524; outline: 1px dashed rgba(213,0,249,0.6); outline-offset: -2px;">
+              <span class="font-label text-xs block mb-2 uppercase tracking-widest" style="color:#cc9dc0">Código gerado · pronto para usar</span>
+              <div class="flex items-center justify-between">
+                <span class="font-mono text-2xl font-bold tracking-widest" style="color:#d500f9" id="generated-code">IST-K7P9MX4R</span>
+                <button id="copy-generated" type="button" class="rounded-lg p-2 transition" style="color:#cc9dc0" aria-label="Copiar código gerado">
+                  <span class="material-symbols-outlined" aria-hidden="true">content_copy</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- === Lista de cupons (7/12) === -->
+      <section class="lg:col-span-7">
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center gap-3">
+            <div class="w-1 h-8 rounded-full" style="background:linear-gradient(180deg, #d500f9, #ea6bff);"></div>
+            <h2 class="font-display text-2xl font-bold">Cupons existentes</h2>
+          </div>
+          <span class="font-label text-xs uppercase tracking-widest" style="color:#cc9dc0">42 resultados</span>
+        </div>
+
+        <!-- Filtros -->
+        <div class="glass-card rounded-2xl p-4 mb-6">
+          <div class="flex flex-col lg:flex-row gap-3">
+            <!-- Busca -->
+            <div class="relative flex-1">
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2" style="font-size:20px;color:#cc9dc0" aria-hidden="true">search</span>
+              <input type="search" placeholder="Buscar por código..." aria-label="Buscar cupom por código"
+                class="field-ghost w-full rounded-lg pl-11 pr-4 py-3 text-sm" />
+            </div>
+            <!-- Status dropdown -->
+            <div class="relative">
+              <label for="filter-status" class="sr-only">Status do cupom</label>
+              <select id="filter-status" aria-label="Filtrar por status" class="field-ghost rounded-lg pl-4 pr-10 py-3 text-sm appearance-none cursor-pointer font-medium">
+                <option>Todos os status</option>
+                <option>Ativo</option>
+                <option>Inativo</option>
+                <option>Expirado</option>
+                <option>Esgotado</option>
+              </select>
+              <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style="font-size:18px;color:#cc9dc0" aria-hidden="true">expand_more</span>
+            </div>
+            <!-- Tipo -->
+            <div class="relative">
+              <label for="filter-type" class="sr-only">Tipo do cupom</label>
+              <select id="filter-type" aria-label="Filtrar por tipo de uso" class="field-ghost rounded-lg pl-4 pr-10 py-3 text-sm appearance-none cursor-pointer font-medium">
+                <option>Todos os tipos</option>
+                <option>Uso único</option>
+                <option>Uso múltiplo</option>
+                <option>Ilimitado</option>
+              </select>
+              <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style="font-size:18px;color:#cc9dc0" aria-hidden="true">expand_more</span>
+            </div>
+          </div>
+
+          <!-- Chip selector (% filter) — sem borders 1px sólidos -->
+          <div class="flex flex-wrap gap-2 mt-3 pt-3" style="border-top: 1px solid rgba(97, 59, 90, 0.15)">
+            <span class="text-xs font-medium self-center mr-2" style="color:#cc9dc0">Percentual:</span>
+            <button class="chip rounded-full font-bold" aria-pressed="true">Todos</button>
+            <button class="chip rounded-full font-bold active" aria-pressed="true">20%</button>
+            <button class="chip rounded-full font-bold active" aria-pressed="true">30%</button>
+            <button class="chip rounded-full font-bold active" aria-pressed="true">50%</button>
+            <button class="chip rounded-full font-bold" aria-pressed="false">60%</button>
+            <button class="chip rounded-full font-bold" aria-pressed="false">100%</button>
+          </div>
+        </div>
+
+        <!-- Lista de cupons (sem border-l-4 — substituído por badge de status) -->
+        <div class="flex flex-col gap-4" id="coupons-list">
+
+          <!-- Cupom 1: Ativo, 50% -->
+          <article class="glass-card rounded-2xl p-5" data-coupon-id="IST-AB12CD34">
+            <div class="flex flex-col md:flex-row md:items-center gap-4 justify-between">
+              <div class="flex items-center gap-5">
+                <div class="flex flex-col items-center justify-center rounded-xl p-3 min-w-[88px]" style="background:#270524">
+                  <span class="font-display text-3xl font-black leading-none" style="color:#d500f9">50%</span>
+                  <span class="text-xs uppercase tracking-widest mt-1" style="color:#cc9dc0">OFF</span>
+                </div>
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2 mb-1 flex-wrap">
+                    <span class="font-mono text-xl font-bold tracking-wider">PROMO50</span>
+                    <span class="pill-active rounded-full font-bold uppercase tracking-widest flex items-center gap-1">
+                      <span class="material-symbols-outlined" style="font-size:11px" aria-hidden="true">check_circle</span>
+                      Ativo
+                    </span>
+                  </div>
+                  <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs" style="color:#cc9dc0">
+                    <span class="flex items-center gap-1.5"><span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">how_to_reg</span>847 / 1000 usos</span>
+                    <span class="flex items-center gap-1.5"><span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">event</span>Expira 31/12/2026</span>
+                    <span class="flex items-center gap-1.5"><span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">category</span>Múltiplo · maxUses=1000</span>
+                  </div>
+                  <!-- Progress -->
+                  <div class="mt-3 h-1.5 rounded-full overflow-hidden" style="background:#380e33" role="progressbar" aria-label="Uso do cupom PROMO50" aria-valuenow="847" aria-valuemin="0" aria-valuemax="1000">
+                    <div class="h-full rounded-full" style="background:linear-gradient(90deg, #d500f9, #ea6bff); width:84.7%"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button type="button" class="btn-outline rounded-lg p-2.5" aria-label="Ver histórico do cupom PROMO50"><span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">history</span></button>
+                <button type="button" class="btn-outline rounded-lg p-2.5" aria-label="Editar cupom PROMO50"><span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">edit</span></button>
+                <button type="button" class="btn-outline rounded-lg p-2.5" aria-label="Desativar cupom PROMO50" style="color:#ff6e84"><span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">power_settings_new</span></button>
+              </div>
+            </div>
+          </article>
+
+          <!-- Cupom 2: Ativo, uso único (ilimitado no sentido "uso único mas durante validade") -->
+          <article class="glass-card rounded-2xl p-5" data-coupon-id="IST-FOUNDER100">
+            <div class="flex flex-col md:flex-row md:items-center gap-4 justify-between">
+              <div class="flex items-center gap-5">
+                <div class="flex flex-col items-center justify-center rounded-xl p-3 min-w-[88px]" style="background:#270524">
+                  <span class="font-display text-3xl font-black leading-none" style="color:#d500f9">100%</span>
+                  <span class="text-xs uppercase tracking-widest mt-1" style="color:#cc9dc0">FREE</span>
+                </div>
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2 mb-1 flex-wrap">
+                    <span class="font-mono text-xl font-bold tracking-wider">FOUNDER100</span>
+                    <span class="pill-active rounded-full font-bold uppercase tracking-widest flex items-center gap-1">
+                      <span class="material-symbols-outlined" style="font-size:11px" aria-hidden="true">check_circle</span>
+                      Ativo
+                    </span>
+                  </div>
+                  <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs" style="color:#cc9dc0">
+                    <span class="flex items-center gap-1.5"><span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">person</span>limite global 1 uso</span>
+                    <span class="flex items-center gap-1.5"><span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">event</span>Expira 15/03/2027</span>
+                    <span class="flex items-center gap-1.5"><span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">category</span>Único (maxUses=1)</span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button type="button" class="btn-outline rounded-lg p-2.5" aria-label="Ver histórico do cupom FOUNDER100"><span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">history</span></button>
+                <button type="button" class="btn-outline rounded-lg p-2.5" aria-label="Editar cupom FOUNDER100"><span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">edit</span></button>
+                <button type="button" class="btn-outline rounded-lg p-2.5" aria-label="Desativar cupom FOUNDER100" style="color:#ff6e84"><span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">power_settings_new</span></button>
+              </div>
+            </div>
+          </article>
+
+          <!-- Cupom 3: Esgotado (mock realista; sem "excedido 523/1") -->
+          <article class="glass-card rounded-2xl p-5" data-coupon-id="IST-LIMITED50">
+            <div class="flex flex-col md:flex-row md:items-center gap-4 justify-between">
+              <div class="flex items-center gap-5">
+                <div class="flex flex-col items-center justify-center rounded-xl p-3 min-w-[88px]" style="background:rgba(251,191,36,0.10)">
+                  <span class="font-display text-3xl font-black leading-none" style="color:#fbbf24">50%</span>
+                  <span class="text-xs uppercase tracking-widest mt-1" style="color:#cc9dc0">OFF</span>
+                </div>
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2 mb-1 flex-wrap">
+                    <span class="font-mono text-xl font-bold tracking-wider">BLACKFRIDAY</span>
+                    <span class="pill-exhausted rounded-full font-bold uppercase tracking-widest flex items-center gap-1">
+                      <span class="material-symbols-outlined" style="font-size:11px" aria-hidden="true">priority_high</span>
+                      Esgotado
+                    </span>
+                  </div>
+                  <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs" style="color:#fbbf24">
+                    <span class="flex items-center gap-1.5"><span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">how_to_reg</span>1000 / 1000 usos (atingiu limite)</span>
+                    <span class="flex items-center gap-1.5" style="color:#cc9dc0"><span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">category</span>Múltiplo · maxUses=1000</span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <!-- P3: botões desabilitados quando esgotado (não só visual) -->
+                <button type="button" class="btn-outline rounded-lg p-2.5" aria-label="Ver histórico do cupom BLACKFRIDAY"><span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">history</span></button>
+                <button type="button" class="btn-outline rounded-lg p-2.5" aria-label="Editar cupom BLACKFRIDAY"><span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">edit</span></button>
+                <button type="button" class="btn-outline rounded-lg p-2.5" disabled aria-disabled="true" aria-label="Desativar cupom BLACKFRIDAY (esgotado)" style="color:#936889"><span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">power_settings_new</span></button>
+              </div>
+            </div>
+          </article>
+
+          <!-- Cupom 4: Expirado -->
+          <article class="rounded-2xl p-5 opacity-60" style="background:#270524" data-coupon-id="IST-LAUNCH20">
+            <div class="flex flex-col md:flex-row md:items-center gap-4 justify-between">
+              <div class="flex items-center gap-5">
+                <div class="flex flex-col items-center justify-center rounded-xl p-3 min-w-[88px]" style="background:#30092c">
+                  <span class="font-display text-3xl font-bold leading-none" style="color:#cc9dc0">20%</span>
+                  <span class="text-xs uppercase tracking-widest mt-1" style="color:#cc9dc0">OFF</span>
+                </div>
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2 mb-1 flex-wrap">
+                    <span class="font-mono text-xl font-medium tracking-wider line-through" style="color:#cc9dc0">LAUNCH20</span>
+                    <span class="pill-expired rounded-full font-bold uppercase tracking-widest flex items-center gap-1">
+                      <span class="material-symbols-outlined" style="font-size:11px" aria-hidden="true">event_busy</span>
+                      Expirado
+                    </span>
+                  </div>
+                  <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs" style="color:#cc9dc0">
+                    <span class="flex items-center gap-1.5"><span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">history</span>2.108 usos totais</span>
+                    <span class="flex items-center gap-1.5"><span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">event_busy</span>Expirou 01/07/2026</span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <!-- P3: botões desabilitados quando expirado -->
+                <button type="button" class="btn-outline rounded-lg p-2.5" aria-label="Ver histórico do cupom LAUNCH20"><span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">history</span></button>
+                <button type="button" class="btn-outline rounded-lg p-2.5" disabled aria-disabled="true" aria-label="Não é possível arquivar cupom expirado"><span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">inventory_2</span></button>
+              </div>
+            </div>
+          </article>
+
+          <!-- Cupom 5: Inativo -->
+          <article class="rounded-2xl p-5" style="background:#270524" data-coupon-id="IST-VIP60">
+            <div class="flex flex-col md:flex-row md:items-center gap-4 justify-between">
+              <div class="flex items-center gap-5">
+                <div class="flex flex-col items-center justify-center rounded-xl p-3 min-w-[88px]" style="background:#30092c">
+                  <span class="font-display text-3xl font-bold leading-none" style="color:#cc9dc0">60%</span>
+                  <span class="text-xs uppercase tracking-widest mt-1" style="color:#cc9dc0">OFF</span>
+                </div>
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2 mb-1 flex-wrap">
+                    <span class="font-mono text-xl font-medium tracking-wider" style="color:#cc9dc0">VIP60</span>
+                    <span class="pill-inactive rounded-full font-bold uppercase tracking-widest">Inativo</span>
+                  </div>
+                  <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs" style="color:#cc9dc0">
+                    <span class="flex items-center gap-1.5"><span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">how_to_reg</span>0 usos</span>
+                    <span class="flex items-center gap-1.5"><span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">event</span>Expira 30/11/2026</span>
+                    <span class="flex items-center gap-1.5"><span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">category</span>Múltiplo</span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button type="button" class="btn-outline rounded-lg p-2.5" aria-label="Ver histórico do cupom VIP60"><span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">history</span></button>
+                <button type="button" class="btn-outline rounded-lg p-2.5" aria-label="Editar cupom VIP60"><span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">edit</span></button>
+                <button type="button" class="btn-outline rounded-lg p-2.5" aria-label="Reativar cupom VIP60" style="color:#34d399"><span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">power_settings_new</span></button>
+              </div>
+            </div>
+          </article>
+
+          <!-- Pagination — D3 documentado: virá paginado via /user/coupons/usage backend -->
+          <div class="flex items-center justify-between mt-6 px-2">
+            <span class="text-xs" style="color:#cc9dc0">Mostrando <strong style="color:#ffdbf3">1–5</strong> de <strong style="color:#ffdbf3">42</strong></span>
+            <div class="flex items-center gap-1">
+              <button type="button" class="w-9 h-9 rounded-lg flex items-center justify-center transition disabled:opacity-30" style="background:#30092c;color:#cc9dc0" disabled aria-disabled="true" aria-label="Página anterior">
+                <span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">chevron_left</span>
+              </button>
+              <button type="button" class="w-9 h-9 rounded-lg flex items-center justify-center font-bold" style="background:linear-gradient(135deg,#f084ff,#ea6bff,#d500f9);color:#000;box-shadow:0 0 16px rgba(213,0,249,0.5);" aria-current="page" aria-label="Página 1">1</button>
+              <button type="button" class="w-9 h-9 rounded-lg flex items-center justify-center transition font-medium" style="background:#30092c;color:#cc9dc0" aria-label="Página 2">2</button>
+              <button type="button" class="w-9 h-9 rounded-lg flex items-center justify-center transition font-medium" style="background:#30092c;color:#cc9dc0" aria-label="Página 3">3</button>
+              <span class="w-9 h-9 flex items-center justify-center" style="color:#cc9dc0" aria-hidden="true">…</span>
+              <button type="button" class="w-9 h-9 rounded-lg flex items-center justify-center transition font-medium" style="background:#30092c;color:#cc9dc0" aria-label="Página 9">9</button>
+              <button type="button" class="w-9 h-9 rounded-lg flex items-center justify-center transition" style="background:#30092c;color:#cc9dc0" aria-label="Próxima página">
+                <span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">chevron_right</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <!-- === Estados da interface (referência visual) === -->
+    <section class="max-w-7xl mx-auto px-6 lg:px-12 pb-20">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-1 h-8 rounded-full" style="background:linear-gradient(180deg, #ea6bff, #d500f9);"></div>
+        <h2 class="font-display text-xl font-bold">Estados da interface</h2>
+        <span class="font-label text-xs uppercase tracking-widest ml-2" style="color:#cc9dc0">Referência visual + exemplos de erro PT-BR</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Loading skeleton -->
+        <div class="glass-card rounded-2xl p-6">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="material-symbols-outlined" style="font-size:20px;color:#d500f9" aria-hidden="true">progress_activity</span>
+            <h3 class="font-display text-lg font-bold">Loading · skeleton</h3>
+          </div>
+          <div class="space-y-3">
+            <div class="flex items-center gap-4">
+              <div class="skeleton w-20 h-16 rounded-xl"></div>
+              <div class="flex-1 space-y-2">
+                <div class="skeleton h-4 rounded w-2/3"></div>
+                <div class="skeleton h-3 rounded w-1/2"></div>
+              </div>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="skeleton w-20 h-16 rounded-xl"></div>
+              <div class="flex-1 space-y-2">
+                <div class="skeleton h-4 rounded w-1/2"></div>
+                <div class="skeleton h-3 rounded w-2/3"></div>
+              </div>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="skeleton w-20 h-16 rounded-xl"></div>
+              <div class="flex-1 space-y-2">
+                <div class="skeleton h-4 rounded w-3/5"></div>
+                <div class="skeleton h-3 rounded w-1/3"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty state -->
+        <div class="glass-card rounded-2xl p-6 flex flex-col items-center justify-center text-center min-h-[260px]">
+          <div class="relative mb-4">
+            <div class="absolute inset-0 rounded-full" style="background:rgba(213,0,249,0.20);filter:blur(16px);"></div>
+            <svg width="80" height="80" viewBox="0 0 80 80" class="relative" aria-hidden="true">
+              <defs>
+                <linearGradient id="empty-grad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#d500f9" />
+                  <stop offset="100%" stop-color="#ea6bff" />
+                </linearGradient>
+              </defs>
+              <path d="M16 24 L16 56 Q16 60 20 60 L60 60 Q64 60 64 56 L64 24" stroke="url(#empty-grad)" stroke-width="3" fill="none" stroke-linecap="round"/>
+              <path d="M16 24 L24 16 L56 16 L64 24" stroke="url(#empty-grad)" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="40" y1="32" x2="40" y2="48" stroke="url(#empty-grad)" stroke-width="3" stroke-linecap="round"/>
+              <line x1="32" y1="40" x2="48" y2="40" stroke="url(#empty-grad)" stroke-width="3" stroke-linecap="round"/>
+              <circle cx="32" cy="48" r="2" fill="#d500f9"/>
+              <circle cx="48" cy="48" r="2" fill="#d500f9"/>
+              <circle cx="40" cy="52" r="2" fill="#d500f9"/>
+            </svg>
+          </div>
+          <h3 class="font-display text-lg font-bold mb-2">Nenhum cupom criado ainda</h3>
+          <p class="text-sm max-w-xs mb-5" style="color:#cc9dc0">Comece criando seu primeiro cupom de desconto para suas campanhas.</p>
+          <button type="button" class="btn-accent rounded-xl px-5 py-3 text-sm font-bold flex items-center gap-2">
+            <span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">add</span>
+            <span>Criar primeiro cupom</span>
+          </button>
+        </div>
+
+        <!-- Error state — backend failure -->
+        <div class="rounded-2xl p-6 flex flex-col items-start" style="background:rgba(255,110,132,0.08); outline: 1px solid rgba(255,110,132,0.40); outline-offset: -1px;">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background:rgba(255,110,132,0.15)">
+              <span class="material-symbols-outlined" style="font-size:22px;color:#ff6e84" aria-hidden="true">error</span>
+            </div>
+            <h3 class="font-display text-lg font-bold">Erro · falha ao carregar cupons</h3>
+          </div>
+          <p class="text-sm mb-4 leading-relaxed" style="color:#cc9dc0">
+            Não conseguimos buscar os cupons neste momento. Verifique sua conexão e tente novamente. Se o problema persistir, contate o suporte.
+          </p>
+          <div class="font-mono text-xs rounded-lg p-3 mb-4 w-full" style="background:rgba(255,110,132,0.10);color:#ff6e84;outline:1px solid rgba(255,110,132,0.20)">
+            GET /api/admin/coupons → 503 Service Unavailable
+          </div>
+          <button type="button" class="btn-outline rounded-xl px-5 py-2.5 text-sm font-bold flex items-center gap-2">
+            <span class="material-symbols-outlined" style="font-size:16px" aria-hidden="true">refresh</span>
+            Tentar novamente
+          </button>
+        </div>
+
+        <!-- Validação inline — 6 mensagens PT-BR dos 422 codes -->
+        <div class="glass-card rounded-2xl p-6">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="material-symbols-outlined" style="font-size:20px;color:#fbbf24" aria-hidden="true">report</span>
+            <h3 class="font-display text-lg font-bold">Validação inline · códigos 422</h3>
+          </div>
+
+          <div class="space-y-4">
+            <div>
+              <label for="cupom-inativo" class="block font-label text-xs uppercase tracking-widest mb-2 font-semibold" style="color:#cc9dc0">Código do cupom</label>
+              <input id="cupom-inativo" type="text" value="OFFLINE30" class="field-ghost invalid w-full rounded-xl p-4 font-mono uppercase tracking-widest font-bold" aria-invalid="true" aria-describedby="cupom-inativo-msg" />
+              <p id="cupom-inativo-msg" class="field-error text-xs flex items-center gap-1.5 mt-2">
+                <span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">cancel</span>
+                Este cupom está desativado. Procure outro cupom válido.
+              </p>
+            </div>
+
+            <div>
+              <label for="cupom-expirado" class="block font-label text-xs uppercase tracking-widest mb-2 font-semibold" style="color:#cc9dc0">Código do cupom</label>
+              <input id="cupom-expirado" type="text" value="LAUNCH20" class="field-ghost invalid w-full rounded-xl p-4 font-mono uppercase tracking-widest font-bold" aria-invalid="true" aria-describedby="cupom-expirado-msg" />
+              <p id="cupom-expirado-msg" class="field-error text-xs flex items-center gap-1.5 mt-2">
+                <span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">cancel</span>
+                Este cupom expirou em 01/07/2026. Procure outro cupom válido.
+              </p>
+            </div>
+
+            <div>
+              <label for="cupom-ainda-valido" class="block font-label text-xs uppercase tracking-widest mb-2 font-semibold" style="color:#cc9dc0">Código do cupom</label>
+              <input id="cupom-ainda-valido" type="text" value="SUMMER26" class="field-ghost invalid w-full rounded-xl p-4 font-mono uppercase tracking-widest font-bold" aria-invalid="true" aria-describedby="cupom-ainda-valido-msg" />
+              <p id="cupom-ainda-valido-msg" class="field-error text-xs flex items-center gap-1.5 mt-2">
+                <span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">cancel</span>
+                Este cupom só será válido a partir de 15/10/2026.
+              </p>
+            </div>
+
+            <div>
+              <label for="cupom-esgotado" class="block font-label text-xs uppercase tracking-widest mb-2 font-semibold" style="color:#cc9dc0">Código do cupom</label>
+              <input id="cupom-esgotado" type="text" value="BLACKFRIDAY" class="field-ghost invalid w-full rounded-xl p-4 font-mono uppercase tracking-widest font-bold" aria-invalid="true" aria-describedby="cupom-esgotado-msg" />
+              <p id="cupom-esgotado-msg" class="field-error text-xs flex items-center gap-1.5 mt-2">
+                <span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">cancel</span>
+                Este cupom já atingiu o limite de usos.
+              </p>
+            </div>
+
+            <div>
+              <label for="cupom-ja-aplicado" class="block font-label text-xs uppercase tracking-widest mb-2 font-semibold" style="color:#cc9dc0">Código do cupom</label>
+              <input id="cupom-ja-aplicado" type="text" value="PROMO50" class="field-ghost invalid w-full rounded-xl p-4 font-mono uppercase tracking-widest font-bold" aria-invalid="true" aria-describedby="cupom-ja-aplicado-msg" />
+              <p id="cupom-ja-aplicado-msg" class="field-error text-xs flex items-center gap-1.5 mt-2">
+                <span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">cancel</span>
+                Este cupom já foi aplicado a este pagamento.
+              </p>
+            </div>
+
+            <div>
+              <label for="pagamento-nao-pendente" class="block font-label text-xs uppercase tracking-widest mb-2 font-semibold" style="color:#cc9dc0">Código do cupom</label>
+              <input id="pagamento-nao-pendente" type="text" value="BACKER25" class="field-ghost invalid w-full rounded-xl p-4 font-mono uppercase tracking-widest font-bold" aria-invalid="true" aria-describedby="pagamento-nao-pendente-msg" />
+              <p id="pagamento-nao-pendente-msg" class="field-error text-xs flex items-center gap-1.5 mt-2">
+                <span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">cancel</span>
+                O pagamento não está mais pendente — cupom não pode ser aplicado.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Toast container (aria-live region) -->
+  <div class="fixed bottom-6 right-6 z-50 space-y-2" role="status" aria-live="polite" aria-atomic="false" aria-relevant="additions text">
+
+    <!-- Toast sucesso demo (visível no preview) -->
+    <div class="toast rounded-2xl p-4 pr-5 flex items-center gap-3 max-w-sm">
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:linear-gradient(135deg,#f084ff,#ea6bff,#d500f9);">
+        <span class="material-symbols-outlined" style="font-size:20px;color:#000" aria-hidden="true">check</span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="font-bold text-sm">Cupom IST-K7P9MX4R criado</div>
+        <div class="text-xs" style="color:#cc9dc0">30% OFF · uso único · expira 31/12/2026</div>
+      </div>
+      <button type="button" aria-label="Fechar notificação" style="color:#cc9dc0" class="hover:text-on-surface">
+        <span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">close</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Footer (D14 — "Powered by Kinetic Architecture" removido) -->
+  <footer class="py-6 text-center text-xs" style="color:#cc9dc0">
+    iSelfToken · Central de Cupons · Painel Administrativo
+  </footer>
+
+  <script>
+    // Toggle uso único global / múltiplo (P2 — corrigido texto)
+    const toggle = document.getElementById('usage-toggle');
+    const label = document.getElementById('toggle-label');
+    const hint = document.getElementById('toggle-hint');
+    toggle.addEventListener('click', () => {
+      const on = !toggle.classList.contains('on');
+      toggle.classList.toggle('on', on);
+      toggle.setAttribute('aria-checked', String(on));
+      if (on) {
+        label.textContent = 'Uso múltiplo';
+        hint.textContent = 'limite global configurável (maxUses)';
+      } else {
+        label.textContent = 'Uso único global';
+        hint.textContent = 'limite global de 1 uso total';
+      }
+    });
+
+    // Auto-gerar código (maxlength 32, charset A-Z 0-9 _ -)
+    const codeInput = document.getElementById('code-input');
+    const codeHint = document.getElementById('code-hint');
+    const codeBtn = document.getElementById('generate-code');
+    codeBtn.addEventListener('click', () => {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let s = 'IST-';
+      for (let i = 0; i < 8; i++) s += chars.charAt(Math.floor(Math.random() * chars.length));
+      codeInput.value = s;
+      codeHint.style.color = '';
+      codeHint.style.color = '#34d399';
+      codeHint.innerHTML = '<span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">check_circle</span> Código disponível';
+    });
+
+    // Copy generated
+    const copyBtn = document.getElementById('copy-generated');
+    copyBtn.addEventListener('click', () => {
+      const code = document.getElementById('generated-code').innerText;
+      navigator.clipboard?.writeText(code);
+      copyBtn.innerHTML = '<span class="material-symbols-outlined" style="color:#34d399">check</span>';
+      setTimeout(() => { copyBtn.innerHTML = '<span class="material-symbols-outlined" aria-hidden="true">content_copy</span>'; }, 2000);
+    });
+
+    // Submit button feedback
+    const genBtn = document.getElementById('generate-btn');
+    genBtn.addEventListener('click', () => {
+      const original = genBtn.innerHTML;
+      genBtn.innerHTML = '<span class="material-symbols-outlined spin-slow">autorenew</span><span>Gerando...</span>';
+      genBtn.disabled = true;
+      setTimeout(() => {
+        genBtn.innerHTML = original;
+        genBtn.disabled = false;
+      }, 900);
+    });
+
+    // Chip filter (visual)
+    document.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        if (chip.textContent.trim() === 'Todos') {
+          document.querySelectorAll('.chip').forEach(c => { c.classList.remove('active'); c.setAttribute('aria-pressed', 'false'); });
+          chip.classList.add('active');
+          chip.setAttribute('aria-pressed', 'true');
+        } else {
+          const allBtn = Array.from(document.querySelectorAll('.chip')).find(c => c.textContent.trim() === 'Todos');
+          if (allBtn) { allBtn.classList.remove('active'); allBtn.setAttribute('aria-pressed', 'false'); }
+          const isActive = chip.classList.toggle('active');
+          chip.setAttribute('aria-pressed', String(isActive));
+        }
+      });
+    });
+
+    // Modal (a11y — focus trap documentado no DESIGN.md §7.4)
+    const openModalBtn = document.getElementById('open-coupon-modal');
+    openModalBtn?.addEventListener('click', () => {
+      // ... não renderizado nesta página; ver code-admin.html
+      window.location.href = './code-admin.html';
+    });
+
+    // Mobile menu (D12)
+    const mobileBtn = document.getElementById('mobile-menu-toggle');
+    const nav = document.getElementById('primary-nav');
+    mobileBtn?.addEventListener('click', () => {
+      const expanded = mobileBtn.getAttribute('aria-expanded') === 'true';
+      mobileBtn.setAttribute('aria-expanded', String(!expanded));
+      nav.classList.toggle('hidden');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,3379 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+//
+// ==========================================
+// DUAL DATABASE CONFIGURATION
+// ==========================================
+// Para usar SQLite em dev, set DATABASE_PROVIDER=sqlite
+// Para usar MySQL em prod, set DATABASE_PROVIDER=mysql
+//
+// AVISO: Decimal e Json em SQLite sao armazenados como TEXT.
+// Calculos monetarios devem usar Prisma.Decimal API.
+// Queries JSON nativas nao funcionam em SQLite.
+//
+// ==========================================
+// DECIMAL — convencoes SQLite (P3.4)
+// ==========================================
+// - Storage: TEXT (ex.: "100.50")
+// - Precision: 18 digitos significativos + ate 8 casas decimais (padrao Prisma)
+// - Operacoes: sempre usar `Prisma.Decimal` ou `new Decimal(value)` para
+//   aritmetica. `Number(value)` perde precisao para valores monetarios.
+// - Serializacao API: `Number(decimalValue)` no service antes de retornar
+//   (frontend so trabalha com number).
+// - Comparacoes SQL: use `_sum: { amount: true }` ou `_avg` no aggregate
+//   em vez de comparar decimais via JS apos SELECT (economiza round-trip).
+// - WHERE por Decimal: filtra como string no raw query (`amount = '100.50'`).
+// ==========================================
+// ==========================================
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ==========================================
+// 1. GESTÃO DE IDENTIDADE E COMPLIANCE
+// ==========================================
+
+model User {
+  id       Int    @id @default(autoincrement())
+  publicId String @unique @default(uuid()) // UUID público para segurança na API
+
+  // Acesso
+  email     String @unique
+  oldEmails Json? // Array de emails antigos para auditoria
+  nome      String
+  senha     String
+  role      Role   @default(USER)
+
+  // Dados Pessoais
+  telefone        String?
+  data_nascimento DateTime?
+  genero          Genero?
+
+  // Endereço
+  endereco    String?
+  numero      String?
+  complemento String?
+  bairro      String?
+  cidade      String?
+  uf          String?
+  cep         String?
+  pais        Int?
+  bandeira    String?
+  pais_legacy Json?
+  paisCountry Country? @relation("UserPais", fields: [pais], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  termosAceitos  Boolean @default(false)
+  politicaAceita Boolean @default(false)
+
+  // Dados Documentais (Simples)
+  tipo_documento TypeDocumento?
+  reg_documento  String?
+
+  // Status de Conta
+  isActive             Boolean  @default(true)
+  // H2 (Fase A): flag que forca troca de senha no proximo login. Setada pelo
+  // dismiss-session quando user reporta login desconhecido, ou por admin em
+  // eventos de seguranca. Limpa apos troca de senha com sucesso.
+  requirePasswordReset Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  // BUG-FT-005: registra a última rejeição admin de KYC (REJECTED ou
+  // NEEDS_RESUBMISSION) para o frontend /profile exibir "Faça upload novamente"
+  // mesmo quando o KYCProfile já foi deletado pelo cleanup. Limpo quando o
+  // user re-envia com sucesso (decisão APPROVED).
+  lastKycRejectionAt     DateTime?
+  lastKycRejectionReason String?
+  lastKycRejectionSlot   String? // "avatar" | "documento" | "biofacial" | "comprovante"
+
+  avatar_id      Int?
+  avatar         KYCProfile? @relation(fields: [avatar_id], references: [id], name: "Avatar")
+  comprovante_id Int?
+  comprovante    KYCProfile? @relation(fields: [comprovante_id], references: [id], name: "Comprovante")
+  documento_id   Int?
+  documento      KYCProfile? @relation(fields: [documento_id], references: [id], name: "Documento")
+  biofacial_id   Int?
+  biofacial      KYCProfile? @relation(fields: [biofacial_id], references: [id], name: "Biofacial")
+
+  // Consentimento biométrico explícito (LGPD Art. 11 I)
+  biofacialConsentAt      DateTime?
+  biofacialConsentVersion String? // "v1.0-2026-08-22"
+
+  // --- RELACIONAMENTOS ---
+  wallet   Wallet?
+  payments Payment[]
+
+  // S18.7 — ordens de pagamento (nova modelagem Order+Items).
+  paymentOrders PaymentOrder[] @relation("PaymentOrderUser")
+
+  // Pagamentos que este user (operador FINANCEIRO/ADMIN) aprovou manualmente
+  paymentsApprovedManually Payment[] @relation("PaymentManualApprover")
+
+  // Documentos de startup que este user (founder) uploadou
+  uploadedStartupDocuments   StartupDocument[]       @relation("StartupDocumentUploader")
+  reviewedStartupDocuments   StartupDocument[]       @relation("StartupDocumentReviewer")
+  createdStartupDocumentNAs  StartupDocumentNA[]     @relation("StartupDocumentNACreator")
+  reviewedStartupDocumentNAs StartupDocumentNA[]     @relation("StartupDocumentNAReviewer")
+  campaignExtensionsCreated  CampaignExtension[]     @relation("CampaignExtensionCreator")
+  // Decisões de auditoria (aprovar/rejeitar) tomadas por este admin.
+  reviewDecisionsMade        StartupReviewDecision[] @relation("StartupReviewDecisionAdmin")
+  // Solicitações de documentos extras feitas pelo compliance (AC-07)
+  documentRequestsRequested  DocumentRequest[]       @relation("DocumentRequestRequester")
+
+  // SaaS
+  subscriptions Subscription[]
+
+  // Notificações in-app (P2.11 — antes era Map em memória, agora persiste)
+  notifications Notification[]
+
+  // Business (Fundador)
+  startups      Startup[]      @relation("FounderStartups")
+  startupDrafts StartupDraft[] @relation("StartupDrafts")
+
+  // Pinning manual (Marketplace S1): startups que este user pinou como ADMIN/COMPLIANCE
+  manuallyPinnedStartups Startup[] @relation("ManuallyPinnedByUser")
+
+  // Business (Investidor)
+  investments       Investment[]
+  tokens            Token[]            @relation("InvestorTokens")
+  tokenHistory      TokenHistory[]
+  tokenReservations TokenReservation[] @relation("UserTokenReservations")
+  uploads           Upload[]
+  /// Posts de transparencia que o usuario (founder) publicou.
+  transparencyPosts TransparencyPost[] @relation("TransparencyPostAuthor")
+
+  /// Threads de Discussao criadas por este usuario (sprint TRANSP-03).
+  discussionsAuthored TransparencyDiscussion[] @relation("AuthorDiscussions")
+
+  /// Threads que este usuario fixou (founder/admin) - apenas a mais recente conta.
+  discussionsPinned TransparencyDiscussion[] @relation("PinnedByUser")
+
+  /// Replies de Discussao escritas por este usuario (sprint TRANSP-03).
+  repliesAuthored TransparencyReply[] @relation("AuthorReplies")
+
+  /// Upvotes dados por este usuario em Discussao (sprint TRANSP-03).
+  upvotes DiscussionUpvote[] @relation("UpvoteUsers")
+
+  // Auditoria
+  auditLogs   AuditLog[] // Ações que este usuário realizou
+  accessLogs  AccessLog[] // Logs de acesso do usuário
+  loginAlerts LoginAlert[]
+
+  // Telemetria de prova de vida (liveness) associada às capturas biofaciais
+  livenessTelemetries LivenessTelemetry[]
+
+  // Template biométrico facial (embedding cifrado). 0..1 por usuário.
+  faceBiometric FaceBiometric?
+
+  // Solicitações de alteração de dados (como solicitante)
+  dataChangeRequestsRequested DataChangeRequest[] @relation("DataChangeRequestRequester")
+  // Solicitações de alteração de dados (como revisor)
+  dataChangeRequestsReviewed  DataChangeRequest[] @relation("DataChangeRequestReviewer")
+
+  // Programa de afiliados
+  affiliations Affiliation[]       @relation("UserAffiliations")
+  referredBy   AffiliateReferral[] @relation("InvestorReferrals")
+
+  // === FIN-09: Repasse ===
+  // Approvals de Compliance em deliberações de repasse
+  complianceRepassessApproved   Repasse[]            @relation("ComplianceRepasseApprover")
+  // Configurações de Financeiro em repasses
+  financeiroRepassessConfigured Repasse[]            @relation("FinanceiroRepasseConfigurer")
+  // InstallmentRequests como fundador
+  installmentRequestsFounded    InstallmentRequest[] @relation("InstallmentRequestFounder")
+  // InstallmentRequests aprovados
+  installmentRequestsApproved   InstallmentRequest[] @relation("InstallmentRequestApprover")
+  // InstallmentRequests rejeitados
+  installmentRequestsRejected   InstallmentRequest[] @relation("InstallmentRequestRejecter")
+
+  // === EMAIL TEMPLATES ===
+  // Templates de email criados por este usuário
+  emailTemplatesCreated     EmailTemplate[]        @relation("EmailTemplateCreator")
+  // Versões de template criadas por este usuário
+  templateVersionsCreated   EmailTemplateVersion[] @relation("VersionCreator")
+  // Versões de template publicadas por este usuário
+  templateVersionsPublished EmailTemplateVersion[] @relation("VersionPublisher")
+
+  // === CUPONS DE DESCONTO ===
+  // Cupons criados por este usuário (ADMIN/FINANCEIRO)
+  couponsCreated Coupon[]      @relation("CouponCreator")
+  // Usos de cupom por este usuário (LGPD auditoria)
+  couponUsages   CouponUsage[] @relation("CouponUsageUser")
+}
+
+model BackupUser {
+  id        Int           @id @default(autoincrement())
+  userId    Int
+  process   BackupProcess
+  data      Json?
+  createdAt DateTime      @default(now())
+}
+
+enum BackupProcess {
+  ADMIN
+  UPDATE
+  DELETE
+}
+
+model EmailValidation {
+  id        Int            @id @default(autoincrement())
+  email     String
+  token     String         @unique
+  userId    Int?
+  type      ValidationType
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@index([email])
+  @@index([token])
+}
+
+enum ValidationType {
+  REGISTRATION
+  UPDATE
+  PASSWORD_RESET
+}
+
+model KYCProfile {
+  id           Int     @id @default(autoincrement())
+  originalName String
+  size         Int
+  mineType     String // é o mime type do arquivo ex: "image/png", "application/pdf"
+  extension    String // Ex: "png", "jpg", "pdf"
+  url          String // URL pública estável do arquivo original
+  url_sm       String? // legado: alias da versão web
+  url_md       String? // URL pública da versão média
+  url_web      String? // URL pública otimizada para web
+  url_lg       String? // legado: alias do original
+
+  status          KYCStatus @default(PENDING)
+  rejectionReason String? // Motivo da reprovação
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  avatar_user      User[]   @relation("Avatar")
+  comprovante_user User[]   @relation("Comprovante")
+  documento_user   User[]   @relation("Documento")
+  biofacial_user   User[]   @relation("Biofacial")
+
+  // Startups que usam este KYCProfile como logo
+  startups               Startup[] @relation("Logo")
+  // Startups que usam este KYCProfile como cover
+  coverOf                Startup[] @relation("Cover")
+  // Startups que usam este KYCProfile como documentos CVM
+  mieOf                  Startup[] @relation("MIE")
+  contratoSocialOf       Startup[] @relation("ContratoSocial")
+  cnpjOf                 Startup[] @relation("CNPJ")
+  balancoAtualOf         Startup[] @relation("BalancoAtual")
+  declaracaoVeracidadeOf Startup[] @relation("DeclaracaoVeracidade")
+  ataEleicaoOf           Startup[] @relation("AtaEleicao")
+  balancoAnteriorOf      Startup[] @relation("BalancoAnterior")
+  procuracaoOf           Startup[] @relation("Procuracao")
+  cvSociosOf             Startup[] @relation("CvSocios")
+  pitchDeckOf            Startup[] @relation("PitchDeck")
+  projecoesOf            Startup[] @relation("Projecoes")
+  modeloContratoOfertaOf Startup[] @relation("ModeloContratoOferta")
+  comprovanteEnderecoOf  Startup[] @relation("ComprovanteEndereco")
+  declaracaoReceitaOf    Startup[] @relation("DeclaracaoReceita")
+}
+
+/// Telemetria da prova de vida (liveness) capturada no cliente durante o envio
+/// da selfie biofacial. Fase 2 do plano de evolução de liveness. NÃO contém
+/// template biométrico (isso é a Fase 5, modelo FaceBiometric) — apenas sinais
+/// agregados que dão auditabilidade à decisão de Compliance.
+model LivenessTelemetry {
+  id       Int    @id @default(autoincrement())
+  publicId String @unique @default(uuid())
+
+  /// Dono da captura.
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Upload biofacial (KYCProfile) ao qual esta telemetria se refere.
+  kycProfileId Int?
+
+  /// Sinais agregados do LivenessResult (client-side).
+  passed              Boolean // gravação aceita (sem rejectionReasons)
+  blinkCount          Int      @default(0)
+  hasGlasses          Boolean? // null = indeterminado
+  maxYawDeg           Float    @default(0)
+  maxPitchDeg         Float    @default(0)
+  landmarkMovement    Float    @default(0) // landmarkMovementScore
+  avgRelativeMovement Float    @default(0)
+  durationMs          Int      @default(0)
+  mimeType            String?
+  /// Instruções sorteadas e se foram satisfeitas (JSON).
+  instructions        Json?
+  /// Tempo de resposta por desafio concluído (JSON) — sinal DF-CAPTCHA de tempo.
+  challengeResponseMs Json?
+  /// Motivos de rejeição, quando houver (JSON de strings).
+  rejectionReasons    Json?
+  /// Fase 4: suspeita de câmera virtual/injeção (heurística, auditoria).
+  injectionSuspicious Boolean  @default(false)
+  injectionReasons    Json?
+  /// Hash do user-agent (LGPD: não guardamos UA cru). Ajuda anti-fraude.
+  userAgentHash       String?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([kycProfileId])
+  @@index([createdAt])
+}
+
+/// Template biométrico facial (embedding) — Fase 5 do plano de liveness.
+///
+/// LGPD Art. 11 (dado sensível): o template NUNCA é armazenado em texto plano.
+/// `templateEnc` guarda o vetor cifrado (AES-256-GCM); `iv` e `authTag` são os
+/// parâmetros da cifra. A extração acontece no SERVIDOR (anti-tamper), a partir
+/// do arquivo biofacial real, com extrator plugável (Noop → ONNX/ArcFace).
+///
+/// Gravado apenas com consentimento válido (`consentVersion`) e PURGADO na
+/// revogação (Art. 18 IX).
+model FaceBiometric {
+  id       Int    @id @default(autoincrement())
+  publicId String @unique @default(uuid())
+
+  /// 1:1 com User.
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Vetor de embedding cifrado (AES-256-GCM) + parâmetros da cifra.
+  templateEnc String
+  iv          String
+  authTag     String
+
+  /// Metadados do template (não sensíveis).
+  modelVersion String // ex: "noop-v0", "arcface-r100-v1"
+  dim          Int // dimensão do vetor (ex: 512)
+  templateHash String // SHA-256 do vetor em claro (auditoria/dedup, não reversível)
+
+  /// Versão do consentimento sob o qual foi capturado.
+  consentVersion String?
+
+  /// Upload biofacial de origem.
+  kycProfileId Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+enum Role {
+  USER
+  ADMIN
+  FINANCEIRO
+  COMPLIANCE
+  INVESTOR
+  FOUNDER
+}
+
+enum Genero {
+  HOMEM
+  MULHER
+  OUTRO
+}
+
+enum TypeDocumento {
+  // Documentos Brasileiros
+  CPF
+  CNH
+  // Documentos Internacionais
+  PASSAPORTE
+  CÉDULA_IDENTIDADE
+  CARTEIRA_MOTORISTA
+  DNI
+  CUIT
+  RUT
+  SSN
+  NATIONAL_ID
+  BIRTH_CERTIFICATE
+}
+
+enum KYCStatus {
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  NEEDS_RESUBMISSION
+}
+
+// ==========================================
+// 2. CARTEIRA E SALDOS (LEDGER)
+// ==========================================
+
+model Wallet {
+  id Int @id @default(autoincrement())
+
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id])
+
+  // Saldo Disponível (Cuidado nas transações)
+  balance  Decimal @default(0.00)
+  blocked  Decimal @default(0.00) // Saldo bloqueado em ordens abertas
+  currency String  @default("BRL")
+
+  transactions WalletTransaction[]
+
+  updatedAt DateTime @updatedAt
+}
+
+model WalletTransaction {
+  id Int @id @default(autoincrement())
+
+  walletId Int
+  wallet   Wallet @relation(fields: [walletId], references: [id])
+
+  type        WalletType // CRÉDITO ou DÉBITO
+  amount      Decimal
+  description String
+
+  // Rastreabilidade (De onde veio o dinheiro?)
+  relatedPaymentId Int? // Se veio de um depósito via PIX
+  relatedInvestId  Int? // Se foi compra de token
+
+  createdAt DateTime @default(now())
+}
+
+// enum WalletType (Novos tipos de movimentação)
+enum WalletType {
+  DEPOSIT // Depósito via PIX (Entrada de dinheiro novo)
+  WITHDRAWAL // Saque para conta bancária
+  INVESTMENT // Compra de Tokens (Saída)
+  SUBSCRIPTION // Pagamento de Plano (Saída)
+
+  // Novos tipos:
+  CAMPAIGN_SETTLEMENT // Founder recebe o valor arrecadado (Entrada)
+  DIVIDEND_EXIT // Investor recebe parte do Exit/Lucros (Entrada)
+  P2P_SALES // Venda de tokens para outro usuário (Entrada)
+  P2P_PURCHASE // Compra de tokens de outro usuário (Saída)
+  AFFILIATE_COMMISSION // Afiliado recebe comissão por venda atribuída (Entrada)
+}
+
+// ==========================================
+// 3. PLANOS E ASSINATURAS (SaaS)
+// ==========================================
+
+model Plan {
+  id        Int     @id @default(autoincrement())
+  nome      String
+  slug      String  @unique // Ex: "investor_pro"
+  descricao String?
+
+  preco        Decimal
+  periodoMeses Int     @default(12)
+  periodo      String  @default("/ano")
+
+  icon        String?
+  beneficios  Json?
+  visivel     Boolean @default(true)
+  isActive    Boolean @default(true)
+  recomendado Boolean @default(false)
+  textoBotao  String?
+
+  subscriptions Subscription[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("plans")
+}
+
+model Subscription {
+  id Int @id @default(autoincrement())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  planId Int
+  plan   Plan @relation(fields: [planId], references: [id])
+
+  status SubStatus @default(PENDING)
+
+  startedAt DateTime?
+  expiresAt DateTime?
+
+  payments Payment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+enum SubStatus {
+  PENDING
+  ACTIVE
+  EXPIRED
+  CANCELED
+}
+
+// ==========================================
+// 3.1 CATEGORIA E ÁREA DE ATUAÇÃO (ADR-007 M7-S20)
+// ==========================================
+
+/// Categoria ampla usada em filtros de marketplace.
+/// Relaciona-se com AreaAtuacao (hierarquia 1:N) e Startup (N:N via FKs).
+model Category {
+  id        Int     @id @default(autoincrement())
+  slug      String  @unique
+  nome      String
+  descricao String?
+  ativo     Boolean @default(true)
+  ordem     Int     @default(0)
+
+  /// Áreas de atuação pertencentes a esta categoria
+  areas    AreaAtuacao[]
+  /// Startups que pertencem a esta categoria (via FK)
+  startups Startup[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("categories")
+}
+
+/// Área de atuação específica (nicho) pertencente a uma Category.
+///用来 expandir a taxonomia de forma granular sem precisar de nova migration.
+model AreaAtuacao {
+  id         Int      @id @default(autoincrement())
+  slug       String   @unique
+  nome       String
+  descricao  String?
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id])
+  ativo      Boolean  @default(true)
+  ordem      Int      @default(0)
+
+  /// Startups que pertencem a esta área de atuação (via FK)
+  startups Startup[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([categoryId])
+  @@map("areas_atuacao")
+}
+
+// ==========================================
+// 4. STARTUPS E CAMPANHAS (Core)
+// ==========================================
+
+model Startup {
+  id Int @id @default(autoincrement())
+
+  founderId Int
+  founder   User @relation("FounderStartups", fields: [founderId], references: [id])
+
+  /// Posts de transparencia publicados pelo founder para os investidores com token.
+  transparencyPosts TransparencyPost[]
+
+  /// Solicitações de parcelas de repasse (FIN-09).
+  installmentRequests InstallmentRequest[]
+
+  /// Threads de Discussao da area de Transparencia (sprint TRANSP-03).
+  discussions TransparencyDiscussion[] @relation("StartupDiscussions")
+
+  nome          String
+  slug          String  @unique
+  razao_social  String?
+  cnpj          String  @unique
+  site          String?
+  telefone      String?
+  email         String?
+  pais          Json?
+  redes_sociais Json?
+
+  // Pitch
+  area_atuacao  String?
+  /// IDs das áreas de atuação selecionadas (JSON). Mantém areaAtuacaoId como legado.
+  areas_atuacao Json?
+  category      StartupCategory?
+
+  // FKs relacionais (ADR-007) — coexistems com campos legados durante transicao
+  categoryId          Int?
+  areaAtuacaoId       Int?
+  categoryRel         Category?    @relation(fields: [categoryId], references: [id])
+  areaAtuacaoRel      AreaAtuacao? @relation(fields: [areaAtuacaoId], references: [id])
+  /// Flag indicando que o mapeamento de area_atuacao para categoryId/areaAtuacaoId
+  /// precisa de revisao manual (valores ambguos ou sem correspondencia no mapeamento).
+  needs_manual_review Boolean      @default(false)
+  estagio             String?
+  descricao           String?
+  problema            String?
+  solucao             String?
+  modelo_receita      String?
+  descritivo_basico   String?
+  youtube_url         String?
+
+  // Dados complementares CVM (MIE) — preenchidos na tela de captação
+  diferencial          String?
+  mercado_alvo         String?
+  espera_alcancar      String?
+  dedicacao            String?
+  compradores          String?
+  investimento_previo  String?
+  concorrencia         String?
+  oferece_lucros       Boolean @default(false)
+  lucros_descricao     String?
+  oferece_beneficios   Boolean @default(false)
+  beneficios_descricao String?
+
+  // Estrutura
+  socios       Json?
+  teams        Json?
+  uso_recursos Json?
+
+  // Dados Bancários para Recebimento (Repasse)
+  banco             String?
+  agencia           String?
+  conta             String?
+  digito            String?
+  tipo_conta        String? // "corrente" | "poupanca"
+  pix_key           String?
+  titular           String?
+  documento_titular String? // CPF/CNPJ do titular da conta
+
+  data_fundacao DateTime?
+
+  logo_id Int?
+  logo    KYCProfile? @relation("Logo", fields: [logo_id], references: [id])
+
+  cover_id Int?
+  cover    KYCProfile? @relation("Cover", fields: [cover_id], references: [id])
+
+  // Documentos CVM obrigatórios
+  mie_id Int?
+  mie    KYCProfile? @relation("MIE", fields: [mie_id], references: [id])
+
+  contrato_social_id Int?
+  contrato_social    KYCProfile? @relation("ContratoSocial", fields: [contrato_social_id], references: [id])
+
+  cnpj_id       Int?
+  cnpj_document KYCProfile? @relation("CNPJ", fields: [cnpj_id], references: [id])
+
+  balanco_atual_id Int?
+  balanco_atual    KYCProfile? @relation("BalancoAtual", fields: [balanco_atual_id], references: [id])
+
+  declaracao_veracidade_id Int?
+  declaracao_veracidade    KYCProfile? @relation("DeclaracaoVeracidade", fields: [declaracao_veracidade_id], references: [id])
+
+  ata_eleicao_id Int?
+  ata_eleicao    KYCProfile? @relation("AtaEleicao", fields: [ata_eleicao_id], references: [id])
+
+  // Documentos CVM condicionais
+  balanco_anterior_id Int?
+  balanco_anterior    KYCProfile? @relation("BalancoAnterior", fields: [balanco_anterior_id], references: [id])
+
+  procuracao_id Int?
+  procuracao    KYCProfile? @relation("Procuracao", fields: [procuracao_id], references: [id])
+
+  cv_socios_id Int?
+  cv_socios    KYCProfile? @relation("CvSocios", fields: [cv_socios_id], references: [id])
+
+  // Documentos recomendados
+  pitch_deck_id Int?
+  pitch_deck    KYCProfile? @relation("PitchDeck", fields: [pitch_deck_id], references: [id])
+
+  projecoes_id Int?
+  projecoes    KYCProfile? @relation("Projecoes", fields: [projecoes_id], references: [id])
+
+  modelo_contrato_oferta_id Int?
+  modelo_contrato_oferta    KYCProfile? @relation("ModeloContratoOferta", fields: [modelo_contrato_oferta_id], references: [id])
+
+  comprovante_endereco_id Int?
+  comprovante_endereco    KYCProfile? @relation("ComprovanteEndereco", fields: [comprovante_endereco_id], references: [id])
+
+  declaracao_receita_id Int?
+  declaracao_receita    KYCProfile? @relation("DeclaracaoReceita", fields: [declaracao_receita_id], references: [id])
+
+  // Status
+
+  status StartupStatus @default(PENDING_RESERVATION_PAYMENT)
+
+  // Founder contratou o serviço de Fast Track Review na reserva de tokens
+  // (S18.6). Marcado quando o Payment FAST_TRACK_REVIEW vinculado ao mesmo
+  // StartupDraft é confirmado PAID. Usado para priorização da fila de
+  // análise do compliance e exibido na listagem admin.
+  fastTrackReview     Boolean   @default(false)
+  fastTrackReviewedAt DateTime?
+
+  // Selo de verificação (independente do status de campanha)
+  verificationStatus VerificationStatus @default(NOT_REQUESTED)
+
+  // Score manual (0-100) para ordenação no Marketplace.featured
+  score Int @default(0)
+
+  // Pinning manual (RF-01): ADMIN/COMPLIANCE podem pinar ate 3 startups
+  // para destaque no Marketplace. Sprint S1.
+  manuallyPinned       Boolean   @default(false)
+  manuallyPinnedBy     Int?
+  manuallyPinnedAt     DateTime?
+  manuallyPinnedReason String?
+
+  manuallyPinnedByUser User? @relation("ManuallyPinnedByUser", fields: [manuallyPinnedBy], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  // Cache do score 0..100 calculado por job diario + listeners (Sprint S2).
+  scoreBreakdown        Json?
+  scoreLastCalculatedAt DateTime?
+
+  // Flag binario para destacar startups aceleradas (parcerias com aceleradoras).
+  // Filtro do endpoint publico GET /api/startup/marketplace/accelerated.
+  isAccelerated Boolean @default(false)
+
+  // Dados de EXIT (Quando a startup é vendida ou faz IPO)
+  isExited        Boolean   @default(false)
+  exitValuation   Decimal? // Valor total da venda da empresa
+  exitDate        DateTime?
+  exitDescription String? // Detalhes da negociação para os investidores
+
+  // Relacionamentos
+  campaigns          Campaign[]
+  issuedTokens       Token[]
+  withdrawals        Withdrawal[] // Pedidos de saque do fundador
+  seals              StartupSeal[]
+  opinions           StartupOpinion[]
+  curatedPicks       CuratedPick[]
+  documents          StartupDocument[]
+  documentNAs        StartupDocumentNA[]
+  documentRejections StartupDocumentRejection[]
+  documentRequests   DocumentRequest[]
+  uploads            Upload[]
+  signedDocuments    SignedDocument[]
+  dataChangeRequests DataChangeRequest[]
+  // Histórico de decisões de auditoria (aprovar/rejeitar por fase).
+  reviewDecisions    StartupReviewDecision[]
+
+  // Programa de afiliados
+  affiliateProgram AffiliateProgram?
+
+  // B12 — Repasse de Fundos
+  notaFiscais   NotaFiscal[]
+  fundTransfers FundTransfer[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([manuallyPinned, score(sort: Desc)])
+  @@map("startups")
+}
+
+/// Documentos da startup (contrato social, CNPJ, balanço, pitch deck, etc).
+/// Arquivos físicos vivem no bucket `document` do MinIO (S3Service); aqui
+/// só persistimos metadados + chave de acesso.
+model StartupDocument {
+  id Int @id @default(autoincrement())
+
+  startupId Int
+  startup   Startup @relation(fields: [startupId], references: [id], onDelete: Cascade)
+
+  categoria StartupDocumentCategory
+  nome      String // Nome de exibição (o arquivo original ou rótulo dado pelo founder)
+  s3Key     String                  @unique // Chave no bucket (`startup-<id>/<uuid>.<ext>`)
+  mimetype  String
+  sizeBytes Int
+
+  uploadedById Int
+  uploadedBy   User @relation("StartupDocumentUploader", fields: [uploadedById], references: [id])
+
+  // === Revisão do Compliance/Admin por documento (fluxo_startup §2) ===
+  // Todo documento nasce PENDING_REVIEW; o Admin/Compliance marca APPROVED ou
+  // REJECTED (com justificativa). Aditivo/nullable para preservar dados antigos.
+  reviewStatus DocumentReviewStatus @default(PENDING_REVIEW)
+  reviewNote   String? // Justificativa (obrigatória na rejeição)
+  reviewedAt   DateTime?
+  reviewedById Int?
+  reviewedBy   User?                @relation("StartupDocumentReviewer", fields: [reviewedById], references: [id])
+
+  // Requests de documento que este doc atende (AC-07)
+  documentRequests DocumentRequest[] @relation("DocumentRequestFulfilledDoc")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([startupId])
+}
+
+/// Status de revisão de um StartupDocument pelo Admin/Compliance (fluxo §2).
+enum DocumentReviewStatus {
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+}
+
+/// Histórico de rejeições de documentos da startup (fluxo §2).
+///
+/// Diferente de `StartupDocument.reviewStatus` (que muta no doc), esta tabela
+/// preserva o histórico APÓS o hard-delete do documento rejeitado (ver
+/// `AdminService.reviewStartupDocument` caso REJECTED). É a fonte de verdade
+/// do banner vermelho exibido ao founder em `/founder/startups/:id/edit/documentos`.
+///
+/// Resolvida (resolvedAt != null) quando o founder faz upload de um novo
+/// documento na mesma categoria.
+model StartupDocumentRejection {
+  id Int @id @default(autoincrement())
+
+  startupId Int
+  startup   Startup @relation(fields: [startupId], references: [id], onDelete: Cascade)
+
+  categoria    StartupDocumentCategory
+  documentName String // Snapshot pré-delete do nome do arquivo rejeitado
+  reason       String // Justificativa (>=20 chars, <=500 chars, validado no service)
+
+  rejectedById Int  // admin/compliance que rejeitou (sem FK para preservar auditoria se User sair)
+  rejectedAt   DateTime @default(now())
+
+  /// Quando o founder re-envia um doc na mesma categoria, este campo é setado
+  /// e o banner some no frontend.
+  resolvedAt DateTime?
+
+  @@index([startupId, categoria, resolvedAt])
+  @@index([startupId, resolvedAt])
+}
+
+/// Marcação "Não se aplica" estruturada por categoria de documento
+/// (fluxo_startup §2). Substitui o antigo marcador improvisado (PDF fake
+/// "não_se_aplica.pdf"). Só é permitida em categorias NÃO-essenciais
+/// (condicionais/recomendados/outros — validado no service). A justificativa
+/// é obrigatória e revisada pelo Compliance junto com os demais documentos.
+model StartupDocumentNA {
+  id        Int     @id @default(autoincrement())
+  startupId Int
+  startup   Startup @relation(fields: [startupId], references: [id], onDelete: Cascade)
+
+  categoria     StartupDocumentCategory
+  justificativa String // "Por que este documento não se aplica à sua startup?"
+
+  // Revisão do Compliance (mesma semântica do StartupDocument).
+  reviewStatus DocumentReviewStatus @default(PENDING_REVIEW)
+  reviewNote   String?
+  reviewedAt   DateTime?
+  reviewedById Int?
+  reviewedBy   User?                @relation("StartupDocumentNAReviewer", fields: [reviewedById], references: [id])
+
+  createdById Int
+  createdBy   User @relation("StartupDocumentNACreator", fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([startupId, categoria])
+  @@index([startupId])
+  @@map("startup_document_na")
+}
+
+/// Decisões de auditoria sobre uma startup (aprovar/rejeitar).
+///
+/// Criada toda vez que um admin/compliance aprova ou rejeita a startup em
+/// uma das fases (1 = cadastro+reserva, 2 = docs, 3 = tese+benefícios).
+///
+/// Quando `decision = REJECTED`, o snapshot dos campos da startup NO MOMENTO
+/// DA REJEIÇÃO é gravado em `rejectedSnapshot` (JSON). O frontend compara
+/// esse snapshot com o estado atual para destacar campo-a-campo o que o
+/// founder atualizou após a rejeição (fluxo admin-startups-phases §5.3).
+///
+/// Para `decision = APPROVED`, `rejectedSnapshot` fica null.
+model StartupReviewDecision {
+  id Int @id @default(autoincrement())
+
+  startupId Int
+  startup   Startup @relation(fields: [startupId], references: [id], onDelete: Cascade)
+
+  /// Fase do fluxo admin que originou a decisão (1, 2 ou 3).
+  phase Int
+
+  /// Decisão: APPROVED ou REJECTED.
+  decision String
+
+  /// Justificativa obrigatória em REJECTED (min 20 chars — LGPD).
+  /// Opcional em APPROVED.
+  justification String?
+
+  /// Quem decidiu (snapshot do nome/email no momento, além do FK).
+  /// `adminName`/`adminEmail` são desnormalizados para que a UI mostre
+  /// "Aprovado por X" mesmo se o User for deletado depois (LGPD).
+  adminUserId Int?
+  admin       User?   @relation("StartupReviewDecisionAdmin", fields: [adminUserId], references: [id])
+  adminName   String?
+  adminEmail  String?
+
+  /// Snapshot dos campos da startup no momento da rejeição (REJECTED only).
+  /// Permite diff field-by-field quando o founder atualizar o cadastro.
+  rejectedSnapshot Json?
+
+  /// IP do admin que tomou a decisão (auditoria Art. 37 LGPD).
+  ip String?
+
+  createdAt DateTime @default(now())
+
+  @@index([startupId, phase, createdAt])
+  @@map("startup_review_decisions")
+}
+
+/// Categorias de documento conforme CVM Resolução 88/2022 (equity
+/// crowdfunding). Agrupadas pela UI em 4 níveis (obrigatórios /
+/// condicionais / recomendados / outros) — ver
+/// `frontend/app/components/founder/documents-section.tsx`.
+enum StartupDocumentCategory {
+  // Obrigatórios CVM
+  MIE
+  CONTRATO_SOCIAL
+  CNPJ
+  BALANCO_ATUAL
+  DECLARACAO_VERACIDADE
+  ATA_ELEICAO
+
+  // Condicionais (empresa > 1 ano / signatário ≠ admin / etc)
+  BALANCO_ANTERIOR
+  PROCURACAO
+  CV_SOCIOS
+
+  // Recomendados
+  PITCH_DECK
+  PROJECOES
+  MODELO_CONTRATO_OFERTA
+  COMPROVANTE_ENDERECO
+  DECLARACAO_RECEITA
+
+  // Plataforma + livre
+  TERMO_PLATAFORMA
+  OUTRO
+}
+
+enum StartupStatus {
+  PENDING
+  PENDING_RESERVATION_PAYMENT
+  RESERVATION_PAID
+  // Cadastro completo (seções 2 e 3); Taxa de Compliance gerada e aguardando pagamento (fluxo_startup §4).
+  AWAITING_COMPLIANCE_FEE
+  PENDING_CURATOR_REVIEW
+  // Taxa de Compliance PAID + tudo validado; startup submetida ao gate final do Compliance (fluxo_startup §5).
+  PENDING_APPROVAL
+  APPROVED
+  LIVE
+  REJECTED
+  DECLINED
+}
+
+enum VerificationStatus {
+  NOT_REQUESTED
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum StartupCategory {
+  FINTECH
+  AI
+  SAAS
+  HEALTHTECH
+  EDTECH
+  BIOTECH
+  OTHER
+}
+
+// ==========================================
+// 4.1 USO DE RECURSOS — ALOCACAO DE CATEGORIA POR CAMPANHA (M7-S21)
+// ==========================================
+
+/// Categorias de alocacao de recursos para campanhas de crowdfunding.
+/// D8: uso_recursos relacional — cada Campaign tera N linhas em
+/// CampaignResourceAllocation com soma 100%.
+enum ResourceCategory {
+  FUNDADOR
+  DESENVOLVIMENTO
+  COMERCIAL
+  MARKETING
+  NUVEM
+  JURIDICO
+  RESERVA_CAIXA
+  CUSTOMIZADO
+}
+
+model Campaign {
+  id Int @id @default(autoincrement())
+
+  startupId Int
+  startup   Startup @relation(fields: [startupId], references: [id])
+
+  title String
+
+  // Financeiro da Oferta
+  targetAmount  Decimal
+  minInvestment Decimal
+  valuation     Decimal
+
+  // Regra do Token
+  tokenPrice  Decimal
+  totalTokens Int
+  tokensSold  Int     @default(0)
+
+  deadline DateTime
+  status   CampaignStatus @default(OPEN)
+
+  investments  Investment[]
+  tokens       Token[]
+  reservations TokenReservation[]
+  extensions   CampaignExtension[]
+
+  // Comissão do afiliado desta RODADA (5 ou 10). O fundador informa na abertura
+  // da rodada e o valor é congelado — não muda depois de lançada. A apuração da
+  // comissão usa este percentual (fallback para o do programa em rodadas antigas).
+  affiliateCommissionPct Decimal?
+
+  reservationFeePaid Boolean @default(false)
+
+  // === SPRINT S01: Snapshots financeiros (ADR-008) ===
+  // Snapshot gravado na criacao da campanha para reconstruir cálculos
+  // históricos sem depender de configs que podem mudar no tempo.
+  // Migration: nullable → backfill → MODIFY NOT NULL (3 cols).
+  // Schema em nullable ate S01.2 (calculo implementado em requestNewRound).
+  adminFeeValue       Decimal? // 20% da meta (snapshot)
+  tokenBaseValue      Decimal? // valor de face do token
+  tokenSellPrice      Decimal? // preço de venda (= base * (1 + fee))
+  tokenMintingCost    Decimal? // custo de geração (tokens * mintFee)
+  complianceFeeBilled Boolean  @default(false) // taxa cobrada após status=FUNDED
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  closedAt  DateTime?
+
+  payments Payment[]
+
+  // S18.7 — ordens de pagamento associadas à campanha (taxa de compliance,
+  // fast deploy, prorrogação, early access).
+  paymentOrders PaymentOrder[]
+
+  // D8: uso_recursos relacional — alocacoes de recursos por categoria
+  resources CampaignResourceAllocation[]
+
+  // === CAMPOS CVM/COMPLIANCE (M7-S22) ===
+  // Resolução CVM 88/2022 — dados de lançamento e objetivo
+  dataLancamentoRodada DateTime? // Quando a rodada entra em captação ativa
+  objetivoCaptacao     String? // Para que a rodada existe (10-500 chars)
+  oQueEsperaAlcancar   String? // Metas concretas (10-500 chars)
+
+  // Lucros e benefícios
+  participacaoLucros      Boolean  @default(false) // Gatilho para distribuição
+  faturamentoMinimoLucros Decimal? // Gatilho anual se lucros=true
+  /// Política de participação nos lucros em texto livre (10-2000 chars).
+  /// Quando `participacaoLucros=true`, o founder descreve aqui os termos
+  /// (gatilho anual, forma de cálculo, periodicidade de distribuição).
+  /// Validado no DTO UpdateCampaignDto (MinLength/MaxLength).
+  politicaLucros          String?
+  beneficiosAdicionais    Boolean  @default(false) // Há benefícios além dos lucros
+  beneficiosDescricao     String? // Descrição dos benefícios
+
+  // Termos e declarações
+  aceiteTermoRepasse   Boolean @default(false) // Art. 7º, V LGPD
+  declaracaoVeracidade Boolean @default(false) // Art. 6º, IX LGPD
+
+  // === CAMPOS DE CAPTACAO (realocados de Startup === Campaign) ===
+  problema           String? // Pitch: problema que resolve
+  solucao            String? // Pitch: solucao proposta
+  modeloReceita      String? // Pitch: modelo de receita
+  diferencial        String? // Pitch: diferencial competitivo
+  mercadoAlvo        String? // Pitch: mercado alvo
+  sociosCount        Int? // Numero de socios
+  dedicacao          String? // Dedicacao do fundador (integral/parcial)
+  compradores        String? // Quem sao os compradores
+  investimentoPrevio String? // Investimento ja realizado
+  concorrencia       String? // Analise de concorrencia
+
+  // B12 — Repasse de Fundos
+  totalRaised          Decimal? // Calculado dos investments CONFIRMED
+  transferStarted      Boolean  @default(false) // Se repasse já foi iniciado
+  repasseConfigured    Boolean  @default(false) // Se financeiro já configurou parcelas
+  repasseParcelas      Int      @default(12) // Nº de parcelas definido pelo financeiro
+  repasseIntervaloDias Int      @default(30) // Intervalo entre parcelas (dias)
+
+  // Auditoria de aceite CVM
+  auditLogs CampaignOfferAuditLog[]
+
+  // Ordens de emissão de tokens (pós-aprovação compliance)
+  issuanceOrders TokenIssuanceOrder[]
+
+  // === PUBLICAÇÃO (delay pós-aprovação Fase 3 / FAST_DEPLOY) ===
+  // Por padrão, após a aprovação da Fase 3 pelo Compliance a startup só é
+  // publicada no marketplace 24h depois. `scheduledPublishAt` guarda o horário
+  // alvo da publicação; a campanha permanece DRAFT até o cron de publicação
+  // agendada transicioná-la para OPEN quando `scheduledPublishAt <= now`.
+  scheduledPublishAt DateTime?
+  // `fastDeploy=true` quando o founder contratou o serviço "Publicação Rápida"
+  // (Payment FAST_DEPLOY PAID). Nesse caso a publicação é imediata na aprovação
+  // (OPEN na hora, sem agendamento de 24h).
+  fastDeploy         Boolean  @default(false)
+
+  // === FIN-09: Repasse (1:1 por campanha) ===
+  repasse Repasse?
+}
+
+enum CampaignStatus {
+  DRAFT
+  OPEN
+  PAUSED
+  CLOSED
+  FUNDED
+  PAID_OUT
+}
+
+/// Prorrogação da captação (PRD_RECEBIMENTO §6.3 / admin-payout-management §13).
+/// O founder define o valor adicional; a reserva de tokens é calculada apenas
+/// sobre o adicional. Ao confirmar o pagamento da reserva (Payment
+/// TOKEN_RESERVATION_EXTENSION → PAID), a campanha é reativada (OPEN) com a
+/// meta somada. Não adiciona valores ao enum CampaignStatus (decisão do PRD).
+model CampaignExtension {
+  id         Int      @id @default(autoincrement())
+  campaignId Int
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  additionalAmount Decimal // Valor adicional a captar (R$)
+  totalAmountShown Decimal // Nova meta somada (meta original + adicional) — read-only
+  tokenReserve     Int // Reserva de tokens calculada só sobre o adicional
+  periodDays       Int     @default(30) // Novo período de captação (Compliance)
+
+  // Ciclo: PENDING_RESERVATION_PAYMENT → RESERVATION_PAID → REACTIVATED.
+  status String @default("PENDING_RESERVATION_PAYMENT")
+
+  // Pagamento da reserva adicional (1:1). Nullable até criar a cobrança.
+  paymentId Int?     @unique
+  payment   Payment? @relation(fields: [paymentId], references: [id])
+
+  createdById Int
+  createdBy   User @relation("CampaignExtensionCreator", fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([campaignId])
+  @@map("campaign_extensions")
+}
+
+/// D8: Alocacao de recurso por categoria para uma Campaign.
+/// Cada linha = 1 categoria + percentual (1-100). Soma por campaign = 100.
+/// UNIQUE(campaignId, categoria) impede duplicacao (idempotencia no backfill).
+model CampaignResourceAllocation {
+  id                   Int              @id @default(autoincrement())
+  campaignId           Int
+  campaign             Campaign         @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  categoria            ResourceCategory
+  percentual           Int // 1-100 (validado em DTO/service)
+  descricaoCustomizada String? // obligatorio quando categoria=CUSTOMIZADO
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+
+  @@unique([campaignId, categoria])
+  @@index([campaignId])
+  @@map("campaign_resource_allocations")
+}
+
+// ==========================================
+// 4.2 AUDITORIA DE ACEITE CVM (M7-S22 T039)
+// ==========================================
+// Log imutável de aceite de termos CVM em ofertas de crowdfunding.
+// Registrado quando aceiteTermoRepasse ou declaracaoVeracidade mudam para true.
+
+model CampaignOfferAuditLog {
+  id         Int      @id @default(autoincrement())
+  campaignId Int
+  campaign   Campaign @relation(fields: [campaignId], references: [id])
+  action     String // "ACEITE_TERMO_REPASSE" ou "DECLARACAO_VERACIDADE"
+  ip         String?
+  userAgent  String?
+  userId     Int?
+  occurredAt DateTime @default(now())
+
+  @@index([campaignId])
+  @@map("campaign_offer_audit_logs")
+}
+
+/// Compliance pode pedir documentos extras ao founder durante a curadoria
+/// (Resolução CVM 88/2022 — Art. 7º, V). O founder recebe notificação
+/// (email + in-app), faz upload via StartupDocument e a request é marcada
+/// como FULFILLED com link para o documento enviado.
+model DocumentRequest {
+  id            Int     @id @default(autoincrement())
+  startupId     Int
+  startup       Startup @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  requestedById Int
+  requestedBy   User    @relation("DocumentRequestRequester", fields: [requestedById], references: [id])
+
+  /// Categoria sugerida (ex.: "BALANCO_ATUALIZADO", "CONTRATO_SOCIAL")
+  /// ou texto livre para casos fora do catálogo.
+  type        String
+  description String
+  deadline    DateTime?
+
+  status DocumentRequestStatus @default(PENDING)
+
+  /// Vinculado quando o founder faz upload do StartupDocument solicitado.
+  fulfilledDocId Int?
+  fulfilledDoc   StartupDocument? @relation("DocumentRequestFulfilledDoc", fields: [fulfilledDocId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([startupId])
+  @@index([status])
+  @@index([requestedById])
+  @@map("document_requests")
+}
+
+enum DocumentRequestStatus {
+  PENDING
+  FULFILLED
+  EXPIRED
+  CANCELED
+}
+
+// ==========================================
+// 5. EQUITY & TOKENS (Ativos Digitais)
+// ==========================================
+
+model Token {
+  id String @id @default(uuid())
+
+  // Identificador único do contrato digital
+  hash        String  @unique
+  certificate String? // URL do PDF gerado
+
+  // Lastros
+  userId Int
+  user   User @relation("InvestorTokens", fields: [userId], references: [id])
+
+  startupId Int
+  startup   Startup @relation(fields: [startupId], references: [id])
+
+  campaignId Int
+  campaign   Campaign @relation(fields: [campaignId], references: [id])
+
+  /// Investimento que originou este token. Nullable para tokens legados
+  /// emitidos antes deste vínculo. Distingue múltiplos aportes do mesmo
+  /// investidor numa mesma campanha (certificado/valorização por aporte).
+  investmentId Int?
+  investment   Investment? @relation(fields: [investmentId], references: [id])
+
+  // Valores
+  quantity    Int      @default(1)
+  purchaseVal Decimal
+  currentVal  Decimal?
+
+  dtAquisicao DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  history TokenHistory[]
+
+  @@index([userId])
+  @@index([startupId])
+  @@index([investmentId])
+}
+
+model TokenHistory {
+  id Int @id @default(autoincrement())
+
+  tokenId String
+  token   Token  @relation(fields: [tokenId], references: [id])
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  type        TransType
+  amount      Decimal?
+  description String?
+
+  createdAt DateTime @default(now())
+}
+
+enum TransType {
+  BUY_MARKET
+  SELL_P2P
+  DIVIDEND
+  DILUTION
+}
+
+// ==========================================
+// 6. PAGAMENTOS (C6 Bank) & SAQUES
+// ==========================================
+//
+// S18.7 — DEPRECATED. O modelo Payment é mantido temporariamente para
+// retrocompat durante o cutover. A nova source-of-truth é `PaymentOrder`
+// (modelo Order+Items) — novos checkouts são escritos em ambos via
+// `_createOrderWithItems` (dual-write). Payments legados foram migrados
+// para PaymentOrder pelo script `scripts/backfill-payment-orders.ts`.
+//
+// CUTOVER PLANEJADO (Fase 6.5):
+//   1. Marcar `LEGACY_PAYMENT_DROPPED=true` via env (default false)
+//   2. Helper `_createOrderWithItems` para de criar Payment legado
+//   3. Prisma removido gradualmente de todos os services
+//   4. Migration SQL final: DROP TABLE Payment, DROP TABLE
+//      StartupDraft (consolidado na Order)
+//
+// Por enquanto, manter o modelo. Não dropar em prod sem antes:
+//   - Validar que todos os consumers leem de PaymentOrder
+//   - Confirmar com 30 dias de bake-time em prod
+//   - Manter backup do DB (LGPD)
+
+model Payment {
+  id Int @id @default(autoincrement())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  // Destino do Pagamento
+  subscriptionId Int?
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
+
+  investmentId Int?        @unique // Relação 1:1 com Investimento
+  investment   Investment? @relation(fields: [investmentId], references: [id])
+
+  // TIPO DE PAGAMENTO (Fundamental para diferenciar as regras)
+  purpose PaymentPurpose
+
+  // Dados Financeiros
+  amount Decimal
+  method PaymentMethod
+  status PaymentStatus @default(PENDING)
+
+  // Breakdown financeiro do item (auditoria + relatórios).
+  // - originalAmount: valor cheio do produto/serviço ANTES de qualquer desconto
+  //   (ex.: R$ 500 reserva, R$ 2.500 fast track). Igual a `amount` quando não há desconto.
+  // - discountAmount: desconto aplicado a ESTE item (cupom compartilhado é rateado
+  //   proporcionalmente ao originalAmount de cada Payment no mesmo checkout).
+  // - paidAmount: valor EFETIVAMENTE pago deste item (originalAmount - discountAmount).
+  //   Igual a `amount` em todos os fluxos atuais; campo reservado para extensões
+  //   futuras (taxas intermediárias, estornos parciais).
+  originalAmount Decimal?
+  discountAmount Decimal?
+  paidAmount     Decimal?
+
+  // Integração EFI Bank (substitui C6)
+  // txid NÃO é @unique: um PIX consolidado (ex.: reserva + fast track) gera
+  // 1 cobrança EFI e 1 txid compartilhado por 2 Payments (TOKEN_RESERVATION
+  // + FAST_TRACK_REVIEW). Mantemos índice para lookup O(1) no webhook.
+  txid             String? // 26 chars max, alfanumérico (EFI Pix)
+  endToEndId       String?   @unique // SPI BACEN id
+  efiChargeId      String?   @unique // ID de cobrança na API Cobranças (cartão)
+  efiLocation      String? // URL do QR Code dinâmico (location do /v2/cob)
+  qrCodeBase64     String?
+  copyPastePix     String?
+  paidAt           DateTime?
+  // Marco de aplicação dos EFEITOS de domínio (ver schema.prisma). A
+  // idempotência/reconciliação se ancoram aqui, não em status===PAID.
+  effectsAppliedAt DateTime?
+  expiresAt        DateTime? // expiração do QR (cob.calendario.expiracao)
+
+  // RELACIONAMENTOS (Destinos)
+  // Para INVESTIMENTO de terceiros
+  campaignId Int? // Para TAXA DE RESERVA (Founder pagando)
+  campaign   Campaign? @relation(fields: [campaignId], references: [id])
+
+  // Metadados para serviços avulsos (ex: Early Access)
+  serviceDetails Json? // Ex: { product: "EARLY_ACCESS", couponId, principal, installments, interestRate, totalWithInterest }
+
+  // Aprovação manual pelo painel /financeiro
+  manualApprovedById   Int?
+  manualApprovedBy     User?     @relation("PaymentManualApprover", fields: [manualApprovedById], references: [id])
+  manualApprovedAt     DateTime?
+  manualJustification  String?
+  manualComprovanteKey String? // chave no bucket `comprovante` do S3/MinIO
+
+  // Estorno
+  refundedAt   DateTime?
+  refundedById Int?
+  refundReason String?
+  refundTxid   String? // txid da devolução EFI
+
+  // Cupom aplicado
+  couponUsages CouponUsage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relação inversa com StartupDraft (1:1 — TOKEN_RESERVATION)
+  startupDraft          StartupDraft?      @relation("StartupDraftPrimary")
+  // Relação inversa com StartupDraft (1:1 — FAST_TRACK_REVIEW)
+  startupDraftFastTrack StartupDraft?      @relation("StartupDraftFastTrack")
+  // Relação inversa com CampaignExtension (1:1 — prorrogação)
+  campaignExtension     CampaignExtension?
+
+  // S18.7 — vínculo para a nova PaymentOrder. Quando um bundle (RESERVA +
+  // FastTrack ou COMPLIANCE + FastDeploy) gera 2 Payments legados, o
+  // primeiro (âncora) tem paymentGroupId = seu próprio id; o segundo tem
+  // paymentGroupId = id da âncora. A PaymentOrder é a fonte da verdade do
+  // estado (status/paidAt/txid) e dos itens; este campo mantém a referência
+  // retroativa até o cutover da Fase 6 (drop table Payment).
+  paymentGroupId Int?
+  paymentGroup   Payment?  @relation("PaymentGroup", fields: [paymentGroupId], references: [id], onDelete: SetNull)
+  groupMembers   Payment[] @relation("PaymentGroup")
+
+  // PERF: next-action do dashboard busca reserva PENDING por campanha
+  // (campaign.startupId + status=PENDING + purpose=TOKEN_RESERVATION).
+  @@index([campaignId, status])
+  // PERF: listagens por usuário com ordenação por data (admin/financeiro/transactions).
+  @@index([userId, createdAt])
+  // S18.7 — busca de siblings do mesmo bundle durante dual-write e backfill.
+  @@index([paymentGroupId])
+}
+
+enum PaymentPurpose {
+  SUBSCRIPTION // Usuário pagando plano mensal
+  INVESTMENT // Investidor comprando tokens
+  TOKEN_RESERVATION // Founder pagando para criar os tokens (Os 5%)
+  EARLY_ACCESS // Compra do acesso antecipado (5k)
+  P2P_BUY // Compra de tokens de outro usuário (B2B)
+  VERIFICATION_SEAL // Pagamento da taxa de selo Startup Verificada (R$ 890,00)
+  COMPLIANCE_FEE // Taxa de Compliance da startup (gate da Etapa/Fase 2 — fluxo_startup §4/§4B)
+  TOKEN_RESERVATION_EXTENSION // Reserva adicional na prorrogação da captação (PRD_RECEBIMENTO §6.3)
+  FAST_TRACK_REVIEW // Análise prioritária (compliance Fast Track) — produto adicional no checkout da reserva de tokens. Compartilha txid com TOKEN_RESERVATION (1 PIX consolidado, 2 Payments distintos para auditoria).
+  FAST_DEPLOY // Publicação Rápida — produto adicional no checkout da Taxa de Compliance. Torna a publicação da startup imediata na aprovação da Fase 3 (em vez do delay padrão de 24h). Compartilha txid com COMPLIANCE_FEE (1 PIX consolidado, 2 Payments distintos para auditoria).
+}
+
+// ==========================================
+// S18.7 — PAYMENT ORDER + ITEMS (fonte da verdade do pagamento)
+// ==========================================
+// Refator do modelo de pagamento consolidado. Antes: 1 ordem de pagamento
+// (ex.: COMPLIANCE_FEE + FAST_DEPLOY) gerava 2 Payment records irmãos
+// com estado independente, permitindo o bug "1 PAID + 1 PENDING". Depois:
+// 1 PaymentOrder tem N PaymentItems, e o estado é携带 na Order (atomic).
+//
+// Migração em background (Fase 4) popula estas tabelas a partir dos
+// Payments legados. Payment é mantido como dual-write durante a transição
+// (Fases 2-5) e removido no cutover da Fase 6.
+
+model PaymentOrder {
+  id Int @id @default(autoincrement())
+
+  userId Int
+  user   User @relation("PaymentOrderUser", fields: [userId], references: [id])
+
+  // Estado centralizado — 1 ordem = 1 ato de pagar (regra de negócio S18.7).
+  // Itens herdam este estado atomicamente.
+  status PaymentStatus @default(PENDING)
+
+  // Método de pagamento escolhido (PIX ou CREDIT_CARD).
+  method PaymentMethod
+
+  // Totais calculados a partir dos itens (Σ).
+  totalAmount   Decimal // Σ(items.subtotal) — valor final após cupom
+  totalOriginal Decimal // Σ(items.originalSubtotal) — antes do cupom
+  totalDiscount Decimal @default(0) // totalOriginal - totalAmount
+
+  // Cupom aplicado (rateado entre os itens).
+  couponCode    String?
+  couponId      Int?
+  couponPercent Int?
+
+  // Identificadores do gateway (PIX: txid + endToEndId; Cartão: efiChargeId).
+  txid        String? @unique
+  endToEndId  String? @unique
+  efiChargeId String? @unique
+
+  expiresAt        DateTime?
+  paidAt           DateTime?
+  effectsAppliedAt DateTime?
+
+  // Relações de domínio (Subscription, Investment, etc.) via items.
+  campaignId Int?
+  campaign   Campaign? @relation(fields: [campaignId], references: [id])
+
+  startupDraftId Int?      @unique
+  startupDraft   StartupDraft? @relation("PaymentOrderStartupDraft", fields: [startupDraftId], references: [id], onDelete: SetNull)
+
+  items PaymentItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // PERF: listagens por usuário com ordenação por data.
+  @@index([userId, createdAt])
+  @@index([status, paidAt])
+  @@index([campaignId])
+}
+
+/// Cada item de uma PaymentOrder. qty=1 para serviços avulsos (RESERVA,
+/// FastTrack, FastDeploy, Compliance) e qty=N para compra de tokens
+/// (15 tokens de uma startup = 1 item com quantity=15).
+model PaymentItem {
+  id Int @id @default(autoincrement())
+
+  orderId Int
+  order   PaymentOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  purpose     PaymentPurpose
+  description String? // ex: "Tokens <Startup X>"
+
+  // Breakdown financeiro por item.
+  unitPrice        Decimal  // preço por unidade
+  quantity         Int      @default(1)
+  subtotal         Decimal  // unitPrice × quantity (após cupom rateado)
+  originalSubtotal Decimal  // valor antes do cupom
+  discountAmount   Decimal  @default(0) // parte do cupom que caiu neste item
+
+  // Metadados específicos do item (ex: dados de investidor, contexto de serviço).
+  serviceDetails Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([purpose])
+}
+
+model Investment {
+  id Int @id @default(autoincrement())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  campaignId Int
+  campaign   Campaign @relation(fields: [campaignId], references: [id])
+
+  /// Subtotal dos tokens (tokensQty x preco de venda). O total cobrado do
+  /// investidor (subtotal + taxa da plataforma) fica em Payment.amount.
+  amount    Decimal
+  tokensQty Int
+
+  // ---------------------------------------------------------------------
+  // Split financeiro (snapshot imutavel gravado na criacao do pedido;
+  // `allocatedAt` carimba a confirmacao do pagamento). Nullable: investimentos
+  // legados anteriores ao split nao possuem os campos — agregacoes devem usar
+  // `startupRepasseAmount ?? amount`.
+  // ---------------------------------------------------------------------
+
+  /// Preco base (valor de face) do token no momento da compra.
+  tokenBasePrice Decimal?
+
+  /// Preco de venda efetivamente cobrado por token.
+  tokenSellPrice Decimal?
+
+  /// tokensQty x tokenSellPrice (espelha `amount`, gravado para clareza).
+  tokenSubtotal Decimal?
+
+  /// Aliquota da taxa da plataforma vigente na compra (fracao, ex: 0.05).
+  platformFeePct Decimal?
+
+  /// tokenSubtotal x platformFeePct — cobrada do investidor no checkout.
+  platformFeeAmount Decimal?
+
+  /// tokensQty x tokenBasePrice — valor liquido devido a startup.
+  startupRepasseAmount Decimal?
+
+  /// tokenSubtotal - startupRepasseAmount — ganho da plataforma no spread.
+  platformSpreadAmount Decimal?
+
+  /// platformSpreadAmount + platformFeeAmount — receita total da plataforma
+  /// neste investimento.
+  platformRevenueAmount Decimal?
+
+  /// Comissao de afiliado devida (base: startupRepasseAmount), gravada na
+  /// confirmacao. Espelha AffiliateCommission.affiliateAmount.
+  affiliateCommissionAmount Decimal?
+
+  /// Carimbo da confirmacao do pagamento (mesma transaction de
+  /// confirmInvestment). NULL enquanto PENDING.
+  allocatedAt DateTime?
+
+  // Ligação inversa com pagamento é feita no model Payment
+  payment Payment?
+
+  /// Código de afiliado digitado no checkout. Tem precedência sobre o vínculo
+  /// gravado pelo link de indicação na hora de atribuir a comissão.
+  affiliateCode String?
+
+  // Comissão de afiliado apurada na confirmação (no máximo uma por investimento)
+  affiliateCommission AffiliateCommission?
+
+  // Reserva de tokens que segura o estoque enquanto o pagamento não confirma.
+  reservation TokenReservation?
+
+  // Tokens emitidos na confirmação deste investimento.
+  tokens Token[]
+
+  status    InvStatus @default(PENDING)
+  createdAt DateTime  @default(now())
+
+  // PERF: agregações do dashboard do founder filtram por campanha + status
+  // (sum de CONFIRMED por campaignId) e contam investidores únicos por userId.
+  // Sem estes índices o SQLite fazia full scan da tabela Investment.
+  @@index([campaignId, status])
+  @@index([userId])
+  // PERF: listagens por usuário com ordenação por data (my-startups, statements).
+  @@index([userId, createdAt])
+}
+
+model Withdrawal {
+  id Int @id @default(autoincrement())
+
+  startupId Int
+  startup   Startup @relation(fields: [startupId], references: [id])
+
+  amount Decimal
+
+  // Dados destino (Snapshot para segurança)
+  bankInfo Json // { banco: "001", ag: "...", cc: "..." }
+
+  status WithdrawalStatus @default(REQUESTED)
+
+  approvedBy   Int? // Admin ID
+  txIdBancario String? // ID da TED/PIX enviada
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum PaymentMethod {
+  PIX
+  CREDIT_CARD
+  WALLET
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  CANCELED
+  REFUNDED
+  // QR Code/Pix expirado (24h) sem pagamento; a startup/ordem NÃO é deletada
+  // (retomar via "Gerar Novo Pagamento") — fluxo_startup §1 / SPEC §16.2.
+  EXPIRED
+}
+
+enum InvStatus {
+  PENDING
+  CONFIRMED
+  CANCELED
+  REFUNDED
+}
+
+enum WithdrawalStatus {
+  REQUESTED
+  PROCESSING
+  COMPLETED
+  REJECTED
+}
+
+// ==========================================
+// 7. AUDITORIA E LOGS (Infraestrutura)
+// ==========================================
+
+model AuditLog {
+  id Int @id @default(autoincrement())
+
+  // userId nullable: ações de sistema (cron, webhooks, jobs) não têm User actor.
+  // BUG-FT-001: antes era hardcoded `userId: 0` em fund-transfer.service.ts,
+  // o que quebrava FK em DB limpo. Agora é `null` para ações de sistema.
+  userId Int?
+  user   User? @relation(fields: [userId], references: [id])
+
+  action   String // Ex: "UPDATE_STARTUP", "APPROVE_KYC"
+  entity   String // Ex: "Startup"
+  entityId String // ID do registro afetado
+
+  oldValue Json? // Snapshot antes
+  newValue Json? // Snapshot depois
+
+  ip String?
+
+  createdAt DateTime @default(now())
+}
+
+model AccessLog {
+  id Int @id @default(autoincrement())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  // Tipo de acesso
+  type AccessType
+
+  // Metadata
+  ip        String? // IPv4/IPv6
+  userAgent String? // legado: mantido para compatibilidade histórica
+  method    String? // legado: mantido para compatibilidade histórica
+  path      String? // legado: mantido para compatibilidade histórica
+
+  // Metadata normalizado da consulta client-side de IP
+  ipHostname     String?
+  ipCity         String?
+  ipRegion       String?
+  ipCountry      String?
+  ipLocation     String?
+  ipOrganization String?
+  ipTimezone     String?
+  ipCapturedAt   DateTime?
+
+  // Timestamp
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+enum AccessType {
+  LOGIN
+  LOGOUT
+  ACCESS // Acesso a rotas protegida
+  AF2_VERIFIED
+}
+
+// Old C6 Bank WebhookLog removed — replaced by EFI-era WebhookLog model near line 1290
+model Country {
+  id              Int      @id @default(autoincrement())
+  name            String
+  iso3            String   @unique
+  iso2            String   @unique
+  numeric_code    String?
+  phonecode       Int?
+  capital         String?
+  currency        String?
+  currency_name   String?
+  currency_symbol String?
+  tld             String?
+  native          String?
+  region          String?
+  region_id       Int?
+  subregion       String?
+  subregion_id    Int?
+  nationality     String?
+  timezones       Json?
+  latitude        Decimal?
+  longitude       Decimal?
+  emoji           String?
+  emojiU          String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  states State[]
+  cities City[]
+  users  User[]  @relation("UserPais")
+
+  @@map("countries")
+}
+
+model State {
+  id           Int      @id @default(autoincrement())
+  name         String
+  country_id   Int
+  country_code String
+  country_name String
+  iso2         String
+  iso3166_2    String
+  fips_code    Int?
+  type         String?
+  level        Int?
+  parent_id    Int?
+  latitude     Decimal?
+  longitude    Decimal?
+  timezone     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  country Country @relation(fields: [country_id], references: [id])
+  cities  City[]
+
+  @@index([country_id])
+  @@map("states")
+}
+
+model City {
+  id           Int       @id @default(autoincrement())
+  name         String
+  state_id     Int
+  state_code   String
+  state_name   String
+  country_id   Int
+  country_code Int
+  country_name String
+  latitude     Decimal?
+  longitude    Decimal?
+  timezone     String?
+  wikiDataId   String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime? @updatedAt
+
+  state   State   @relation(fields: [state_id], references: [id])
+  country Country @relation(fields: [country_id], references: [id])
+
+  @@index([state_id])
+  @@index([country_id])
+  @@map("cities")
+}
+
+// ==========================================
+// Configurações genéricas (admin/financeiro)
+// ==========================================
+
+model FinanceConfig {
+  key         String   @id
+  value       String
+  description String?
+  updatedAt   DateTime @updatedAt
+
+  @@map("finance_config")
+}
+
+/// Configuracao dinamica do sistema. Permite ajustar taxas/limites sem deploy.
+/// Apenas ADMIN/FINANCEIRO pode modificar via PATCH /admin/configs/:key.
+/// Usado por campanhas (ADR-008) — backend e source-of-truth dos calculos.
+/// Decimal(15,4) proposital: algumas configs podem ter precisao > 2 casas
+/// (ex: percentuais como 0.2050).
+model SystemConfig {
+  id          Int      @id @default(autoincrement())
+  key         String   @unique
+  value       Decimal
+  description String?
+  updatedAt   DateTime @updatedAt
+  updatedBy   Int? // User ID que alterou (log-only, sem FK)
+
+  @@map("system_configs")
+}
+
+// Parâmetros de cálculo (taxas, percentuais, limites) com VIGÊNCIA POR DATA.
+// Append-only: cada alteração é uma nova versão com `effectiveFrom`. O valor
+// vigente numa data D é a versão de maior `effectiveFrom <= D`. Versões passadas
+// nunca são alteradas — por isso cálculos passados não mudam. Uma versão com
+// `effectiveFrom` no futuro é uma alteração agendada, que passa a valer sozinha.
+model ConfigParameterValue {
+  id            Int      @id @default(autoincrement())
+  key           String
+  value         String
+  effectiveFrom DateTime
+  note          String?
+  createdById   Int?
+  createdAt     DateTime @default(now())
+
+  @@index([key, effectiveFrom])
+  @@map("config_parameter_values")
+}
+
+// ==========================================
+// Cupons de desconto (B04)
+// ==========================================
+
+enum CouponStatus {
+  ACTIVE
+  INACTIVE
+  EXPIRED
+  EXHAUSTED
+}
+
+model Coupon {
+  id          Int           @id @default(autoincrement())
+  code        String        @unique
+  percent     Int // validado em [20, 30, 50, 60, 100]
+  maxUses     Int? // null = ilimitado, 1 = uso único, N>1 = limitado
+  usedCount   Int           @default(0)
+  validFrom   DateTime? // null = válido desde sempre
+  validUntil  DateTime? // null = nunca expira
+  active      Boolean       @default(true)
+  status      CouponStatus  @default(ACTIVE)
+  description String? // VarChar(500) em MySQL
+  createdById Int
+  createdBy   User          @relation("CouponCreator", fields: [createdById], references: [id])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  usages      CouponUsage[]
+
+  @@index([active])
+  @@index([validUntil])
+  @@index([percent])
+  @@map("coupons")
+}
+
+model CouponUsage {
+  id              Int      @id @default(autoincrement())
+  couponId        Int
+  coupon          Coupon   @relation(fields: couponId, references: [id])
+  userId          Int // FK obrigatória — auditoria LGPD
+  user            User     @relation("CouponUsageUser", fields: userId, references: [id])
+  paymentId       Int? // nullable (cupom sem payment imediato)
+  payment         Payment? @relation(fields: paymentId, references: [id])
+  discountApplied Decimal
+  originalAmount  Decimal
+  finalAmount     Decimal
+  appliedAt       DateTime @default(now())
+
+  @@unique([couponId, paymentId])
+  @@index([userId])
+  @@index([couponId])
+  @@map("coupon_usages")
+}
+
+// ==========================================
+// Serviços — catálogo gerenciado pelo admin
+// ==========================================
+//
+// Cada Service representa um serviço pago que o founder pode contratar
+// para uma de suas startups. O endpoint founder lê só os `available=true`,
+// ordenando por `order ASC` + `highlight DESC`. O admin CRUD usa o mesmo
+// model com guard AdminGuard (ver admin/services.controller.ts).
+//
+// Os campos `endpoint` e `requiresCampaignStatus` controlam o gate
+// client-side (botão CTA + select de startup elegíveis). Quando o founder
+// confirma, o frontend dispara a mutation correspondente (ver
+// `use-founder-service-requests.ts`).
+
+model Service {
+  id                     Int      @id @default(autoincrement())
+  slug                   String   @unique
+  name                   String
+  shortDesc              String? // 1 linha para cards
+  description            String // descricao longa (markdown leve)
+  benefits               String? // JSON array de strings (bullets)
+  category               String // FAST_TRACK | COMPLIANCE | SEAL | EXTENSION | EARLY_ACCESS | OTHER
+  paymentPurpose         String // PaymentPurpose correspondente (gera o Payment via mutacao)
+  price                  Decimal? // null = varia por contexto (ex.: prorrogacao)
+  currency               String   @default("BRL")
+  highlight              Boolean  @default(false) // servico padrao, exibido no topo
+  available              Boolean  @default(true)
+  order                  Int      @default(0)
+  requiresCampaignStatus String? // JSON array de campaign status permitidos (gate client-side)
+  endpoint               String? // path BFF para a mutation (ex.: /api/founder/compliance-fee)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  @@index([available, order])
+  @@map("services")
+}
+
+// ==========================================
+// EFI Bank — Configuração de Parcelamento
+// ==========================================
+
+model InstallmentConfig {
+  id                   Int       @id @default(autoincrement())
+  interestRate         Decimal   @default(0.0299)
+  monthlyInterestRate  Decimal   @default(0.0299)
+  maxInstallments      Int       @default(18)
+  minInstallmentAmount Decimal   @default(50.0)
+  effectiveFrom        DateTime  @default(now())
+  effectiveUntil       DateTime?
+  isActive             Boolean   @default(true)
+  createdById          Int
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @default(now()) @updatedAt
+  notes                String?
+
+  @@index([effectiveFrom, effectiveUntil])
+  @@index([isActive])
+  @@map("installment_configs")
+}
+
+// ==========================================
+// EFI Bank — Split de Pagamento Pix
+// ==========================================
+
+model SplitConfig {
+  id            String    @id @default(cuid())
+  efiSplitId    Int       @unique // ID retornado pela EFI no POST /v2/gn/split/config
+  name          String // ex: "Repasse Startup 95% + Plataforma 5%"
+  description   String?
+  splits        Json // Json em MySQL
+  active        Boolean   @default(true)
+  createdById   Int
+  createdAt     DateTime  @default(now())
+  cancelledAt   DateTime?
+  cancelledById Int?
+
+  @@index([active])
+  @@map("split_configs")
+}
+
+// ==========================================
+// EFI Bank — Abertura de Conta
+// ==========================================
+
+enum EfiAccountOpeningStatus {
+  PENDING
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+model EfiAccountOpening {
+  id                String                  @id @default(cuid())
+  userId            Int                     @unique
+  efiRegistrationId String                  @unique // ID da solicitação na EFI
+  status            EfiAccountOpeningStatus @default(PENDING)
+  statusUpdatedAt   DateTime?
+  rejectionReason   String?
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+
+  @@map("efi_account_openings")
+}
+
+// ==========================================
+// EFI Bank — Log de Webhooks (S3 SSE-KMS + PII anonimizado)
+// ==========================================
+
+model WebhookLog {
+  id       String @id @default(cuid())
+  provider String @default("EFI_BANK")
+
+  eventType   String? // "pix.received" | "card.paid" | "card.failed" | etc
+  txid        String? // txid do EFI
+  endToEndId  String? // endToEndId do Pix
+  efiChargeId String?
+
+  // HMAC-SHA256 do CPF (anonimizado para queries)
+  cpfHash  String?
+  // HMAC-SHA256 do CNPJ (anonimizado para queries)
+  cnpjHash String?
+
+  amount Decimal?
+
+  status    String // SUCCESS | ERROR
+  errorCode String? // code EFI
+  errorLog  String?
+
+  payload String? // Payload bruto do webhook
+
+  // Payload bruto criptografado em S3 (SSE-KMS)
+  payloadS3Key     String? // s3://bucket/webhooks/<id>.json
+  payloadS3Bucket  String? // nome do bucket
+  payloadExpiresAt DateTime? // lifecycle 90 dias
+
+  processed   Boolean   @default(false)
+  processedAt DateTime?
+  retryCount  Int       @default(0)
+  ipAddress   String? // já validado por IP whitelist
+
+  // Idempotência: hash(txid + eventType) para evitar duplicidade
+  idempotencyKey String? @unique
+
+  receivedAt DateTime @default(now())
+
+  @@index([txid])
+  @@index([cpfHash])
+  @@index([eventType, receivedAt])
+  @@map("webhook_logs")
+}
+
+// ==========================================
+// Selos (Seals) - badges para Startups
+// ==========================================
+
+model Seal {
+  id          Int          @id @default(autoincrement())
+  slug        String       @unique
+  name        String
+  description String?
+  imagePath   String
+  category    SealCategory @default(CUSTOM)
+  active      Boolean      @default(true)
+
+  startupSeals StartupSeal[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("seals")
+}
+
+enum SealCategory {
+  STAGE
+  VERIFICATION
+  PARTNERSHIP
+  ACHIEVEMENT
+  CUSTOM
+}
+
+enum UploadApplicancy {
+  APPLICABLE
+  NOT_APPLICABLE
+}
+
+enum UploadStatus {
+  PENDING
+  PROCESSING
+  READY
+  FAILED
+  INFECTED
+}
+
+/// Tipo de post de transparencia publicado pelo founder.
+/// Usado para filtros no feed (FINANCEIRO / PRODUTO / SOCIETARIO / GERAL).
+enum TransparencyPostType {
+  FINANCIAL_REPORT
+  PRODUCT_MILESTONE
+  CORPORATE_CHANGE
+  GENERAL
+}
+
+model Upload {
+  id        Int      @id @default(autoincrement())
+  publicId  String   @unique @default(uuid())
+  startupId Int?
+  startup   Startup? @relation(fields: [startupId], references: [id])
+
+  /// Uploads públicos não têm proprietário e não podem ser vinculados a perfis.
+  userId Int?
+  user   User? @relation(fields: [userId], references: [id])
+
+  type            String? // 'image' | 'video' | 'document'
+  mimeType        String?          @map("mime_type") // typo corrigido: era mineType
+  originalName    String?
+  size            Int?             @map("size_bytes")
+  extension       String?
+  bucket          String?
+  key             String?
+  sha256          String?          @map("sha256") // hash SHA-256 do conteudo
+  variants        Json? // { lg: {...}, md: {...}, sm: {...} }
+  status          UploadStatus     @default(PENDING)
+  fileKey         String?
+  url             String?
+  url_md          String?
+  url_web         String?
+  documentType    String?
+  applicancy      UploadApplicancy @default(APPLICABLE)
+  rejectionReason String?
+
+  /// Anexos de posts de transparencia que referenciam este upload.
+  transparencyPostAttachments TransparencyPostAttachment[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([startupId])
+  @@index([userId])
+  @@index([sha256])
+  @@index([status])
+  @@index([deletedAt])
+}
+
+model StartupSeal {
+  id        Int      @id @default(autoincrement())
+  startupId Int
+  startup   Startup  @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  sealId    Int
+  seal      Seal     @relation(fields: [sealId], references: [id], onDelete: Cascade)
+  issuedBy  Int?
+  issuedAt  DateTime @default(now())
+  metadata  Json?
+
+  @@unique([startupId, sealId])
+  @@index([startupId])
+  @@index([sealId])
+  @@map("startup_seals")
+}
+
+// ==========================================
+// 9. OPINIÃO DE STARTUPS (Reviews/Avaliações)
+// ==========================================
+
+model StartupOpinion {
+  id        Int     @id @default(autoincrement())
+  startupId Int
+  startup   Startup @relation(fields: [startupId], references: [id], onDelete: Cascade)
+
+  // Conteúdo da opinião
+  mensagem String
+  autor    String
+  cargos   Json? // Array de cargos do autor ex: ["CEO", "Founder"]
+
+  // Redes sociais do autor
+  youtube   String?
+  site      String?
+  linkedin  String?
+  instagram String?
+  facebook  String?
+
+  // Metadados
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([startupId])
+  @@map("startup_opinions")
+}
+
+// ==========================================
+// 10. DEPOIMENTOS (Testemunhos de usuários)
+// ==========================================
+
+model Depoimento {
+  id Int @id @default(autoincrement())
+
+  // Conteúdo do depoimento
+  mensagem String
+  autor    String
+  cargos   Json? // Array de cargos do autor ex: ["CEO", "Investidor"]
+
+  // Redes sociais do autor
+  youtube   String?
+  site      String?
+  linkedin  String?
+  instagram String?
+  facebook  String?
+
+  // Metadados
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("depoimentos")
+}
+
+// ==========================================
+// 11. CURATED PICKS (Curadoria iSelfToken)
+// ==========================================
+
+model CuratedPick {
+  id Int @id @default(autoincrement())
+
+  startupId Int
+  startup   Startup @relation(fields: [startupId], references: [id], onDelete: Cascade)
+
+  // Conteudo editorial
+  quote         String
+  curatorName   String
+  curatorRole   String
+  curatorAvatar String
+
+  // Estado de publicacao
+  active      Boolean  @default(true)
+  publishedAt DateTime @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([active, publishedAt])
+  @@map("curated_picks")
+}
+
+// ==========================================
+// 12. PKI — Certificate Authority Interna
+// ==========================================
+// Modelo para persistir CAs internas (Root + Intermediate) do termo de adesao digital.
+// As chaves privadas sao armazenadas no HashiCorp Vault (ou stub in-memory em dev).
+// As chaves privadas JAMAIS devem ser armazenadas em plaintext no banco de dados.
+
+model CertificateAuthority {
+  id String @id @default(cuid())
+
+  // Tipo da CA: Root (auto-assinada) ou Intermediate (assinada pela Root)
+  type String // 'root' | 'intermediate'
+
+  // Hierarquia: Intermediate CA aponta para a Root CA
+  parentCaId String?                @map("parent_ca_id")
+  parentCa   CertificateAuthority?  @relation("CaHierarchy", fields: [parentCaId], references: [id])
+  children   CertificateAuthority[] @relation("CaHierarchy")
+
+  // Certificados digitais emitidos por esta CA
+  issuedCertificates DigitalCertificate[]
+
+  // Certificado X.509 em formato PEM
+  certificatePem String @map("certificate_pem")
+
+  // Referencia para a chave privada no Vault (path, NAO o conteudo da chave)
+  // Ex: iselftoken/pki/root/private ou iselftoken/pki/intermediate/private
+  privateKeyRef String @map("private_key_ref")
+
+  // Validade do certificado
+  issuedAt  DateTime @default(now()) @map("issued_at")
+  expiresAt DateTime @map("expires_at")
+
+  // Status: active (valido) ou revoked (revogado)
+  status String @default("active") // 'active' | 'revoked'
+
+  // Dados do certificado para consulta rapida
+  commonName   String @map("common_name")
+  organization String @default("Iselftoken")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([type, status])
+  @@index([commonName])
+  @@map("certificate_authority")
+}
+
+// ==========================================
+// 13. PKI — Digital Certificates (Termo de Adesao)
+// ==========================================
+// Modelo para certificados digitais emitidos pela Intermediate CA.
+// Cada certificado pertence a um owner (founder ou startup) e eh usado
+// para assinar digitalmente o Termo de Adesao.
+
+model DigitalCertificate {
+  id String @id @default(cuid())
+
+  // CA emissora (Intermediate CA)
+  issuerCaId String
+  issuerCa   CertificateAuthority @relation(fields: [issuerCaId], references: [id])
+
+  // Dono do certificado
+  ownerType String // 'founder' | 'startup'
+  ownerId   String // ID do founder (user.id) ou startup (startup.id)
+
+  // Dados do certificado
+  serialNumber         String @unique // Serial number unico do certificado
+  certificatePem       String // Certificado X.509 em formato PEM
+  privateKeyRef        String // Referencia ao path da chave privada no KeyStorageService
+  publicKeyFingerprint String // SHA-256 da chave publica (DER encoded, hex)
+
+  // Validade
+  issuedAt  DateTime @default(now())
+  expiresAt DateTime
+
+  // Status: active (valido), revoked (revogado), expired (expirado)
+  status String @default("active") // 'active' | 'revoked' | 'expired'
+
+  // Revogacao
+  revokedAt        DateTime?
+  revocationReason String?
+
+  // Assinaturas que usam este certificado (founder)
+  founderSignedDocuments SignedDocument[] @relation("FounderSignedCert")
+  // Assinaturas que usam este certificado (startup)
+  startupSignedDocuments SignedDocument[] @relation("StartupSignedCert")
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerType, ownerId, status])
+  @@index([expiresAt, status])
+  @@map("digital_certificate")
+}
+
+// ==========================================
+// 14. TERMO DE ADESAO — Documentos Assinados (M6-S18)
+// ==========================================
+// Modelo para persistir documentos assinados digitalmente (Termo de Adesao).
+// Cada documento tem 2 assinaturas PAdES (founder + startup).
+// Ref: S18.4-termo-adesao
+
+model SignedDocument {
+  id                     String              @id @default(cuid())
+  startupId              Int
+  startup                Startup             @relation(fields: [startupId], references: [id])
+  founderId              Int // user.id que aceitou
+  type                   String // 'termo_adesao'
+  templateVersion        String // '1.0.0'
+  fileKey                String // S3 key do PDF
+  documentHash           String // SHA-256 do PDF final (apos assinatura)
+  signatureFounderCertId String
+  signatureFounderCert   DigitalCertificate  @relation("FounderSignedCert", fields: [signatureFounderCertId], references: [id])
+  signatureFounderAt     DateTime            @default(now())
+  signatureStartupCertId String
+  signatureStartupCert   DigitalCertificate  @relation("StartupSignedCert", fields: [signatureStartupCertId], references: [id])
+  signatureStartupAt     DateTime            @default(now())
+  createdAt              DateTime            @default(now())
+  audits                 SignatureAuditLog[]
+
+  @@unique([startupId, type, founderId]) // idempotente: 1 termo por startup+founder
+  @@index([startupId])
+  @@map("signed_document")
+}
+
+model SignatureAuditLog {
+  id               String          @id @default(cuid())
+  signedDocumentId String?
+  signedDocument   SignedDocument? @relation(fields: [signedDocumentId], references: [id])
+  actorType        String // 'founder' | 'startup' | 'system'
+  action           String // 'aceite_checkbox' | 'certificado_emitido' | 'documento_assinado' | 'documento_visualizado' | 'documento_verificado_publico'
+  ipAddress        String?
+  userAgent        String?
+  createdAt        DateTime        @default(now())
+
+  @@index([signedDocumentId])
+  @@index([action, createdAt])
+  @@map("signature_audit_log")
+}
+
+// ==========================================
+// 15. AUDITORIA — HARD DELETE de Startups (Compliance M6-S17)
+// ==========================================
+// Log imutavel (append-only) de exclusao HARD de startups pelo role compliance.
+// Snapshot completo do registro + hash SHA-256 antes do delete em cascata.
+// Retido por 7 anos (LGPD + obrigacao contabilidade brasil).
+// Ref: S17-compliance-delete
+
+model StartupDeleteAuditLog {
+  id String @id @default(cuid())
+
+  // ID da startup que foi excluida
+  startupId String @map("startup_id")
+
+  // Snapshots JSON (stringified) antes do delete
+  startupSnapshot     String  @map("startup_snapshot") // Registro completo da startup
+  rodadaSnapshot      String? @map("rodada_snapshot") // JSON da rodada ativa (se houver)
+  investmentsSnapshot String? @map("investments_snapshot") // JSON de investments ativos
+  paymentsSnapshot    String? @map("payments_snapshot") // JSON de payments
+  documentsSnapshot   String? @map("documents_snapshot") // JSON de StartupDocument
+  signedDocsSnapshot  String? @map("signed_docs_snapshot") // JSON de SignedDocument (S18) — protegidos
+
+  // Metadados da exclusao
+  deletedByUserId String   @map("deleted_by_user_id") // User ID do compliance que executou
+  deletedByRole   String   @map("deleted_by_role") // Role: 'COMPLIANCE' no M6
+  deletedAt       DateTime @default(now()) @map("deleted_at")
+  ipAddress       String?  @map("ip_address") // IP do request
+  userAgent       String?  @map("user_agent") // User-Agent do browser
+  reason          String? // Motivo opcional informado pelo compliance
+
+  // Retencao: 7 anos (LGPD + contabilidade)
+  retentionUntil DateTime @map("retention_until")
+
+  // Timestamps (sem updatedAt — log imutavel)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([startupId])
+  @@index([deletedByUserId])
+  @@index([deletedAt])
+  @@map("startup_delete_audit_log")
+}
+
+// ==========================================
+// 16. SOLICITAÇÃO DE ALTERAÇÃO DE DADOS BLOQUEADOS (B13)
+// ==========================================
+// Após rodada de investimento, dados como CNPJ, Razão Social e País ficam
+// bloqueados (B07). Este modelo permite ao founder solicitar alterações que
+// são revisadas pela equipe de compliance.
+
+enum DataChangeField {
+  CNPJ
+  RAZAO_SOCIAL
+  PAIS
+}
+
+enum DataChangeStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model DataChangeRequest {
+  id                Int              @id @default(autoincrement())
+  startupId         Int
+  startup           Startup          @relation(fields: [startupId], references: [id])
+  requestedByUserId Int
+  requestedBy       User             @relation("DataChangeRequestRequester", fields: [requestedByUserId], references: [id])
+  field             DataChangeField
+  currentValue      String
+  requestedValue    String
+  status            DataChangeStatus @default(PENDING)
+  reviewedByUserId  Int?
+  reviewedBy        User?            @relation("DataChangeRequestReviewer", fields: [reviewedByUserId], references: [id])
+  reviewNote        String?
+  reviewedAt        DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  @@index([startupId])
+  @@index([status])
+  @@map("data_change_requests")
+}
+
+// ==========================================
+// 16.5 EMAIL TEMPLATES (FIN-05)
+// ==========================================
+
+enum EmailTemplateStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model EmailTemplate {
+  id               String  @id @default(cuid())
+  slug             String  @unique
+  name             String
+  description      String?
+  isActive         Boolean @default(true)
+  currentVersionId String? @unique
+
+  currentVersion EmailTemplateVersion?  @relation("CurrentVersion", fields: [currentVersionId], references: [id], onDelete: SetNull)
+  versions       EmailTemplateVersion[] @relation("TemplateVersions")
+
+  createdByUserId Int
+  createdBy       User @relation("EmailTemplateCreator", fields: [createdByUserId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([isActive])
+}
+
+model EmailTemplateVersion {
+  id         String        @id @default(cuid())
+  templateId String
+  template   EmailTemplate @relation("TemplateVersions", fields: [templateId], references: [id], onDelete: Cascade)
+
+  version         Int
+  subject         String
+  htmlTemplate    String
+  textTemplate    String
+  variablesSchema Json
+  status          EmailTemplateStatus @default(DRAFT)
+  changeNote      String?
+
+  createdByUserId Int
+  createdBy       User     @relation("VersionCreator", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  createdAt       DateTime @default(now())
+
+  publishedAt       DateTime?
+  publishedByUserId Int?
+  publishedBy       User?     @relation("VersionPublisher", fields: [publishedByUserId], references: [id], onDelete: SetNull)
+
+  currentFor EmailTemplate? @relation("CurrentVersion")
+
+  @@unique([templateId, version])
+  @@index([templateId, status])
+  @@index([status])
+}
+
+// ==========================================
+// 17. B12 — REPASSE DE FUNDOS
+// ==========================================
+// Notas fiscais e transferências parceladas para repasse de
+// fundos arrecadados em campanhas de equity crowdfunding.
+
+enum NotaFiscalStatus {
+  PENDING
+  ISSUED
+  CANCELED
+}
+
+enum FundTransferStatus {
+  AWAITING_REQUEST
+  REQUESTED
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REJECTED
+}
+
+enum RepasseStatus {
+  CONFIGURED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+/// Nota fiscal emitida pela startup para repasse de fundos.
+/// Cada NF representa o valor total a ser repassado e agrupa
+/// as parcelas de transferência (FundTransfer).
+model NotaFiscal {
+  id        Int              @id @default(autoincrement())
+  startupId Int
+  startup   Startup          @relation(fields: [startupId], references: [id])
+  number    String           @unique // NF number sequencial (ex: "NF-2026-000001")
+  amount    Decimal
+  issuedAt  DateTime         @default(now())
+  status    NotaFiscalStatus @default(PENDING)
+  xmlUrl    String? // S3 presigned URL do XML da NF
+
+  fundTransfers FundTransfer[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([startupId])
+  @@index([status])
+  @@map("nota_fiscais")
+}
+
+/// Transferência parcelada de fundos para a startup.
+/// O repasse é dividido em N parcelas configuráveis pelo financeiro (default 12).
+/// Cada parcela passa pelo fluxo: AWAITING_REQUEST → REQUESTED → PROCESSING → COMPLETED.
+model FundTransfer {
+  id                Int                @id @default(autoincrement())
+  startupId         Int
+  startup           Startup            @relation(fields: [startupId], references: [id])
+  notaFiscalId      Int
+  notaFiscal        NotaFiscal         @relation(fields: [notaFiscalId], references: [id])
+  installmentNumber Int // 1..N (conforme configurado pelo financeiro)
+  amount            Decimal
+  scheduledDate     DateTime? // Preenchido quando financeiro aprova (null enquanto AWAITING_REQUEST)
+  status            FundTransferStatus @default(AWAITING_REQUEST)
+  paidAt            DateTime?
+  txIdBancario      String? // ID da transação no gateway C6
+
+  // Alocação de recursos preenchida pelo fundador na solicitação
+  allocation      Json? // { marketing, desenvolvimento, infraestrutura, pessoal, juridico, operacional, reservaCaixa }
+  observacao      String? // Justificativa livre do fundador
+  rejectionReason String? // Motivo da rejeição pelo financeiro
+
+  requestedAt DateTime? // Quando o fundador solicitou
+  approvedAt  DateTime? // Quando o financeiro aprovou
+  approvedBy  Int? // ID do admin que aprovou/rejeitou
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([notaFiscalId, installmentNumber]) // Uma parcela por número por NF
+  @@index([startupId])
+  @@index([status])
+  @@index([scheduledDate])
+  @@map("fund_transfers")
+}
+
+// ==========================================
+// FIN-09: REPASSE, PARCELA, SOLICITACAO
+// ==========================================
+
+/// Plano de repasse de uma campanha FUNDED. Compliance delibera a QUANTIDADE
+/// de parcelas, Financeiro configura o VALOR FIXO por parcela + INTERVALO.
+/// 1 Repasse por Campaign (campaignId UNIQUE).
+model Repasse {
+  id         Int      @id @default(autoincrement())
+  campaignId Int      @unique
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  // Compliance delibera
+  numeroParcelas             Int       @default(12)
+  complianceApprovedAt       DateTime?
+  complianceApprovedByUserId Int?
+  complianceApprovedBy       User?     @relation("ComplianceRepasseApprover", fields: [complianceApprovedByUserId], references: [id])
+  complianceObservacao       String?
+
+  // Financeiro configura
+  valorParcela                 Decimal   @default(0)
+  valorUltimaParcela           Decimal?
+  intervaloDias                Int       @default(30)
+  /// Intervalo entre a data de configuracao e a PRIMEIRA parcela.
+  /// Permite um ramp-up (ex.: "primeira em 7 dias, demais a cada 30")
+  /// quando a campanha acabou de ser finalizada. Nullable para preservar
+  /// repasses legados — quando null, fallback = `intervaloDias`.
+  primeiraParcelaDias          Int?
+  valorTotalCaptacao           Decimal   @default(0)
+  financeiroConfiguredAt       DateTime?
+  financeiroConfiguredByUserId Int?
+  financeiroConfiguredBy       User?     @relation("FinanceiroRepasseConfigurer", fields: [financeiroConfiguredByUserId], references: [id])
+
+  status          RepasseStatus @default(CONFIGURED)
+  cancelledAt     DateTime?
+  cancelledMotivo String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  installments Installment[]
+
+  @@index([campaignId])
+  @@index([status])
+  @@map("repasses")
+}
+
+/// Parcela individual de um Repasse. Status inicial AWAITING_REQUEST
+/// (herda do enum FundTransferStatus ja existente — reuso).
+model Installment {
+  id        Int     @id @default(autoincrement())
+  repasseId Int
+  repasse   Repasse @relation(fields: [repasseId], references: [id], onDelete: Cascade)
+
+  numero        Int       @default(1)
+  valor         Decimal
+  scheduledDate DateTime?
+  paidAt        DateTime?
+
+  // PRD_RECEBIMENTO §9 / admin-payout §4.3 — comprovante anexado pelo
+  // Financeiro/Admin ao marcar a parcela como paga; exibido na transparência.
+  comprovanteUrl String?
+  // Identificador genérico da transação de pagamento da parcela (TED/PIX).
+  // Distinto de InstallmentRequest.txidC6 (específico da integração EFI).
+  txId           String?
+
+  // Reusa enum FundTransferStatus: AWAITING_REQUEST | REQUESTED | PENDING |
+  // PROCESSING | COMPLETED | FAILED | REJECTED
+  status FundTransferStatus @default(AWAITING_REQUEST)
+
+  request InstallmentRequest?
+
+  @@unique([repasseId, numero])
+  @@index([repasseId])
+  @@index([status])
+  @@map("installments")
+}
+
+/// Solicitacao do fundador para receber uma parcela. Criada no `request`,
+/// incrementando `attemptNumber` em resubmissoes. UNIQUE(installmentId)
+/// para garantir 1 solicitacao ativa por parcela (reabrir = atualizar).
+model InstallmentRequest {
+  id            Int         @id @default(autoincrement())
+  installmentId Int         @unique
+  installment   Installment @relation(fields: [installmentId], references: [id], onDelete: Cascade)
+
+  startupId Int
+  startup   Startup @relation(fields: [startupId], references: [id])
+
+  founderUserId Int
+  founder       User @relation("InstallmentRequestFounder", fields: [founderUserId], references: [id])
+
+  // Alocacao por % (campos nominais). SOMA deve dar 100% (validado no DTO).
+  allocationPercents Json
+  // Preenchido na aprovacao — convertido em R$ a partir de valorParcela × percent/100.
+  allocationValues   Json?
+  observacao         String?
+
+  // Snapshot dos dados bancarios no momento da criacao.
+  bankInfoSnapshot Json
+
+  valorSolicitado Decimal
+
+  // === Relatório do mês (obrigatório para solicitar) — PRD_RECEBIMENTO §8.2 ===
+  // Publicado no relatório mensal da página de transparência ao salvar.
+  // Nullable para preservar solicitações antigas criadas antes desta migração.
+  usoRecurso             String? // Para onde o recurso será utilizado (alinhado à alocação 3A)
+  teveLucro              Boolean? // A startup teve lucro neste período?
+  marcoAlcancado         Boolean? // Alcançou algum marco/desenvolvimento?
+  marcoDescricao         String? // Detalhe do marco (quando marcoAlcancado = true)
+  mensagemInvestidores   String? // "Mensagem do mês" exibida na transparência
+  publicadoTransparencia Boolean  @default(false) // Relatório já publicado na transparência
+
+  // Status: AWAITING_SUBMISSION | REQUESTED | APPROVED | PROCESSING | COMPLETED | REJECTED
+  status            String   @default("REQUESTED")
+  submittedAt       DateTime @default(now())
+  tsLimitePagamento DateTime
+
+  attemptNumber Int @default(1)
+
+  approvedAt           DateTime?
+  approvedByUserId     Int?
+  approvedBy           User?     @relation("InstallmentRequestApprover", fields: [approvedByUserId], references: [id])
+  valorOverride        Decimal?
+  observacaoFinanceiro String?
+
+  rejectedAt       DateTime?
+  rejectedByUserId Int?
+  rejectedBy       User?     @relation("InstallmentRequestRejecter", fields: [rejectedByUserId], references: [id])
+  rejectionReason  String?
+
+  completedAt DateTime?
+  txidC6      String?
+  endToEndId  String?
+
+  updatedAt DateTime @updatedAt
+
+  @@index([installmentId])
+  @@index([founderUserId])
+  @@index([startupId])
+  @@index([status])
+  @@index([tsLimitePagamento])
+  @@map("installment_requests")
+}
+
+// ==========================================
+// 18. RESERVA DE TOKENS (Previne Oversell)
+// ==========================================
+
+/// Reserva que segura tokens de uma campanha enquanto o investidor conclui o
+/// pagamento. Ciclo: RESERVED -> CONFIRMED (pago; tokens emitidos) ou
+/// RESERVED -> DISCARDED (expirado/cancelado; estoque liberado).
+/// A disponibilidade da campanha = totalTokens - tokensSold - reservas RESERVED.
+model TokenReservation {
+  id String @id @default(uuid())
+
+  campaignId Int
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  userId Int
+  user   User @relation("UserTokenReservations", fields: [userId], references: [id])
+
+  quantity Int
+
+  status TokenReservationStatus @default(RESERVED)
+
+  /// Investimento que originou a reserva (1:1). Nullable para reservas futuras
+  /// que não venham de um investimento.
+  investmentId Int?        @unique
+  investment   Investment? @relation(fields: [investmentId], references: [id], onDelete: SetNull)
+
+  expiresAt     DateTime
+  confirmedAt   DateTime?
+  discardedAt   DateTime?
+  discardReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([campaignId, status])
+  @@index([userId])
+  @@index([status, expiresAt])
+  @@map("token_reservations")
+}
+
+enum TokenReservationStatus {
+  RESERVED
+  CONFIRMED
+  DISCARDED
+}
+
+// ==========================================
+// 19. PROGRAMA DE AFILIADOS
+// ==========================================
+// Funil em tres etapas:
+//   1. Startup adere ao programa           -> aprovado pela admin iSelfToken
+//   2. Usuario se candidata a afiliado      -> triado pelo fundador da startup
+//   3. Admin da o aval final                -> prepara tokens e link de compra
+// Sobre cada investimento atribuido a um afiliado a startup paga DUAS
+// comissoes (ao afiliado e a iSelfToken), ambas descontadas do repasse.
+
+/// Adesao de uma startup ao programa de afiliados (1:1 com Startup).
+/// Os percentuais sao congelados aqui na aprovacao; os defaults vem de
+/// FinanceConfig (`affiliate.defaultAffiliatePct` / `affiliate.defaultPlatformPct`).
+model AffiliateProgram {
+  id        Int     @id @default(autoincrement())
+  startupId Int     @unique
+  startup   Startup @relation(fields: [startupId], references: [id], onDelete: Cascade)
+
+  status AffiliateProgramStatus @default(PENDING)
+
+  /// Percentual pago ao afiliado sobre o valor do investimento atribuido.
+  affiliateCommissionPct Decimal
+  /// Percentual pago a iSelfToken sobre o mesmo valor.
+  platformCommissionPct  Decimal
+
+  /// Teto opcional de afiliados ativos simultaneos (null = sem limite).
+  maxAffiliates Int?
+
+  requestedAt    DateTime  @default(now())
+  requestedBy    Int // founder User id
+  decidedAt      DateTime?
+  decidedBy      Int? // admin User id
+  decisionReason String?
+
+  affiliations Affiliation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@map("affiliate_programs")
+}
+
+enum AffiliateProgramStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+/// Vinculo de um usuario como afiliado de uma startup.
+/// Percorre PENDING_FOUNDER -> PENDING_ADMIN -> ACTIVE.
+model Affiliation {
+  id        Int              @id @default(autoincrement())
+  programId Int
+  program   AffiliateProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  userId Int
+  user   User @relation("UserAffiliations", fields: [userId], references: [id])
+
+  status AffiliationStatus @default(PENDING_FOUNDER)
+
+  /// Codigo de indicacao: usado no link (/affiliate/track/:code) e como
+  /// override digitado no checkout.
+  code String @unique
+
+  /// Alocado pelo fundador na etapa 2 (triagem); preservado na ativacao.
+  tokensAllocated Int?
+  purchaseLinkUrl String?
+
+  appliedAt        DateTime  @default(now())
+  founderDecidedAt DateTime?
+  founderDecidedBy Int?
+  adminDecidedAt   DateTime?
+  adminDecidedBy   Int?
+  rejectionReason  String?
+
+  referrals   AffiliateReferral[]
+  commissions AffiliateCommission[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([programId, userId])
+  @@index([status])
+  @@index([userId])
+  @@map("affiliations")
+}
+
+enum AffiliationStatus {
+  PENDING_FOUNDER
+  PENDING_ADMIN
+  ACTIVE
+  REJECTED
+  SUSPENDED
+}
+
+/// Investidor capturado por um afiliado. O vinculo por LINK e persistente;
+/// CHECKOUT_CODE registra atribuicao explicita no momento de investir.
+model AffiliateReferral {
+  id            Int         @id @default(autoincrement())
+  affiliationId Int
+  affiliation   Affiliation @relation(fields: [affiliationId], references: [id], onDelete: Cascade)
+
+  investorId Int
+  investor   User @relation("InvestorReferrals", fields: [investorId], references: [id])
+
+  source AffiliateReferralSource @default(LINK)
+
+  createdAt DateTime @default(now())
+
+  @@unique([affiliationId, investorId])
+  @@index([investorId])
+  @@map("affiliate_referrals")
+}
+
+enum AffiliateReferralSource {
+  LINK
+  CHECKOUT_CODE
+}
+
+/// Comissao devida por um investimento confirmado. Percentuais e valores sao
+/// congelados na criacao para que mudanca posterior no programa nao altere
+/// comissao ja apurada. Um investimento gera no maximo uma comissao.
+model AffiliateCommission {
+  id            Int         @id @default(autoincrement())
+  affiliationId Int
+  affiliation   Affiliation @relation(fields: [affiliationId], references: [id])
+
+  investmentId Int        @unique
+  investment   Investment @relation(fields: [investmentId], references: [id])
+
+  /// Valor do investimento que serviu de base para o calculo.
+  baseAmount Decimal
+
+  affiliatePct    Decimal
+  affiliateAmount Decimal
+  platformPct     Decimal
+  platformAmount  Decimal
+
+  status AffiliateCommissionStatus @default(PENDING)
+
+  /// Lancamento na carteira do afiliado quando a comissao e paga.
+  walletTransactionId Int?
+
+  attributedBy AffiliateReferralSource
+
+  paidAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([affiliationId])
+  @@index([status])
+  @@map("affiliate_commissions")
+}
+
+enum AffiliateCommissionStatus {
+  PENDING
+  PAYABLE
+  PAID
+  CANCELED
+}
+
+// ==========================================
+// 20. ORDEM DE EMISSÃO DE TOKENS (TokenIssuanceOrder)
+// ==========================================
+// Modelo para rastrear a ordem de emissão de tokens de uma campanha.
+// Criada quando o Compliance aprova a startup + pagamento confirmado.
+// Worker processa via SELECT ... FOR UPDATE SKIP LOCKED.
+// Garante idempotência e auditabilidade da emissão.
+
+enum TokenIssuanceOrderStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model TokenIssuanceOrder {
+  id String @id @default(uuid())
+
+  campaignId Int
+  campaign   Campaign @relation(fields: [campaignId], references: [id])
+
+  /// Quantidade total de tokens a serem emitidos nesta ordem
+  quantity Int
+
+  /// Status da ordem: PENDING -> PROCESSING -> COMPLETED / FAILED
+  status TokenIssuanceOrderStatus @default(PENDING)
+
+  /// ID do operador de compliance que aprovou (gatilho da criação)
+  approvedByUserId Int?
+
+  /// Tentativas de processamento (para retry com backoff)
+  attempts Int @default(0)
+
+  /// Última mensagem de erro (se FAILED)
+  lastError String?
+
+  /// Timestamp de início de processamento (lock)
+  processingStartedAt DateTime?
+
+  /// Timestamp de conclusão (COMPLETED ou FAILED)
+  completedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([campaignId])
+  @@map("token_issuance_orders")
+}
+
+/// Post de transparencia publicado pelo founder para investidores.
+/// Acessivel apenas para usuarios com Token ativo da startup (gating via TokenGateGuard).
+/// Referencia: scripts/PRD_PAGINA_TRANSPARENCIA.md
+model TransparencyPost {
+  id Int @id @default(autoincrement())
+
+  startupId Int
+  startup   Startup @relation(fields: [startupId], references: [id])
+
+  /// Autor do post (founder da startup ou ADMIN).
+  /// Validado no service: authorId === req.user.id (founder da startup) OU ADMIN.
+  authorId Int
+  author   User @relation("TransparencyPostAuthor", fields: [authorId], references: [id])
+
+  /// Tipo do post - usado para filtros no feed.
+  type TransparencyPostType @default(GENERAL)
+
+  /// Titulo do post (exibido no card e detalhe).
+  title String
+
+  /// Conteudo em markdown (renderizado no client via react-markdown com rehype-sanitize).
+  /// Whitelist conservadora: sem HTML cru, sem scripts, sem iframes (XSS prevention).
+  content String
+
+  /// Periodo de referencia do post (nullable para posts sem periodo, ex: "Marcos do produto").
+  periodMonth Int?
+  periodYear  Int?
+
+  /// Soft delete para preservar historico de auditoria.
+  publishedAt DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  /// Origem do post (rastreabilidade / idempotencia).
+  /// - INSTALLMENT_REQUEST: auto-gerado por FIN-10 ao aprovar/concluir uma InstallmentRequest.
+  ///   `sourceId` armazena o InstallmentRequest.id (convertido para String).
+  /// - DISCUSSION: auto-gerado por TRANSP-03 (featured report mensal).
+  ///   `sourceId` armazena o TransparencyDiscussion.id (UUID/string).
+  /// O par (sourceType, sourceId) e UNIQUE: garante idempotencia de auto-posts.
+  sourceType String?
+  sourceId   String?
+
+  /// Anexos do post (PDFs, planilhas, imagens) via modulo uploads.
+  attachments TransparencyPostAttachment[]
+
+  @@unique([sourceType, sourceId])
+  @@index([startupId, publishedAt(sort: Desc)])
+  @@index([startupId, type])
+  @@index([startupId, periodYear, periodMonth])
+  @@index([sourceType, sourceId])
+}
+
+/// Join table N:N entre TransparencyPost e Upload (anexos).
+/// Cascade delete: ao deletar um post, remove os vinculos (uploads permanecem como orfaos para o cleanup job).
+model TransparencyPostAttachment {
+  postId   Int
+  post     TransparencyPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  uploadId Int
+  upload   Upload           @relation(fields: [uploadId], references: [id])
+
+  @@id([postId, uploadId])
+  @@index([uploadId])
+  @@map("transparency_post_attachments")
+}
+
+// ==========================================
+// TRANSP-03 / TRANSP-05 — Discussao + Relatorio Vigente
+// ==========================================
+
+/// Taxonomia de categoria das threads de Discussao da area de Transparencia.
+/// DEFAULT GERAL garante retrocompatibilidade com threads existentes.
+enum DiscussionCategory {
+  GERAL
+  FINANCEIRO
+  PRODUTO
+  SOCIETARIO
+  DUVIDA
+
+  @@map("discussion_category")
+}
+
+/// Thread de Discussao aberta por um token-holder (ou founder) dentro da
+/// area de Transparencia de uma startup. Suporta taxonomia, anonimato opt-in,
+/// upvotes (1 por user/thread via DiscussionUpvote UNIQUE) e pin exclusivo
+/// por startup (garantido por transacao no discussions.service.ts).
+///
+/// LGPD: respostas NUNCA devem incluir `User.cpf`, `User.email` ou
+/// `User.phone` — authorPublicId eh derivado no service atraves de
+/// `buildAuthorPublicId()` para preservar privacidade do opt-in anonymous.
+///
+/// Referencia: CASE.md §[Transparencia] - Discussao e Relatorio Vigente
+///             todo/todo.json -> TRANSP-03 / TRANSP-05.
+model TransparencyDiscussion {
+  id String @id @default(uuid())
+
+  startupId Int
+  startup   Startup @relation("StartupDiscussions", fields: [startupId], references: [id], onDelete: Cascade)
+
+  /// Autor da thread. User.id eh publico na camada de auth mas NUNCA exposto
+  /// em DTOs de resposta; usamos apenas firstName/lastName/fullName via
+  /// `buildAuthorPublicId()`.
+  authorId Int
+  author   User @relation("AuthorDiscussions", fields: [authorId], references: [id])
+
+  title   String
+  content String
+
+  /// Taxonomia da discussao. Default GERAL permite criacao sem fornecer.
+  category DiscussionCategory @default(GERAL)
+
+  /// Opt-in de anonimato. Quando true, exibicao usa "PrimeiroNome U.".
+  isAnonymous Boolean @default(false)
+
+  /// Contador denormalizado para ordenacao "top". Atualizado atomicamente pelo
+  /// service em `toggleUpvote()` dentro de transacao.
+  upvotesCount Int @default(0)
+
+  /// Flag de fixacao. No maximo 1 thread fixada por startup (constraint
+  /// aplicada na logica de `pin()` via transaction).
+  isPinned       Boolean   @default(false)
+  pinnedAt       DateTime?
+  pinnedByUserId Int?
+  pinnedBy       User?     @relation("PinnedByUser", fields: [pinnedByUserId], references: [id])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  /// Soft delete para auditoria.
+  deletedAt DateTime?
+
+  replies TransparencyReply[]
+  upvotes DiscussionUpvote[]
+
+  @@index([startupId])
+  @@index([authorId])
+  @@index([startupId, isPinned])
+  @@index([startupId, createdAt])
+  @@index([startupId, upvotesCount])
+  @@map("transparency_discussions")
+}
+
+/// Resposta (reply) dentro de uma thread de Discussao. Soft delete para
+/// preservar historico. Atualiza implicitamente `lastActivityAt` da thread
+/// (campo derivado na query via MAX(replies.createdAt) ou updatedAt da thread).
+model TransparencyReply {
+  id String @id @default(uuid())
+
+  discussionId String
+  discussion   TransparencyDiscussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+
+  authorId Int
+  author   User @relation("AuthorReplies", fields: [authorId], references: [id])
+
+  content String
+
+  createdAt DateTime  @default(now())
+  /// Soft delete para auditoria.
+  deletedAt DateTime?
+
+  @@index([discussionId])
+  @@index([authorId])
+  @@map("transparency_replies")
+}
+
+/// Upvote de um user em uma thread. UNIQUE(discussionId, userId) garante
+/// idempotencia do toggle: 1 voto por user por thread.
+///
+/// O contador denormalizado `TransparencyDiscussion.upvotesCount` eh a fonte
+/// de verdade para ordenacao "top"; este registro eh a fonte para
+/// `viewerHasUpvoted` (existencia = voto ativo).
+model DiscussionUpvote {
+  id String @id @default(uuid())
+
+  discussionId String
+  discussion   TransparencyDiscussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+
+  userId Int
+  user   User @relation("UpvoteUsers", fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  /// Garante idempotencia do toggle upvote: 1 voto por (thread, user).
+  @@unique([discussionId, userId])
+  @@index([discussionId])
+  @@index([userId])
+  @@map("discussion_upvotes")
+}
+
+// ==========================================
+// STARTUP DRAFT (Tabela temporária pré-pagamento)
+// ==========================================
+
+/// Armazena o payload completo de cadastro de startup ANTES do pagamento
+/// ser confirmado. Quando o Payment associado muda para PAID, o worker
+/// processa este draft e cria a Startup real + Campaign.
+///
+/// Fluxo:
+///   1. Founder preenche formulário → POST /startup/draft
+///   2. Backend cria Payment (TOKEN_RESERVATION) + salva payload aqui
+///   3. Founder paga (simulado ou C6 real)
+///   4. Webhook/worker detecta Payment PAID → busca draft por paymentId
+///   5. Cria Startup + Campaign com dados do payload → status PENDING
+///   6. Draft marcado como PROCESSED
+model StartupDraft {
+  id Int @id @default(autoincrement())
+
+  founderId Int
+  founder   User @relation("StartupDrafts", fields: [founderId], references: [id])
+
+  paymentId Int     @unique
+  payment   Payment @relation("StartupDraftPrimary", fields: [paymentId], references: [id])
+
+  /// Pagamento adicional (Fast Track Review) vinculado ao mesmo checkout
+  /// consolidado da reserva de tokens. Compartilha o mesmo txid EFI com o
+  /// `payment` (TOKEN_RESERVATION), mas existe como Payment independente
+  /// para que admin/compliance possam auditar a contratação do serviço
+  /// separadamente. `null` quando o founder NÃO contratou Fast Track.
+  fastTrackPaymentId Int?     @unique
+  fastTrackPayment   Payment? @relation("StartupDraftFastTrack", fields: [fastTrackPaymentId], references: [id])
+
+  /// Payload completo do formulário serializado em JSON.
+  /// Contém todos os campos que serão usados para criar a Startup + Campaign.
+  payload Json
+
+  status StartupDraftStatus @default(PENDING_PAYMENT)
+
+  /// S18.7 — PaymentOrder que consolidou a reserva + fast track neste draft.
+  /// Substitui progressivamente as relations `payment` / `fastTrackPayment`
+  /// acima. `null` para drafts pré-S18.7 (dual-read até cutover da Fase 6).
+  paymentOrder PaymentOrder? @relation("PaymentOrderStartupDraft")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum StartupDraftStatus {
+  PENDING_PAYMENT // Aguardando pagamento ser confirmado
+  PROCESSING // Worker está processando (lock)
+  PROCESSED // Startup criada com sucesso
+  FAILED // Falha no processamento (payload inválido, etc)
+}
+
+/// P2.11 — Notificações in-app persistidas (substitui Map em memória do
+/// NotificationsService). O backend era reiniciado em produção e perdia
+/// todas as notificações. Migration: 20260908000000_add_notification_table.
+model Notification {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  description String
+  // Enum Prisma — integridade reforcada em 2 camadas:
+  //  1. App-layer: NotificationType enum em TS (ver dto/query-notifications.dto.ts)
+  //  2. Banco: triggers SQL (migration 20261011000000_notification_type_constraint)
+  //     + CHECK constraint do Prisma (gerado a partir deste enum).
+  //
+  // IMPORTANTE: valores estao em snake_case (mesmo formato que o frontend ja
+  // consome e que o WS Gateway serializa). Ver migration
+  // 20261011010000_notification_type_enum.sql que faz o CAST para esses valores.
+  // Lista (22 valores — alinhar com enum TS):
+  //   kyc_approved, kyc_resubmission_requested,
+  //   investment_confirmed, token_purchased,
+  //   campaign_funded, campaign_deadline, campaign_closed,
+  //   startup_approved, startup_rejected, startup_phase_approved, phase_approved,
+  //   compliance_request, security, general,
+  //   user_approved, user_suspended,
+  //   plan_purchased, plan_added,
+  //   repasse_request, repasse_approved, repasse_rejected, repasse_paid
+  type        NotificationType @default(general)
+  isRead      Boolean           @default(false)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+}
+
+/// Enum do campo Notification.type (Sprint de Notificacoes — central 2026-10-04).
+/// Mesma lista que o `NotificationType` em `src/api/notifications/dto/`.
+/// Valores em snake_case (alinhados com o frontend + WS payload + trigger SQL).
+enum NotificationType {
+  kyc_approved
+  kyc_resubmission_requested
+  investment_confirmed
+  token_purchased
+  campaign_funded
+  campaign_deadline
+  campaign_closed
+  startup_approved
+  startup_rejected
+  startup_phase_approved
+  phase_approved
+  compliance_request
+  security
+  general
+  user_approved
+  user_suspended
+  plan_purchased
+  plan_added
+  repasse_request
+  repasse_approved
+  repasse_rejected
+  repasse_paid
+}
+
+// Alertas de novo login. Mantém apenas metadados minimizados e o estado do ciclo de vida.
+model LoginAlert {
+  id       Int    @id @default(autoincrement())
+  publicId String @unique @default(uuid())
+  userId   Int
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  eventKey                 String  @unique
+  fingerprint              String
+  trustedIp                String?
+  ipClass                  String
+  environment              String
+  proxyChainTrusted        Boolean @default(false)
+  deviceLabel              String?
+  deviceBrowser            String?
+  deviceOperatingSystem    String?
+  deviceType               String?
+  deviceHash               String?
+  locationSource           String
+  locationPrecision        String
+  locationCountry          String?
+  locationCity             String?
+  locationRegion           String?
+  locationLatitudeRounded  Float?
+  locationLongitudeRounded Float?
+  locationTimezone         String?
+  locationOrg              String?
+  locationHostname         String?
+  accuracyBucketMeters     Int?
+  reason                   String
+
+  deliveryStatus     String    @default("PENDING")
+  deliveryMessageId  String?
+  deliveryError      String?
+  actionStatus       String    @default("PENDING")
+  actionTokenJtiHash String?   @unique
+  actionExpiresAt    DateTime?
+  confirmedAt        DateTime?
+  dismissedAt        DateTime?
+  sessionsDeleted    Int       @default(0)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([userId, actionStatus])
+  @@index([deliveryStatus])
+}

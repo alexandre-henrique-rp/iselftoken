@@ -1,0 +1,183 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 800" width="1280" height="800" font-family="Manrope, sans-serif">
+  <defs>
+    <linearGradient id="bg-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1f031d"/>
+      <stop offset="100%" stop-color="#270524"/>
+    </linearGradient>
+    <linearGradient id="accent-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#d500f9"/>
+      <stop offset="100%" stop-color="#f084ff"/>
+    </linearGradient>
+    <linearGradient id="text-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#d500f9"/>
+      <stop offset="60%" stop-color="#ea6bff"/>
+      <stop offset="100%" stop-color="#f084ff"/>
+    </linearGradient>
+    <linearGradient id="orb-1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d500f9" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#d500f9" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="orb-2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ea6bff" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#ea6bff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="6" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1280" height="800" fill="url(#bg-grad)"/>
+
+  <!-- Watermark -->
+  <text x="640" y="430" text-anchor="middle" font-size="180" font-weight="800"
+    fill="rgba(213, 0, 249, 0.04)" transform="rotate(-15 640 400)" letter-spacing="-6">
+    iSelfToken
+  </text>
+
+  <!-- Decorative orbs -->
+  <circle cx="200" cy="120" r="120" fill="url(#orb-1)"/>
+  <circle cx="1080" cy="680" r="160" fill="url(#orb-2)"/>
+
+  <!-- Header sticky -->
+  <rect x="0" y="0" width="1280" height="72" fill="rgba(65, 19, 59, 0.55)"/>
+  <line x1="0" y1="72" x2="1280" y2="72" stroke="rgba(97, 59, 90, 0.3)" stroke-width="1"/>
+  <rect x="32" y="22" width="28" height="28" rx="7" fill="url(#accent-grad)" filter="url(#glow)"/>
+  <text x="76" y="42" fill="#ffdbf3" font-size="15" font-weight="800">iSelfToken</text>
+  <text x="76" y="56" fill="#cc9dc0" font-size="9" letter-spacing="2">PAINEL ADMINISTRATIVO</text>
+
+  <!-- Nav -->
+  <text x="430" y="44" fill="#cc9dc0" font-size="13">Dashboard</text>
+  <text x="510" y="44" fill="#cc9dc0" font-size="13">Startups</text>
+  <text x="580" y="44" fill="#cc9dc0" font-size="13">Pagamentos</text>
+  <rect x="650" y="30" width="80" height="24" rx="6" fill="#30092c"/>
+  <text x="690" y="46" text-anchor="middle" fill="#ffdbf3" font-size="13" font-weight="700">Cupons</text>
+  <circle cx="722" cy="32" r="3" fill="#d500f9" filter="url(#glow)"/>
+
+  <!-- Avatar -->
+  <rect x="1216" y="22" width="28" height="28" rx="7" fill="url(#accent-grad)"/>
+  <text x="1230" y="41" text-anchor="middle" fill="#ffdbf3" font-size="11" font-weight="700">MR</text>
+
+  <!-- Hero text -->
+  <text x="64" y="140" fill="#d500f9" font-size="10" font-weight="700" letter-spacing="3">MARKETING · PROMOÇÕES</text>
+  <text x="64" y="200" fill="url(#text-grad)" font-size="54" font-weight="800" letter-spacing="-2">Central de Cupons</text>
+  <text x="64" y="232" fill="#cc9dc0" font-size="14">Crie, gerencie e audite cupons de desconto para campanhas</text>
+  <text x="64" y="250" fill="#cc9dc0" font-size="14">de captação das startups parceiras.</text>
+
+  <!-- Hero buttons -->
+  <rect x="64" y="280" width="120" height="38" rx="9" fill="none" stroke="rgba(213, 0, 249, 0.45)" stroke-width="1"/>
+  <text x="124" y="303" text-anchor="middle" fill="#f084ff" font-size="12" font-weight="700">Exportar CSV</text>
+  <rect x="194" y="280" width="140" height="38" rx="9" fill="url(#accent-grad)" filter="url(#glow)"/>
+  <text x="264" y="303" text-anchor="middle" fill="white" font-size="12" font-weight="700">+ Novo Cupom</text>
+
+  <!-- Stats grid -->
+  <g transform="translate(64, 340)">
+    <rect width="270" height="86" rx="14" fill="rgba(48, 9, 44, 0.4)" stroke="rgba(213, 0, 249, 0.18)"/>
+    <text x="20" y="26" fill="#cc9dc0" font-size="9" letter-spacing="2">ATIVOS</text>
+    <text x="20" y="58" fill="#ffdbf3" font-size="26" font-weight="800">42</text>
+    <text x="20" y="76" fill="#34d399" font-size="10">+8 vs mês anterior</text>
+  </g>
+  <g transform="translate(354, 340)">
+    <rect width="270" height="86" rx="14" fill="rgba(48, 9, 44, 0.4)" stroke="rgba(213, 0, 249, 0.18)"/>
+    <text x="20" y="26" fill="#cc9dc0" font-size="9" letter-spacing="2">USOS TOTAIS</text>
+    <text x="20" y="58" fill="#ffdbf3" font-size="26" font-weight="800">1.847</text>
+    <text x="20" y="76" fill="#cc9dc0" font-size="10">últimos 30 dias</text>
+  </g>
+  <g transform="translate(644, 340)">
+    <rect width="270" height="86" rx="14" fill="rgba(48, 9, 44, 0.4)" stroke="rgba(213, 0, 249, 0.18)"/>
+    <text x="20" y="26" fill="#cc9dc0" font-size="9" letter-spacing="2">DESCONTO CONCEDIDO</text>
+    <text x="20" y="58" fill="#ffdbf3" font-size="26" font-weight="800">R$ 87,4k</text>
+    <text x="20" y="76" fill="#cc9dc0" font-size="10">capital poupado</text>
+  </g>
+  <g transform="translate(934, 340)">
+    <rect width="270" height="86" rx="14" fill="rgba(48, 9, 44, 0.4)" stroke="rgba(213, 0, 249, 0.18)"/>
+    <text x="20" y="26" fill="#cc9dc0" font-size="9" letter-spacing="2">EXPIRANDO EM 7D</text>
+    <text x="20" y="58" fill="#ffdbf3" font-size="26" font-weight="800">5</text>
+    <text x="20" y="76" fill="#fbbf24" font-size="10">requer atenção</text>
+  </g>
+
+  <!-- Two-column workspace -->
+  <!-- Gerador (left, 5/12) -->
+  <g transform="translate(64, 460)">
+    <rect width="510" height="320" rx="18" fill="rgba(65, 19, 59, 0.55)" stroke="rgba(213, 0, 249, 0.25)"/>
+    <text x="28" y="42" fill="#d500f9" font-size="22">⚙</text>
+    <text x="60" y="46" fill="#ffdbf3" font-size="20" font-weight="700">Gerador de Cupom</text>
+    <text x="28" y="76" fill="#cc9dc0" font-size="11">Configure e emita um código de desconto em segundos.</text>
+
+    <!-- Percentual -->
+    <text x="28" y="108" fill="#cc9dc0" font-size="9" letter-spacing="2">PERCENTUAL DE DESCONTO</text>
+    <rect x="28" y="116" width="454" height="42" rx="10" fill="rgba(48, 9, 44, 0.6)" stroke="rgba(147, 104, 137, 0.35)"/>
+    <text x="44" y="142" fill="#ffdbf3" font-size="14" font-weight="700">30% de desconto</text>
+    <text x="464" y="142" fill="#cc9dc0" font-size="14">▾</text>
+
+    <!-- Toggle -->
+    <text x="28" y="180" fill="#cc9dc0" font-size="9" letter-spacing="2">REGRA DE USO</text>
+    <rect x="28" y="188" width="454" height="50" rx="10" fill="#30092c"/>
+    <text x="50" y="210" fill="#d500f9" font-size="14">⚙</text>
+    <text x="76" y="212" fill="#ffdbf3" font-size="11" font-weight="700">Uso único</text>
+    <text x="76" y="226" fill="#cc9dc0" font-size="10">1 uso por usuário</text>
+    <rect x="420" y="202" width="48" height="22" rx="11" fill="#380e33"/>
+    <circle cx="430" cy="213" r="9" fill="#ffdbf3"/>
+
+    <!-- Submit -->
+    <rect x="28" y="252" width="454" height="48" rx="11" fill="url(#accent-grad)" filter="url(#glow)"/>
+    <text x="255" y="282" text-anchor="middle" fill="white" font-size="14" font-weight="700">⟳  Gerar Cupom</text>
+  </g>
+
+  <!-- Lista (right, 7/12) -->
+  <g transform="translate(594, 460)">
+    <!-- Coupon 1 -->
+    <rect width="622" height="74" rx="14" fill="rgba(48, 9, 44, 0.4)" stroke="rgba(213, 0, 249, 0.18)"/>
+    <rect x="0" y="0" width="4" height="74" rx="2" fill="#d500f9"/>
+    <rect x="20" y="14" width="80" height="46" rx="10" fill="rgba(48, 9, 44, 0.6)" stroke="rgba(213, 0, 249, 0.2)"/>
+    <text x="60" y="44" text-anchor="middle" fill="#d500f9" font-size="20" font-weight="900">50%</text>
+    <text x="60" y="56" text-anchor="middle" fill="#cc9dc0" font-size="7" letter-spacing="2">OFF</text>
+    <text x="120" y="30" fill="#ffdbf3" font-size="16" font-weight="700" font-family="JetBrains Mono">PROMO50</text>
+    <rect x="240" y="18" width="48" height="16" rx="8" fill="rgba(52, 211, 153, 0.14)"/>
+    <text x="264" y="30" text-anchor="middle" fill="#34d399" font-size="8" font-weight="700" letter-spacing="2">ATIVO</text>
+    <text x="120" y="50" fill="#cc9dc0" font-size="10">847/1000 usos · Expira 31/12/2026 · Múltiplo</text>
+    <rect x="120" y="58" width="200" height="4" rx="2" fill="#380e33"/>
+    <rect x="120" y="58" width="170" height="4" rx="2" fill="url(#accent-grad)"/>
+
+    <!-- Action icons -->
+    <circle cx="540" cy="37" r="14" fill="none" stroke="rgba(213, 0, 249, 0.45)"/>
+    <text x="540" y="42" text-anchor="middle" fill="#f084ff" font-size="11">⊕</text>
+    <circle cx="572" cy="37" r="14" fill="none" stroke="rgba(213, 0, 249, 0.45)"/>
+    <text x="572" y="42" text-anchor="middle" fill="#f084ff" font-size="11">✎</text>
+    <circle cx="604" cy="37" r="14" fill="rgba(255, 110, 132, 0.15)"/>
+    <text x="604" y="42" text-anchor="middle" fill="#ff6e84" font-size="11">⏻</text>
+  </g>
+
+  <g transform="translate(594, 550)">
+    <!-- Coupon 2: 100% founder -->
+    <rect width="622" height="74" rx="14" fill="rgba(48, 9, 44, 0.4)" stroke="rgba(213, 0, 249, 0.18)"/>
+    <rect x="0" y="0" width="4" height="74" rx="2" fill="#d500f9"/>
+    <rect x="20" y="14" width="80" height="46" rx="10" fill="rgba(48, 9, 44, 0.6)" stroke="rgba(213, 0, 249, 0.2)"/>
+    <text x="60" y="44" text-anchor="middle" fill="#d500f9" font-size="20" font-weight="900">100%</text>
+    <text x="60" y="56" text-anchor="middle" fill="#cc9dc0" font-size="7" letter-spacing="2">FREE</text>
+    <text x="120" y="30" fill="#ffdbf3" font-size="16" font-weight="700" font-family="JetBrains Mono">FOUNDER100</text>
+    <rect x="265" y="18" width="48" height="16" rx="8" fill="rgba(52, 211, 153, 0.14)"/>
+    <text x="289" y="30" text-anchor="middle" fill="#34d399" font-size="8" font-weight="700" letter-spacing="2">ATIVO</text>
+    <text x="120" y="50" fill="#cc9dc0" font-size="10">12/∞ usos · Expira 15/03/2027 · Único</text>
+  </g>
+
+  <g transform="translate(594, 640)">
+    <!-- Coupon 3: warning / esgotado -->
+    <rect width="622" height="74" rx="14" fill="rgba(48, 9, 44, 0.4)" stroke="rgba(213, 0, 249, 0.18)"/>
+    <rect x="0" y="0" width="4" height="74" rx="2" fill="#fbbf24"/>
+    <rect x="20" y="14" width="80" height="46" rx="10" fill="rgba(48, 9, 44, 0.6)" stroke="rgba(251, 191, 36, 0.3)"/>
+    <text x="60" y="44" text-anchor="middle" fill="#fbbf24" font-size="20" font-weight="900">30%</text>
+    <text x="60" y="56" text-anchor="middle" fill="#cc9dc0" font-size="7" letter-spacing="2">OFF</text>
+    <text x="120" y="30" fill="#ffdbf3" font-size="16" font-weight="700" font-family="JetBrains Mono">WELCOME30</text>
+    <rect x="266" y="18" width="80" height="16" rx="8" fill="rgba(251, 191, 36, 0.14)"/>
+    <text x="306" y="30" text-anchor="middle" fill="#fbbf24" font-size="8" font-weight="700" letter-spacing="2">⚠ ESGOTADO</text>
+    <text x="120" y="50" fill="#fbbf24" font-size="10">523/1 uso (excedido!) · Sem expiração · Único (bug config)</text>
+  </g>
+
+  <!-- Toast sucesso -->
+  <g transform="translate(940, 720)">
+    <rect width="276" height="56" rx="14" fill="rgba(48, 9, 44, 0.92)" stroke="rgba(213, 0, 249, 0.4)"/>
+    <rect x="14" y="14" width="28" height="28" rx="8" fill="url(#accent-grad)"/>
+    <text x="28" y="33" text-anchor="middle" fill="white" font-size="14">✓</text>
+    <text x="56" y="26" fill="#ffdbf3" font-size="12" font-weight="700">Cupom IST-K7P9MX4R criado</text>
+    <text x="56" y="42" fill="#cc9dc0" font-size="10">30% OFF · uso único · expira 31/12/2026</text>
+  </g>
+</svg>

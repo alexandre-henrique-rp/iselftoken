@@ -1,0 +1,315 @@
+{
+  "_type": "harness-sprint-v6",
+  "version": 1,
+  "schemaVersion": "1",
+  "id": "S01-cnpj-alfanumerico",
+  "name": "Sprint 1 — CNPJ Alfanumérico (IN RFB 2.229/2024)",
+  "milestone": "M1",
+  "priority": "critical",
+  "status": "pending",
+  "profile": "lean",
+  "estimatedAt": "2026-07-01",
+  "regulatoryDeadline": "2026-07-01",
+  "regulatorySource": "IN RFB 2.229/2024 — entrada em vigor operacional do CNPJ Alfanumérico",
+  "goal": "Adaptar o frontend Iselftoken para aceitar, validar, formatar, transmitir e armazenar CNPJ Alfanumérico sem rejeitar inscrições legítimas a partir de julho/2026, mantendo 100% de compatibilidade com CNPJs numéricos legados.",
+  "scope": {
+    "inScope": [
+      "Atualizar máscara, formatter, schema Zod, validador DV (placeholder), schema bancário, BFF de lookup e componentes de formulário para suportar letras maiúsculas (A-Z) no radical do CNPJ",
+      "Preservar compatibilidade reversa com CNPJs numéricos atribuídos antes de julho/2026",
+      "Setup mínimo de Vitest + testes unitários do formatter/máscara/schema",
+      "Padronizar para maiúsculas antes de transmitir (evitar diferenciação Ab.123 vs AB.123)"
+    ],
+    "outOfScope": [
+      "Implementação completa do algoritmo de DV alfanumérico (depende de leitura do PDF oficial — flagado como blocker em T003)",
+      "Migração do backend NestJS (escopo de outro repositório — flagado em cross-sprint.json)",
+      "Mudanças de copy/UX além das mensagens de erro técnicas (será decidido por designer)",
+      "Reforma Tributária — CNPJ para PF (status pending-official-confirmation; sem tasks nesta sprint)"
+    ]
+  },
+  "ragRefs": [
+    {
+      "id": "cnpj-alfanumerico-in-rfb-2229-2024",
+      "path": ".harness/RAG/law/cnpj-alfanumerico-in-rfb-2229-2024.md",
+      "category": "law",
+      "status": "confirmed",
+      "appliesTo": [
+        "app/lib/new-startup-schema.ts",
+        "app/lib/cnpj-format.ts",
+        "app/lib/mask-utils.ts",
+        "app/lib/banking-schema.ts",
+        "app/routes/api/geral.cnpj.$cnpj.ts",
+        "app/components/founder/corporate-identity.tsx",
+        "app/components/founder/new-startup-step-1-identity.tsx",
+        "app/components/founder/banking-details.tsx",
+        "app/routes/private/create-startup.tsx"
+      ]
+    }
+  ],
+  "filesAffected": [
+    "app/lib/mask-utils.ts",
+    "app/lib/cnpj-format.ts",
+    "app/lib/new-startup-schema.ts",
+    "app/lib/banking-schema.ts",
+    "app/components/founder/corporate-identity.tsx",
+    "app/components/founder/banking-details.tsx",
+    "app/components/founder/new-startup-step-1-identity.tsx",
+    "app/components/founder/new-startup-step-4-banking-review.tsx",
+    "app/routes/private/create-startup.tsx",
+    "app/routes/api/geral.cnpj.$cnpj.ts",
+    "package.json",
+    "vitest.config.ts (novo)",
+    "app/lib/__tests__/cnpj-format.test.ts (novo)",
+    "app/lib/__tests__/mask-utils.test.ts (novo)",
+    "app/lib/__tests__/new-startup-schema.test.ts (novo)",
+    "app/lib/__tests__/banking-schema.test.ts (novo)",
+    "app/routes/api/__tests__/geral.cnpj.$cnpj.test.ts (novo)"
+  ],
+  "tasks": [
+    {
+      "id": "T001",
+      "title": "Adaptar mask-utils.ts para CNPJ alfanumérico (token A do remask)",
+      "type": "frontend",
+      "owner": "frontend",
+      "dependencies": [],
+      "estimatedEffort": 2,
+      "status": "pending",
+      "scope": "Atualizar MASK_PATTERNS.CNPJ de '99.999.999/9999-99' para 'AA.AAA.AAA/AAAA-99' (token A do remask = letras maiúsculas). Garantir que applyCnpjMask e cnpjMaskHandler aceitam letras no radical.",
+      "expectedArtifacts": [
+        "app/lib/mask-utils.ts modificado",
+        "Tipos/assinaturas preservados (compat com consumers existentes)"
+      ],
+      "specRefs": [
+        "RAG: law/cnpj-alfanumerico-in-rfb-2229-2024.md §3.2"
+      ],
+      "acceptanceCriteria": [
+        "MASK_PATTERNS.CNPJ === 'AA.AAA.AAA/AAAA-99'",
+        "applyCnpjMask('AB12C3') retorna 'AB.12C.3' (parcial, progressivo)",
+        "applyCnpjMask('AB12C3DE45F6') retorna 'AB.12C.3DE/45F6-'",
+        "applyCnpjMask('ab12c3de45f678') retorna 'AB.12C.3DE/45F6-78' (uppercase automático)",
+        "cnpjMaskHandler é estável em onChange (idempotente)",
+        "Demais máscaras (CPF/PHONE/CEP/RG/CNH) inalteradas"
+      ]
+    },
+    {
+      "id": "T002",
+      "title": "Adaptar cnpj-format.ts para preservar letras no radical",
+      "type": "frontend",
+      "owner": "frontend",
+      "dependencies": [],
+      "estimatedEffort": 2,
+      "status": "pending",
+      "scope": "Criar getAlphanumeric(value) que preserva letras + dígitos + força uppercase. Atualizar formatCnpj() e isCnpjComplete() para suportar letras. Manter getOnlyDigits() como @deprecated para usos explicitamente legados.",
+      "expectedArtifacts": [
+        "app/lib/cnpj-format.ts modificado",
+        "Helpers: getAlphanumeric, formatCnpj, isCnpjComplete"
+      ],
+      "specRefs": [
+        "RAG: law/cnpj-alfanumerico-in-rfb-2229-2024.md §3.3"
+      ],
+      "acceptanceCriteria": [
+        "getAlphanumeric('AB.12C.3DE/45F6-78') retorna 'AB12C3DE45F678'",
+        "getAlphanumeric('ab12c3de45f678') retorna 'AB12C3DE45F678' (uppercase)",
+        "formatCnpj('AB12C3DE45F678') retorna 'AB.12C.3DE/45F6-78'",
+        "formatCnpj('ab12c3de45f678') retorna 'AB.12C.3DE/45F6-78'",
+        "formatCnpj('AB12C') retorna 'AB.12C.' (parcial progressivo)",
+        "isCnpjComplete('AB12C3DE45F678') === true",
+        "isCnpjComplete('AB.12C.3DE/45F6-78') === true",
+        "isCnpjComplete('AB12C') === false",
+        "getOnlyDigits continua exportado com @deprecated JSDoc"
+      ]
+    },
+    {
+      "id": "T003",
+      "title": "Atualizar new-startup-schema.ts (regex Zod alfanumérico + DV placeholder)",
+      "type": "frontend",
+      "owner": "frontend",
+      "dependencies": ["T002"],
+      "estimatedEffort": 4,
+      "status": "pending",
+      "scope": "Atualizar CNPJ_REGEX para aceitar letras no radical. Criar custom refinement cnpjAlfanumericoValidator() que valida DV — registrar como PENDENTE de leitura do manual-dv-cnpj.pdf. Enquanto DV não está 100% validado, o refinamento aceita entrada no formato novo mas marca o campo como 'pending-manual-dv-review' via console.warn + aceita (validação soft).",
+      "expectedArtifacts": [
+        "app/lib/new-startup-schema.ts modificado",
+        "Helper cnpjAlfanumericoValidator exportado",
+        "Mensagens de erro em PT-BR distintas para: 'formato', 'comprimento', 'DV inválido'"
+      ],
+      "specRefs": [
+        "RAG: law/cnpj-alfanumerico-in-rfb-2229-2024.md §3.1, §4"
+      ],
+      "blockers": [
+        "Algoritmo DV completo depende de leitura do manual-dv-cnpj.pdf (https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/documentos-tecnicos/cnpj/manual-dv-cnpj.pdf/view) e do arquivo codigos-cnpj.zip — registrar como 'pending-manual-dv-review' e usar validação soft (passa + warn)"
+      ],
+      "acceptanceCriteria": [
+        "CNPJ_REGEX === /^[A-Z0-9]{2}\\.[A-Z0-9]{3}\\.[A-Z0-9]{3}\\/[A-Z0-9]{4}-\\d{2}$/",
+        "Mensagem de erro do regex em PT-BR com exemplo 'AB.12C.3DE/45F6-78'",
+        "cnpjAlfanumericoValidator('12.345.678/0001-90') aceita (CNPJ legado válido)",
+        "cnpjAlfanumericoValidator('AB.12C.3DE/45F6-78') aceita com warn no console (soft)",
+        "cnpjAlfanumericoValidator('AB.12C.3DE/45F6-99') aceita com warn (DV placeholder, validação real pendente)",
+        "cnpjAlfanumericoValidator('XX.000.000/0000-00') rejeita (caracter minúsculo)",
+        "cnpjAlfanumericoValidator('123') rejeita (comprimento)",
+        "console.warn emitido identifica 'pending-manual-dv-review' como string pesquisável"
+      ]
+    },
+    {
+      "id": "T004",
+      "title": "Atualizar banking-schema.ts para aceitar CNPJ alfanumérico no documentoTitular",
+      "type": "frontend",
+      "owner": "frontend",
+      "dependencies": ["T002"],
+      "estimatedEffort": 2,
+      "status": "pending",
+      "scope": "Trocar digitCount() por uma contagem que considere 14 chars alfanuméricos para CNPJ (mantendo 11 dígitos para CPF). Atualizar mensagem de erro.",
+      "expectedArtifacts": [
+        "app/lib/banking-schema.ts modificado",
+        "documentoTitular aceita 11 dígitos (CPF) OU 14 chars alfanuméricos (CNPJ)"
+      ],
+      "specRefs": [
+        "RAG: law/cnpj-alfanumerico-in-rfb-2229-2024.md §3.4"
+      ],
+      "acceptanceCriteria": [
+        "bankingSchema valida CPF (11 dígitos) sem mudança",
+        "bankingSchema valida CNPJ numérico legado (14 dígitos) sem mudança",
+        "bankingSchema valida CNPJ alfanumérico (14 chars [A-Z0-9])",
+        "Mensagem de erro atualizada para 'Informe um CPF (11 dígitos) ou CNPJ (14 caracteres alfanuméricos)'",
+        "documentoTitular com letras minúsculas é normalizado para maiúsculas antes da validação"
+      ]
+    },
+    {
+      "id": "T005",
+      "title": "Atualizar componentes founder/* que aceitam CNPJ para não destruir letras",
+      "type": "frontend",
+      "owner": "frontend",
+      "dependencies": ["T001", "T002", "T003", "T004"],
+      "estimatedEffort": 3,
+      "status": "pending",
+      "scope": "Substituir getOnlyDigits por getAlphanumeric nos fluxos de leitura/lookup. Ajustar values.cnpj.replace(/\\D/g, '') para preservar letras. Garantir que formatCnpj novo (que aceita letras) seja usado.",
+      "expectedArtifacts": [
+        "app/components/founder/corporate-identity.tsx modificado",
+        "app/components/founder/banking-details.tsx modificado",
+        "app/components/founder/new-startup-step-1-identity.tsx (sem mudança se já delega para CorporateIdentity)",
+        "app/components/founder/new-startup-step-4-banking-review.tsx (sem mudança se já delega para BankingDetails)",
+        "app/routes/private/create-startup.tsx modificado (handleCnpjLookup + handleCnpjChange + payload final)"
+      ],
+      "specRefs": [
+        "RAG: law/cnpj-alfanumerico-in-rfb-2229-2024.md §3.6"
+      ],
+      "acceptanceCriteria": [
+        "handleCnpjLookup propaga letras no path /api/geral/cnpj/${cnpj}",
+        "toast.error('CNPJ deve ter 14 dígitos') substituído por 'CNPJ deve ter 14 caracteres alfanuméricos'",
+        "payload.cnpj no POST /api/startups preserva letras (não usa /\\D/g)",
+        "Componentes não forçam entrada a virar só dígitos em nenhum ponto do fluxo de digitação",
+        "Botão 'Buscar' desabilitado quando isCnpjComplete é false (helper T002)"
+      ]
+    },
+    {
+      "id": "T006",
+      "title": "Atualizar BFF geral.cnpj.$cnpj.ts para propagar CNPJ alfanumérico",
+      "type": "frontend",
+      "owner": "frontend",
+      "dependencies": ["T002"],
+      "estimatedEffort": 2,
+      "status": "pending",
+      "scope": "Substituir raw.replace(/\\D/g, '') por getAlphanumeric(raw). Trocar validação de digits.length === 14 para chars.length === 14. Propagar letras para BACKEND_URL/geral/cnpj/${chars}.",
+      "expectedArtifacts": [
+        "app/routes/api/geral.cnpj.$cnpj.ts modificado",
+        "BFF preserva letras no caminho do backend"
+      ],
+      "specRefs": [
+        "RAG: law/cnpj-alfanumerico-in-rfb-2229-2024.md §3.5"
+      ],
+      "acceptanceCriteria": [
+        "Mensagem de erro do BFF: 'CNPJ deve ter 14 caracteres alfanuméricos' (não '14 dígitos')",
+        "Status code 400 preservado para entrada inválida",
+        "Path enviado para BACKEND_URL contém letras intactas (AB12C3DE45F678, não AB12345678)",
+        "Cookie propagado continua idêntico (request.headers.get('cookie'))",
+        "Catch (502 fetch_failed) preserva mensagem genérica original"
+      ]
+    },
+    {
+      "id": "T007",
+      "title": "Setup Vitest + testes unitários de CNPJ alfanumérico",
+      "type": "test",
+      "owner": "tester",
+      "dependencies": ["T001", "T002", "T003", "T004", "T005", "T006"],
+      "estimatedEffort": 5,
+      "status": "pending",
+      "scope": "Configurar Vitest (vitest.config.ts + npm scripts) — primeira vez na história do projeto (dívida residual conhecida). Criar suíte de testes unitários cobrindo: (a) CNPJ numérico antigo, (b) CNPJ alfanumérico novo do Simulador oficial, (c) DV inválido, (d) máscara com letras, (e) componente aceitando valor não-normalizado.",
+      "expectedArtifacts": [
+        "vitest.config.ts (novo)",
+        "package.json scripts: test, test:watch, test:coverage",
+        "vitest instalado em devDependencies",
+        "app/lib/__tests__/cnpj-format.test.ts (novo)",
+        "app/lib/__tests__/mask-utils.test.ts (novo)",
+        "app/lib/__tests__/new-startup-schema.test.ts (novo)",
+        "app/lib/__tests__/banking-schema.test.ts (novo)",
+        "app/routes/api/__tests__/geral.cnpj.$cnpj.test.ts (novo, integração do BFF com mock de fetch)"
+      ],
+      "specRefs": [
+        "RAG: law/cnpj-alfanumerico-in-rfb-2229-2024.md §4.2 (item 5 — testes contra Simulador oficial)"
+      ],
+      "acceptanceCriteria": [
+        "npm run test executa suíte completa",
+        "npm run test:coverage reporta cobertura (mínimo 70% por linha nos arquivos alterados — perfil lean)",
+        "Testes cobrem: CNPJ numérico legado válido, CNPJ numérico legado DV inválido, CNPJ alfanumérico (mínimo 3 casos do Simulador oficial), entrada com letras minúsculas (normalizada), máscara progressiva com letras, regex Zod aceita+rejeita corretamente, bankingSchema com documentoTitular alfanumérico, BFF propaga letras e rejeita < 14 chars",
+        "ZERO console.log deixado nos arquivos de produção após a implementação (apenas console.warn permitido em cnpjAlfanumericoValidator para flag 'pending-manual-dv-review')",
+        "Cobertura mínima 70% em cada novo arquivo __tests__"
+      ]
+    }
+  ],
+  "acceptanceCriteria": [
+    "100% dos 6 pontos mapeados pelo RAG §3 foram migrados (mask-utils, cnpj-format, new-startup-schema, banking-schema, BFF geral.cnpj, componentes)",
+    "CNPJ numérico legado (14 dígitos) continua aceito sem regressão",
+    "CNPJ alfanumérico com letras no radical (formato XX.XXX.XXX/XXXX-YY) é aceito em todos os fluxos (cadastro, edição, lookup Receita Federal, dados bancários)",
+    "Helper isCnpjComplete conta caracteres alfanuméricos, não dígitos",
+    "BFF /api/geral/cnpj/:cnpj propaga letras no path para o backend",
+    "Schema Zod do cadastro (newStartupSchema) aceita letras no campo cnpj",
+    "Schema Zod do payout (bankingSchema.documentoTitular) aceita CNPJ alfanumérico",
+    "Setup mínimo de Vitest instalado + testes cobrindo happy path + edge cases (mínimo 70% cobertura nos arquivos alterados)",
+    "console.warn 'pending-manual-dv-review' registrado em cnpjAlfanumericoValidator até leitura do manual-dv-cnpj.pdf",
+    "ZERO console.log de debug nos arquivos de produção",
+    "AGENTS.md de app/lib/ e app/components/founder/ atualizado para refletir nova API de CNPJ (deixar para orchestrator decidir se faz nesta sprint ou como housekeeping)"
+  ],
+  "dependencies": {
+    "external": [
+      {
+        "name": "manual-dv-cnpj.pdf",
+        "url": "https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/documentos-tecnicos/cnpj/manual-dv-cnpj.pdf/view",
+        "kind": "regulatory-source",
+        "blocks": "T003 — implementação completa do validador DV"
+      },
+      {
+        "name": "codigos-cnpj.zip",
+        "url": "https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/documentos-tecnicos/cnpj/codigos-cnpj.zip/view",
+        "kind": "regulatory-source",
+        "blocks": "T003 — tabela de mapeamento letra→valor"
+      },
+      {
+        "name": "Simulador oficial",
+        "url": "https://www.gov.br/pt-br/servicos/simulador-cnpj-alfanumerico",
+        "kind": "test-fixture",
+        "usedBy": "T007 — geração de CNPIs válidos para testes"
+      },
+      {
+        "name": "backend NestJS (BACKEND_URL)",
+        "url": "../backendnode (repositório irmão, fora do escopo desta sprint)",
+        "kind": "cross-repo",
+        "blocks": "Lookup Receita Federal no backend precisa aceitar letras — registrar em cross-sprint.json"
+      }
+    ]
+  },
+  "stats": {
+    "totalTasks": 7,
+    "byType": { "frontend": 6, "test": 1 },
+    "totalHours": 20,
+    "crossSprintFlows": 0,
+    "specCoverage": "100%",
+    "blockers": 1
+  },
+  "guardrails": [
+    "Não inventar tabela de mapeamento letra→valor (RAG §6 — Antipadrão 3)",
+    "Não usar /\\D/g no caminho crítico de validação/transmissão",
+    "Não hard-codar prefixos de filial numéricos (0001-9999) — alfanumérico quebra",
+    "Não logar CNPJ em claro no console (LGPD — usar hash se precisar logar em dev)",
+    "Não misturar letras minúsculas no storage (sempre uppercase)",
+    "Não instalar Vitest sem antes validar que o agent executor vai configurar coverage threshold e CI hook (perfil lean: 70% é o mínimo)"
+  ]
+}

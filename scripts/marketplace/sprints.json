@@ -1,0 +1,785 @@
+{
+  "module": "marketplace",
+  "version": "1.0.0",
+  "generated_at": "2026-09-22",
+  "owner": "backend + frontend",
+  "objective": "Alinhar o marketplace da iSelfToken com as regras de scripts/marketplace/marketplace.md e implementar o plano do PRD_MARKETPLACE_IMPL.md (pinning manual + score automatico + cron + UI founder/admin).",
+  "source_rules": {
+    "business_rules": "scripts/marketplace/marketplace.md",
+    "analysis_prd": "scripts/marketplace/PRD_MARKETPLACE_REGRAS.md",
+    "implementation_prd": "scripts/marketplace/PRD_MARKETPLACE_IMPL.md",
+    "ux_plan": "scripts/marketplace/PLANO_ALGORITMO_UX.md"
+  },
+  "global_non_functional_requirements": [
+    "Resposta de toda rota publica em < 200ms (p95) com cache HTTP.",
+    "Cache Redis `marketplace:featured:v1` TTL 5min + invalidacao on-event.",
+    "Logs em PT-BR via NestJS Logger; nunca console.log.",
+    "LGPD: logs de auditoria com retencao minima 5 anos (pin/unpin/score).",
+    "Swagger + Scalar atualizados; snapshot openapi.json regenerado.",
+    "Testes Jest cobrindo regras de secao e regras de score."
+  ],
+  "sprints": [
+    {
+      "id": "S0",
+      "name": "Hardening das regras de secao (marketplace.md)",
+      "goal": "Fazer o modulo marketplace HONRAR as 5 regras de sessao descritas em scripts/marketplace/marketplace.md antes de adicionar pinning/score automatico.",
+      "priority": "P0",
+      "depends_on": [],
+      "deliverables": [
+        "Filtros de selo, idade de captacao e ordenacoes por score aplicados nas sessoes publicas.",
+        "Endpoint /marketplace/early-access devolvendo startups (alem do ranking)."
+      ],
+      "tasks": [
+        {
+          "id": "MKT-S0-T01",
+          "title": "Codificar regra de Rodadas em Destaque e Rodadas Quentes",
+          "summary": "Aplicar max 15, filtro >4 selos ativos, ordenacao por score DESC com randomizacao para score>85 e boost top para score>98.",
+          "spec": {
+            "context": "Hoje /marketplace/featured retorna top N por score DESC, createdAt DESC, sem filtros. A regra de scripts/marketplace/marketplace.md exige: captação ativa, >4 selos ativos, max 15 itens, score>85 randomizado entre si, score>98 entre os primeiros.",
+            "files_touched": [
+              "backendnode/src/api/marketplace/marketplace.service.ts",
+              "backendnode/src/api/marketplace/marketplace.controller.ts",
+              "backendnode/prisma/schema.sqlite.prisma"
+            ],
+            "depends_on": [],
+            "agent_role": "backend",
+            "acceptance_criteria": [
+              "GET /marketplace/featured retorna no maximo 15 startups.",
+              "Apenas startups com captação ativa (campaigns.some.status=OPEN) sao listadas.",
+              "Apenas startups com mais de 4 selos ativos sao listadas (count de StartupSeal com seal.active=true).",
+              "Startups com score > 98 aparecem antes das com score entre 85 e 98.",
+              "Startups com score > 85 tem ordem aleatoria entre si (seedada por dia para estabilidade).",
+              "Teste unit cobre os 5 criterios acima."
+            ],
+            "tests": [
+              "backendnode/src/api/marketplace/marketplace.service.spec.ts — caso com 20 startups elegiveis (esperado 15) e caso com selos insuficientes (esperado 0).",
+              "Teste E2E em backendnode/test/e2e/flows/marketplace-featured-rules.spec.ts."
+            ],
+            "risks": [
+              "Regra de randomizacao pode oscilar a cada requisicao; mitigar com seed diario (YYYY-MM-DD) ou Redis cache 5min."
+            ],
+            "docs_ref": "scripts/marketplace/marketplace.md §Rodadas em Destaque / Rodadas Quentes; PRD_MARKETPLACE_REGRAS.md §5"
+          }
+        },
+        {
+          "id": "MKT-S0-T02",
+          "title": "Codificar regra de Recem-Adicionadas e Acesso Antecipado",
+          "summary": "Filtro de captacao com inicio < 20 dias, ordenacao por quantidade de selos DESC, max 15.",
+          "spec": {
+            "context": "Hoje /marketplace/recently-added ordena por createdAt DESC sem filtro temporal. A regra exige: captação ativa, captacao com inicio ha menos de 20 dias, ordenar por selos do maior para o menor, max 15. Tambem deve existir /marketplace/early-access retornando startups (hoje so existe ranking de pagamentos).",
+            "files_touched": [
+              "backendnode/src/api/marketplace/marketplace.service.ts",
+              "backendnode/src/api/marketplace/early-access.controller.ts",
+              "backendnode/src/api/marketplace/early-access.service.ts",
+              "backendnode/src/api/marketplace/dto/early-access-startups.dto.ts"
+            ],
+            "depends_on": ["MKT-S0-T01"],
+            "agent_role": "backend",
+            "acceptance_criteria": [
+              "GET /marketplace/recently-added retorna no maximo 15 startups.",
+              "Filtra campanhas OPEN com createdAt >= now()-20d.",
+              "Ordena por count(selos ativos) DESC, createdAt DESC como tiebreaker.",
+              "GET /marketplace/early-access/startups retorna o mesmo conjunto (mesma query, payload com campo `rank` opcional)."
+            ],
+            "tests": [
+              "Unit do service com mock de now() para validar janela de 20 dias.",
+              "Unit do controller validando query params."
+            ],
+            "risks": [
+              "Campanha pode nao ter campo createdAt exposto; verificar schema."
+            ],
+            "docs_ref": "scripts/marketplace/marketplace.md §Recem-Adicionadas / Acesso Antecipado"
+          }
+        },
+        {
+          "id": "MKT-S0-T03",
+          "title": "Codificar regra de Picks da Semana",
+          "summary": "Captacao com inicio nos ultimos 7 dias, ordenar captacao mais antiga primeiro, max 15.",
+          "spec": {
+            "context": "Hoje /marketplace/curated-picks retorna 3 picks curados pela equipe. A regra de marketplace.md define Picks da Semana como captacoes com inicio nos ultimos 7 dias, ordenadas pela mais antiga primeiro, max 15. Sao conceitos diferentes: o curated e curadoria humana; o picks da semana e filtro temporal. Devem coexistir.",
+            "files_touched": [
+              "backendnode/src/api/marketplace/marketplace.service.ts",
+              "backendnode/src/api/marketplace/marketplace.controller.ts"
+            ],
+            "depends_on": [],
+            "agent_role": "backend",
+            "acceptance_criteria": [
+              "Novo endpoint GET /marketplace/picks-of-week.",
+              "Filtra campanhas OPEN com createdAt >= now()-7d.",
+              "Ordena por campaigns.createdAt ASC (captacao mais antiga primeiro).",
+              "Limita a 15 itens.",
+              "Endpoint existente /marketplace/curated-picks continua existindo (curadoria humana)."
+            ],
+            "tests": [
+              "Unit cobrindo janela de 7 dias e ordenacao ASC."
+            ],
+            "risks": [
+              "Conflito semantico com curated-picks; documentar em AGENTS.md a diferenca."
+            ],
+            "docs_ref": "scripts/marketplace/marketplace.md §Picks da Semana"
+          }
+        },
+        {
+          "id": "MKT-S0-T04",
+          "title": "Expor limite de 15 nas 3 secoes publicas",
+          "summary": "Remover FinanceConfig featured_limit/recent_limit e usar constante SESSION_LIMIT=15 em todas as secoes.",
+          "spec": {
+            "context": "A regra fixa max 15 por sessao. Hoje os limites sao configuraveis via FinanceConfig (default 10 e 5). Devem ser constantes explicitas ou FinanceConfig mas com default 15 e documentacao explicita de que exceder 15 quebra a regra.",
+            "files_touched": [
+              "backendnode/src/api/marketplace/marketplace.service.ts",
+              "backendnode/src/finance/finance-config.service.ts (se houver alteracao de chave)"
+            ],
+            "depends_on": [],
+            "agent_role": "backend",
+            "acceptance_criteria": [
+              "Constante MARKETPLACE_SECTION_LIMIT=15 no service.",
+              "Todas as queries publicas aplicam Math.min(N, MARKETPLACE_SECTION_LIMIT).",
+              "AGENTS.md do modulo marketplace documenta o limite."
+            ],
+            "tests": [
+              "Unit com FinanceConfig simulando valor 50 (esperado retorno = 15)."
+            ],
+            "risks": [
+              "Mudanca quebra de compatibilidade com FinanceConfig ja populado em prod; manter fallback para valor antigo."
+            ],
+            "docs_ref": "scripts/marketplace/marketplace.md §regras por session"
+          }
+        }
+      ]
+    },
+    {
+      "id": "S1",
+      "name": "Schema, migration e seed",
+      "goal": "Adicionar colunas de pinning manual e cache de score no model Startup + seed da TechInnovate com score 45.",
+      "priority": "P0",
+      "depends_on": ["S0"],
+      "deliverables": [
+        "Migration SQLite `add_marketplace_pinning_score` aplicada em dev.",
+        "Seed da TechInnovate com score 45 + scoreBreakdown.",
+        "Snapshot do schema regenerado."
+      ],
+      "tasks": [
+        {
+          "id": "MKT-S1-T01",
+          "title": "Migration `add_marketplace_pinning_score`",
+          "summary": "Adicionar colunas nullable no model Startup: manuallyPinned, manuallyPinnedBy, manuallyPinnedAt, manuallyPinnedReason, scoreLastCalculatedAt, scoreBreakdown; FK para User; indice composto.",
+          "status": "done",
+          "applied_at": "2026-09-22",
+          "spec": {
+            "context": "Schema atual nao tem campos para pin nem para cache do score automatico. PRD_IMPL §3.1 define o DDL exato (originalmente MySQL); precisamos adaptar para SQLite preservando nulabilidade.",
+            "files_touched": [
+              "backendnode/prisma/schema.sqlite.prisma",
+              "backendnode/prisma/migrations-sqlite/20260922000000_marketplace_pinning_score/migration.sql",
+              "backendnode/prisma/migrations-sqlite/20260922000000_marketplace_pinning_score/rollback.sql"
+            ],
+            "depends_on": ["MKT-S0-T04"],
+            "agent_role": "backend",
+            "acceptance_criteria": [
+              "Migration aditiva: todas as colunas novas sao nullable ou tem default 0.",
+              "FK manuallyPinnedBy -> User(id) ON DELETE SET NULL (validada no service; SQLite ALTER TABLE nao permite).",
+              "Indice composto Startup_manuallyPinned_score_idx (manuallyPinned DESC, score DESC).",
+              "Prisma db push roda sem erro.",
+              "Prisma client regerado (prisma:setup) sem erro.",
+              "Rollback plan documentado em rollback.sql (DROP COLUMN).",
+              "Teste E2E round-trip (marketplace-migration.e2e-spec.ts) cobrindo persist + leitura + default."
+            ],
+            "tests": [
+              "backendnode/test/e2e/flows/marketplace-migration.e2e-spec.ts — 3 testes verde"
+            ],
+            "risks": [
+              "SQLite nao suporta ENUM; adaptar action do AuditLog em S4 (string livre, validacao no service).",
+              "Indice composto pode nao ser usado pelo query planner; validar com EXPLAIN apos S4 ter dados reais."
+            ],
+            "docs_ref": "PRD_MARKETPLACE_IMPL.md §3.1; backendnode/docs/migration-marketplace-pin-spec.md"
+          }
+        },
+        {
+          "id": "MKT-S1-T02",
+          "title": "Atualizar seed.ts para popular score 45 da TechInnovate",
+          "summary": "Patchar seed para setar score=45 e scoreBreakdown com 9 chaves na startup TechInnovate.",
+          "status": "done",
+          "applied_at": "2026-09-22",
+          "spec": {
+            "context": "PRD_IMPL §6 cita explicitamente a TechInnovate como exemplo canonico: score 45 com breakdown completo. Seed atual nao popula score.",
+            "files_touched": [
+              "backendnode/prisma/seed.ts"
+            ],
+            "depends_on": ["MKT-S1-T01"],
+            "agent_role": "backend",
+            "acceptance_criteria": [
+              "TechInnovate tem score=45, scoreBreakdown=JSON com 9 chaves (kyc, documents, seals, traction, raised, deadline, category, partnerships, activity).",
+              "scoreLastCalculatedAt=now() no momento do seed.",
+              "Retrocomp: se TechInnovate ja existe sem score=45, seed faz update in-place."
+            ],
+            "tests": [
+              "Validacao visual via Prisma Studio apos seed."
+            ],
+            "risks": [
+              "Se seed roda antes da migration, falhara; ordem garantida por prisma:setup no pre-deploy."
+            ],
+            "docs_ref": "PRD_MARKETPLACE_IMPL.md §6 exemplo canônico"
+          }
+        },
+        {
+          "id": "MKT-S1-T03",
+          "title": "Documentar S1 em AGENTS.md do modulo marketplace + CASE.md",
+          "summary": "Documentar schema novo, novos campos, e regra de pinning manual em CASE.md.",
+          "status": "done",
+          "applied_at": "2026-09-22",
+          "spec": {
+            "context": "AGENTS.md do modulo marketplace descrevia apenas o estado pre-pinning. CASE.md precisa da regra de negocio nova (Regra de Ouro §10).",
+            "files_touched": [
+              "backendnode/src/api/marketplace/AGENTS.md",
+              "CASE.md"
+            ],
+            "depends_on": ["MKT-S1-T02"],
+            "agent_role": "backend",
+            "acceptance_criteria": [
+              "AGENTS.md lista manualmentePinned, scoreBreakdown, scoreLastCalculatedAt como campos de Startup.",
+              "AGENTS.md indica como regenerar Prisma client apos mudanca (prisma:setup).",
+              "CASE.md tem nova secao '[Marketplace] — Pinning manual' com regras Geral/Backend/Frontend conforme template §6 do AGENTS raiz."
+            ],
+            "tests": [],
+            "risks": [],
+            "docs_ref": "AGENTS.md (raiz) §6 + §10 — Regra de Ouro"
+          }
+        }
+      ]
+    },
+    {
+      "id": "S2",
+      "name": "ScoreCalculator + endpoint + cron + listeners",
+      "goal": "Calcular score 0..100 automaticamente por job diario 03:00 BRT + em eventos (upload, KYC, selo, status de campanha) + endpoint publico de featured consolidado.",
+      "priority": "P0",
+      "depends_on": ["S1"],
+      "deliverables": [
+        "ScoreCalculatorService com algoritmo documentado em PRD §5.",
+        "Cron `@Cron('0 3 * * *')` com lock Redis.",
+        "Listeners para 4 eventos de dominio.",
+        "Endpoint publico consolidado + endpoint privado com breakdown."
+      ],
+      "tasks": [
+        {
+          "id": "MKT-S2-T01",
+          "title": "Implementar ScoreCalculatorService",
+          "summary": "Calcular score 0..100 com breakdown de 9 chaves (kyc, documents, seals, traction, raised, deadline, category, partnerships, activity).",
+          "spec": {
+            "context": "PRD_IMPL §5 tem o pseudocodigo completo. Hoje o score eh fixo (vem de admin/startups/:id/score manual). Precisamos calcular automaticamente.",
+            "files_touched": [
+              "backendnode/src/api/marketplace/score-calculator.service.ts",
+              "backendnode/src/api/marketplace/score-calculator.service.spec.ts"
+            ],
+            "depends_on": ["MKT-S1-T01"],
+            "agent_role": "backend",
+            "acceptance_criteria": [
+              "calculateForStartup(startupId) retorna { score: 0..100, breakdown: { kyc: {earned, max, count}, ... 9 chaves } }.",
+              "Service persiste score + breakdown + scoreLastCalculatedAt.",
+              "Service emite evento startup.scoreUpdated.",
+              "Cobertura Jest >= 90%.",
+              "6+ casos de teste unit conforme PRD §9 sprint 2."
+            ],
+            "tests": [
+              "Unit: startup sem documentos = score baixo em documents.",
+              "Unit: startup com 5 selos = max em seals.",
+              "Unit: captacao aberta com deadline proximo = boost em deadline."
+            ],
+            "risks": [
+              "Algoritmo pode oscilar diariamente; PRD §10 ja mitiga com DPO notificando outliers ±30pts.",
+              "Performance: calcular para 23 startups via 1 cron leva poucos segundos; documentar."
+            ],
+            "docs_ref": "PRD_MARKETPLACE_IMPL.md §5"
+          }
+        },
+        {
+          "id": "MKT-S2-T02",
+          "title": "Cron RecalculateMarketplaceScore + lock Redis",
+          "summary": "Job diario 03:00 BRT que recalcula score de todas as startups APPROVED, com listener de outliers ±30pts.",
+          "spec": {
+            "context": "PRD §5 e §7 definem cron + listener. Lock Redis evita corrida em multi-instancia.",
+            "files_touched": [
+              "backendnode/src/api/marketplace/score-recalc.cron.ts",
+              "backendnode/src/api/marketplace/score-recalc.listener.ts"
+            ],
+            "depends_on": ["MKT-S2-T01"],
+            "agent_role": "backend",
+            "acceptance_criteria": [
+              "@Cron('0 3 * * *') com lock Redis SET NX EX 1800 (`lock:recalculate:marketplace-scores`).",
+              "Recalcula todas as startups status=APPROVED.",
+              "Emite marketplace.scoreOutlier se |delta| >= 30pts.",
+              "Listener onOutlier cria AuditLog com action=SCORE_RECALCULATED e envia email DPO.",
+              "Endpoint manual POST /internal/admin/recalculate-scores com X-Internal-Token para testes."
+            ],
+            "tests": [
+              "Unit: cron com lock ja adquirido = skip silencioso.",
+              "Unit: outlier ±30pts dispara listener (mock event emitter)."
+            ],
+            "risks": [
+              "Janela 03:00 BRT coincide com backup; verificar em backendnode/AGENTS.md §DOCKER.",
+              "Email DPO precisa de template; verificar src/email/templates/."
+            ],
+            "docs_ref": "PRD_MARKETPLACE_IMPL.md §5 + §7"
+          }
+        },
+        {
+          "id": "MKT-S2-T03",
+          "title": "Listeners em eventos de dominio (upload, KYC, selo, status campanha)",
+          "summary": "4 @OnEvent que disparam recalculo individual com debounce 30s por startupId.",
+            "spec": {
+            "context": "PRD §7 lista os 4 eventos. Hoje nenhum listener existe; upload de doc ou mudanca de selo nao recalcula score.",
+            "files_touched": [
+              "backendnode/src/api/marketplace/score-event.listeners.ts"
+            ],
+            "depends_on": ["MKT-S2-T02"],
+            "agent_role": "backend",
+            "acceptance_criteria": [
+              "Listeners para startup.documentUploaded, startup.kycStatusChanged, startup.sealAssigned, startup.campaignStatusChanged.",
+              "Debounce 30s por startupId via Redis SET NX EX 30 (`lock:recalc:startup:<id>`).",
+              "Cache Redis `marketplace:featured:v1` invalidado em startup.scoreUpdated."
+            ],
+            "tests": [
+              "Integration: mock event emitter + upload mockado = score recalculado em <= 5s."
+            ],
+            "risks": [
+              "Eventos ainda nao emitidos em todos os pontos; auditar upload.service, kyc.service, seals.service, campaigns.service."
+            ],
+            "docs_ref": "PRD_MARKETPLACE_IMPL.md §7"
+          }
+        },
+        {
+          "id": "MKT-S2-T04",
+          "title": "Consolidar endpoint /startups/featured (privado) + /marketplace/featured (publico)",
+          "summary": "Featured publico retorna max 15 conforme S0; privado retorna pinos manuais (1..3) + resto por score DESC ate total 15.",
+          "spec": {
+            "context": "PRD §4.1 e §8 MKT-IMPL-08. Hoje coexistem /startups/featured (em startup.controller) e /marketplace/featured (em marketplace.controller) com logicas duplicadas.",
+            "files_touched": [
+              "backendnode/src/api/marketplace/marketplace.service.ts",
+              "backendnode/src/api/startup/startup.controller.ts (marcar deprecado)",
+              "backendnode/src/api/startup/service/startup-query.service.ts"
+            ],
+            "depends_on": ["MKT-S2-T01"],
+            "agent_role": "backend",
+            "acceptance_criteria": [
+              "GET /marketplace/featured (publico) retorna max 15 conforme regras S0.",
+              "Cache-Control: public, max-age=300.",
+              "Endpoint /startups/featured mantido por retrocompatibilidade (mesma logica, mas documentado como legacy).",
+              "RF-05 cumprido: ordem = pinned primeiro (1..N), depois score DESC ate total = marketplace.featured_limit (limitado a 15 por S0-T04)."
+            ],
+            "tests": [
+              "E2E flow marketplace-featured com 3 startups pinned + 20 nao-pinned."
+            ],
+            "risks": [],
+            "docs_ref": "PRD_MARKETPLACE_IMPL.md §4.1 + RF-05"
+          }
+        },
+        {
+          "id": "MKT-S2-T05",
+          "title": "Endpoint privado /startups/:id/marketplace-info",
+          "summary": "Retorna score + breakdown + pin info para ADMIN, COMPLIANCE ou founder dono.",
+          "spec": {
+            "context": "PRD §4.2. AC: founder so ve dados da propria startup; ADMIN/COMPLIANCE ve qualquer.",
+            "files_touched": [
+              "backendnode/src/api/marketplace/marketplace-info.controller.ts",
+              "backendnode/src/api/marketplace/dto/marketplace-info.dto.ts"
+            ],
+            "depends_on": ["MKT-S2-T01"],
+            "agent_role": "backend",
+            "acceptance_criteria": [
+              "GET /startups/:id/marketplace-info retorna { score, scoreBreakdown, scoreLastCalculatedAt, manuallyPinned, manuallyPinnedReason, manuallyPinnedBy, manuallyPinnedAt }.",
+              "Auth: AuthGuard + check de ownership (founder da startup ou role ADMIN/COMPLIANCE).",
+              "Swagger documentado com 403 quando acessado por founder de outra startup."
+            ],
+            "tests": [
+              "E2E: founderA da startup1 acessa /marketplace-info de startup1 = 200.",
+              "E2E: founderA acessa /marketplace-info de startup2 = 403."
+            ],
+            "risks": [],
+            "docs_ref": "PRD_MARKETPLACE_IMPL.md §4.2"
+          }
+        }
+      ]
+    },
+    {
+      "id": "S3",
+      "name": "UI Founder (breakdown + como melhorar)",
+      "goal": "Mostrar score + breakdown + tooltip 'Como melhorar?' no dashboard do founder.",
+      "priority": "P1",
+      "depends_on": ["S2"],
+      "deliverables": [
+        "Componente marketplace-position-card.tsx no dashboard /founder.",
+        "BFF + hook TanStack Query.",
+        "Tooltip explicativo por chave do breakdown."
+      ],
+      "tasks": [
+        {
+          "id": "MKT-S3-T01",
+          "title": "BFF /api/founder/startups/:id/marketplace-info",
+          "summary": "Proxy SSR/loader que chama backend /startups/:id/marketplace-info.",
+          "spec": {
+            "context": "Frontend usa BFF pattern (routes/api/). Hook fica em queries.ts.",
+            "files_touched": [
+              "frontend/app/routes/api/founder.startups.$id.marketplace-info.ts",
+              "frontend/app/lib/queries.ts (hook useFounderStartupMarketplaceInfo)"
+            ],
+            "depends_on": ["MKT-S2-T05"],
+            "agent_role": "frontend",
+            "acceptance_criteria": [
+              "BFF forwardeia cookie de sessao.",
+              "Cache HTTP 60s (staleTime TanStack Query).",
+              "Retorna 401 se backend retornar 401; 403 se 403.",
+              "Hook useFounderStartupMarketplaceInfo(id) tipado com MarketplaceInfo."
+            ],
+            "tests": [
+              "Test do BFF mockando backend.",
+              "Test do hook com @testing-library/react."
+            ],
+            "risks": [
+              "Backend nao estar pronto bloqueia S3; depender de S2-T05."
+            ],
+            "docs_ref": "PRD_MARKETPLACE_IMPL.md §6.1; frontend-architecture skill"
+          }
+        },
+        {
+          "id": "MKT-S3-T02",
+          "title": "Componente marketplace-position-card.tsx",
+          "summary": "Card mostra score 0..100, status (auto/pinned), tooltip com breakdown de 9 chaves.",
+          "spec": {
+            "context": "PRD §6.1 tem wireframe ASCII. Componente deve ser shadcn/ui + Tailwind 4.",
+            "files_touched": [
+              "frontend/app/components/marketplace/marketplace-position-card.tsx",
+              "frontend/app/components/marketplace/breakdown-tooltip.tsx"
+            ],
+            "depends_on": ["MKT-S3-T01"],
+            "agent_role": "frontend",
+            "acceptance_criteria": [
+              "Renderiza score grande + badge 'Em destaque por: <motivo>' se pinned ou 'Score alto' se score>85.",
+              "Tooltip mostra 9 chaves do breakdown com earned/max e icone de status.",
+              "Botao 'Como melhorar?' abre sheet com recomendacoes estaticas por chave baixa.",
+              "Renderiza com score 0, 45 e 92 sem quebrar (MKT-IMPL-10)."
+            ],
+            "tests": [
+              "Storybook story com 3 variantes (zero/medio/alto).",
+              "Vitest cobrindo props principais."
+            ],
+            "risks": [],
+            "docs_ref": "PRD_MARKETPLACE_IMPL.md §6.1"
+          }
+        },
+        {
+          "id": "MKT-S3-T03",
+          "title": "Integrar card em /founder/dashboard",
+          "summary": "Mostrar card no topo do dashboard quando o founder tem startup cadastrada.",
+          "spec": {
+            "context": "founder-dashboard.tsx hoje ja mostra selo e score estatico (admin-startup-dialogs.tsx:190). Substituir pelo componente novo.",
+            "files_touched": [
+              "frontend/app/routes/private/founder-dashboard.tsx"
+            ],
+            "depends_on": ["MKT-S3-T02"],
+            "agent_role": "frontend",
+            "acceptance_criteria": [
+              "Card aparece apenas se user.role=FOUNDER e tem startup vinculada.",
+              "Loading skeleton durante fetch.",
+              "Empty state se score=0 ('Vamos melhorar seu score?')."
+            ],
+            "tests": [
+              "Playwright: founder logado ve card com score 45 da TechInnovate seed."
+            ],
+            "risks": [],
+            "docs_ref": "frontend/app/routes/private/founder-dashboard.tsx"
+          }
+        }
+      ]
+    },
+    {
+      "id": "S4",
+      "name": "Pinning manual + UI admin + auditoria",
+      "goal": "ADMIN/COMPLIANCE podem pinar ate 3 startups com motivo auditavel; UI /admin/marketplace para gerenciar pinos.",
+      "priority": "P1",
+      "depends_on": ["S2"],
+      "deliverables": [
+        "POST/DELETE /admin/startups/:id/pin com limite 3.",
+        "GET /admin/marketplace/pinned.",
+        "Rota /admin/marketplace com lista de pinos + busca.",
+        "AuditLog com PIN_STARTUP/UNPIN_STARTUP."
+      ],
+      "tasks": [
+        {
+          "id": "MKT-S4-T01",
+          "title": "POST /admin/startups/:id/pin + DELETE /admin/startups/:id/unpin",
+          "summary": "Pin com motivo >= 20 chars; retorna 409 se max 3 pinos atingido; audit log obrigatorio.",
+          "spec": {
+            "context": "PRD §4.3 e §4.4 + RF-02/RF-03/RF-10.",
+            "files_touched": [
+              "backendnode/src/api/marketplace/pin.controller.ts",
+              "backendnode/src/api/marketplace/pin.service.ts",
+              "backendnode/src/api/marketplace/dto/pin.dto.ts"
+            ],
+            "depends_on": ["MKT-S2-T01"],
+            "agent_role": "backend",
+            "acceptance_criteria": [
+              "POST valida reason >= 20 chars (400 se menor).",
+              "POST conta pinos ativos antes de inserir; 409 MAX_PINNED_EXCEEDED se >= 3.",
+              "POST seta manuallyPinned=true, manuallyPinnedBy=actorId, manuallyPinnedAt=now, manuallyPinnedReason=reason.",
+              "DELETE seta manualmentePinned=false e limpa campos (mantem reason em audit).",
+              "Cada acao cria AuditLog com action=PIN_STARTUP/UNPIN_STARTUP, IP, userAgent, actorId.",
+              "Auth: AdminGuard OU ComplianceGuard (mesma logica do /admin/startups/:id/score)."
+            ],
+            "tests": [
+              "E2E: ADMIN pina 3 startups ok; 4a = 409.",
+              "E2E: reason 19 chars = 400; 20 chars = 201.",
+              "Unit: 409 dispara AuditLog com action=PIN_STARTUP_DENIED_MAX."
+            ],
+            "risks": [
+              "Race condition entre count e insert em paralelo; usar transacao Prisma."
+            ],
+            "docs_ref": "PRD_MARKETPLACE_IMPL.md §4.3 + §4.4 + RF-02/RF-03/RF-10"
+          }
+        },
+        {
+          "id": "MKT-S4-T02",
+          "title": "GET /admin/marketplace/pinned",
+          "summary": "Lista 0..3 pinos ativos com quem pineou e motivo.",
+          "spec": {
+            "context": "PRD §4.5 e RF-04.",
+            "files_touched": [
+              "backendnode/src/api/marketplace/pin.controller.ts"
+            ],
+            "depends_on": ["MKT-S4-T01"],
+            "agent_role": "backend",
+            "acceptance_criteria": [
+              "Retorna array com { startupId, slug, nome, manuallyPinnedAt, manuallyPinnedBy (publicId do admin), manuallyPinnedReason }.",
+              "Auth AdminGuard/ComplianceGuard.",
+              "Ordena por manuallyPinnedAt DESC (mais recente primeiro)."
+            ],
+            "tests": [
+              "Unit: lista vazia quando 0 pinos; lista 3 quando max atingido."
+            ],
+            "risks": [],
+            "docs_ref": "PRD_MARKETPLACE_IMPL.md §4.5 + RF-04"
+          }
+        },
+        {
+          "id": "MKT-S4-T03",
+          "title": "Rota /admin/marketplace com lista de pinos + busca",
+          "summary": "Implementar frontend/app/routes/admin/marketplace.tsx conforme spec.md.",
+          "spec": {
+            "context": "Spec ja existe em frontend/app/routes/admin/marketplace.spec.md (PRD §6.2). Falta o .tsx real.",
+            "files_touched": [
+              "frontend/app/routes/admin/marketplace.tsx",
+              "frontend/app/components/admin/pin-startup-modal.tsx",
+              "frontend/app/components/admin/pinned-startups-table.tsx"
+            ],
+            "depends_on": ["MKT-S4-T02", "MKT-S3-T01"],
+            "agent_role": "frontend",
+            "acceptance_criteria": [
+              "Tela mostra 3 slots visuais (vazio/preenchido) + busca por nome/slug.",
+              "Modal de pin exige motivo >= 20 chars (validacao client + server).",
+              "Tabela de pinos atuais com botao Despinear.",
+              "Bloqueia pin se 3 ja preenchidos (toast explicativo).",
+              "Auth: AdminGuard ou ComplianceGuard (mesmo padrao de /admin/startups)."
+            ],
+            "tests": [
+              "Playwright: ADMIN pina TechInnovate, aparece em /home como destaque.",
+              "Playwright: ADMIN tenta pinar 4a = erro visivel."
+            ],
+            "risks": [],
+            "docs_ref": "frontend/app/routes/admin/marketplace.spec.md"
+          }
+        },
+        {
+          "id": "MKT-S4-T04",
+          "title": "Cache invalidation em /marketplace/featured quando pino muda",
+          "summary": "Ao pinar/despinar, invalidar Redis `marketplace:featured:v1` para refresh em ate 5min.",
+          "spec": {
+            "context": "PRD §7 + RF-15. Sem invalidacao, pinos demorariam ate 5min para aparecer.",
+            "files_touched": [
+              "backendnode/src/api/marketplace/pin.service.ts"
+            ],
+            "depends_on": ["MKT-S4-T01"],
+            "agent_role": "backend",
+            "acceptance_criteria": [
+              "Em POST/DELETE de pin, chamar Redis DEL `marketplace:featured:v1`.",
+              "Cache reaquecido automaticamente na proxima requisicao.",
+              "RF-15 cumprido: refresh na home sem intervencao manual."
+            ],
+            "tests": [
+              "Integration: apos POST /pin, GET /marketplace/featured retorna o pino no topo."
+            ],
+            "risks": [
+              "Se Redis estiver fora, fallback para TTL natural de 5min."
+            ],
+            "docs_ref": "PRD_MARKETPLACE_IMPL.md §7 + RF-15"
+          }
+        },
+        {
+          "id": "MKT-S4-T05",
+          "title": "Documentar S4 em AGENTS.md + atualizar CASE.md",
+          "summary": "Adicionar regra de pinning em CASE.md (secao 6 do AGENTS raiz) + atualizar AGENTS.md do modulo.",
+          "spec": {
+            "context": "Regra de Ouro (AGENTS.md raiz §10): toda regra de negocio descoberta deve ir para CASE.md. Pin manual e regra de negocio nova.",
+            "files_touched": [
+              "CASE.md",
+              "backendnode/src/api/marketplace/AGENTS.md",
+              "frontend/app/routes/admin/AGENTS.md"
+            ],
+            "depends_on": ["MKT-S4-T03"],
+            "agent_role": "backend + frontend",
+            "acceptance_criteria": [
+              "CASE.md tem nova secao '[Marketplace] — Pinning manual' com regras Geral/Backend/Frontend conforme template §6 do AGENTS raiz.",
+              "AGENTS.md do modulo marketplace lista endpoints novos.",
+              "AGENTS.md de /admin lista rota /admin/marketplace."
+            ],
+            "tests": [],
+            "risks": [],
+            "docs_ref": "AGENTS.md (raiz) §6 + §10 — Regra de Ouro"
+          }
+        }
+      ]
+    },
+    {
+      "id": "S5",
+      "name": "Hardening, polish e go-live",
+      "goal": "Snapshot OpenAPI atualizado, metricas em Sentry, documentacao final, smoke tests em staging.",
+      "priority": "P2",
+      "depends_on": ["S0", "S1", "S2", "S3", "S4"],
+      "deliverables": [
+        "OpenAPI snapshot regerado.",
+        "Alertas Sentry para cron.",
+        "Smoke tests documentados.",
+        "Comunicado aos founders."
+      ],
+      "tasks": [
+        {
+          "id": "MKT-S5-T01",
+          "title": "Regerar snapshot OpenAPI",
+          "summary": "Rodar npm run openapi:dump e commitar backend/docs/openapi.json.",
+          "spec": {
+            "context": "backendnode/AGENTS.md §OPENAPI — snapshot deve refletir todos os controllers novos.",
+            "files_touched": [
+              "backend/docs/openapi.json"
+            ],
+            "depends_on": ["S4"],
+            "agent_role": "backend",
+            "acceptance_criteria": [
+              "Diff do openapi.json contem os 6 endpoints novos (pin POST/DELETE/GET, marketplace-info, picks-of-week, featured consolidado).",
+              "Scalar UI continua renderizando em /docs."
+            ],
+            "tests": [
+              "Snapshot test compara com baseline."
+            ],
+            "risks": [],
+            "docs_ref": "backendnode/AGENTS.md §OPENAPI"
+          }
+        },
+        {
+          "id": "MKT-S5-T02",
+          "title": "Alertas Sentry para cron e outliers",
+          "summary": "Criar alerta se cron demorar > 1h ou se outlier ±30pts/dia.",
+          "spec": {
+            "context": "PRD §10 risco 'Job cron demora > 24h'. Mitigacao = alerta Sentry.",
+            "files_touched": [
+              ".opencode/skills/sentry-create-alert/...",
+              "backendnode/src/api/marketplace/score-recalc.cron.ts"
+            ],
+            "depends_on": ["S2-T02"],
+            "agent_role": "backend",
+            "acceptance_criteria": [
+              "Sentry alert criado para cron com duration > 60min.",
+              "Sentry alert para marketplace.scoreOutlier > 5 startups/dia (possivel burla).",
+              "Email DPO configurado em compliance-users."
+            ],
+            "tests": [],
+            "risks": [],
+            "docs_ref": "PRD_MARKETPLACE_IMPL.md §10; sentry-create-alert skill"
+          }
+        },
+        {
+          "id": "MKT-S5-T03",
+          "title": "Smoke tests em staging + runbook",
+          "summary": "5 smoke tests do PRD §11 + runbook de rollback.",
+          "spec": {
+            "context": "PRD §11 tem os 5 comandos curl. Documentar tambem como rodar via Postman/Insomnia.",
+            "files_touched": [
+              "docs/runbooks/marketplace-go-live.md"
+            ],
+            "depends_on": ["S4"],
+            "agent_role": "backend",
+            "acceptance_criteria": [
+              "5 smoke tests automatizados via supertest (backendnode/test/e2e/flows/marketplace-go-live.spec.ts).",
+              "Runbook de rollback: DROP COLUMN + npm run seed (reverte S1)."
+            ],
+            "tests": [
+              "Rodar npm run test:e2e:flows e validar 5/5 verdes."
+            ],
+            "risks": [],
+            "docs_ref": "PRD_MARKETPLACE_IMPL.md §11"
+          }
+        },
+        {
+          "id": "MKT-S5-T04",
+          "title": "Comunicado aos founders + LP /founder explicativa",
+          "summary": "Email aos founders com link para breakdown + secao 'Como melhorar' no dashboard.",
+          "spec": {
+            "context": "PRD §1: 'card no /founder/dashboard mostrando score + breakdown + botao Como melhorar?' ja entregue em S3. Falta o aviso.",
+            "files_touched": [
+              "src/email/templates/marketplace-score-launch.ts",
+              "frontend/app/routes/private/founder-dashboard.tsx"
+            ],
+            "depends_on": ["S3"],
+            "agent_role": "backend + frontend",
+            "acceptance_criteria": [
+              "Email enviado 1x para todos os founders ativos.",
+              "Banner no dashboard durante 7 dias com link 'Entenda seu score'."
+            ],
+            "tests": [],
+            "risks": [],
+            "docs_ref": "PRD_MARKETPLACE_IMPL.md §1"
+          }
+        }
+      ]
+    }
+  ],
+  "task_index": {
+    "MKT-S0-T01": "S0",
+    "MKT-S0-T02": "S0",
+    "MKT-S0-T03": "S0",
+    "MKT-S0-T04": "S0",
+    "MKT-S1-T01": "S1",
+    "MKT-S1-T02": "S1",
+    "MKT-S1-T03": "S1",
+    "MKT-S2-T01": "S2",
+    "MKT-S2-T02": "S2",
+    "MKT-S2-T03": "S2",
+    "MKT-S2-T04": "S2",
+    "MKT-S2-T05": "S2",
+    "MKT-S3-T01": "S3",
+    "MKT-S3-T02": "S3",
+    "MKT-S3-T03": "S3",
+    "MKT-S4-T01": "S4",
+    "MKT-S4-T02": "S4",
+    "MKT-S4-T03": "S4",
+    "MKT-S4-T04": "S4",
+    "MKT-S4-T05": "S4",
+    "MKT-S5-T01": "S5",
+    "MKT-S5-T02": "S5",
+    "MKT-S5-T03": "S5",
+    "MKT-S5-T04": "S5"
+  },
+  "metadata": {
+    "total_sprints": 6,
+    "total_tasks": 23,
+    "estimated_weeks": "6-7 (S0=1, S1=0.5, S2=2, S3=1, S4=1.5, S5=0.5)",
+    "dependencies_graph": {
+      "S0": [],
+      "S1": ["S0"],
+      "S2": ["S1"],
+      "S3": ["S2"],
+      "S4": ["S2"],
+      "S5": ["S0", "S1", "S2", "S3", "S4"]
+    },
+    "approval_required_for": [
+      "Schema changes (S1)",
+      "Cron job em prod (S2)",
+      "Email em massa para founders (S5)"
+    ]
+  }
+}

@@ -1,0 +1,336 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Checkout - iSelfToken</title>
+<!-- Google Fonts: Manrope -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet">
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary-dim": "#e986d8",
+                        "on-tertiary-fixed-variant": "#70180a",
+                        "surface-container-low": "#270524",
+                        "surface-dim": "#1f031d",
+                        "on-background": "#ffdbf3",
+                        "tertiary": "#ff937f",
+                        "on-surface-variant": "#cc9dc0",
+                        "on-tertiary-container": "#510500",
+                        "inverse-surface": "#fff7f9",
+                        "outline-variant": "#613b5a",
+                        "on-primary": "#540063",
+                        "on-secondary": "#610a5b",
+                        "primary-container": "#ea6bff",
+                        "on-secondary-fixed": "#60095a",
+                        "surface-container-high": "#380e33",
+                        "on-error": "#490013",
+                        "on-error-container": "#ffb2b9",
+                        "primary": "#f084ff",
+                        "inverse-primary": "#a200be",
+                        "error": "#ff6e84",
+                        "primary-dim": "#c500e6",
+                        "on-secondary-fixed-variant": "#832d79",
+                        "error-container": "#a70138",
+                        "tertiary-fixed": "#ff937f",
+                        "inverse-on-surface": "#704867",
+                        "surface": "#1f031d",
+                        "surface-bright": "#4a1844",
+                        "on-primary-fixed-variant": "#50005f",
+                        "on-secondary-container": "#ffbbef",
+                        "on-tertiary-fixed": "#380200",
+                        "surface-container-lowest": "#000000",
+                        "secondary-fixed": "#ffbdef",
+                        "surface-container-highest": "#41133b",
+                        "background": "#1f031d",
+                        "primary-fixed": "#ea6bff",
+                        "on-surface": "#ffdbf3",
+                        "on-tertiary": "#640e03",
+                        "surface-variant": "#41133b",
+                        "surface-container": "#30092c",
+                        "surface-tint": "#f084ff",
+                        "on-primary-container": "#41004d",
+                        "secondary": "#f893e6",
+                        "tertiary-container": "#fc7e67",
+                        "secondary-container": "#77226f",
+                        "primary-fixed-dim": "#e44fff",
+                        "tertiary-dim": "#f57963",
+                        "tertiary-fixed-dim": "#fc7e67",
+                        "on-primary-fixed": "#000000",
+                        "error-dim": "#d73357",
+                        "secondary-fixed-dim": "#ffa7ed",
+                        "outline": "#936889"
+                    },
+                    fontFamily: {
+                        headline: ["Manrope", "sans-serif"],
+                        display: ["Manrope", "sans-serif"],
+                        body: ["Manrope", "sans-serif"],
+                        label: ["Manrope", "sans-serif"]
+                    },
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1f031d; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #41133b; 
+            border-radius: 0px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #613b5a; 
+        }
+    </style>
+</head>
+<body class="bg-surface-container-lowest text-on-surface font-body antialiased selection:bg-primary/30 selection:text-primary">
+<main class="flex min-h-screen w-full flex-col-reverse lg:flex-row-reverse">
+<!-- Left Side: Checkout Flow -->
+<section class="w-full lg:w-1/2 bg-surface min-h-screen overflow-y-auto flex flex-col items-center justify-center py-12 px-6 sm:px-12 lg:px-20 relative border-surface-container-high/50 z-20 shadow-[4px_0_24px_rgba(0,0,0,0.5)] border-l">
+<div class="w-full max-w-md space-y-10">
+<!-- Payment Method Toggle -->
+<div class="border-b border-surface-container-high flex gap-8">
+<button class="pb-3 text-label-md font-bold text-primary border-b-2 border-primary transition-colors flex items-center gap-2" id="tab-cc" onclick="switchTab('cc')">
+<span class="material-symbols-outlined text-lg">credit_card</span>
+                        Cartão de Crédito
+                    </button>
+<button class="pb-3 text-label-md font-bold text-on-surface-variant border-b-2 border-transparent hover:text-on-surface transition-colors flex items-center gap-2" id="tab-pix" onclick="switchTab('pix')">
+<span class="material-symbols-outlined text-lg">qr_code_2</span>
+                        PIX
+                    </button>
+</div>
+<!-- Payment Forms Container -->
+<div class="relative min-h-[320px]">
+<!-- Credit Card Form -->
+<div class="absolute inset-0 w-full transition-opacity duration-300 opacity-100 z-10 flex flex-col gap-6" id="form-cc">
+<div class="space-y-6">
+<!-- Card Number -->
+<div>
+<label class="text-label-sm text-primary mb-1 block">Número do Cartão</label>
+<div class="relative">
+<input class="w-full bg-surface-container-high border-b-2 border-transparent focus:border-primary text-on-surface placeholder:text-on-surface-variant/30 px-4 py-3 outline-none transition-colors rounded-none font-mono text-body-lg" placeholder="0000 0000 0000 0000" type="text">
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant">credit_score</span>
+</div>
+</div>
+<!-- Name -->
+<div>
+<label class="text-label-sm text-primary mb-1 block">Nome Impresso no Cartão</label>
+<input class="w-full bg-surface-container-high border-b-2 border-transparent focus:border-primary text-on-surface placeholder:text-on-surface-variant/30 px-4 py-3 outline-none transition-colors rounded-none font-body text-body-md uppercase" placeholder="NOME DO TITULAR" type="text">
+</div>
+<!-- Expiry & CVV -->
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="text-label-sm text-primary mb-1 block">Validade</label>
+<input class="w-full bg-surface-container-high border-b-2 border-transparent focus:border-primary text-on-surface placeholder:text-on-surface-variant/30 px-4 py-3 outline-none transition-colors rounded-none font-mono text-body-md" placeholder="MM/AA" type="text">
+</div>
+<div>
+<label class="text-label-sm text-primary mb-1 block">CVV</label>
+<input class="w-full bg-surface-container-high border-b-2 border-transparent focus:border-primary text-on-surface placeholder:text-on-surface-variant/30 px-4 py-3 outline-none transition-colors rounded-none font-mono text-body-md" placeholder="123" type="text">
+</div>
+</div>
+<!-- Installments -->
+<div>
+<label class="text-label-sm text-primary mb-1 block">Parcelamento</label>
+<div class="relative">
+<select class="w-full bg-surface-container-high border-b-2 border-transparent focus:border-primary text-on-surface px-4 py-3 outline-none transition-colors rounded-none font-body text-body-md appearance-none cursor-pointer">
+<option value="1">1x de R$ 10.500,00</option>
+<option value="2">2x de R$ 5.250,00 sem juros</option>
+<option value="3">3x de R$ 3.500,00 sem juros</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-primary pointer-events-none">expand_more</span>
+</div>
+</div>
+</div>
+</div>
+<!-- PIX Form -->
+<div class="absolute inset-0 w-full transition-opacity duration-300 opacity-0 pointer-events-none z-0 flex flex-col items-center justify-center gap-6 bg-surface-container-low rounded-sm p-8 border border-outline-variant/20" id="form-pix">
+<div class="text-center">
+<span class="material-symbols-outlined text-display-lg text-primary-dim mb-4 block">qr_code_scanner</span>
+<h3 class="text-label-lg font-bold text-on-surface mb-2">Pagamento via PIX</h3>
+<p class="text-label-sm text-on-surface-variant">Aprovação instantânea. O código será gerado na próxima etapa.</p>
+</div>
+<div class="w-full border-t border-surface-container-high pt-6 mt-2">
+<div class="bg-surface-container-high p-4 rounded-sm flex items-center justify-between">
+<span class="font-mono text-label-sm text-on-surface-variant truncate mr-4">00020126360014BR.GOV.BCB.PIX...</span>
+<button class="text-primary hover:text-primary-container transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">content_copy</span>
+<span class="text-label-sm font-bold uppercase">Copiar</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Button -->
+<div class="pt-6">
+<button class="w-full bg-gradient-to-br from-primary to-primary-dim text-on-primary-fixed rounded-full py-5 text-label-lg font-black tracking-widest uppercase shadow-[0_0_24px_rgba(240,132,255,0.25)] hover:shadow-[0_0_40px_rgba(240,132,255,0.5)] active:scale-[0.98] transition-all duration-300">
+                        Finalizar Pagamento
+                    </button>
+</div>
+<!-- Security Badges -->
+<div class="flex justify-center items-center gap-6 pt-4 border-t border-surface-container-low">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">lock</span>
+<span class="text-label-sm">Criptografia SSL 256-bit</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">shield</span>
+<span class="text-label-sm">Transação Segura</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Right Side: Brand Experience & Order Summary -->
+<section class="w-full lg:w-1/2 flex flex-col p-12 relative overflow-hidden bg-surface-container-lowest z-10 min-h-screen">
+<!-- Structural Background Overlay / Watermark -->
+<div class="absolute -right-32 top-1/4 select-none pointer-events-none transform rotate-12">
+<span class="text-[20rem] font-black tracking-tighter text-surface-container-high/20 leading-none">ISELF</span>
+</div>
+<!-- Neon Vertical Divider - moved to left side of this section -->
+<div class="absolute top-0 h-full w-[1px] bg-gradient-to-b from-transparent via-primary/50 to-transparent shadow-[0_0_15px_rgba(240,132,255,0.4)] hidden lg:block right-0"></div>
+<!-- Header / Logo -->
+<div class="relative z-10 mb-12">
+<div class="text-display-sm font-headline font-black tracking-tighter text-primary">iSelfToken</div>
+</div>
+<!-- Content Anchor -->
+<div class="relative z-10 max-w-xl mb-12">
+<h1 class="text-display-md font-headline font-extrabold tracking-tight text-on-surface mb-8 leading-[1.1]">
+                    Garanta sua participação <br> <span class="text-primary-dim">no futuro.</span>
+</h1>
+<p class="text-body-lg text-on-surface-variant leading-relaxed">
+                    Acesso exclusivo à rodada de investimento. Estrutura de segurança de grau institucional com liquidação imediata e custódia descentralizada. O seu capital, potencializado pela arquitetura cinética.
+                </p>
+<div class="mt-8 flex items-center gap-4">
+<span class="material-symbols-outlined text-primary text-3xl" data-weight="fill">token</span>
+<div class="h-px w-24 bg-primary/30"></div>
+</div>
+</div>
+<!-- Order Summary Integrated into Brand Section -->
+<div class="relative z-10 max-w-xl w-full space-y-6 mt-auto mb-12 bg-surface/80 backdrop-blur-md p-8 rounded-lg border border-primary/20">
+<h3 class="text-title-lg font-bold text-primary mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined">shopping_cart</span>
+        Resumo do Pedido
+    </h3>
+<!-- 3 Items List -->
+<div class="space-y-4">
+<!-- Item 1 -->
+<div class="flex justify-between items-start border-b border-surface-container-high pb-4">
+<div>
+<h4 class="text-label-lg font-bold text-on-surface">Token Nexus AI</h4>
+<p class="text-label-sm text-on-surface-variant mt-1">Acesso à inteligência de mercado</p>
+</div>
+<div class="text-right">
+<span class="text-label-md text-primary font-mono bg-primary/10 px-2 py-1 rounded-sm block mb-1">500 QTD</span>
+<span class="text-label-md text-on-surface-variant">R$ 2.500,00</span>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex justify-between items-start border-b border-surface-container-high pb-4">
+<div>
+<h4 class="text-label-lg font-bold text-on-surface">Startup Pack Pro</h4>
+<p class="text-label-sm text-on-surface-variant mt-1">Ferramentas de escala</p>
+</div>
+<div class="text-right">
+<span class="text-label-md text-primary font-mono bg-primary/10 px-2 py-1 rounded-sm block mb-1">1 UN</span>
+<span class="text-label-md text-on-surface-variant">R$ 5.000,00</span>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="flex justify-between items-start border-b border-surface-container-high pb-4">
+<div>
+<h4 class="text-label-lg font-bold text-on-surface">Consultoria KYC</h4>
+<p class="text-label-sm text-on-surface-variant mt-1">Assessoria regulatória</p>
+</div>
+<div class="text-right">
+<span class="text-label-md text-primary font-mono bg-primary/10 px-2 py-1 rounded-sm block mb-1">10 HRS</span>
+<span class="text-label-md text-on-surface-variant">R$ 3.000,00</span>
+</div>
+</div>
+</div>
+<!-- Subtotal & Discount -->
+<div class="space-y-2 pt-2">
+<div class="flex justify-between items-end">
+<span class="text-label-md text-on-surface-variant">Subtotal</span>
+<span class="text-title-md text-on-surface-variant">R$ 10.500,00</span>
+</div>
+</div>
+<!-- Discount Coupon -->
+<div class="pt-4 pb-2">
+<label class="text-label-sm text-on-surface-variant mb-2 block">Cupom de Desconto</label>
+<div class="flex gap-2">
+<input class="w-full bg-surface-container-high border-b-2 border-transparent focus:border-primary text-on-surface placeholder:text-on-surface-variant/50 px-4 py-3 outline-none transition-colors rounded-none font-body text-body-md" placeholder="Insira o código" type="text">
+<button class="bg-surface-container-high text-primary font-bold px-6 py-3 hover:bg-surface-container-highest transition-colors rounded-sm uppercase text-label-sm tracking-wider">
+                                    Aplicar
+                                </button>
+</div>
+</div>
+<div class="h-px w-full bg-primary/30 my-4"></div>
+<div class="flex justify-between items-end">
+<span class="text-label-md text-primary font-bold uppercase tracking-wider">Total Final</span>
+<span class="text-headline-sm font-black text-primary">R$ 10.500,00</span>
+</div>
+</div>
+<!-- Bottom Graphic -->
+<div class="relative z-10 opacity-50 mt-auto">
+<span class="text-label-sm font-mono tracking-widest text-primary">SYS.AUTH.TKN // 2024</span>
+</div>
+</section>
+</main>
+<!-- Tab Switching Logic -->
+<script>
+        function switchTab(tab) {
+            const btnCc = document.getElementById('tab-cc');
+            const btnPix = document.getElementById('tab-pix');
+            const formCc = document.getElementById('form-cc');
+            const formPix = document.getElementById('form-pix');
+
+            if (tab === 'cc') {
+                // Update Buttons
+                btnCc.classList.add('text-primary', 'border-primary');
+                btnCc.classList.remove('text-on-surface-variant', 'border-transparent');
+                
+                btnPix.classList.remove('text-primary', 'border-primary');
+                btnPix.classList.add('text-on-surface-variant', 'border-transparent');
+
+                // Update Forms
+                formCc.classList.remove('opacity-0', 'pointer-events-none', 'z-0');
+                formCc.classList.add('opacity-100', 'z-10');
+                
+                formPix.classList.remove('opacity-100', 'z-10');
+                formPix.classList.add('opacity-0', 'pointer-events-none', 'z-0');
+            } else {
+                // Update Buttons
+                btnPix.classList.add('text-primary', 'border-primary');
+                btnPix.classList.remove('text-on-surface-variant', 'border-transparent');
+                
+                btnCc.classList.remove('text-primary', 'border-primary');
+                btnCc.classList.add('text-on-surface-variant', 'border-transparent');
+
+                // Update Forms
+                formPix.classList.remove('opacity-0', 'pointer-events-none', 'z-0');
+                formPix.classList.add('opacity-100', 'z-10');
+                
+                formCc.classList.remove('opacity-100', 'z-10');
+                formCc.classList.add('opacity-0', 'pointer-events-none', 'z-0');
+            }
+        }
+    </script>
+
+
+</body></html>

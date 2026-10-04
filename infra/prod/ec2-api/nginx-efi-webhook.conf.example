@@ -1,0 +1,79 @@
+# =============================================================================
+# Nginx — Webhook PIX da EFI com mTLS reverso (referência)
+# =============================================================================
+#
+# A EFI exige autenticação mútua (mTLS) nos callbacks de webhook: o Nginx do
+# host valida o certificado CLIENTE apresentado pela EFI usando a cadeia
+# pública dela. O TLS termina aqui e o tráfego segue em HTTP interno para o
+# container do backend (127.0.0.1:7077), que aplica a 2ª camada (HMAC na query
+# ?hmac= + IP 34.193.116.226) no WebhookSignatureGuard.
+#
+# Fluxo de verificação da EFI:
+#   1ª requisição: SEM certificado → o servidor DEVE recusar.
+#   2ª requisição: COM certificado da EFI → hand-shake mTLS estabelecido.
+#
+# Pré-requisitos no host:
+#   - TLS server válido para o domínio (ex.: Let's Encrypt/Certbot).
+#   - Cadeia pública da EFI baixada em /etc/nginx/certs/efi/:
+#       Produção:    certificate-chain-prod.crt
+#       Homologação: certificate-chain-homolog.crt
+#     (equivalentes aos arquivos em backendnode/certs/efi_webhook/)
+#     Download oficial:
+#       https://certificados.efipay.com.br/webhooks/certificate-chain-prod.crt
+#       https://certificados.efipay.com.br/webhooks/certificate-chain-homolog.crt
+#
+# Requer TLS >= 1.2 (norma BACEN).
+# =============================================================================
+
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name api.seu-dominio.com.br;   # ajuste para o domínio real
+
+    # --- TLS do servidor (certificado público do seu domínio) ---
+    ssl_certificate     /etc/letsencrypt/live/api.seu-dominio.com.br/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/api.seu-dominio.com.br/privkey.pem;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+
+    client_max_body_size 50M;
+
+    # -------------------------------------------------------------------------
+    # Webhook EFI — exige certificado cliente (mTLS) SOMENTE nesta rota.
+    # Troque para certificate-chain-homolog.crt em ambiente de homologação.
+    # -------------------------------------------------------------------------
+    location /payment/efi/webhook {
+        ssl_verify_client       on;
+        ssl_client_certificate  /etc/nginx/certs/efi/certificate-chain-prod.crt;
+        ssl_verify_depth        3;
+
+        # Rejeita se o cliente não apresentou certificado válido (1ª requisição
+        # da EFI, feita sem cert, cai aqui e recebe 496).
+        if ($ssl_client_verify != SUCCESS) {
+            return 496;
+        }
+
+        proxy_pass http://127.0.0.1:7077;
+        proxy_http_version 1.1;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # --- Demais rotas da API (sem mTLS) ---
+    location / {
+        proxy_pass http://127.0.0.1:7077;
+        proxy_http_version 1.1;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+# -----------------------------------------------------------------------------
+# Nota sobre `?ignorar=`:
+# O backend cadastra a URL como https://<dominio>/payment/efi/webhook?hmac=...&ignorar=
+# O parâmetro `ignorar=` impede a EFI de acrescentar `/pix` ao path; ainda
+# assim o controller aceita tanto /payment/efi/webhook quanto .../webhook/pix.
+# -----------------------------------------------------------------------------

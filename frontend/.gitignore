@@ -1,0 +1,13 @@
+.DS_Store
+
+# dotenv environment variable files (never commit secrets)
+.env
+.env.*
+!.env.example
+!.env.prod.example
+
+/node_modules/
+
+# React Router
+/.react-router/
+/build/

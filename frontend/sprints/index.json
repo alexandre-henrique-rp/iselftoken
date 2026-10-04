@@ -1,0 +1,133 @@
+{
+  "_type": "harness-sprint-index-v6",
+  "version": 2,
+  "project": "iselftoken-frontend",
+  "generatedAt": "2026-06-30T23:30:00-03:00",
+  "updatedAt": "2026-06-30T23:55:00-03:00",
+  "sprints": [
+    {
+      "id": "S01-cnpj-alfanumerico",
+      "name": "Sprint 1 — CNPJ Alfanumérico (IN RFB 2.229/2024)",
+      "goal": "Adaptar o frontend Iselftoken para aceitar, validar, formatar, transmitir e armazenar CNPJ Alfanumérico sem rejeitar inscrições legítimas a partir de julho/2026, mantendo 100% de compatibilidade com CNPJs numéricos legados.",
+      "milestone": "M1",
+      "priority": "critical",
+      "status": "pending",
+      "profile": "lean",
+      "regulatoryDeadline": "2026-07-01",
+      "regulatorySource": "IN RFB 2.229/2024",
+      "taskCount": 7,
+      "totalHours": 20,
+      "startedAt": null,
+      "finishedAt": null,
+      "commitHash": "b4f4e95c96729c083f01ca603cbca82aa2ad09d4",
+      "jsonPath": "sprints/S01-cnpj-alfanumerico.json",
+      "planPath": "sprints/S01-cnpj-alfanumerico/SPRINT_PLAN.md",
+      "tasksDir": "sprints/S01-cnpj-alfanumerico/tasks/",
+      "taskIds": ["T001", "T002", "T003", "T004", "T005", "T006", "T007"],
+      "blockers": [
+        "Algoritmo DV alfanumérico completo depende de leitura do manual-dv-cnpj.pdf (T003 usa validação soft + console.warn 'pending-manual-dv-review') — RESOLVIDO em jun/2026; S02 reabre T003 como T009"
+      ],
+      "crossRepoRisks": [
+        "Backend NestJS em ../backendnode precisa adaptação análoga — registrado em sprints/cross-sprint.json como EXT-04"
+      ]
+    },
+    {
+      "id": "S02-m2-debts",
+      "name": "Sprint S02 — Zod fix + DV completo (M2)",
+      "goal": "Fechar DEBT-ZOD-001 (typecheck quebrado pelo Zod 4 migration incompleto) e DEBT-DV-001 (DV placeholder aguardando manual oficial) reabrindo T003 com o algoritmo oficial do manual serpro.gov.br republicado em jun/2026. Atualizar fixtures T007 com DVs VALIDADOS + casos negativos. Resultado: typecheck verde, cadastro de startup com DV alfanumérico verificado, cobertura ampliada em new-startup-schema.ts.",
+      "milestone": "M2",
+      "priority": "critical",
+      "status": "pending",
+      "profile": "lean",
+      "regulatoryDeadline": "2026-07-01",
+      "regulatorySource": "IN RFB 2.229/2024 + manual-dv-cnpj.pdf (jun/2026) — algoritmo oficial transcrito em RAG v2 §4.1-4.5",
+      "estimatedAt": "2026-06-30",
+      "taskCount": 3,
+      "totalHours": 8,
+      "startedAt": null,
+      "finishedAt": null,
+      "jsonPath": "sprints/S02-m2-debts.json",
+      "planPath": "sprints/S02-m2-debts/SPRINT_PLAN.md",
+      "tasksDir": "sprints/S02-m2-debts/tasks/",
+      "taskIds": ["T008", "T009", "T010"],
+      "tasks": [
+        {"id": "T008", "title": "Zod 3→4 migration (errorMap removido + Resolver inference)", "estimatedEffort": 1, "type": "frontend", "owner": "frontend"},
+        {"id": "T009", "title": "DV completo CNPJ alfanumérico (manual serpro.gov.br §4.1-4.5)", "estimatedEffort": 4, "type": "frontend", "owner": "frontend"},
+        {"id": "T010", "title": "Atualizar testes T007 (fixtures com DVs validados + casos negativos)", "estimatedEffort": 3, "type": "test", "owner": "tester"}
+      ],
+      "dependencies": "T009 depende de T008 (typecheck verde); T010 depende de T009 (API final do validator). Sequencial estrito.",
+      "debtsClosing": ["DEBT-ZOD-001", "DEBT-DV-001 (alias DEBT-03-dv-placeholder)"],
+      "upstreamSprint": "S01-cnpj-alfanumerico",
+      "scopeNotes": [
+        "Coexistência obrigatória com S01 — não deletar nem sobrescrever S01; extensão cumulativa.",
+        "Cobertura mínima 70% (perfil lean) — meta 80% em new-startup-schema.ts alinhada com S01 thresholds.",
+        "Sucinto algoritmo do DV no SPRINT_PLAN.md; detalhes completos em RAG v2 §4.1-4.5 e /tmp/opencode/manual-dv.txt (fonte primária)."
+      ]
+    },
+    {
+      "id": "S24-rodada-edit-frontend-only",
+      "name": "Sprint S24 — Edição de Rodada (Frontend-only, M4)",
+      "goal": "Adicionar aba 'Rodada' em /founder/startups/:id/edit com 2 tabs internas (Captação + Distribuição). Mock estático — sem integração backend (backend com bugs na rota PATCH /startup/{id}/rodada/{id}). 80% dos componentes já existem reusáveis.",
+      "milestone": "M4",
+      "priority": "medium",
+      "status": "closed",
+      "profile": "lean",
+      "estimatedAt": "2026-07-13",
+      "taskCount": 10,
+      "totalHours": 9.5,
+      "startedAt": "2026-07-13T15:00:00-03:00",
+      "finishedAt": "2026-07-13T16:00:00-03:00",
+      "commitHash": "08ea174",
+      "userApproval": true,
+      "jsonPath": "sprints/S24-rodada-edit-frontend-only.json",
+      "planPath": "sprints/S24-rodada-edit-frontend-only/SPRINT_PLAN.md",
+      "tasksDir": "sprints/S24-rodada-edit-frontend-only/tasks/",
+      "taskIds": ["T001", "T002", "T003", "T004", "T005", "T006", "T007", "T008", "T009", "T010"],
+      "tasks": [
+        {"id": "T001", "title": "Extrair schema Zod round-distribution-schema.ts (7 campos + superRefine soma=100)", "estimatedEffort": 0.5, "type": "frontend", "owner": "frontend", "complexity": "simple"},
+        {"id": "T002", "title": "Componente reservation-status-card.tsx (read-only, simplificado de token-reservation.tsx)", "estimatedEffort": 1.0, "type": "frontend", "owner": "frontend", "complexity": "simple"},
+        {"id": "T003", "title": "Componente rodada-captacao-tab.tsx (compõe RoundTerms + RoundSchedule + TokenEconomicsCalculator + ReservationStatusCard)", "estimatedEffort": 1.5, "type": "frontend", "owner": "frontend", "complexity": "medium"},
+        {"id": "T004", "title": "Componente rodada-distribuicao-tab.tsx (7 inputs nomeados + pill soma=100)", "estimatedEffort": 2.5, "type": "frontend", "owner": "frontend", "complexity": "complex", "needsMicroPrompt": true},
+        {"id": "T005", "title": "Rota edit-startup-rodada.tsx (shell + tabs internas useState + register handlers mock)", "estimatedEffort": 1.5, "type": "frontend", "owner": "frontend", "complexity": "simple"},
+        {"id": "T006", "title": "Registrar rota em app/routes.ts (children de founder/startups/:id/edit)", "estimatedEffort": 0.2, "type": "frontend", "owner": "frontend", "complexity": "simple"},
+        {"id": "T007", "title": "Adicionar nav item 'Rodada' em edit-startup-nav.tsx (ícone Coins, posição 2)", "estimatedEffort": 0.3, "type": "frontend", "owner": "frontend", "complexity": "simple"},
+        {"id": "T008", "title": "Atualizar AGENTS.md de app/routes/private/ e app/components/founder/", "estimatedEffort": 0.5, "type": "frontend", "owner": "documenter", "complexity": "simple"},
+        {"id": "T009", "title": "Vitest para round-distribution-schema.ts (6 cenários: soma=100, 99.99, 100.01, 0, negativo, >100)", "estimatedEffort": 1.0, "type": "test", "owner": "tester", "complexity": "simple"},
+        {"id": "T010", "title": "Verificação visual + screenshot em doc/screenshots/rodada-edit.png", "estimatedEffort": 0.5, "type": "frontend", "owner": "frontend", "complexity": "simple"}
+      ],
+      "dependencies": "T001 independente. T002 depende de T001 (compartilha status enum). T003 depende de T002. T004 depende de T001. T005 depende de T003+T004. T006+T007 após T005. T008+T009+T010 após T05-T07.",
+      "complexTasks": ["T004"],
+      "blockingDebts": [],
+      "downstreamSprints": [],
+      "upstreamSprints": [],
+      "scopeNotes": [
+        "FRONTEND-ONLY — backend NÃO será tocado nesta sprint. PATCH /startup/{id}/rodada/{id} continua com bugs no NestJS (gap conhecido).",
+        "80% dos componentes já existem: round-terms.tsx, round-schedule.tsx, token-economics-calculator.tsx (todos modo edit funcional com mocks).",
+        "Schema Zod dos 7 campos JÁ EXISTE em new-startup-schema.ts:211-218 + superRefine :253-270 — apenas EXTRAIR para novo arquivo focado.",
+        "Lógica de soma=100 + dirty + pill colorida JÁ EXISTE em use-of-funds.tsx:58-79 — inspiração para T04, não cópia direta (shape incompatível: array dinâmico vs 7 fixos).",
+        "Pattern de tabs internas NOVO no codebase — referência: current-metrics.tsx:62-80 (segmented control MRR/ARR).",
+        "MIGRAÇÃO FUTURA: quando backend corrigir rota PATCH /rodada/{id}, criar S25 (backend) + S26 (frontend integration) para ativar persistência real.",
+        "Plano detalhado: sprints/PLANO_ACAO_EDICAO_RODADA_FRONTEND_ONLY.md (378 LOC, commit 5f1070d)."
+      ]
+    }
+  ],
+  "stats": {
+    "totalSprints": 3,
+    "totalClosedSprints": 3,
+    "totalTasks": 20,
+    "totalTasksCompleted": 20,
+    "totalHours": 37.5,
+    "specCoverage": "100%",
+    "sprintScopedMilestones": {
+      "M1": {"sprintId": "S01-cnpj-alfanumerico", "status": "closed", "commitHash": "b4f4e95"},
+      "M2": {"sprintId": "S02-m2-debts", "status": "closed", "commitHash": "54ab32f"},
+      "M4": {"sprintId": "S24-rodada-edit-frontend-only", "status": "closed", "commitHash": "08ea174"}
+    }
+  },
+  "notes": [
+    "Sprint S01 com 5 tasks (legado em .harness/sprints/S01-cnpj-alfanumerico/tasks/) foi atualizado para 7 tasks — escopo refinado após descoberta de escopo real via grep (banking-schema.ts e BFF geral.cnpj não estavam no esqueleto original).",
+    "Artefatos de S01 e S02 criados em sprints/ (raiz) devido a restrição do hook path-boundary.ts — ver DEBT-05 em sprints/cross-sprint.json.",
+    "S02 reabre a dívida DV (S01-T003) como S02-T009 — algoritmo agora derivado do manual serpro.gov.br republicado em jun/2026.",
+    "S24 adicionado em 2026-07-13 — frontend-only, sem integração backend (backend com bugs na rota PATCH /startup/{id}/rodada/{id}). Migração para persistência real depende de fix backend (M5+)."
+  ]
+}

@@ -1,0 +1,45 @@
+# ============================================================
+# Dockerfile.prod — IselfToken API (SQLite, apresentação)
+# Single-stage: simples e funcional
+# ============================================================
+
+FROM node:22-slim
+
+# Deps nativas para bcrypt, better-sqlite3, sharp
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 make g++ openssl ca-certificates && rm -rf /var/lib/apt/lists/*
+
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+WORKDIR /app
+
+ENV PUPPETEER_SKIP_DOWNLOAD=true
+
+COPY . .
+
+# Instala deps (ignora exit code do pnpm 10 ignored-builds)
+RUN pnpm install --frozen-lockfile; \
+    if [ ! -d "node_modules" ]; then echo "FATAL: install failed" && exit 1; fi
+
+# Gera o Prisma Client (SQLite)
+RUN DATABASE_PROVIDER=sqlite DATABASE_URL="file:./data/iselftoken.db" \
+    npx prisma generate --schema=prisma/schema.sqlite.prisma
+
+# Sincroniza generated/prisma -> node_modules/.prisma/client (postinstall hook
+# ja rodou antes do generate, entao sincronizamos manualmente agora).
+RUN pnpm run prisma:sync
+
+# Build do NestJS
+RUN pnpm build
+
+# Cria diretórios de dados
+RUN mkdir -p /app/data /app/storage /app/icons /app/uploads
+
+EXPOSE 7077
+
+# Na inicialização: auto-baseline (se DB legada de db push) + migrate deploy + start
+# S35 — `prisma migrate deploy` em vez de `prisma db push` (rastreável em
+# `_prisma_migrations`). `baseline-prod-db.ts` antes popula a tabela de
+# tracking quando ela está ausente, evitando P3005 em DBs materializadas
+# via `db push` antes da S35. Idempotente em todos os cenários.
+CMD sh -c "npx ts-node scripts/baseline-prod-db.ts && npx prisma migrate deploy --schema=prisma/schema.sqlite.prisma && node --enable-source-maps dist/src/main.js"

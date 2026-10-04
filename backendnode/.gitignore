@@ -1,0 +1,113 @@
+# compiled output
+/dist
+/node_modules
+/build
+
+# TypeScript incremental cache
+/tsconfig.tsbuildinfo
+
+# generated .d.ts / .js / source maps (build artifacts que nao devem ir pro repo)
+/*.d.ts
+/jest.setup.js
+/jest.setup.js.map
+/prisma.config.d.ts
+
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# OS
+.DS_Store
+
+# Tests
+/coverage
+/.nyc_output
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# dotenv environment variable files (never commit secrets)
+.env
+.env.*
+!.env.example
+!.env.prod.example
+
+# temp directory
+.temp
+.tmp
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Docker
+docker/mysql/data/
+docker/mysql/.env
+docker/redis/redis_data/
+docker/rabbitmq/rabbitmq_data/
+docker/minio/minio_data/
+
+
+/generated/prisma
+# Diretório `generated` é cache de artefatos do Prisma (sincronizado com node_modules/.prisma/client via postinstall).
+# Não deve ser commitado — protege também contra symlinks acidentais como `generated/generated -> ../generated`
+# que já causaram ELOOP no `pnpm lint` no CI.
+/generated/
+
+# Diretório local/provisionado de staging; assets versionáveis ficam em prisma/seeds/assets
+/storage/
+
+# uploads (gerados pela seed/runtime; não versionar)
+/uploads
+
+# Certificados mTLS (C6 Bank, etc.) — nunca commitar
+/certs/c6/
+
+# Certificados mTLS EFI (.p12 homologação/produção) — nunca commitar
+/certs/efi/*.p12
+/certs/efi/*.pem
+
+# PKI dev keystore (criptografado em dev, mas nao deve ir pro repo mesmo assim)
+/.pki_keystore.json
+
+# pnpm store versionado por engano (deveria morar fora do projeto)
+/.pnpm-store/
+
+# yarn (caso alguem tente usar em paralelo)
+/.yarn/
+/.yarnrc.yml
+/yarn.lock
+/package-lock.json
+
+# Sandbox marker (criado pelo ai-jail ao abrir o projeto)
+/.ai-jail
+/db/
+# Saida de test runners (vestigios)
+/test_results_*.json
+prisma/dev.db
+# Banco SQLite de dados (fora de prisma!)
+
+# Script de teste solto (SES) — não versionar
+test-ses-api.js
+
+

@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 800" width="1280" height="800" font-family="Manrope, sans-serif">
+  <defs>
+    <linearGradient id="bg-grad-a" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1f031d"/>
+      <stop offset="100%" stop-color="#270524"/>
+    </linearGradient>
+    <linearGradient id="accent-grad-a" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#d500f9"/>
+      <stop offset="100%" stop-color="#f084ff"/>
+    </linearGradient>
+    <linearGradient id="text-grad-a" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#d500f9"/>
+      <stop offset="60%" stop-color="#ea6bff"/>
+      <stop offset="100%" stop-color="#f084ff"/>
+    </linearGradient>
+    <linearGradient id="orb-a-1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d500f9" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#d500f9" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="glow-a"><feGaussianBlur stdDeviation="8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1280" height="800" fill="url(#bg-grad-a)"/>
+  <!-- Overlay modal -->
+  <rect width="1280" height="800" fill="rgba(31, 3, 29, 0.85)"/>
+
+  <!-- Watermark -->
+  <text x="640" y="430" text-anchor="middle" font-size="180" font-weight="800"
+    fill="rgba(213, 0, 249, 0.04)" transform="rotate(-15 640 400)" letter-spacing="-6">
+    iSelfToken
+  </text>
+
+  <!-- Modal orbs -->
+  <circle cx="1100" cy="180" r="160" fill="url(#orb-a-1)"/>
+
+  <!-- Header (slightly dimmed) -->
+  <rect x="0" y="0" width="1280" height="72" fill="rgba(65, 19, 59, 0.55)"/>
+  <rect x="32" y="22" width="28" height="28" rx="7" fill="url(#accent-grad-a)" filter="url(#glow-a)"/>
+  <text x="76" y="42" fill="#ffdbf3" font-size="15" font-weight="800">iSelfToken</text>
+  <text x="76" y="56" fill="#cc9dc0" font-size="9" letter-spacing="2">PAINEL ADMINISTRATIVO</text>
+  <rect x="650" y="30" width="80" height="24" rx="6" fill="#30092c"/>
+  <text x="690" y="46" text-anchor="middle" fill="#ffdbf3" font-size="13" font-weight="700">Cupons</text>
+
+  <!-- Modal -->
+  <rect x="200" y="100" width="880" height="600" rx="18" fill="#1f031d" stroke="rgba(213, 0, 249, 0.3)"/>
+  <circle cx="1050" cy="180" r="120" fill="rgba(213, 0, 249, 0.18)"/>
+
+  <!-- Modal header -->
+  <text x="232" y="148" fill="#d500f9" font-size="9" font-weight="700" letter-spacing="3">EDITAR CUPOM · PROMO50</text>
+  <text x="232" y="186" fill="url(#text-grad-a)" font-size="26" font-weight="800">PROMO50</text>
+  <text x="380" y="186" fill="#cc9dc0" font-size="13" font-weight="500">50% OFF · múltiplo</text>
+  <text x="232" y="208" fill="#cc9dc0" font-size="11">Black Friday 2026 · campanha agressiva para aquisição de novos investidores</text>
+  <text x="1042" y="158" fill="#cc9dc0" font-size="18">✕</text>
+
+  <line x1="216" y1="232" x2="1064" y2="232" stroke="rgba(97, 59, 90, 0.2)"/>
+
+  <!-- Tabs -->
+  <text x="232" y="266" fill="#d500f9" font-size="11" font-weight="700">⚙  Configuração</text>
+  <line x1="232" y1="276" x2="346" y2="276" stroke="#d500f9" stroke-width="2"/>
+  <text x="364" y="266" fill="#cc9dc0" font-size="11" font-weight="600">📊 Uso em tempo real</text>
+  <text x="490" y="266" fill="#cc9dc0" font-size="11" font-weight="600">📋 Auditoria</text>
+  <text x="582" y="266" fill="#cc9dc0" font-size="11" font-weight="600">📄 Histórico</text>
+  <line x1="216" y1="288" x2="1064" y2="288" stroke="rgba(97, 59, 90, 0.2)"/>
+
+  <!-- Status -->
+  <rect x="232" y="308" width="200" height="24" rx="12" fill="rgba(52, 211, 153, 0.14)"/>
+  <circle cx="248" cy="320" r="3" fill="#34d399"/>
+  <text x="262" y="324" fill="#34d399" font-size="10" font-weight="700" letter-spacing="2">ATIVO · 847/1000 USOS</text>
+  <text x="450" y="324" fill="#cc9dc0" font-size="10">Última atualização: há 2 horas por <tspan fill="#ffdbf3" font-weight="700">marina.r</tspan></text>
+  <line x1="216" y1="346" x2="1064" y2="346" stroke="rgba(97, 59, 90, 0.2)"/>
+
+  <!-- Percentual + Código -->
+  <text x="232" y="376" fill="#cc9dc0" font-size="9" letter-spacing="2">PERCENTUAL</text>
+  <rect x="232" y="384" width="200" height="40" rx="10" fill="rgba(48, 9, 44, 0.6)" stroke="rgba(147, 104, 137, 0.35)"/>
+  <text x="252" y="408" fill="#ffdbf3" font-size="13" font-weight="700">50%</text>
+  <text x="416" y="408" fill="#cc9dc0" font-size="13">▾</text>
+
+  <text x="450" y="376" fill="#cc9dc0" font-size="9" letter-spacing="2">CÓDIGO</text>
+  <rect x="450" y="384" width="610" height="40" rx="10" fill="rgba(48, 9, 44, 0.6)" stroke="rgba(147, 104, 137, 0.35)"/>
+  <text x="470" y="408" fill="#d500f9" font-size="14" font-weight="700" font-family="JetBrains Mono" letter-spacing="3">PROMO50</text>
+  <rect x="1010" y="384" width="40" height="40" rx="10" fill="none" stroke="rgba(213, 0, 249, 0.45)"/>
+  <text x="1030" y="408" text-anchor="middle" fill="#f084ff" font-size="14">⟳</text>
+
+  <!-- Regra de uso -->
+  <text x="232" y="450" fill="#cc9dc0" font-size="9" letter-spacing="2">REGRA DE USO</text>
+  <rect x="232" y="458" width="828" height="58" rx="10" fill="#30092c" stroke="rgba(97, 59, 90, 0.3)"/>
+  <text x="252" y="486" fill="#d500f9" font-size="14">⚙</text>
+  <text x="280" y="484" fill="#ffdbf3" font-size="11" font-weight="700">Uso múltiplo · até 1.000 reservas</text>
+  <text x="280" y="502" fill="#cc9dc0" font-size="10">Cada usuário pode usar 1 vez · limite global 1.000</text>
+  <rect x="1004" y="478" width="48" height="22" rx="11" fill="url(#accent-grad-a)"/>
+  <circle cx="1042" cy="489" r="9" fill="#ffdbf3"/>
+
+  <!-- Validade -->
+  <text x="232" y="540" fill="#cc9dc0" font-size="9" letter-spacing="2">DATA DE EXPIRAÇÃO</text>
+  <rect x="232" y="548" width="828" height="40" rx="10" fill="rgba(48, 9, 44, 0.6)" stroke="rgba(147, 104, 137, 0.35)"/>
+  <text x="252" y="572" fill="#ffdbf3" font-size="13">31/12/2026</text>
+  <text x="1042" y="572" fill="#cc9dc0" font-size="14">📅</text>
+
+  <!-- Descrição interna -->
+  <text x="232" y="608" fill="#cc9dc0" font-size="9" letter-spacing="2">DESCRIÇÃO INTERNA * — AUDIT TRAIL LGPD/CVM 88</text>
+  <rect x="232" y="616" width="828" height="40" rx="10" fill="rgba(48, 9, 44, 0.6)" stroke="rgba(147, 104, 137, 0.35)"/>
+  <text x="252" y="640" fill="#cc9dc0" font-size="11">Black Friday 2026 — campanha agressiva para aquisição de novos investidores...</text>
+
+  <!-- Modal footer -->
+  <line x1="216" y1="668" x2="1064" y2="668" stroke="rgba(97, 59, 90, 0.2)"/>
+  <text x="232" y="700" fill="#ff6e84" font-size="11" font-weight="700">⏻  Desativar cupom</text>
+
+  <rect x="754" y="678" width="100" height="32" rx="9" fill="none" stroke="rgba(213, 0, 249, 0.45)"/>
+  <text x="804" y="698" text-anchor="middle" fill="#f084ff" font-size="11" font-weight="700">Cancelar</text>
+  <rect x="864" y="678" width="196" height="32" rx="9" fill="url(#accent-grad-a)" filter="url(#glow-a)"/>
+  <text x="962" y="698" text-anchor="middle" fill="white" font-size="11" font-weight="700">💾  Salvar alterações</text>
+
+  <!-- Toast -->
+  <g transform="translate(940, 720)">
+    <rect width="276" height="48" rx="12" fill="rgba(48, 9, 44, 0.92)" stroke="rgba(213, 0, 249, 0.4)"/>
+    <rect x="14" y="14" width="20" height="20" rx="6" fill="url(#accent-grad-a)"/>
+    <text x="24" y="28" text-anchor="middle" fill="white" font-size="11">✓</text>
+    <text x="42" y="28" fill="#ffdbf3" font-size="11" font-weight="700">PROMO50 atualizado</text>
+    <text x="42" y="42" fill="#cc9dc0" font-size="9">Salvo · audit registrado por marina.r</text>
+  </g>
+</svg>

@@ -1,0 +1,16 @@
+# Chaves SSH e material sensível — NUNCA commitar
+keys/
+*.pem
+
+# Diretório auxiliar local (lambdas/experimentos AWS)
+aws/
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+
+# Variáveis sensíveis
+*.auto.tfvars
+secret.tfvars

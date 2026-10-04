@@ -1,0 +1,30 @@
+- generic [active] [ref=e1]:
+  - region "Notifications alt+T"
+  - main [ref=e4]:
+    - generic [ref=e6]:
+      - heading "iSelfToken" [level=2] [ref=e8]
+      - generic [ref=e9]:
+        - heading "Bem-vindo" [level=3] [ref=e10]
+        - paragraph [ref=e11]: Acesse sua conta para continuar sua jornada de investimento.
+      - generic [ref=e12]:
+        - generic [ref=e13]:
+          - generic [ref=e14]: Email Corporativo
+          - textbox "Email Corporativo" [ref=e16]:
+            - /placeholder: nome@empresa.com
+        - generic [ref=e17]:
+          - generic [ref=e18]: Senha de Acesso
+          - generic [ref=e19]:
+            - textbox "Senha de Acesso" [ref=e20]:
+              - /placeholder: ············
+            - button "Mostrar senha" [ref=e21]
+        - generic [ref=e25]:
+          - generic [ref=e26] [cursor=pointer]:
+            - checkbox "Lembrar credenciais" [ref=e28]
+            - generic [ref=e29]: Lembrar credenciais
+          - link "Recuperar senha" [ref=e30] [cursor=pointer]:
+            - /url: /forgot-password
+        - button "Entrar" [ref=e31]
+      - paragraph [ref=e33]:
+        - text: Novo no ecossistema?
+        - link "Crie sua conta agora" [ref=e34] [cursor=pointer]:
+          - /url: /register

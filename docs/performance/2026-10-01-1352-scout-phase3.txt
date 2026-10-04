@@ -1,0 +1,467 @@
+==================================================
+perf-scout — iSelfToken — 2026-10-01T13:52:05Z
+Escopo: full
+==================================================
+
+## 1. INVENTÁRIO DE ROTAS (frontend)
+
+### 1.1 Total de rotas
+Total declaradas em routes.ts: 299
+
+### 1.2 Rotas privadas (gated pelo layout)
+admin/affiliate
+admin/config
+admin/coupons
+admin/dashboard
+admin/email-templates
+admin/history
+admin/installments
+admin/kyc
+admin/marketplace
+admin/payments
+admin/payouts
+admin/plans
+admin/servicos
+admin/startups
+admin/startups/:id
+admin/users
+admin/users/:id
+auditoria
+bancario
+campanhas
+central-cupons
+checkout/:id
+checkout/:id/pix
+checkout/payment/:id
+checkout/return
+compliance/dashboard
+compliance/startups
+compliance/users
+compliance/users/:id
+documentos
+endereco
+founder/dashboard
+founder/investors
+founder/startups/new
+home
+investments/:id/success
+kyc
+notifications
+pricing
+profile
+profile/plans
+recursos
+retornos
+startups
+startups/:id
+tese
+time
+transparencia
+wallet
+wallet/withdraw
+
+### 1.3 Rotas BFF (/api/*)
+admin/audit-logs
+admin/config/fundraising
+admin/config/parameters
+admin/coupons
+admin/coupons/:id
+admin/coupons/:id/audit
+admin/coupons/:id/status
+admin/coupons/:id/usages
+admin/dashboard
+admin/document-requests
+admin/email-templates
+admin/financeiro/split
+admin/history
+admin/history/export
+admin/kyc
+admin/kyc/:id
+admin/kyc/:id/decide
+admin/payments
+admin/payments/:id
+admin/payouts
+admin/plans
+admin/plans/:id
+admin/plans/:id/stats
+admin/seals
+admin/seals/:id
+admin/services
+admin/startups
+admin/startups/:id
+admin/startups/:id/score
+admin/users
+admin/users/:id
+admin/users/:id/status
+affiliate/track
+auth
+auth/access
+auth/confirm-login
+auth/dev/2fa-code
+auth/dismiss-session
+auth/forgot-password
+auth/logout
+auth/newcode
+auth/register
+auth/reset-password
+auth/status
+auth/validate-email
+auth/verify-code
+categories
+compliance/campaigns
+compliance/campaigns/:id
+config/fundraising
+country
+coupons
+coupons/available
+founder/payments
+founder/services
+geral/cep/:cep
+geral/cnpj/:cnpj
+investments
+investments/:id/cancel
+investments/my-startups
+marketplace/all
+marketplace/banner
+marketplace/early-access
+marketplace/sector-stats
+notifications
+payment
+payment/apply-coupon
+payment/checkout
+payment/:id
+payment/:id/card
+payment/:id/pix
+payment/:id/regenerate
+payment/simulate
+payment/startup-checkout
+pdf-proxy
+plans
+plans/:id
+seals
+seals/startup/:id
+startup
+startup/draft
+startup/:id
+startup/:id/banking
+startup/:id/documents
+startup/:id/documents/na
+startup/:id/draft
+startup/:id/investors
+startup/:id/pitch
+startup/:id/resubmit
+startups
+startups/featured
+startups/:id
+startups/opportunities
+startups/recently-added
+startups/slug/:slug
+subscriptions
+subscriptions/:id
+subscriptions/:id/cancel
+testimonials/investors
+testimonials/startups
+
+### 1.4 Rotas públicas
+2fa
+forgot-password
+login
+manutencao
+politica-privacidade
+r/:code
+register
+reset-password
+s/:slugOrId
+startup/:slug
+termos-de-uso
+validate-email
+
+## 2. AUDITORIA SSR (Hidratação)
+
+### 2.1 Rotas COM HydrationBoundary
+18
+
+### 2.2 Rotas privadas SEM HydrationBoundary (suspeitas)
+  SUSPEITO: frontend/app/routes/private/checkout-pix.tsx
+  SUSPEITO: frontend/app/routes/private/checkout-return.tsx
+  SUSPEITO: frontend/app/routes/private/checkout.tsx
+  SUSPEITO: frontend/app/routes/private/compliance-user-detail-auditoria.tsx
+  SUSPEITO: frontend/app/routes/private/compliance-user-detail-campanhas.tsx
+  SUSPEITO: frontend/app/routes/private/compliance-user-detail-endereco.tsx
+  SUSPEITO: frontend/app/routes/private/compliance-user-detail-identidade.tsx
+  SUSPEITO: frontend/app/routes/private/compliance-user-detail-investimentos.tsx
+  SUSPEITO: frontend/app/routes/private/financeiro-reconciliation.tsx
+  SUSPEITO: frontend/app/routes/private/founder/startups.$id/checkout.tsx
+  SUSPEITO: frontend/app/routes/private/founder.startups.$id.checkout.tsx
+  SUSPEITO: frontend/app/routes/private/compliance-change-requests.tsx
+  SUSPEITO: frontend/app/routes/private/admin-affiliate.tsx
+  SUSPEITO: frontend/app/routes/private/admin-email-templates.$slug.tsx
+  SUSPEITO: frontend/app/routes/private/admin-email-templates.tsx
+  SUSPEITO: frontend/app/routes/private/admin-history.tsx
+  SUSPEITO: frontend/app/routes/private/admin-kyc.tsx
+  SUSPEITO: frontend/app/routes/private/admin-startups.tsx
+  SUSPEITO: frontend/app/routes/private/admin-users.tsx
+  SUSPEITO: frontend/app/routes/private/admin.coupons.tsx
+  SUSPEITO: frontend/app/routes/private/admin.installments.tsx
+  SUSPEITO: frontend/app/routes/private/compliance-repasses.tsx
+  SUSPEITO: frontend/app/routes/private/compliance-startups.tsx
+  SUSPEITO: frontend/app/routes/private/edit-startup-bancario.tsx
+  SUSPEITO: frontend/app/routes/private/edit-startup-layout.tsx
+  SUSPEITO: frontend/app/routes/private/financeiro-assas.tsx
+  SUSPEITO: frontend/app/routes/private/financeiro-investments.tsx
+  SUSPEITO: frontend/app/routes/private/financeiro-plan-edit.tsx
+  SUSPEITO: frontend/app/routes/private/financeiro-plans.tsx
+  SUSPEITO: frontend/app/routes/private/financeiro-repasse.tsx
+
+### 2.3 Loaders que fazem fetch mas não usam setQueryData
+  WATERFALL: frontend/app/routes/api/admin.financeiro.reconciliation.ts
+  WATERFALL: frontend/app/routes/api/admin.financeiro.transactions.ts
+  WATERFALL: frontend/app/routes/api/auth-newcode.ts
+  WATERFALL: frontend/app/routes/api/auth-status.ts
+  WATERFALL: frontend/app/routes/api/auth-validate-email.ts
+  WATERFALL: frontend/app/routes/api/country.ts
+  WATERFALL: frontend/app/routes/api/geral.cnpj.$cnpj.ts
+  WATERFALL: frontend/app/routes/api/marketplace-all.ts
+  WATERFALL: frontend/app/routes/api/marketplace-curated-picks.ts
+  WATERFALL: frontend/app/routes/api/marketplace-sector-stats.ts
+  WATERFALL: frontend/app/routes/api/payment.$id.ts
+  WATERFALL: frontend/app/routes/api/payment.ts
+  WATERFALL: frontend/app/routes/api/plans.$id.ts
+  WATERFALL: frontend/app/routes/api/plans.ts
+  WATERFALL: frontend/app/routes/api/seals-startup.ts
+  WATERFALL: frontend/app/routes/api/seals.ts
+  WATERFALL: frontend/app/routes/api/startup-dashboard-metrics.ts
+  WATERFALL: frontend/app/routes/api/startup.$id.documents.$docId.download.ts
+  WATERFALL: frontend/app/routes/api/startup.$id.documents.ts
+  WATERFALL: frontend/app/routes/api/startup.ts
+  WATERFALL: frontend/app/routes/api/startups-featured.ts
+  WATERFALL: frontend/app/routes/api/startups-opportunities.ts
+  WATERFALL: frontend/app/routes/api/startups-recently-added.ts
+  WATERFALL: frontend/app/routes/api/testimonials-investors.ts
+  WATERFALL: frontend/app/routes/api/testimonials-startups.ts
+  WATERFALL: frontend/app/routes/api/users-me.ts
+  WATERFALL: frontend/app/routes/api/auth-register.ts
+  WATERFALL: frontend/app/routes/api/auth-dev-2fa-code.ts
+  WATERFALL: frontend/app/routes/api/verificar.$documentId.ts
+  WATERFALL: frontend/app/routes/api/categories.ts
+
+## 3. ANTI-PATTERNS
+
+### 3.1 fetch solto em useEffect
+
+### 3.2 BACKEND_URL usado em loaders (deveria passar por BFF)
+
+### 3.3 queryKey com string mágica (fora de lib/queries.ts)
+frontend/app/hooks/use-financeiro-configure-repasse.ts:30:      qc.invalidateQueries({ queryKey: ["financeiro-repasse", key] });
+frontend/app/hooks/use-financeiro-configure-repasse.ts:31:      qc.invalidateQueries({ queryKey: ["repasse-dashboard"] });
+frontend/app/hooks/use-financeiro-configure-repasse.ts:32:      qc.invalidateQueries({ queryKey: ["compliance-repasses"] });
+frontend/app/hooks/use-email-template.ts:6:    queryKey: ["admin", "email-templates", slug],
+frontend/app/hooks/use-admin-startups.test.tsx:27:    expect(opts.queryKey).toEqual(["admin-startups", { page: 2, status: "ACTIVE" }]);
+frontend/app/hooks/use-efi-checkout.ts:43:    queryKey: ["efi-checkout", paymentId, checkoutId],
+frontend/app/hooks/use-efi-checkout.ts:69:    queryKey: ["efi-status", paymentId],
+frontend/app/hooks/use-efi-checkout.ts:187:      queryClient.invalidateQueries({ queryKey: ["efi-checkout"] });
+frontend/app/hooks/use-efi-checkout.ts:203:      queryClient.invalidateQueries({ queryKey: ["efi-checkout"] });
+frontend/app/hooks/use-efi-checkout.ts:204:      queryClient.invalidateQueries({ queryKey: ["efi-status"] });
+frontend/app/hooks/use-efi-checkout.ts:220:      queryClient.invalidateQueries({ queryKey: ["efi-checkout"] });
+frontend/app/hooks/use-document-requests.ts:18:    queryKey: ["document-requests", "admin", params],
+frontend/app/hooks/use-document-requests.ts:39:      qc.invalidateQueries({ queryKey: ["document-requests"] });
+frontend/app/hooks/use-document-requests.ts:57:      qc.invalidateQueries({ queryKey: ["document-requests"] });
+frontend/app/hooks/use-admin-payments.ts:122:    queryKey: ["admin-payments", params],
+frontend/app/hooks/use-admin-payments.ts:152:    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-payments"] }),
+frontend/app/hooks/use-mark-all-as-read-mutation.ts:27:      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+frontend/app/hooks/use-dashboard-overview.ts:7: * Reutiliza a queryKey ["startups"] para compartilhar cache com startupsQueryOptions
+frontend/app/hooks/use-review-change-request-mutation.ts:31:      qc.invalidateQueries({ queryKey: ["compliance-change-requests"] });
+frontend/app/hooks/use-mark-as-read-mutation.ts:27:      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+
+### 3.4 refetch de /users/me ou /auth/status em rota filha
+
+## 4. BACKEND — QUERIES PESADAS
+
+### 4.1 Top 20 services com mais queries Prisma
+backendnode/src/api/admin/admin.service.ts:81
+backendnode/src/api/payment/payment.service.ts:79
+backendnode/src/api/transparency/discussions/discussions.service.ts:32
+backendnode/src/api/startup/service/startup-crud.service.ts:30
+backendnode/src/api/admin/admin-dashboard-summary.service.ts:29
+backendnode/src/api/seals/seals.service.ts:24
+backendnode/src/api/repasses/repasses.service.ts:24
+backendnode/src/api/transactions/transactions.service.ts:23
+backendnode/src/api/payment/coupons/coupon.service.ts:23
+backendnode/src/api/affiliate/affiliate.service.ts:22
+backendnode/src/api/startup/service/startup-extras.service.ts:21
+backendnode/src/api/email-templates/email-templates.service.ts:21
+backendnode/src/api/payment/fund-transfer.service.ts:20
+backendnode/src/api/startup/service/startup-query.service.ts:19
+backendnode/src/api/subscriptions/subscriptions.service.ts:18
+backendnode/src/api/campaigns/campaigns.service.ts:15
+backendnode/src/api/wallet/wallet.service.ts:14
+backendnode/src/api/installment-requests/installment-requests.service.ts:14
+backendnode/src/api/users/users.service.ts:13
+backendnode/src/api/affiliate/affiliate-commission.service.ts:13
+
+### 4.2 Promise.all com > 5 agregados (candidatos a cache)
+  PESADO: backendnode/src/api/affiliate/affiliate.service.ts (22 queries Prisma)
+  PESADO: backendnode/src/api/transparency/discussions/discussions.service.ts (32 queries Prisma)
+  PESADO: backendnode/src/api/admin/admin.service.ts (81 queries Prisma)
+  PESADO: backendnode/src/api/transactions/transactions.service.ts (23 queries Prisma)
+  PESADO: backendnode/src/api/admin/admin-dashboard-summary.service.ts (29 queries Prisma)
+  PESADO: backendnode/src/api/payment/payment.service.ts (79 queries Prisma)
+  PESADO: backendnode/src/api/startup/service/startup-extras.service.ts (21 queries Prisma)
+  PESADO: backendnode/src/api/startup/service/startup-crud.service.ts (30 queries Prisma)
+  PESADO: backendnode/src/api/payment/coupons/coupon.service.ts (23 queries Prisma)
+
+### 4.3 findMany SEM take explícito (risco OOM)
+  SEM TAKE: backendnode/src/api/startup-opinion/startup-opinion.service.ts (orderBy: 1x, take: 0x)
+  SEM TAKE: backendnode/src/api/affiliate/affiliate.service.ts (orderBy: 1x, take: 0x)
+  SEM TAKE: backendnode/src/api/seals/seals.service.ts (orderBy: 3x, take: 2x)
+  SEM TAKE: backendnode/src/api/config/config.service.ts (orderBy: 1x, take: 0x)
+  SEM TAKE: backendnode/src/api/payment/split/split.service.ts (orderBy: 1x, take: 0x)
+  SEM TAKE: backendnode/src/api/campaigns/service/campaign-resource.service.ts (orderBy: 1x, take: 0x)
+  SEM TAKE: backendnode/src/api/payment/service/statement.service.ts (orderBy: 1x, take: 0x)
+  SEM TAKE: backendnode/src/api/admin/admin-financeiro-split.service.ts (orderBy: 2x, take: 1x)
+  SEM TAKE: backendnode/src/api/admin/admin-document-requests.service.ts (orderBy: 1x, take: 0x)
+  SEM TAKE: backendnode/src/api/tokens/token-certificate.service.ts (orderBy: 1x, take: 0x)
+  SEM TAKE: backendnode/src/api/startup/service/data-change-request.service.ts (orderBy: 2x, take: 0x)
+
+### 4.4 Endpoints com @InjectRedis (cache presente)
+backendnode/src/realtime/realtime.service.ts
+backendnode/src/common/system-config/system-config.service.ts
+backendnode/src/common/system-config/AGENTS.md
+backendnode/src/auth/dismiss-session.controller.ts
+backendnode/src/auth/session/session.service.ts
+backendnode/src/auth/session/redis.module.ts
+backendnode/src/auth/services/login-lockout.service.ts
+backendnode/src/auth/services/login-alert.service.ts
+backendnode/src/api/marketplace/score-event.listeners.ts
+backendnode/src/api/marketplace/score-recalc.cron.ts
+backendnode/src/api/marketplace/pin-change.listener.ts
+backendnode/src/api/geral/geral.service.ts
+backendnode/src/api/payment/split/split.service.ts
+backendnode/src/api/uploads/services/presigned-url-cache.service.ts
+backendnode/src/api/payment/service/balance.service.ts
+
+### 4.5 Endpoints com findMany agregado em controllers (admin)
+backendnode/src/api/admin/admin.service.ts
+backendnode/src/api/admin/compliance-delete.service.ts
+backendnode/src/api/admin/admin-dashboard-summary.service.ts
+backendnode/src/api/admin/financeiro-reconciliation.service.ts
+backendnode/src/api/admin/admin-financeiro-split.service.ts
+backendnode/src/api/admin/admin-security-audit.controller.ts
+backendnode/src/api/admin/compliance-campaigns.service.ts
+
+## 5. ÍNDICES PRISMA
+
+### 5.1 Total de índices declarados
+Total: 123
+
+### 5.2 Índices compostos (candidatos a otimização)
+  @@index([email])
+  @@index([token])
+  @@index([userId])
+  @@index([kycProfileId])
+  @@index([createdAt])
+  @@index([userId])
+  @@index([userId])
+  @@index([categoryId])
+  @@index([manuallyPinned, score(sort: Desc)])
+  @@index([startupId])
+  @@index([startupId])
+  @@index([startupId, phase, createdAt])
+  @@index([campaignId])
+  @@index([campaignId])
+  @@index([campaignId])
+  @@index([startupId])
+  @@index([status])
+  @@index([requestedById])
+  @@index([userId])
+  @@index([startupId])
+
+### 5.3 Lacunas conhecidas (queries comuns sem índice composto)
+  - Payment(userId, createdAt) — verificar em schema
+  - Investment.allocatedAt — verificar em schema
+  - WebhookLog[eventType, receivedAt] — verificar em schema
+
+## 6. PKI E CRONS
+
+### 6.1 node-forge síncrono
+
+### 6.2 Crons ativos (@Cron)
+backendnode/src/common/pki/cert-expiration.cron.ts-   */
+backendnode/src/common/pki/cert-expiration.cron.ts:  @Cron('0 3 * * *')
+backendnode/src/common/pki/cert-expiration.cron.ts-  async handleCertificateExpiration(): Promise<void> {
+backendnode/src/common/pki/cert-expiration.cron.ts-    this.logger.log(
+--
+backendnode/src/api/campaigns/decisions/LGPD-REVIEW-S01.md-   ```typescript
+backendnode/src/api/campaigns/decisions/LGPD-REVIEW-S01.md:   @Cron('0 3 * * *')  // 3h da manhã
+backendnode/src/api/campaigns/decisions/LGPD-REVIEW-S01.md-   async purgeExpiredAuditLogs() {
+backendnode/src/api/campaigns/decisions/LGPD-REVIEW-S01.md-     const expired = await this.prisma.campaignOfferAuditLog.findMany({
+--
+backendnode/src/api/campaigns/service/campaign-deadline.cron.ts-
+backendnode/src/api/campaigns/service/campaign-deadline.cron.ts:  @Cron(CronExpression.EVERY_5_MINUTES, { name: 'campaign-deadline-check' })
+backendnode/src/api/campaigns/service/campaign-deadline.cron.ts-  async checkDeadlines(): Promise<void> {
+backendnode/src/api/campaigns/service/campaign-deadline.cron.ts-    const now = new Date();
+--
+backendnode/src/api/payment/fund-transfer-cron.service.ts-   */
+backendnode/src/api/payment/fund-transfer-cron.service.ts:  @Cron(CronExpression.EVERY_DAY_AT_9AM, {
+backendnode/src/api/payment/fund-transfer-cron.service.ts-    name: 'process-fund-transfers',
+backendnode/src/api/payment/fund-transfer-cron.service.ts-    timeZone: 'America/Sao_Paulo',
+--
+backendnode/src/api/uploads/jobs/cleanup.job.ts-   */
+backendnode/src/api/uploads/jobs/cleanup.job.ts:  @Cron('0 */6 * * *')
+backendnode/src/api/uploads/jobs/cleanup.job.ts-  async cleanupAbandonedUploads(): Promise<void> {
+backendnode/src/api/uploads/jobs/cleanup.job.ts-    const correlationId = crypto.randomUUID();
+--
+backendnode/src/api/uploads/jobs/cleanup.job.ts-   */
+backendnode/src/api/uploads/jobs/cleanup.job.ts:  @Cron('0 3 * * *')
+backendnode/src/api/uploads/jobs/cleanup.job.ts-  async cleanupOrphanUploads(): Promise<void> {
+backendnode/src/api/uploads/jobs/cleanup.job.ts-    const correlationId = crypto.randomUUID();
+--
+backendnode/src/api/payment/payment.cron.ts-   */
+backendnode/src/api/payment/payment.cron.ts:  @Cron('*/15 * * * *', { name: 'expire-pending-payments' })
+backendnode/src/api/payment/payment.cron.ts-  async expirePendingPayments(): Promise<{
+backendnode/src/api/payment/payment.cron.ts-    expired: number;
+--
+backendnode/src/api/payment/payment.cron.ts-   */
+backendnode/src/api/payment/payment.cron.ts:  @Cron('*/5 * * * *', { name: 'reconcile-paid-without-effects' })
+backendnode/src/api/payment/payment.cron.ts-  async reconcilePaidWithoutEffects(): Promise<{ recovered: number }> {
+backendnode/src/api/payment/payment.cron.ts-    const grace = new Date(Date.now() - EFFECTS_GRACE_MS);
+--
+
+## 7. BUILD ARTIFACTS
+
+### 7.1 Total de chunks JS
+481
+
+### 7.2 Top 10 chunks por tamanho (gzip)
+137244 admin-email-templates._slug-XhBR4sXQ.js
+127450 pdf-N1wkkXy6.js
+58211 founder.startups._id.transparencia-xWFmw40F.js
+57256 entry.client-1oHg4riN.js
+46212 index-BnMdO04Z.js
+42383 drawer-DUI6Ixub.js
+42316 chunk-QFMPRPBF-DXyO6grn.js
+39398 vision_bundle-BCuG209n.js
+27256 payment-token-efi-umd.min-DSgEkA1q.js
+20530 perfil-D-2PBWnv.js
+
+### 7.3 Top 10 chunks por tamanho (raw)
+437287 frontend/build/client/assets/admin-email-templates._slug-XhBR4sXQ.js
+431188 frontend/build/client/assets/pdf-N1wkkXy6.js
+204932 frontend/build/client/assets/founder.startups._id.transparencia-xWFmw40F.js
+183175 frontend/build/client/assets/entry.client-1oHg4riN.js
+182820 frontend/build/client/assets/manifest-f2ded2c2.js
+147240 frontend/build/client/assets/index-BnMdO04Z.js
+134566 frontend/build/client/assets/vision_bundle-BCuG209n.js
+130904 frontend/build/client/assets/drawer-DUI6Ixub.js
+129844 frontend/build/client/assets/chunk-QFMPRPBF-DXyO6grn.js
+89936 frontend/build/client/assets/payment-token-efi-umd.min-DSgEkA1q.js
+
+==================================================
+FIM — perf-scout 2026-10-01T13:52:05Z
+Próximos passos:
+  1. Revisar seções 2-7 acima
+  2. Para top-15 páginas, rodar k6:
+     k6 run .opencode/skills/performance-tuning/templates/k6-script.js
+  3. Gerar relatório Markdown:
+     cp .opencode/skills/performance-tuning/templates/report.md docs/performance/<id>.md
+==================================================

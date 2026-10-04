@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Postman API Testing",
+      "trigger": "PostFileSave",
+      "description": "Monitora alterações no código e configuração da API para lembrar a sincronização e execução dos testes Postman.",
+      "matcher": "(^|/)(backendnode|frontend)/.*\\.(ts|tsx|js|jsx|json|yaml|yml)$|(^|/)(package\\.json|.*openapi.*|.*swagger.*)$",
+      "action": {
+        "type": "agent",
+        "prompt": "O código ou a configuração da API foi alterado. Consulte o arquivo .postman.json na raiz do projeto. Se ele não existir ou estiver vazio, informe que é necessário criar uma coleção Postman; se existir, use os IDs registrados para verificar os recursos e proponha executar a coleção com o ambiente configurado. Nunca exponha segredos ou valores sensíveis."
+      }
+    }
+  ]
+}

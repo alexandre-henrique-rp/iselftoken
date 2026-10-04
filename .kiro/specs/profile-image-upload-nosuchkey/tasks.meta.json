@@ -1,0 +1,205 @@
+{
+  "pbtResults": {
+    "1. Escrever o teste exploratório da condição de bug (ANTES da correção)": {
+      "status": "passed",
+      "failingExample": "Property counterexamples on unfixed code: (1) FAILED retry with bucket='image', key='avatars/missing-canonical.png', storage.exists=false: Expected storageProvider.exists('image','avatars/missing-canonical.png'), received 0 calls; the job was republished without availability confirmation. The same holds for image/profiles/no-such-key.png and image-sm/avatars/missing-variant.png. (2) Upload id=77 owned by A (101), same SHA-256 uploaded by B (202): GET /uploads/77/status for B rejected with NotFoundException('Upload não encontrado') / HTTP 404 instead of authorized FAILED/200. The worker trace confirms download(image, 'avatars/missing-canonical.png') rejected Error('NoSuchKey') after publication.",
+      "lastRunTimestamp": 1789144740398
+    },
+    "2. Escrever os testes de preservação (ANTES da correção)": {
+      "status": "passed",
+      "lastRunTimestamp": 1789145113112
+    },
+    "3.6 Verificar que o teste exploratório agora passa": {
+      "status": "passed",
+      "lastRunTimestamp": 1789147158052
+    },
+    "3.7 Verificar que os testes de preservação continuam passando": {
+      "status": "passed",
+      "lastRunTimestamp": 1789147161655
+    }
+  },
+  "executionHistory": {
+    "1. Escrever o teste exploratório da condição de bug (ANTES da correção)": [
+      {
+        "executionId": "ed3a8e96-2751-4736-8b54-8f865656aba6",
+        "chatSessionId": "sess_f70e1018-aeba-4810-ad66-d4f07cef3f26",
+        "timestamp": 1789144584131
+      },
+      {
+        "executionId": "ed3a8e96-2751-4736-8b54-8f865656aba6",
+        "chatSessionId": "sess_f70e1018-aeba-4810-ad66-d4f07cef3f26",
+        "timestamp": 1789144592812
+      },
+      {
+        "executionId": "ed3a8e96-2751-4736-8b54-8f865656aba6",
+        "chatSessionId": "sess_f70e1018-aeba-4810-ad66-d4f07cef3f26",
+        "timestamp": 1789144783432
+      }
+    ],
+    "2. Escrever os testes de preservação (ANTES da correção)": [
+      {
+        "executionId": "ed3a8e96-2751-4736-8b54-8f865656aba6",
+        "chatSessionId": "sess_f70e1018-aeba-4810-ad66-d4f07cef3f26",
+        "timestamp": 1789144584230
+      },
+      {
+        "executionId": "ed3a8e96-2751-4736-8b54-8f865656aba6",
+        "chatSessionId": "sess_f70e1018-aeba-4810-ad66-d4f07cef3f26",
+        "timestamp": 1789144790303
+      },
+      {
+        "executionId": "ed3a8e96-2751-4736-8b54-8f865656aba6",
+        "chatSessionId": "sess_f70e1018-aeba-4810-ad66-d4f07cef3f26",
+        "timestamp": 1789145142562
+      }
+    ],
+    "3.1 Implementar o contrato canônico e a barreira de disponibilidade do storage": [
+      {
+        "executionId": "ed3a8e96-2751-4736-8b54-8f865656aba6",
+        "chatSessionId": "sess_f70e1018-aeba-4810-ad66-d4f07cef3f26",
+        "timestamp": 1789144584338
+      },
+      {
+        "executionId": "ed3a8e96-2751-4736-8b54-8f865656aba6",
+        "chatSessionId": "sess_f70e1018-aeba-4810-ad66-d4f07cef3f26",
+        "timestamp": 1789145151318
+      },
+      {
+        "executionId": "ed3a8e96-2751-4736-8b54-8f865656aba6",
+        "chatSessionId": "sess_f70e1018-aeba-4810-ad66-d4f07cef3f26",
+        "timestamp": 1789145488500
+      }
+    ],
+    "3.2 [BLOQUEADO — requer aprovação humana] Decidir e executar a alteração de ownership/deduplicação por SHA-256": [
+      {
+        "executionId": "ed3a8e96-2751-4736-8b54-8f865656aba6",
+        "chatSessionId": "sess_f70e1018-aeba-4810-ad66-d4f07cef3f26",
+        "timestamp": 1789144584515
+      },
+      {
+        "executionId": "ed3a8e96-2751-4736-8b54-8f865656aba6",
+        "chatSessionId": "sess_f70e1018-aeba-4810-ad66-d4f07cef3f26",
+        "timestamp": 1789145496339
+      },
+      {
+        "executionId": "ed3a8e96-2751-4736-8b54-8f865656aba6",
+        "chatSessionId": "sess_f70e1018-aeba-4810-ad66-d4f07cef3f26",
+        "timestamp": 1789145708480
+      }
+    ],
+    "3.3 Normalizar falhas do processor e o endpoint de status autorizado": [
+      {
+        "executionId": "ed3a8e96-2751-4736-8b54-8f865656aba6",
+        "chatSessionId": "sess_f70e1018-aeba-4810-ad66-d4f07cef3f26",
+        "timestamp": 1789144584662
+      },
+      {
+        "executionId": "ed3a8e96-2751-4736-8b54-8f865656aba6",
+        "chatSessionId": "sess_f70e1018-aeba-4810-ad66-d4f07cef3f26",
+        "timestamp": 1789145715836
+      },
+      {
+        "executionId": "ed3a8e96-2751-4736-8b54-8f865656aba6",
+        "chatSessionId": "sess_f70e1018-aeba-4810-ad66-d4f07cef3f26",
+        "timestamp": 1789145938050
+      }
+    ],
+    "3.4 Preservar a barreira de vínculo e a sincronização de perfil": [
+      {
+        "executionId": "ed3a8e96-2751-4736-8b54-8f865656aba6",
+        "chatSessionId": "sess_f70e1018-aeba-4810-ad66-d4f07cef3f26",
+        "timestamp": 1789144584820
+      },
+      {
+        "executionId": "ed3a8e96-2751-4736-8b54-8f865656aba6",
+        "chatSessionId": "sess_f70e1018-aeba-4810-ad66-d4f07cef3f26",
+        "timestamp": 1789145945281
+      },
+      {
+        "executionId": "ed3a8e96-2751-4736-8b54-8f865656aba6",
+        "chatSessionId": "sess_f70e1018-aeba-4810-ad66-d4f07cef3f26",
+        "timestamp": 1789146286561
+      }
+    ],
+    "3.5 Cobrir integrações de backend e frontend": [
+      {
+        "executionId": "ed3a8e96-2751-4736-8b54-8f865656aba6",
+        "chatSessionId": "sess_f70e1018-aeba-4810-ad66-d4f07cef3f26",
+        "timestamp": 1789144584942
+      },
+      {
+        "executionId": "ed3a8e96-2751-4736-8b54-8f865656aba6",
+        "chatSessionId": "sess_f70e1018-aeba-4810-ad66-d4f07cef3f26",
+        "timestamp": 1789146291800
+      },
+      {
+        "executionId": "ed3a8e96-2751-4736-8b54-8f865656aba6",
+        "chatSessionId": "sess_f70e1018-aeba-4810-ad66-d4f07cef3f26",
+        "timestamp": 1789146739419
+      }
+    ],
+    "3.6 Verificar que o teste exploratório agora passa": [
+      {
+        "executionId": "ed3a8e96-2751-4736-8b54-8f865656aba6",
+        "chatSessionId": "sess_f70e1018-aeba-4810-ad66-d4f07cef3f26",
+        "timestamp": 1789144585079
+      },
+      {
+        "executionId": "ed3a8e96-2751-4736-8b54-8f865656aba6",
+        "chatSessionId": "sess_f70e1018-aeba-4810-ad66-d4f07cef3f26",
+        "timestamp": 1789146744998
+      },
+      {
+        "executionId": "ed3a8e96-2751-4736-8b54-8f865656aba6",
+        "chatSessionId": "sess_f70e1018-aeba-4810-ad66-d4f07cef3f26",
+        "timestamp": 1789146862059
+      }
+    ],
+    "3.7 Verificar que os testes de preservação continuam passando": [
+      {
+        "executionId": "ed3a8e96-2751-4736-8b54-8f865656aba6",
+        "chatSessionId": "sess_f70e1018-aeba-4810-ad66-d4f07cef3f26",
+        "timestamp": 1789144585177
+      },
+      {
+        "executionId": "ed3a8e96-2751-4736-8b54-8f865656aba6",
+        "chatSessionId": "sess_f70e1018-aeba-4810-ad66-d4f07cef3f26",
+        "timestamp": 1789146870199
+      },
+      {
+        "executionId": "ed3a8e96-2751-4736-8b54-8f865656aba6",
+        "chatSessionId": "sess_f70e1018-aeba-4810-ad66-d4f07cef3f26",
+        "timestamp": 1789147024096
+      }
+    ],
+    "4. Checkpoint — garantir que todos os testes passem": [
+      {
+        "executionId": "ed3a8e96-2751-4736-8b54-8f865656aba6",
+        "chatSessionId": "sess_f70e1018-aeba-4810-ad66-d4f07cef3f26",
+        "timestamp": 1789144585266
+      },
+      {
+        "executionId": "ed3a8e96-2751-4736-8b54-8f865656aba6",
+        "chatSessionId": "sess_f70e1018-aeba-4810-ad66-d4f07cef3f26",
+        "timestamp": 1789147033244
+      },
+      {
+        "executionId": "a0e9837b-7651-4553-add8-e4dd1ce0b111",
+        "chatSessionId": "sess_f70e1018-aeba-4810-ad66-d4f07cef3f26",
+        "timestamp": 1789147503526
+      },
+      {
+        "executionId": "a0e9837b-7651-4553-add8-e4dd1ce0b111",
+        "chatSessionId": "sess_f70e1018-aeba-4810-ad66-d4f07cef3f26",
+        "timestamp": 1789147779595
+      }
+    ],
+    "3. Corrigir o pipeline de upload de avatar e a representação de erro": [
+      {
+        "executionId": "ed3a8e96-2751-4736-8b54-8f865656aba6",
+        "chatSessionId": "sess_f70e1018-aeba-4810-ad66-d4f07cef3f26",
+        "timestamp": 1789147024453
+      }
+    ]
+  }
+}

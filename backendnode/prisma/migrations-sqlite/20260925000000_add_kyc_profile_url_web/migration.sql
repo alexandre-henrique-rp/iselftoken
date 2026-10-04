@@ -1,0 +1,1 @@
+ALTER TABLE "KYCProfile" ADD COLUMN "url_web" TEXT;

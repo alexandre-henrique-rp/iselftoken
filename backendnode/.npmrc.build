@@ -1,0 +1,1 @@
+{"onlyBuiltDependencies":["msgpackr-extract","sharp","bcrypt","@nestjs/core","better-sqlite3","prisma","@prisma/client","@prisma/adapter-better-sqlite3","@prisma/adapter-mariadb","@prisma/engines"]}

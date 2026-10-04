@@ -1,0 +1,15 @@
+# robots.txt — iSelfToken
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /founder/
+Disallow: /compliance/
+Disallow: /financeiro/
+Disallow: /investor/
+Disallow: /affiliate/
+Disallow: /profile
+Disallow: /wallet
+Disallow: /checkout/
+
+Sitemap: https://iselftoken.com/sitemap.xml

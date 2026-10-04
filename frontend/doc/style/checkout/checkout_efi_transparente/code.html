@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkout — IselfToken</title>
+
+  <!-- Manrope (Google Fonts) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind 4 CDN (transitional) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Tokens alinhados à Kinetic Architecture (vivid_logic §5)
+    // Migração futura: mover para `@theme { --color-primary: #d500f9; ... }` do Tailwind 4
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Manrope', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            // === Kinetic Architecture — paleta oficial (sem hex inventado) ===
+            primary:        '#d500f9', // neon principal — vivid_logic §2
+            'primary-container': '#ea6bff',
+            'primary-light': '#f084ff',
+            'on-primary-fixed': '#000000', // preto sobre gradiente primary (resolve contraste)
+            surface:        '#1f031d',
+            'surface-dim':  '#170117',
+            'surface-low':  '#270524',
+            'surface-container-low': '#2a0628',
+            'surface-container':     '#30092c',
+            'surface-container-high': '#380e33',
+            'surface-container-highest': '#41133b',
+            'surface-bright': '#4a1844',
+            'on-surface':         '#ffdbf3',
+            'on-surface-variant': '#cc9dc0',
+            'on-surface-dim':     '#936889', // apenas em texto de baixa hierarquia (hints)
+            outline:           '#936889',
+            'outline-variant': '#613b5a',
+            success:          '#34d399',
+            'success-bg':     'rgba(52,211,153,0.15)',
+            warning:          '#fbbf24',
+            'warning-bg':     'rgba(251,191,36,0.15)',
+            danger:           '#ff6e84',
+            'danger-bg':      'rgba(255,110,132,0.15)',
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- Material Symbols (ícones) — padronização do projeto -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=block" rel="stylesheet" />
+
+  <style>
+    html, body { font-family: 'Manrope', system-ui, sans-serif; }
+    body { background: #1f031d; color: #ffdbf3; }
+
+    /* === Kinetic Architecture — tokens oficiais === */
+    .glass {
+      background: rgba(48, 9, 44, 0.55);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+    .glass-strong {
+      background: rgba(65, 19, 59, 0.6);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+    /* Gradiente primary oficial do vivid_logic §2 */
+    .gradient-primary {
+      background: linear-gradient(135deg, #f084ff 0%, #ea6bff 60%, #d500f9 100%);
+      color: #000000; /* on-primary-fixed: preto para contraste AA */
+    }
+    .gradient-primary-soft {
+      background: linear-gradient(135deg, rgba(240,132,255,0.18) 0%, rgba(234,107,255,0.12) 50%, rgba(213,0,249,0.10) 100%);
+    }
+    /* Glow colorido (nunca cinza) — vivid_logic §5 */
+    .shadow-glow {
+      box-shadow: 0 0 32px rgba(213, 0, 249, 0.55), 0 12px 24px rgba(213, 0, 249, 0.25);
+    }
+    .shadow-glow-sm {
+      box-shadow: 0 0 16px rgba(213, 0, 249, 0.35), 0 4px 12px rgba(213, 0, 249, 0.15);
+    }
+
+    /* QR Code placeholder visual (EFI envia base64 real) */
+    .qr-placeholder {
+      background:
+        repeating-linear-gradient(0deg, transparent 0 8px, rgba(0,0,0,0.95) 8px 9px),
+        repeating-linear-gradient(90deg, transparent 0 8px, rgba(0,0,0,0.95) 8px 9px),
+        #ffdbf3;
+      background-size: 12px 12px;
+      background-blend-mode: difference;
+      image-rendering: pixelated;
+    }
+    .flag-chip { letter-spacing: 0.04em; }
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type="number"] { -moz-appearance: textfield; }
+
+    /* Focus ring — outline na cor primary-light (vivid_logic §5) */
+    .focus-ring:focus-visible {
+      outline: 2px solid #f084ff;
+      outline-offset: 2px;
+      border-color: #d500f9;
+    }
+
+    /* Pulse + shimmer — desativados se prefers-reduced-motion */
+    @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+    .pulse-soft { animation: pulse-soft 2s ease-in-out infinite; }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    .skeleton {
+      background: linear-gradient(90deg, rgba(48,9,44,0.4) 0%, rgba(213,0,249,0.14) 50%, rgba(48,9,44,0.4) 100%);
+      background-size: 200% 100%;
+      animation: shimmer 1.6s infinite;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .pulse-soft, .skeleton { animation: none; }
+    }
+
+    /* Material Symbols tuning */
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+
+    /* Toast variants — 3 níveis do SPEC §6.1.2 */
+    .toast-critical   { background: rgba(255,110,132,0.18); outline: 1px solid rgba(255,110,132,0.4); }
+    .toast-retryable  { background: rgba(251,191,36,0.18); outline: 1px solid rgba(251,191,36,0.4); }
+    .toast-default    { background: rgba(48,9,44,0.92); outline: 1px solid rgba(213,0,249,0.4); }
+
+    /* Ghost border (outline-variant 20%) — única "borda" autorizada (vivid_logic §4) */
+    .ghost-border { outline: 1px solid rgba(97, 59, 90, 0.20); outline-offset: -1px; }
+
+    /* Estado selecionado usa preenchimento, não ring outline */
+    .is-selected-primary { background: linear-gradient(135deg, #f084ff 0%, #ea6bff 60%, #d500f9 100%); color: #000; }
+  </style>
+</head>
+
+<body class="min-h-screen antialiased">
+
+  <!-- ============== TOP NAV (glass) ============== -->
+  <header class="glass-strong sticky top-0 z-30" style="outline: 1px solid rgba(97, 59, 90, 0.20); outline-offset: -1px;">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <a href="#" class="flex items-center gap-2" aria-label="IselfToken · início">
+        <div class="w-9 h-9 rounded-xl flex items-center justify-center shadow-glow-sm gradient-primary">
+          <span class="font-black text-lg" aria-hidden="true">i</span>
+        </div>
+        <span class="font-extrabold tracking-tight text-on-surface">IselfToken</span>
+      </a>
+      <nav class="hidden md:flex items-center gap-6 text-sm text-on-surface-variant" aria-label="Navegação principal">
+        <a href="#" class="hover:text-on-surface transition">Campanhas</a>
+        <a href="#" class="hover:text-on-surface transition">Carteira</a>
+        <a href="#" class="text-on-surface font-semibold" aria-current="page">Checkout</a>
+      </nav>
+      <div class="flex items-center gap-3">
+        <span class="hidden sm:inline-flex items-center gap-1.5 text-xs text-on-surface-variant">
+          <span class="material-symbols-outlined" style="font-size:16px" aria-hidden="true">lock</span>
+          Pagamento seguro EFI
+        </span>
+        <div class="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold" style="background: linear-gradient(135deg, #ea6bff, #d500f9); color:#000;" aria-label="Perfil: Rafael Almeida">RA</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============== PAGE ============== -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+
+    <!-- Breadcrumb -->
+    <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs text-on-surface-variant mb-6">
+      <a href="#" class="hover:text-on-surface">Carrinho</a>
+      <span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">chevron_right</span>
+      <span class="text-on-surface font-medium" aria-current="page">Pagamento</span>
+    </nav>
+
+    <!-- Page heading -->
+    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
+      <div>
+        <p class="text-xs uppercase tracking-[0.2em] mb-2 font-semibold" style="color:#f084ff">Finalizar pagamento</p>
+        <h1 class="text-3xl lg:text-4xl font-extrabold tracking-tight">Checkout seguro</h1>
+        <p class="text-on-surface-variant mt-2 max-w-md">Pagamento processado via EFI Bank. Dados criptografados de ponta a ponta.</p>
+      </div>
+      <div class="flex items-center gap-2 text-xs text-on-surface-variant">
+        <span class="material-symbols-outlined" style="font-size:18px;color:#34d399" aria-hidden="true">verified</span>
+        <span>PCI-DSS SAQ A · mTLS ativo</span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
+
+      <!-- ============== COLUNA ESQUERDA (3/5) ============== -->
+      <section class="lg:col-span-3 space-y-6" aria-labelledby="method-heading">
+
+        <!-- ===== 1. Método de pagamento ===== -->
+        <div class="glass rounded-2xl p-5 lg:p-7">
+          <div class="flex items-center gap-3 mb-5">
+            <span class="w-8 h-8 rounded-lg gradient-primary-soft flex items-center justify-center text-sm font-bold" style="color:#f084ff">1</span>
+            <h2 class="text-lg lg:text-xl font-bold" id="method-heading">Método de pagamento</h2>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" role="radiogroup" aria-label="Método de pagamento">
+            <label class="cursor-pointer group">
+              <input type="radio" name="method" value="PIX" checked class="peer sr-only" aria-describedby="pix-desc" />
+              <div class="rounded-xl p-4 transition ghost-border peer-checked:is-selected-primary peer-checked:shadow-glow-sm">
+                <div class="flex items-start justify-between">
+                  <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-lg bg-white/95 flex items-center justify-center">
+                      <span class="font-extrabold text-xs tracking-tighter" style="color:#d500f9">PIX</span>
+                    </div>
+                    <div>
+                      <p class="font-semibold peer-checked:text-black">PIX</p>
+                      <p class="text-xs text-on-surface-variant peer-checked:text-black/80" id="pix-desc">Confirmação instantânea</p>
+                    </div>
+                  </div>
+                  <span class="material-symbols-outlined" style="font-size:20px;color:#f084ff" aria-hidden="true">check_circle</span>
+                </div>
+              </div>
+            </label>
+            <label class="cursor-pointer group">
+              <input type="radio" name="method" value="CREDIT_CARD" class="peer sr-only" aria-describedby="card-desc" />
+              <div class="rounded-xl p-4 transition ghost-border peer-checked:is-selected-primary peer-checked:shadow-glow-sm">
+                <div class="flex items-start justify-between">
+                  <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-lg flex items-center justify-center" style="background:#41133b">
+                      <span class="material-symbols-outlined" style="font-size:20px;color:#ffdbf3" aria-hidden="true">credit_card</span>
+                    </div>
+                    <div>
+                      <p class="font-semibold peer-checked:text-black">Cartão de crédito</p>
+                      <p class="text-xs text-on-surface-variant peer-checked:text-black/80" id="card-desc">À vista ou parcelado</p>
+                    </div>
+                  </div>
+                  <span class="material-symbols-outlined opacity-0 peer-checked:opacity-100" style="font-size:20px" aria-hidden="true">check_circle</span>
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- ===== 2. PIX flow (default visível) ===== -->
+        <div id="pix-section" class="glass rounded-2xl p-5 lg:p-7">
+          <div class="flex items-center gap-3 mb-5">
+            <span class="w-8 h-8 rounded-lg gradient-primary-soft flex items-center justify-center text-sm font-bold" style="color:#f084ff">2</span>
+            <h2 class="text-lg lg:text-xl font-bold">Pagamento via PIX</h2>
+          </div>
+
+          <!-- Timer + status -->
+          <div class="flex flex-wrap items-center gap-3 mb-5">
+            <div class="inline-flex items-center gap-2 px-3 py-2 rounded-lg ghost-border">
+              <span class="material-symbols-outlined pulse-soft" style="font-size:18px;color:#fbbf24" aria-hidden="true">timer</span>
+              <span class="text-sm font-semibold">Expira em <span id="timer" aria-live="polite" aria-atomic="true" role="timer">29:42</span></span>
+            </div>
+            <div class="inline-flex items-center gap-2 px-3 py-2 rounded-lg ghost-border">
+              <span class="w-2 h-2 rounded-full pulse-soft" style="background:#fbbf24" aria-hidden="true"></span>
+              <span class="text-sm">Aguardando pagamento</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="flex flex-col items-center">
+              <div class="qr-placeholder w-56 h-56 rounded-xl p-3 mb-3 shadow-glow-sm" aria-label="QR Code PIX"></div>
+              <p class="text-xs text-on-surface-variant text-center">Aponte a câmera do seu app<br />ou escaneie com o banco</p>
+            </div>
+
+            <div class="flex flex-col">
+              <label for="pix-copy" class="block text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-2">PIX copia e cola</label>
+              <textarea id="pix-copy" readonly class="ghost-border rounded-xl p-3 mb-3 break-all text-xs font-mono leading-relaxed" style="background:rgba(48,9,44,0.55);color:#ffdbf3;width:100%;min-height:96px;resize:none;">00020126580014BR.GOV.BCB.PIX0136a1f2b3c4-d5e6-7890-1234-567890abcdef52040000530398654061000.005802BR5913ISELFTOKEN LTDA6009SAO PAULO62070503***6304ABCD</textarea>
+              <button type="button" class="gradient-primary font-semibold py-3 rounded-xl flex items-center justify-center gap-2 shadow-glow-sm hover:opacity-95 transition focus-ring" aria-label="Copiar código PIX">
+                <span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">content_copy</span>
+                Copiar código PIX
+              </button>
+
+              <div class="mt-4 rounded-xl p-3 text-xs leading-relaxed ghost-border">
+                <p class="font-semibold mb-1">Como pagar com PIX</p>
+                <ol class="list-decimal list-inside space-y-1 text-on-surface-variant">
+                  <li>Abra o app do seu banco</li>
+                  <li>Escolha pagar via PIX QR Code ou copia e cola</li>
+                  <li>Confirme o valor de <strong class="text-on-surface">R$ 750,00</strong> (já com cupom aplicado)</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== 2b. CARTÃO (escondido por padrão) ===== -->
+        <div id="card-section" class="glass rounded-2xl p-5 lg:p-7 hidden">
+          <div class="flex items-center gap-3 mb-5">
+            <span class="w-8 h-8 rounded-lg gradient-primary-soft flex items-center justify-center text-sm font-bold" style="color:#f084ff">2</span>
+            <h2 class="text-lg lg:text-xl font-bold">Dados do cartão</h2>
+            <span class="ml-auto inline-flex items-center gap-1 text-xs text-on-surface-variant">
+              <span class="material-symbols-outlined" style="font-size:16px" aria-hidden="true">lock</span>
+              Tokenizado via SDK EFI
+            </span>
+          </div>
+
+          <form class="space-y-4" novalidate>
+            <div>
+              <label for="card-number" class="block text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-2">Número do cartão</label>
+              <div class="relative">
+                <input id="card-number" type="text" inputmode="numeric" autocomplete="cc-number" placeholder="0000 0000 0000 0000" maxlength="19" aria-describedby="card-number-help" class="w-full rounded-xl px-4 py-3 pr-14 font-mono focus-ring" style="background:rgba(48,9,44,0.55);color:#ffdbf3;" />
+                <span id="card-number-help" class="flag-chip absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold px-2 py-1 rounded-md" style="background:#41133b;color:#ffdbf3">VISA</span>
+              </div>
+            </div>
+
+            <div>
+              <label for="card-name" class="block text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-2">Nome impresso no cartão</label>
+              <input id="card-name" type="text" autocomplete="cc-name" placeholder="RAFAEL A SILVA" class="w-full rounded-xl px-4 py-3 focus-ring uppercase" style="background:rgba(48,9,44,0.55);color:#ffdbf3;" />
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label for="card-expiry" class="block text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-2">Validade</label>
+                <input id="card-expiry" type="text" inputmode="numeric" autocomplete="cc-exp" placeholder="MM/AA" maxlength="5" class="w-full rounded-xl px-4 py-3 font-mono focus-ring" style="background:rgba(48,9,44,0.55);color:#ffdbf3;" />
+              </div>
+              <div>
+                <label for="card-cvv" class="block text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-2">CVV</label>
+                <div class="relative">
+                  <input id="card-cvv" type="text" inputmode="numeric" autocomplete="cc-csc" placeholder="•••" maxlength="4" class="w-full rounded-xl px-4 py-3 pr-10 font-mono focus-ring" style="background:rgba(48,9,44,0.55);color:#ffdbf3;" />
+                  <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2" style="font-size:18px;color:#936889" aria-hidden="true">help</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Parcelas — renderizadas dinamicamente via JS (maxInstallments=12) -->
+            <div>
+              <label for="installments" class="block text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-2">Parcelas</label>
+              <select id="installments" name="installments" class="w-full rounded-xl px-4 py-3 font-semibold focus-ring" style="background:rgba(48,9,44,0.55);color:#ffdbf3;">
+                <option value="1">1x sem juros — R$ 750,00</option>
+                <option value="2">2x sem juros — 2 × R$ 375,00</option>
+                <option value="3">3x sem juros — 3 × R$ 250,00</option>
+                <option value="4">4x sem juros — 4 × R$ 187,50</option>
+                <option value="5">5x sem juros — 5 × R$ 150,00</option>
+                <option value="6" selected>6x com juros (2,99% a.m.) — 6 × R$ 147,41 = R$ 884,46</option>
+                <option value="7">7x com juros (2,99% a.m.) — 7 × R$ 132,21 = R$ 925,46</option>
+                <option value="8">8x com juros (2,99% a.m.) — 8 × R$ 121,02 = R$ 968,15</option>
+                <option value="9">9x com juros (2,99% a.m.) — 9 × R$ 112,55 = R$ 1.012,98</option>
+                <option value="10">10x com juros (2,99% a.m.) — 10 × R$ 105,98 = R$ 1.059,82</option>
+                <option value="11">11x com juros (2,99% a.m.) — 11 × R$ 100,74 = R$ 1.108,12</option>
+                <option value="12">12x com juros (2,99% a.m.) — 12 × R$ 96,38 = R$ 1.156,50</option>
+              </select>
+              <p class="text-xs text-on-surface-variant mt-2" id="installments-hint">
+                Máximo de <span id="max-installments">12</span> parcelas permitidas · Valor mínimo da parcela: R$ 20,00 (atendido).
+              </p>
+            </div>
+
+            <button type="submit" class="w-full gradient-primary font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-glow hover:opacity-95 transition focus-ring">
+              <span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">shield</span>
+              Finalizar pagamento
+            </button>
+          </form>
+        </div>
+
+        <!-- ===== 2c. PENDING_3DS (autenticação 3DS — tela intermediária) ===== -->
+        <div id="pending3ds-section" class="glass rounded-2xl p-5 lg:p-7 hidden" role="alertdialog" aria-labelledby="pending3ds-title" aria-describedby="pending3ds-desc">
+          <div class="flex flex-col items-center text-center max-w-md mx-auto py-6">
+            <div class="relative mb-6">
+              <div class="w-20 h-20 rounded-full gradient-primary-soft flex items-center justify-center pulse-soft">
+                <span class="material-symbols-outlined" style="font-size:40px;color:#f084ff" aria-hidden="true">phonelink_lock</span>
+              </div>
+            </div>
+            <h3 class="text-xl font-bold mb-2" id="pending3ds-title">Aguarde a autenticação do cartão</h3>
+            <p class="text-on-surface-variant text-sm mb-5" id="pending3ds-desc">
+              Seu cartão exige validação 3-D Secure. Confirme a autenticação no app do seu banco e retorne para esta tela em até 5 minutos.
+            </p>
+            <div class="flex items-center gap-2 text-xs text-on-surface-variant ghost-border rounded-xl px-4 py-2">
+              <span class="material-symbols-outlined pulse-soft" style="font-size:14px;color:#fbbf24" aria-hidden="true">hourglass_top</span>
+              <span>Redirecionando para authenticationUrl em <span id="pending3ds-countdown">30</span>s…</span>
+            </div>
+            <a id="authentication-link" href="#" class="gradient-primary font-bold rounded-xl px-5 py-3 mt-6 inline-flex items-center gap-2 shadow-glow-sm">
+              <span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">open_in_new</span>
+              Continuar autenticação
+            </a>
+          </div>
+        </div>
+
+        <!-- ===== 3. ESTADO VAZIO (cart==0) — markup REAL (não comentário) ===== -->
+        <div id="cart-empty-section" class="glass rounded-2xl p-12 text-center hidden" role="status">
+          <div class="w-16 h-16 mx-auto rounded-full gradient-primary-soft flex items-center justify-center mb-4">
+            <span class="material-symbols-outlined" style="font-size:32px;color:#f084ff" aria-hidden="true">shopping_cart</span>
+          </div>
+          <h2 class="text-xl font-bold mb-2">Seu carrinho está vazio</h2>
+          <p class="text-on-surface-variant mb-6">Adicione tokens ou uma assinatura antes de finalizar o pagamento.</p>
+          <a href="#" class="inline-flex items-center gap-2 gradient-primary px-5 py-3 rounded-xl font-bold shadow-glow-sm">
+            <span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">arrow_forward</span>
+            Explorar campanhas
+          </a>
+        </div>
+
+        <!-- ===== 4. ESTADO LOADING (skeleton real, renderizável) ===== -->
+        <div id="loading-section" class="glass rounded-2xl p-5 lg:p-7 hidden" role="status" aria-live="polite" aria-atomic="true">
+          <div class="flex items-center gap-3 mb-5">
+            <div class="skeleton w-8 h-8 rounded-lg"></div>
+            <div class="skeleton h-5 rounded w-40"></div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="skeleton w-56 h-56 rounded-xl"></div>
+            <div class="space-y-3">
+              <div class="skeleton h-3 rounded w-24"></div>
+              <div class="skeleton h-24 rounded-xl"></div>
+              <div class="skeleton h-12 rounded-xl"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== 5. ESTADO ERRO — markup real com catalog EFI (SPEC §6.1.2) ===== -->
+        <div id="error-section" class="glass rounded-2xl p-5 lg:p-7 hidden" role="alert">
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(255,110,132,0.18)">
+              <span class="material-symbols-outlined" style="font-size:22px;color:#ff6e84" aria-hidden="true">error</span>
+            </div>
+            <div class="flex-1">
+              <h3 class="font-bold mb-1" id="error-title">Cartão recusado</h3>
+              <p class="text-sm text-on-surface-variant mb-3" id="error-description">
+                Sua operadora recusou o cartão. Verifique os dados ou tente outro método de pagamento. Em caso de dúvida, contate seu banco.
+              </p>
+              <p class="font-mono text-xs mb-4 ghost-border rounded-lg p-2" style="color:#ff6e84">EFI code: <span id="error-code">cartao_recusado</span></p>
+              <div class="flex flex-wrap gap-2">
+                <button type="button" id="error-retry" class="px-4 py-2 rounded-lg text-sm font-bold ghost-border">
+                  <span class="material-symbols-outlined" style="font-size:16px" aria-hidden="true">refresh</span>
+                  Tentar novamente
+                </button>
+                <button type="button" id="error-switch-pix" class="gradient-primary-soft px-4 py-2 rounded-lg text-sm font-bold">
+                  <span class="material-symbols-outlined" style="font-size:16px" aria-hidden="true">swap_horiz</span>
+                  Pagar com PIX
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== 6. ESTADO SUCESSO — recibo completo (paymentId, txid, endToEndId, paidAt) ===== -->
+        <div id="success-section" class="glass rounded-2xl p-8 text-center hidden" role="status" aria-live="polite">
+          <div class="w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4" style="background:rgba(52,211,153,0.18)">
+            <span class="material-symbols-outlined" style="font-size:36px;color:#34d399" aria-hidden="true">check</span>
+          </div>
+          <h2 class="text-2xl font-extrabold mb-2">Pagamento confirmado</h2>
+          <p class="text-on-surface-variant mb-6">Sua compra foi processada com sucesso. Guarde este recibo para sua referência.</p>
+
+          <!-- Recibo -->
+          <dl class="text-left max-w-md mx-auto ghost-border rounded-xl p-5 space-y-2 mb-6 font-mono text-xs">
+            <div class="flex justify-between gap-4">
+              <dt class="text-on-surface-variant">paymentId</dt>
+              <dd class="text-on-surface" id="receipt-payment-id">pay_01HZA7B9K5D2P3QFJ8X4N0T7VG</dd>
+            </div>
+            <div class="flex justify-between gap-4">
+              <dt class="text-on-surface-variant">txid</dt>
+              <dd class="text-on-surface" id="receipt-txid">TXID9C0F2A4E8B1D07</dd>
+            </div>
+            <div class="flex justify-between gap-4">
+              <dt class="text-on-surface-variant">endToEndId</dt>
+              <dd class="text-on-surface" id="receipt-end2end">E0000000020260822001234567890AB</dd>
+            </div>
+            <div class="flex justify-between gap-4">
+              <dt class="text-on-surface-variant">paidAt</dt>
+              <dd class="text-on-surface" id="receipt-paid-at">22/08/2026 14:32:11 BRT</dd>
+            </div>
+            <div class="flex justify-between gap-4 pt-2" style="border-top:1px solid rgba(97,59,90,0.20)">
+              <dt class="text-on-surface-variant">valor</dt>
+              <dd class="text-on-surface font-bold">R$ 750,00</dd>
+            </div>
+          </dl>
+
+          <div class="flex flex-wrap gap-2 justify-center">
+            <button type="button" id="download-receipt" class="gradient-primary font-bold px-5 py-3 rounded-xl flex items-center gap-2 shadow-glow-sm">
+              <span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">download</span>
+              Baixar recibo (PDF)
+            </button>
+            <a href="#" class="ghost-border px-5 py-3 rounded-xl font-bold">Ver pedido</a>
+          </div>
+        </div>
+
+        <!-- ===== 7. ESTADO EXPIRADO (PIX) — markup real ===== -->
+        <div id="expired-section" class="glass rounded-2xl p-5 lg:p-7 hidden" role="alert">
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(251,191,36,0.18)">
+              <span class="material-symbols-outlined" style="font-size:22px;color:#fbbf24" aria-hidden="true">schedule</span>
+            </div>
+            <div class="flex-1">
+              <h3 class="font-bold mb-1">QR Code PIX expirado</h3>
+              <p class="text-sm text-on-surface-variant mb-3">O tempo limite para pagamento foi atingido. Gere um novo QR Code para concluir a compra.</p>
+              <button type="button" id="regenerate-qr" class="gradient-primary font-bold px-4 py-2 rounded-lg flex items-center gap-2 shadow-glow-sm">
+                <span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">refresh</span>
+                Gerar novo QR Code
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ============== COLUNA DIREITA (2/5) ============== -->
+      <aside class="lg:col-span-2" aria-labelledby="summary-heading">
+        <div class="glass rounded-2xl p-5 lg:p-6 lg:sticky lg:top-24">
+
+          <h3 class="text-lg font-bold mb-4" id="summary-heading">Resumo do pedido</h3>
+
+          <!-- Items -->
+          <div class="space-y-3 mb-5">
+            <div class="flex items-start gap-3 rounded-xl p-3" style="background:rgba(48,9,44,0.55)">
+              <div class="w-12 h-12 rounded-lg gradient-primary-soft flex items-center justify-center flex-shrink-0">
+                <span class="material-symbols-outlined" style="font-size:22px;color:#f084ff" aria-hidden="true">toll</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-semibold text-sm truncate">500 Tokens — Startup Acme</p>
+                <p class="text-xs text-on-surface-variant">Reserva · Campanha TechBR</p>
+              </div>
+              <p class="font-bold text-sm whitespace-nowrap">R$ 500,00</p>
+            </div>
+
+            <div class="flex items-start gap-3 rounded-xl p-3" style="background:rgba(48,9,44,0.55)">
+              <div class="w-12 h-12 rounded-lg gradient-primary-soft flex items-center justify-center flex-shrink-0">
+                <span class="material-symbols-outlined" style="font-size:22px;color:#f084ff" aria-hidden="true">workspace_premium</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-semibold text-sm truncate">Plano Pro — Mensal</p>
+                <p class="text-xs text-on-surface-variant">Renovação automática</p>
+              </div>
+              <p class="font-bold text-sm whitespace-nowrap">R$ 99,00</p>
+            </div>
+
+            <div class="flex items-start gap-3 rounded-xl p-3" style="background:rgba(48,9,44,0.55)">
+              <div class="w-12 h-12 rounded-lg gradient-primary-soft flex items-center justify-center flex-shrink-0">
+                <span class="material-symbols-outlined" style="font-size:22px;color:#f084ff" aria-hidden="true">verified</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-semibold text-sm truncate">Selo de Verificação</p>
+                <p class="text-xs text-on-surface-variant">Validade 12 meses</p>
+              </div>
+              <p class="font-bold text-sm whitespace-nowrap">R$ 890,00</p>
+            </div>
+          </div>
+
+          <!-- Coupon field (P7 — cupom 100% suportado) -->
+          <div class="mb-5">
+            <label for="coupon-code" class="block text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-2">Cupom de desconto</label>
+            <div class="flex gap-2">
+              <input id="coupon-code" type="text" placeholder="Digite seu cupom" maxlength="32" minlength="3" pattern="[A-Z0-9_\-]+" autocomplete="off" class="flex-1 rounded-xl px-4 py-3 font-mono uppercase focus-ring" style="background:rgba(48,9,44,0.55);color:#ffdbf3;" />
+              <button type="button" id="apply-coupon" class="gradient-primary-soft px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-2 hover:opacity-90 transition">
+                <span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">confirmation_number</span>
+                Aplicar
+              </button>
+            </div>
+            <p id="coupon-status" class="text-xs mt-2 flex items-center gap-1.5" style="color:#34d399">
+              <span class="material-symbols-outlined" style="font-size:16px" aria-hidden="true">check_circle</span>
+              <span>Cupom <strong class="font-mono">PROMO50</strong> aplicado · 50% OFF (pagamento simbólico via PIX se cupom 100%)</span>
+            </p>
+          </div>
+
+          <!-- Totals (cupom propaga para PIX e parcelas) -->
+          <div class="space-y-2 py-4">
+            <div class="flex justify-between text-sm">
+              <span class="text-on-surface-variant">Subtotal</span>
+              <span>R$ 1.489,00</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-on-surface-variant">Taxa de processamento EFI</span>
+              <span>R$ 11,00</span>
+            </div>
+            <div class="flex justify-between text-sm" style="color:#34d399">
+              <span>Desconto (PROMO50 · 50% OFF)</span>
+              <span>−R$ 750,00</span>
+            </div>
+          </div>
+
+          <div class="pt-4">
+            <div class="flex justify-between items-baseline">
+              <span class="text-on-surface-variant">Total a pagar</span>
+              <span class="text-2xl lg:text-3xl font-extrabold" style="background:linear-gradient(135deg,#f084ff,#ea6bff,#d500f9);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;">R$ 750,00</span>
+            </div>
+            <p class="text-xs mt-1" style="color:#936889">
+              ou 6x de <strong style="color:#ffdbf3">R$ 147,41</strong> com juros de 2,99% a.m. (juros simples · total R$ 884,46)
+            </p>
+          </div>
+
+          <!-- Trust badges — acessibilidade: AA, sem text-[10px] -->
+          <div class="mt-6 pt-5">
+            <div class="grid grid-cols-3 gap-2 text-center">
+              <div class="rounded-xl p-2.5" style="background:rgba(48,9,44,0.55)">
+                <span class="material-symbols-outlined block mx-auto mb-1" style="font-size:20px;color:#34d399" aria-hidden="true">verified</span>
+                <p class="text-xs text-on-surface-variant leading-tight">PCI-DSS<br />SAQ A</p>
+              </div>
+              <div class="rounded-xl p-2.5" style="background:rgba(48,9,44,0.55)">
+                <span class="material-symbols-outlined block mx-auto mb-1" style="font-size:20px;color:#34d399" aria-hidden="true">lock</span>
+                <p class="text-xs text-on-surface-variant leading-tight">mTLS<br />ativo</p>
+              </div>
+              <div class="rounded-xl p-2.5" style="background:rgba(48,9,44,0.55)">
+                <span class="material-symbols-outlined block mx-auto mb-1" style="font-size:20px;color:#34d399" aria-hidden="true">account_balance</span>
+                <p class="text-xs text-on-surface-variant leading-tight">EFI<br />Bank</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </aside>
+
+    </div>
+
+  </main>
+
+  <!-- ============== TOAST CONTAINER (3 variantes — SPEC §6.1.2) ============== -->
+  <div id="toast-container" class="fixed bottom-6 right-6 z-50 space-y-2 pointer-events-none" aria-live="polite" aria-atomic="false" role="status" aria-relevant="additions text">
+
+    <!-- Toast 1 — variant default (info: cupom aplicado) -->
+    <div class="toast-default rounded-xl p-3 flex items-start gap-2 shadow-glow-sm max-w-xs pointer-events-auto glass-strong">
+      <span class="material-symbols-outlined" style="font-size:18px;color:#f084ff;flex-shrink:0;margin-top:2px" aria-hidden="true">info</span>
+      <div class="min-w-0">
+        <p class="text-sm font-bold">Cupom aplicado</p>
+        <p class="text-xs text-on-surface-variant">PROMO50 · 50% OFF aplicado ao subtotal.</p>
+      </div>
+    </div>
+
+    <!-- Toast 2 — variant retryable (warning + botão "Tentar novamente") — exemplo: cartao_recusado -->
+    <div class="toast-retryable rounded-xl p-3 flex items-start gap-2 shadow-glow-sm max-w-xs pointer-events-auto glass-strong">
+      <span class="material-symbols-outlined" style="font-size:18px;color:#fbbf24;flex-shrink:0;margin-top:2px" aria-hidden="true">warning</span>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-bold">Cartão recusado (cartao_recusado)</p>
+        <p class="text-xs text-on-surface-variant">Verifique os dados ou tente outro método.</p>
+      </div>
+      <button type="button" class="text-xs font-bold underline" style="color:#fbbf24">Tentar novamente</button>
+    </div>
+  </div>
+
+  <!-- ============== JS ============== -->
+  <script>
+    // Toggle PIX / Cartão / 3DS / Estados visíveis
+    const radios = document.querySelectorAll('input[name="method"]');
+    const pix = document.getElementById('pix-section');
+    const card = document.getElementById('card-section');
+    const pending3ds = document.getElementById('pending3ds-section');
+    radios.forEach(r => r.addEventListener('change', () => {
+      pix.classList.add('hidden');
+      card.classList.add('hidden');
+      pending3ds.classList.add('hidden');
+      if (r.value === 'PIX' && r.checked) pix.classList.remove('hidden');
+      if (r.value === 'CREDIT_CARD' && r.checked) card.classList.remove('hidden');
+    }));
+
+    // Timer regressivo (demo) — aria-live já no markup
+    let secs = 29 * 60 + 42;
+    const tEl = document.getElementById('timer');
+    if (tEl) {
+      setInterval(() => {
+        if (secs <= 0) return;
+        secs--;
+        const m = String(Math.floor(secs / 60)).padStart(2, '0');
+        const s = String(secs % 60).padStart(2, '0');
+        tEl.textContent = `${m}:${s}`;
+      }, 1000);
+    }
+
+    // Card number flag detection (mock — EFI SDK real faz isso client-side)
+    document.querySelectorAll('input[inputmode="numeric"]').forEach(input => {
+      input.addEventListener('input', (e) => {
+        let v = e.target.value.replace(/\D/g, '');
+        if (input.placeholder.includes('0000 0000')) {
+          v = v.match(/.{1,4}/g)?.join(' ') || '';
+          const chip = input.parentElement.querySelector('.flag-chip');
+          if (v.startsWith('4')) chip.textContent = 'VISA';
+          else if (v.startsWith('5')) chip.textContent = 'MASTER';
+          else if (v.startsWith('3')) chip.textContent = 'AMEX';
+          else chip.textContent = '••••';
+        }
+        if (input.placeholder.includes('MM/AA')) {
+          v = v.replace(/^(\d{2})(\d)/, '$1/$2');
+        }
+        e.target.value = v;
+      });
+    });
+
+    // === Catálogo de erros EFI (SPEC §6.1.2) — code → mensagem PT-BR + variant ===
+    // Decision matrix documentada no DESIGN.md §5
+    const EFI_ERRORS = {
+      // Cartão
+      'cartao_recusado':         { title: 'Cartão recusado',          desc: 'Sua operadora recusou o cartão. Verifique os dados ou tente outro método.', variant: 'retryable' },
+      'cartao_vencido':          { title: 'Cartão vencido',           desc: 'A data de validade do cartão já passou. Use outro cartão.',                    variant: 'retryable' },
+      'cartao_bloqueado':        { title: 'Cartão bloqueado',         desc: 'O cartão está bloqueado pelo banco. Contate a central do seu banco.',          variant: 'retryable' },
+      'cvv_invalido':            { title: 'CVV inválido',             desc: 'O código de segurança não confere. Digite novamente.',                          variant: 'retryable' },
+      // 3DS
+      'autenticacao_3ds_falhou':  { title: 'Falha na autenticação 3-D Secure', desc: 'A autenticação falhou ou expirou. Reinicie o pagamento.',               variant: 'retryable' },
+      // PIX
+      'cobranca_expirada':       { title: 'Cobrança PIX expirada',    desc: 'O QR Code expirou antes do pagamento. Gere um novo.',                       variant: 'retryable' },
+      'chave_pix_invalida':      { title: 'Chave PIX inválida',       desc: 'A chave PIX associada à cobrança não é válida. Contate o suporte.',         variant: 'critical' },
+      // Genéricos
+      'efi_indisponivel':        { title: 'Sistema temporariamente indisponível', desc: 'A EFI está fora do ar. Tente em alguns minutos.',                  variant: 'critical' },
+      'valor_invalido':          { title: 'Valor inválido',           desc: 'O valor enviado diverge do total do carrinho. Atualize a página.',            variant: 'critical' },
+      'token_oauth_invalido':    { title: 'Sessão expirada',          desc: 'Sua sessão expirou. Faça login novamente.',                                   variant: 'default' },
+      // fallback do AC-12.4
+      'erro_generico':           { title: 'Não foi possível processar', desc: 'Tente em alguns minutos. Se persistir, contate o suporte.',                variant: 'retryable' },
+    };
+
+    // === Cálculo de juros simples (PRD AC-03.1) ===
+    // total = principal × (1 + i × n);  i = 2,99% a.m.; n = parcela
+    function calcInstallmentSimple(principal, n, i = 0.0299) {
+      const total = principal * (1 + i * n);
+      return { total, parcela: total / n };
+    }
+
+    // Demo: gera as parcelas no select (em produção, backend envia `installments[]` calculado)
+    // Mostra que cupom se propaga corretamente para ambas modalidades (PIX e parcelas)
+    const principal = 750; // R$ 750,00 após cupom
+    const sel = document.getElementById('installments');
+    if (sel) {
+      sel.addEventListener('change', () => {
+        const n = parseInt(sel.value, 10);
+        const { total, parcela } = calcInstallmentSimple(principal, n);
+        const totalStr = total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const parcStr  = parcela.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        console.log(`[demo] ${n}x → ${n} × R$ ${parcStr} = R$ ${totalStr}`);
+      });
+    }
+
+    // Simulação: dispara estado PENDING_3DS após submit no cartão (apenas para demo)
+    document.querySelector('#card-section form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      card.classList.add('hidden');
+      pending3ds.classList.remove('hidden');
+      // Countdown para redirect (apenas demo)
+      let c = 30;
+      const cEl = document.getElementById('pending3ds-countdown');
+      const tick = setInterval(() => {
+        c--;
+        if (cEl) cEl.textContent = c;
+        if (c <= 0) clearInterval(tick);
+      }, 1000);
+    });
+
+    // === Demo dos 3 estados prontos para troca (dev comments removed) ===
+    // window.__checkoutState = { show: (name) => { ... } };
+    // Para QA: trocar via console — ex: document.getElementById('pix-section').classList.add('hidden'); document.getElementById('error-section').classList.remove('hidden');
+  </script>
+
+</body>
+</html>

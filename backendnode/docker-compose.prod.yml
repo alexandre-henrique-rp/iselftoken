@@ -1,0 +1,128 @@
+# ============================================================
+# docker-compose.prod.yml — Infra simplificada para apresentação
+# 1 EC2: Redis + RabbitMQ + API (SQLite)
+# ============================================================
+name: iselftoken-prod
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  redis_data:
+  rabbitmq_data:
+
+services:
+  # --- Redis (sessões + cache + BullMQ) ---
+  redis:
+    image: redis:7.4-alpine
+    container_name: iselftoken_redis
+    restart: unless-stopped
+    command:
+      [
+        'redis-server',
+        '--appendonly',
+        'yes',
+        '--maxmemory',
+        '256mb',
+        '--maxmemory-policy',
+        'allkeys-lru',
+      ]
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    networks:
+      - app_network
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # --- RabbitMQ (filas async webhooks) ---
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: iselftoken_rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-admin}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-admin}
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - app_network
+    healthcheck:
+      test: ['CMD', 'rabbitmq-diagnostics', '-q', 'ping']
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # --- API (NestJS + SQLite) ---
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: iselftoken_api
+    restart: unless-stopped
+    env_file:
+      - .env.prod
+    environment:
+      # Override para garantir SQLite + conexões internas Docker
+      DATABASE_PROVIDER: sqlite
+      DATABASE_URL: 'file:/app/db/iselftoken.db'
+      # Keystore da PKI (CA interna) persistido no mesmo volume do SQLite.
+      # Sem isso, `.pki_keystore.json` fica no cwd (efêmero) e é perdido ao
+      # recriar o container, dessincronizando as CAs do banco (erro
+      # "Chave nao encontrada" ao assinar termos).
+      KEY_STORAGE_PATH: /app/db
+      # Passphrase de criptografia do keystore (AES-256-GCM). Vem do
+      # .env.prod via `env_file:` acima — NÃO usar interpolação ${...} aqui,
+      # pois o Compose só interpola do .env/shell e isso quebraria o build
+      # mesmo com a variável presente no .env.prod. A validação de presença
+      # e rejeição do default de dev é feita no scripts/deploy.sh.
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      # S35 — credenciais do RabbitMQ DEVEM ser as mesmas que o serviço
+      # `rabbitmq` foi inicializado acima (`RABBITMQ_DEFAULT_USER`/
+      # `RABBITMQ_DEFAULT_PASS`). O operador configura via shell env
+      # (RABBITMQ_USER / RABBITMQ_PASS) ou em `.env.prod`. Sem passar
+      # essas vars, a API cai no default `admin`/`admin` do schema Zod
+      # enquanto o broker está esperando `admin`/`admin` — a senha bate
+      # por sorte nesse caso, mas diverge assim que o operador setar
+      # RABBITMQ_PASS no `.env.prod` (cenário comum de hardening).
+      RABBITMQ_USER: ${RABBITMQ_USER:-admin}
+      RABBITMQ_PASS: ${RABBITMQ_PASS:-admin}
+    ports:
+      - '7077:7077'
+    volumes:
+      # SQLite acessível fora do container (mesmo diretório do projeto)
+      - ./db:/app/db
+      # Ícones de selos
+      - ./icons:/app/icons
+      # Uploads estáticos (seed/logos)
+      - ./uploads:/app/uploads
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - app_network
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "const h=require('http');h.get('http://localhost:7077/health',(r)=>{process.exit(r.statusCode===200?0:1)}).on('error',()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3

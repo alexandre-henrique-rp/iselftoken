@@ -1,0 +1,16 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
+
+# Keys SSH (NUNCA commitar)
+keys/
+
+# Lambda zips gerados
+scheduler/lambda_start.zip
+scheduler/lambda_stop.zip
+
+# Variáveis sensíveis
+*.auto.tfvars
+secret.tfvars

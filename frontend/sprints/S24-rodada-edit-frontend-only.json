@@ -1,0 +1,401 @@
+{
+  "_type": "harness-sprint-v6",
+  "version": 1,
+  "schemaVersion": "1",
+  "id": "S24-rodada-edit-frontend-only",
+  "name": "Sprint S24 — Edição de Rodada (Frontend-only, M4)",
+  "milestone": "M4",
+  "priority": "medium",
+  "status": "planning-approved",
+  "profile": "lean",
+  "estimatedAt": "2026-07-13",
+  "goal": "Adicionar aba 'Rodada' em /founder/startups/:id/edit com 2 tabs internas (Captação + Distribuição). Mock estático — sem integração backend (backend com bugs na rota PATCH /startup/{id}/rodada/{id}). 80% dos componentes já existem reusáveis.",
+  "scope": {
+    "inScope": [
+      "Criar rota /founder/startups/:id/edit/rodada com tabs internas (Captação + Distribuição) via useState",
+      "Extrair schema Zod dos 7 campos de distribuição (recursosFundador..recursosCaixa) com superRefine validando soma=100",
+      "Criar componente reservation-status-card.tsx (read-only, simplificado de token-reservation.tsx)",
+      "Reusar round-terms.tsx, round-schedule.tsx, token-economics-calculator.tsx (modo edit funcional)",
+      "Adicionar item 'Rodada' no nav lateral com ícone Coins (posição 2)",
+      "Mock local via useState — handlers do action bar disparam toast mock (sem persistência)",
+      "Atualizar AGENTS.md de app/routes/private/ e app/components/founder/",
+      "Cobertura Vitest ≥70% em round-distribution-schema.ts (6 cenários: soma=100, 99.99, 100.01, 0, negativo, >100)"
+    ],
+    "outOfScope": [
+      "Integração backend — PATCH /startup/{id}/rodada/{id} continua com bugs no NestJS (gap conhecido cross-repo)",
+      "Persistência real da distribuição de recursos (mock apenas)",
+      "BFFs novos — nenhum adicionado nesta sprint",
+      "Hooks TanStack novos — nenhum adicionado (apenas useState local)",
+      "Mudança no schema Zod principal de new-startup-schema.ts (apenas extração para arquivo focado)",
+      "Refactor amplo de use-of-funds.tsx (apenas inspiração para o padrão visual)",
+      "Migração de tabs internas para useSearchParams ou sub-rotas (protótipo aceita useState)",
+      "Validação visual + screenshot — escopo do frontend agent na Fase 5 (T010)"
+    ]
+  },
+  "ragRefs": [
+    {
+      "id": "plan-aprovado-edicao-rodada",
+      "path": "sprints/PLANO_ACAO_EDICAO_RODADA_FRONTEND_ONLY.md",
+      "kind": "design-decision",
+      "status": "approved",
+      "commit": "5f1070d",
+      "appliesTo": [
+        "app/lib/round-distribution-schema.ts (novo)",
+        "app/components/founder/reservation-status-card.tsx (novo)",
+        "app/components/founder/rodada-captacao-tab.tsx (novo)",
+        "app/components/founder/rodada-distribuicao-tab.tsx (novo)",
+        "app/routes/private/edit-startup-rodada.tsx (novo)",
+        "app/routes.ts (modificar)",
+        "app/components/founder/edit-startup-nav.tsx (modificar)"
+      ]
+    }
+  ],
+  "filesAffected": [
+    "app/lib/round-distribution-schema.ts (novo)",
+    "app/components/founder/reservation-status-card.tsx (novo)",
+    "app/components/founder/rodada-captacao-tab.tsx (novo)",
+    "app/components/founder/rodada-distribuicao-tab.tsx (novo)",
+    "app/routes/private/edit-startup-rodada.tsx (novo)",
+    "app/routes.ts (modificado — +1 rota)",
+    "app/components/founder/edit-startup-nav.tsx (modificado — +1 navItem)",
+    "app/components/founder/AGENTS.md (atualizado — adicionar 3 componentes)",
+    "app/routes/private/AGENTS.md (atualizado — adicionar 1 rota + renomear 'Founder (8 rotas)' → 'Founder (9 rotas)')",
+    "app/lib/round-distribution-schema.test.ts (novo — Vitest, 6 cenários)",
+    "doc/screenshots/rodada-edit.png (novo — verificação visual T010)"
+  ],
+  "tasks": [
+    {
+      "id": "T001",
+      "title": "Extrair schema Zod round-distribution-schema.ts (7 campos + superRefine soma=100)",
+      "type": "frontend",
+      "owner": "frontend",
+      "dependencies": [],
+      "estimatedEffort": 0.5,
+      "status": "pending",
+      "scope": "Criar novo arquivo app/lib/round-distribution-schema.ts contendo apenas os 7 campos recursosFundador..recursosCaixa (copiados de new-startup-schema.ts:211-218) + superRefine validando soma=100 (copiado de :253-270). Exportar tipo RoundDistributionInput via z.infer. NÃO importar complementaryStartupSchema — schema focado e independente.",
+      "expectedArtifacts": [
+        "app/lib/round-distribution-schema.ts (novo)",
+        "roundDistributionSchema exportado",
+        "RoundDistributionInput type exportado"
+      ],
+      "specRefs": [
+        "PLANO_ACAO_EDICAO_RODADA_FRONTEND_ONLY.md §2.1, §6 T01"
+      ],
+      "complexity": "simple",
+      "acceptanceCriteria": [
+        "Schema roundDistributionSchema.parse({recursosFundador: 30, recursosDesenvolvimento: 25, ...}) aceita quando soma=100",
+        "Schema rejeita soma≠100 com mensagem 'A soma dos recursos deve ser exatamente 100%. Total atual: X%'",
+        "Tipo RoundDistributionInput exportado e importável",
+        "Cada campo tem min(0).max(100) — entrada negativa ou >100 falha",
+        "Arquivo NÃO importa complementaryStartupSchema nem new-startup-schema.ts"
+      ]
+    },
+    {
+      "id": "T002",
+      "title": "Componente reservation-status-card.tsx (read-only, simplificado de token-reservation.tsx)",
+      "type": "frontend",
+      "owner": "frontend",
+      "dependencies": ["T001"],
+      "estimatedEffort": 1.0,
+      "status": "pending",
+      "scope": "Criar app/components/founder/reservation-status-card.tsx. Props: { status: 'PAGO'|'AGUARDANDO'|'CANCELADO', paidAt?: string, valorPago?: number }. Visual read-only inspirado em token-reservation.tsx:128-139 (paid) e :142-217 (pending). Border-l-4 colorido (verde/amarelo/vermelho). CheckCircle2/Loader2/XCircle icons. SEM botão de pagar (versão pura de status).",
+      "expectedArtifacts": [
+        "app/components/founder/reservation-status-card.tsx (novo)"
+      ],
+      "specRefs": [
+        "PLANO_ACAO_EDICAO_RODADA_FRONTEND_ONLY.md §2.2, §5 (Tab Captação), §6 T02"
+      ],
+      "complexity": "simple",
+      "acceptanceCriteria": [
+        "Renderiza status PAGO com border-l-4 verde + CheckCircle2 + data/valor",
+        "Renderiza status AGUARDANDO com border-l-4 amarelo + Loader2 + texto explicativo",
+        "Renderiza status CANCELADO com border-l-4 vermelho + XCircle + motivo (opcional)",
+        "NÃO renderiza botão 'Pagar reserva' (read-only puro)",
+        "Aceita props opcionais paidAt e valorPago sem quebrar quando undefined"
+      ]
+    },
+    {
+      "id": "T003",
+      "title": "Componente rodada-captacao-tab.tsx (compõe RoundTerms + RoundSchedule + TokenEconomicsCalculator + ReservationStatusCard)",
+      "type": "frontend",
+      "owner": "frontend",
+      "dependencies": ["T002"],
+      "estimatedEffort": 1.5,
+      "status": "pending",
+      "scope": "Criar app/components/founder/rodada-captacao-tab.tsx. Props: { startup: StartupDetail } (do loader do layout). Reusa RoundTerms (modo edit com defaults mock), RoundSchedule (modo edit), TokenEconomicsCalculator (modo edit com tokenPrice mock), ReservationStatusCard (de T02). Mocks locais via useState para defaults derivados do startup.",
+      "expectedArtifacts": [
+        "app/components/founder/rodada-captacao-tab.tsx (novo)"
+      ],
+      "specRefs": [
+        "PLANO_ACAO_EDICAO_RODADA_FRONTEND_ONLY.md §5 (Tab Captação), §6 T03"
+      ],
+      "complexity": "medium",
+      "acceptanceCriteria": [
+        "Renderiza RoundTerms no modo 'edit' com defaults mock extraídos de startup",
+        "Renderiza RoundSchedule com 3 datas em modo edit",
+        "Renderiza TokenEconomicsCalculator readonly (valuation calculado a partir de meta+equity)",
+        "Renderiza ReservationStatusCard no topo (status mock PAGO para visual)",
+        "reportStatus + registerReset propagados para sub-componentes (EditSectionProps)"
+      ]
+    },
+    {
+      "id": "T004",
+      "title": "Componente rodada-distribuicao-tab.tsx (7 inputs nomeados + pill soma=100)",
+      "type": "frontend",
+      "owner": "frontend",
+      "dependencies": ["T001"],
+      "estimatedEffort": 2.5,
+      "status": "pending",
+      "complexity": "complex",
+      "needsMicroPrompt": true,
+      "scope": "Criar app/components/founder/rodada-distribuicao-tab.tsx. Props: { startup: StartupDetail }. Implementar 7 inputs nomeados (recursosFundador..recursosCaixa) — NÃO array dinâmico (decisão arquitetural: schema Zod tem 7 campos fixos, NÃO .array()). State local: useState<RoundDistributionInput>. Cálculo: sumPct via useMemo. totalIsValid = Math.abs(sumPct-100) < 0.01. Pill no header: verde se válido, vermelho se não. Visual: grid 2 colunas (mobile 1-col), inputs com sufixo %. Inspiração: use-of-funds.tsx:58-79 (lógica sumPct + dirty). reportStatus + registerReset (EditSectionProps). Validação opcional via roundDistributionSchema.parse(state) em submit.",
+      "expectedArtifacts": [
+        "app/components/founder/rodada-distribuicao-tab.tsx (novo)",
+        "Função sumPct derivada via useMemo",
+        "Pill colorida verde/vermelho conforme soma"
+      ],
+      "specRefs": [
+        "PLANO_ACAO_EDICAO_RODADA_FRONTEND_ONLY.md §2.3, §5 (Tab Distribuição), §6 T04",
+        "app/lib/new-startup-schema.ts:211-218 (campos)",
+        "app/lib/new-startup-schema.ts:253-270 (superRefine)",
+        "app/components/founder/use-of-funds.tsx:58-79 (sumPct + dirty)"
+      ],
+      "acceptanceCriteria": [
+        "7 inputs nomeados: Fundador, Desenvolvimento, Comercial (Equipe), Marketing, Nuvem, Jurídico, Reserva de Caixa",
+        "sumPct calculado corretamente como soma dos 7 campos (useMemo)",
+        "Pill verde '100/100' quando Math.abs(sumPct-100) < 0.01",
+        "Pill vermelho 'X/100 ⚠️' quando soma ≠ 100 (com alerta textual)",
+        "Visual em grid 2 colunas (md:grid-cols-2, mobile 1-col)",
+        "Inputs com sufixo % visual (direita)",
+        "reportStatus com id='round-distribution', dirty derivado de comparação initialRef vs state, filled 1 se totalIsValid",
+        "registerReset implementado (resetSection volta state para initialRef.current)",
+        "Botão 'Salvar' (do action bar) fica desabilitado enquanto soma ≠ 100"
+      ]
+    },
+    {
+      "id": "T005",
+      "title": "Rota edit-startup-rodada.tsx (shell + tabs internas useState + register handlers mock)",
+      "type": "frontend",
+      "owner": "frontend",
+      "dependencies": ["T003", "T004"],
+      "estimatedEffort": 1.5,
+      "status": "pending",
+      "scope": "Criar app/routes/private/edit-startup-rodada.tsx. meta() com título 'Rodada | Editar Startup | iSelfToken'. useRouteLoaderData('routes/private/edit-startup-layout') para obter startup. useState<'captacao'|'distribuicao'>('captacao') para tabs internas. Renderizar segmented control (pattern current-metrics.tsx:62-80). Renderizar RodadaCaptacaoTab ou RodadaDistribuicaoTab conforme activeTab. Aside: TipCard + PublicPreviewCard (reusa de edit-startup-identidade.tsx). Registrar handlers no useEditStartupForm(): onSave → toast.success('Alterações salvas (mock)'), onDiscard → toast.info('Alterações descartadas').",
+      "expectedArtifacts": [
+        "app/routes/private/edit-startup-rodada.tsx (novo)"
+      ],
+      "specRefs": [
+        "PLANO_ACAO_EDICAO_RODADA_FRONTEND_ONLY.md §3 (Decisão Estrutural), §6 T05"
+      ],
+      "complexity": "simple",
+      "acceptanceCriteria": [
+        "Rota renderiza sem erro (loader mock retorna FinFlow)",
+        "Tab 'Captação' é default ao carregar a rota",
+        "Segmented control alterna entre Captação/Distribuição via useState",
+        "Aside contém TipCard (texto novo: 'Configure a rodada em 2 abas...') + PublicPreviewCard",
+        "registerHandlers({onSave, onDiscard}) chamado em useEffect com toasts mock",
+        "meta() retorna título correto 'Rodada | Editar Startup | iSelfToken'",
+        "Tipo StartupDetail consumido corretamente via useRouteLoaderData"
+      ]
+    },
+    {
+      "id": "T006",
+      "title": "Registrar rota em app/routes.ts (children de founder/startups/:id/edit)",
+      "type": "frontend",
+      "owner": "frontend",
+      "dependencies": ["T005"],
+      "estimatedEffort": 0.2,
+      "status": "pending",
+      "scope": "Modificar app/routes.ts:124-129 (children de founder/startups/:id/edit). Adicionar route('rodada', 'routes/private/edit-startup-rodada.tsx') como último item do array (após bancario). Manter ordem alfabética ou posicional conforme padrão.",
+      "expectedArtifacts": [
+        "app/routes.ts modificado (+1 linha)"
+      ],
+      "specRefs": [
+        "PLANO_ACAO_EDICAO_RODADA_FRONTEND_ONLY.md §4.2, §6 T06"
+      ],
+      "complexity": "simple",
+      "acceptanceCriteria": [
+        "Linha adicionada: route('rodada', 'routes/private/edit-startup-rodada.tsx')",
+        "Posição: última entrada do array children de founder/startups/:id/edit",
+        "Sem alteração em outras rotas",
+        "TypeScript válido (sem erro de compilação)"
+      ]
+    },
+    {
+      "id": "T007",
+      "title": "Adicionar nav item 'Rodada' em edit-startup-nav.tsx (ícone Coins, posição 2)",
+      "type": "frontend",
+      "owner": "frontend",
+      "dependencies": ["T005"],
+      "estimatedEffort": 0.3,
+      "status": "pending",
+      "scope": "Modificar app/components/founder/edit-startup-nav.tsx. Adicionar import { User, Users, Coins, FileText, Landmark, type LucideIcon } from 'lucide-react'. Inserir { label: 'Rodada', href: 'rodada', icon: Coins } no array navItems na posição 2 (entre Identidade e Time).",
+      "expectedArtifacts": [
+        "app/components/founder/edit-startup-nav.tsx modificado (+3 linhas)"
+      ],
+      "specRefs": [
+        "PLANO_ACAO_EDICAO_RODADA_FRONTEND_ONLY.md §4.2, §6 T07"
+      ],
+      "complexity": "simple",
+      "acceptanceCriteria": [
+        "navItems contém 5 itens (Identidade, Rodada, Time, Documentos, Bancário)",
+        "Rodada na posição 2 (índice 1 do array)",
+        "Ícone Coins importado de lucide-react",
+        "href='rodada' (vira /founder/startups/:id/edit/rodada via base + href)",
+        "Visual idêntico aos outros itens (mesma estrutura JSX)"
+      ]
+    },
+    {
+      "id": "T008",
+      "title": "Atualizar AGENTS.md de app/routes/private/ e app/components/founder/",
+      "type": "frontend",
+      "owner": "documenter",
+      "dependencies": ["T005"],
+      "estimatedEffort": 0.5,
+      "status": "pending",
+      "scope": "Atualizar dois arquivos de documentação: (1) app/routes/private/AGENTS.md — adicionar 'edit-startup-rodada.tsx' na seção 'Founder (8 rotas)' → renomear para 'Founder (9 rotas)'; (2) app/components/founder/AGENTS.md — adicionar 4 novos componentes na seção 'Identidade, banca, rodada, financeiro' (rodada-captacao-tab.tsx, rodada-distribuicao-tab.tsx, reservation-status-card.tsx — 3 no escopo + o componente da rota).",
+      "expectedArtifacts": [
+        "app/routes/private/AGENTS.md modificado",
+        "app/components/founder/AGENTS.md modificado"
+      ],
+      "specRefs": [
+        "PLANO_ACAO_EDICAO_RODADA_FRONTEND_ONLY.md §6 T08"
+      ],
+      "complexity": "simple",
+      "acceptanceCriteria": [
+        "app/routes/private/AGENTS.md: seção Founder renomeada para '(9 rotas)' + nova rota listada",
+        "app/components/founder/AGENTS.md: 4 novos arquivos na seção 'Identidade, banca, rodada, financeiro'",
+        "Ambos arquivos mantêm limite de 40 linhas (lean profile)",
+        "Formatação consistente com entradas existentes"
+      ]
+    },
+    {
+      "id": "T009",
+      "title": "Vitest para round-distribution-schema.ts (6 cenários: soma=100, 99.99, 100.01, 0, negativo, >100)",
+      "type": "test",
+      "owner": "tester",
+      "dependencies": ["T001"],
+      "estimatedEffort": 1.0,
+      "status": "pending",
+      "scope": "Criar app/lib/round-distribution-schema.test.ts (ou em __tests__/ se convenção do projeto exigir). Cenários mínimos: (1) soma=100 aceita, (2) soma=99.99 rejeita com mensagem específica, (3) soma=100.01 rejeita, (4) soma=0 rejeita (todos zeros), (5) campo negativo rejeita, (6) campo >100 rejeita. Usar describe/it do Vitest já configurado em S01/T007.",
+      "expectedArtifacts": [
+        "app/lib/round-distribution-schema.test.ts (novo)"
+      ],
+      "specRefs": [
+        "PLANO_ACAO_EDICAO_RODADA_FRONTEND_ONLY.md §6 T09",
+        "Vitest setup S01/T007"
+      ],
+      "complexity": "simple",
+      "acceptanceCriteria": [
+        "6 cenários implementados e passando",
+        "Cobertura ≥70% em round-distribution-schema.ts (lean)",
+        "Mensagem de erro do superRefine testada via toContain('100%')",
+        "Cada teste isolado (sem dependência de estado externo)",
+        "Sem console.log deixado após os testes"
+      ]
+    },
+    {
+      "id": "T010",
+      "title": "Verificação visual + screenshot em doc/screenshots/rodada-edit.png",
+      "type": "frontend",
+      "owner": "frontend",
+      "dependencies": ["T005", "T006", "T007", "T008", "T009"],
+      "estimatedEffort": 0.5,
+      "status": "pending",
+      "scope": "Tarefa de smoke test visual. Iniciar dev server (npm run dev). Navegar até /founder/startups/:id/edit/rodada (loader mock retorna dados). Verificar: (a) nav lateral tem 5 itens com Rodada entre Identidade e Time; (b) tab Captação default renderiza RoundTerms + RoundSchedule + TokenEconomicsCalculator + ReservationStatusCard; (c) tab Distribuição renderiza 7 inputs nomeados + pill verde '100/100'; (d) alterar um input para quebrar soma → pill vira vermelho; (e) action bar global dispara toast 'Alterações salvas (mock)' ao clicar Salvar. Capturar screenshot final em doc/screenshots/rodada-edit.png (fullPage=true).",
+      "expectedArtifacts": [
+        "doc/screenshots/rodada-edit.png (novo)"
+      ],
+      "specRefs": [
+        "PLANO_ACAO_EDICAO_RODADA_FRONTEND_ONLY.md §6 T10"
+      ],
+      "complexity": "simple",
+      "acceptanceCriteria": [
+        "Screenshot capturado em doc/screenshots/rodada-edit.png",
+        "Nav com 5 itens verificado visualmente",
+        "Tabs Captação/Distribuição funcionando (toggle visual)",
+        "Pill soma=100 verde, pill quebra-soma vermelha",
+        "Toast mock disparado ao clicar Salvar",
+        "Sem warnings novos no dev server console"
+      ]
+    }
+  ],
+  "dependencies": {
+    "internal": {
+      "T001": [],
+      "T002": ["T001"],
+      "T003": ["T002"],
+      "T004": ["T001"],
+      "T005": ["T003", "T004"],
+      "T006": ["T005"],
+      "T007": ["T005"],
+      "T008": ["T005"],
+      "T009": ["T001"],
+      "T010": ["T005", "T006", "T007", "T008", "T009"]
+    },
+    "executionDiagram": "T001 ─┬─→ T002 ─→ T003 ─┐\n      └─→ T004 ─────────┤\n                        └─→ T005 ─┬─→ T006\n                                  ├─→ T007\n                                  ├─→ T008\n                                  └─→ T010\n                  T001 ─→ T009 ─────────┘"
+  },
+  "complexTasks": ["T004"],
+  "scopeNotes": [
+    "FRONTEND-ONLY — backend NÃO será tocado nesta sprint. PATCH /startup/{id}/rodada/{id} continua com bugs no NestJS (gap conhecido).",
+    "80% dos componentes já existem: round-terms.tsx, round-schedule.tsx, token-economics-calculator.tsx (todos modo edit funcional com mocks).",
+    "Schema Zod dos 7 campos JÁ EXISTE em new-startup-schema.ts:211-218 + superRefine :253-270 — apenas EXTRAIR para novo arquivo focado.",
+    "Lógica de soma=100 + dirty + pill colorida JÁ EXISTE em use-of-funds.tsx:58-79 — inspiração para T04, não cópia direta (shape incompatível: array dinâmico vs 7 fixos).",
+    "Pattern de tabs internas NOVO no codebase — referência: current-metrics.tsx:62-80 (segmented control MRR/ARR).",
+    "MIGRAÇÃO FUTURA: quando backend corrigir rota PATCH /rodada/{id}, criar S25 (backend) + S26 (frontend integration) para ativar persistência real.",
+    "Plano detalhado: sprints/PLANO_ACAO_EDICAO_RODADA_FRONTEND_ONLY.md (378 LOC, commit 5f1070d).",
+    "Coexistência com S01 e S02 — sem delete/overwrite de artefatos anteriores.",
+    "Path-boundary caveat: artefatos criados em sprints/ (raiz) e NÃO em .harness/sprints/ (DEBT-05 em sprints/cross-sprint.json)."
+  ],
+  "acceptanceCriteria": [
+    "Item 'Rodada' visível no nav lateral de /founder/startups/:id/edit entre Identidade e Time, com ícone Coins",
+    "/founder/startups/:id/edit/rodada renderiza sem erro (loader mock retorna dados)",
+    "Tab 'Captação' (default) mostra: RoundTerms + RoundSchedule + TokenEconomicsCalculator + ReservationStatusCard",
+    "Tab 'Distribuição' mostra 7 inputs nomeados com sufixo %",
+    "Pill no header da Tab Distribuição: VERDE '100/100' quando soma=100, VERMELHO 'X/100' quando ≠ 100",
+    "Tab Distribuição NÃO permite submit (pill indica erro) enquanto soma ≠ 100",
+    "Action bar global: ao clicar 'Salvar Alterações', dispara toast mock 'Alterações salvas (mock)'",
+    "Sem regressão nas 4 abas existentes (Identidade/Time/Documentos/Bancário)",
+    "Visual consistente com edit-startup-time (cores neon #d500f9, glow background)",
+    "app/lib/round-distribution-schema.test.ts passa todos os 6 cenários",
+    "Typecheck + lint passam",
+    "Dev server sobe sem warnings novos",
+    "Cobertura ≥ 70% no novo schema (perfil Lean)",
+    "AGENTS.md de app/routes/private/ e app/components/founder/ atualizados",
+    "Screenshot capturado em doc/screenshots/rodada-edit.png"
+  ],
+  "guardrails": [
+    "Não tocar backend NestJS — escopo é frontend-only",
+    "Não criar BFFs novos em app/routes/api/",
+    "Não criar hooks TanStack novos — usar useState local",
+    "Não modificar new-startup-schema.ts principal — apenas extrair para novo arquivo focado",
+    "Não deletar nem sobrescrever S01/S02 — coexistência cumulativa",
+    "Não implementar registerReset com comportamento que resete state indevidamente (mock — deixar undefined ou trivial)",
+    "Não logar dados sensíveis da rodada (valorPago, paidAt) — usar mock estático",
+    "Não instalar dependências novas — usar libs já no stack (lucide-react, react-hook-form opcional, sonner)",
+    "Não usar Redux/Zustand/Jotai — manter useState local (decisão arquitetural)",
+    "Não implementar deep-link das tabs (useSearchParams) — aceitar perda de estado no F5 como protótipo"
+  ],
+  "stats": {
+    "totalTasks": 10,
+    "byType": { "frontend": 9, "test": 1 },
+    "byOwner": { "frontend": 9, "tester": 1, "documenter": 1 },
+    "byComplexity": { "simple": 8, "medium": 1, "complex": 1 },
+    "totalHours": 9.5,
+    "filesCreated": 6,
+    "filesModified": 4,
+    "filesDocs": 2,
+    "complexTasksCount": 1,
+    "crossSprintFlows": 0,
+    "specCoverage": "100%",
+    "blockers": 0
+  },
+  "ordering": {
+    "T001_first": true,
+    "T009_parallel_T002_T003_T004": true,
+    "T005_after_T003_T004": true,
+    "T006_T007_T008_parallel_after_T005": true,
+    "T010_last": true,
+    "rationale": "T001 (schema) é fundamento — sem ele T002/T003/T004 não conseguem. T009 (testes) é paralelo a T002-T04. T005 (rota) compõe T03+T04. T06/T07/T08 são pós-rota. T10 é smoke final."
+  }
+}

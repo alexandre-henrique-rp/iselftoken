@@ -1,0 +1,29 @@
+# ============================================================
+# pnpm-workspace.yaml — iselftoken backendnode
+# pnpm 10+: install settings ficam neste arquivo (.npmrc só lê auth/registry)
+# Ref: https://pnpm.io/settings
+# ============================================================
+
+# Permite que pacotes com build scripts nativos rodem durante install.
+# Equivalente ao "onlyBuiltDependencies" do package.json em pnpm 9.
+# Necessário para: better-sqlite3 (native), sharp (native), bcrypt (native),
+#                  prisma engines, @scarf/scarf, msgpackr-extract, puppeteer.
+allowBuilds:
+  '@nestjs/core': true
+  '@prisma/adapter-better-sqlite3': true
+  '@prisma/client': true
+  '@prisma/engines': true
+  '@scarf/scarf': true
+  bcrypt: true
+  better-sqlite3: true
+  msgpackr-extract: true
+  prisma: true
+  puppeteer: true
+  sharp: true
+
+# Hoist de TODOS os pacotes @prisma/* para node_modules/@prisma/ (raiz).
+# Necessário porque generated/prisma/runtime/client.js faz
+# `require("@prisma/client-runtime-utils")` e pnpm nao expoe transitivas
+# por padrao. Resolve: "Error: Cannot find module '@prisma/client-runtime-utils'"
+publicHoistPattern:
+  - '@prisma/*'

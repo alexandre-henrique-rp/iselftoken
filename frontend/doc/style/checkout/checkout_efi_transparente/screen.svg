@@ -1,0 +1,216 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" width="1440" height="900" role="img" aria-label="Screenshot do Checkout EFI Transparente">
+  <defs>
+    <!-- Paleta Kinetic Architecture (vivid_logic §2) — sem hex inventado -->
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1f031d"/>
+      <stop offset="1" stop-color="#170117"/>
+    </linearGradient>
+    <linearGradient id="primary" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f084ff"/>
+      <stop offset="60%" stop-color="#ea6bff"/>
+      <stop offset="100%" stop-color="#d500f9"/>
+    </linearGradient>
+    <linearGradient id="qr" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffdbf3"/>
+      <stop offset="1" stop-color="#cc9dc0"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.55"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <pattern id="qrPattern" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect width="8" height="8" fill="#ffdbf3"/>
+      <rect x="0" y="0" width="4" height="4" fill="#1f031d"/>
+      <rect x="4" y="4" width="4" height="4" fill="#1f031d"/>
+    </pattern>
+    <style>
+      .title { font: 800 36px Manrope, system-ui, sans-serif; fill: #ffdbf3; }
+      .h2 { font: 700 20px Manrope, system-ui, sans-serif; fill: #ffdbf3; }
+      .body { font: 400 13px Manrope, system-ui, sans-serif; fill: #cc9dc0; }
+      .label { font: 600 11px Manrope, system-ui, sans-serif; fill: #cc9dc0; letter-spacing: 0.08em; }
+      .small { font: 500 11px Manrope, system-ui, sans-serif; fill: #cc9dc0; }
+      .mono { font: 700 14px 'JetBrains Mono', monospace; fill: #ffdbf3; }
+      .kpi-strong { font: 800 22px Manrope, system-ui, sans-serif; fill: #ffdbf3; }
+      .cta-primary { font: 700 14px Manrope, system-ui, sans-serif; fill: #000000; }
+      .pill-on-bg { font: 700 11px Manrope, system-ui, sans-serif; fill: #34d399; letter-spacing: 0.06em; }
+      .pill-warn { font: 700 11px Manrope, system-ui, sans-serif; fill: #fbbf24; letter-spacing: 0.06em; }
+    </style>
+  </defs>
+  <rect width="1440" height="900" fill="url(#bg)"/>
+
+  <!-- Decorative orbs (vivid_logic) -->
+  <circle cx="1380" cy="32" r="160" fill="#d500f9" opacity="0.10" filter="url(#glow)"/>
+  <circle cx="80" cy="860" r="200" fill="#ea6bff" opacity="0.08" filter="url(#glow)"/>
+
+  <!-- Header / Nav (glass-strong) -->
+  <rect x="0" y="0" width="1440" height="64" fill="rgba(65,19,59,0.55)"/>
+  <rect x="24" y="20" width="28" height="28" rx="8" fill="url(#primary)"/>
+  <text x="38" y="38" class="cta-primary" text-anchor="middle">i</text>
+  <text x="68" y="38" class="h2">IselfToken</text>
+  <text x="380" y="38" class="body">Campanhas</text>
+  <text x="470" y="38" class="body">Carteira</text>
+  <text x="540" y="38" class="h2">Checkout</text>
+  <rect x="1380" y="20" width="36" height="36" rx="18" fill="url(#primary)"/>
+  <text x="1398" y="42" class="cta-primary" text-anchor="middle">RA</text>
+
+  <!-- Main content -->
+  <g transform="translate(0, 100)">
+    <text x="80" y="0" class="label">CARRINTO ›</text>
+    <text x="180" y="0" class="label" fill="#ffdbf3">PAGAMENTO</text>
+    <text x="80" y="50" class="label" fill="#f084ff">FINALIZAR PAGAMENTO</text>
+    <text x="80" y="90" class="title">Checkout seguro</text>
+    <text x="80" y="115" class="body">Pagamento processado via EFI Bank. Dados criptografados de ponta a ponta.</text>
+
+    <g transform="translate(1080, -40)">
+      <rect width="140" height="28" rx="6" fill="rgba(52,211,153,0.18)"/>
+      <text x="14" y="18" class="small" fill="#34d399">PCI-DSS SAQ A · mTLS ativo</text>
+    </g>
+  </g>
+
+  <!-- Method selection -->
+  <g transform="translate(80, 260)">
+    <rect width="780" height="180" rx="16" fill="rgba(48,9,44,0.55)"/>
+    <text x="24" y="40" class="h2">1. Método de pagamento</text>
+
+    <g transform="translate(24, 60)">
+      <rect width="350" height="100" rx="12" fill="url(#primary)"/>
+      <rect x="20" y="20" width="60" height="60" rx="8" fill="rgba(255,255,255,0.95)"/>
+      <text x="50" y="58" font="800 18px Manrope" fill="#d500f9" text-anchor="middle">PIX</text>
+      <text x="100" y="48" class="cta-primary">PIX</text>
+      <text x="100" y="68" font="500 12px Manrope" fill="rgba(0,0,0,0.7)">Confirmação instantânea</text>
+      <circle cx="320" cy="50" r="12" fill="#000"/>
+      <path d="M313 50 l5 5 l8 -8" stroke="#34d399" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    </g>
+
+    <g transform="translate(394, 60)">
+      <rect width="350" height="100" rx="12" fill="rgba(48,9,44,0.55)"/>
+      <rect x="20" y="20" width="60" height="60" rx="8" fill="#41133b"/>
+      <text x="100" y="48" class="h2">Cartão de crédito</text>
+      <text x="100" y="68" class="body">À vista ou parcelado</text>
+    </g>
+  </g>
+
+  <!-- PIX flow -->
+  <g transform="translate(80, 460)">
+    <rect width="780" height="350" rx="16" fill="rgba(48,9,44,0.55)"/>
+    <text x="24" y="40" class="h2">2. Pagamento via PIX</text>
+
+    <g transform="translate(24, 60)">
+      <rect width="140" height="32" rx="8" fill="rgba(251,191,36,0.15)"/>
+      <text x="14" y="20" class="small" fill="#fbbf24">Expira em 29:42</text>
+    </g>
+
+    <g transform="translate(170, 60)">
+      <rect width="170" height="32" rx="8" fill="rgba(251,191,36,0.15)"/>
+      <circle cx="14" cy="16" r="4" fill="#fbbf24"/>
+      <text x="26" y="20" class="small" fill="#fbbf24">Aguardando pagamento</text>
+    </g>
+
+    <!-- QR Code -->
+    <g transform="translate(48, 130)">
+      <rect width="220" height="220" rx="12" fill="#ffdbf3" filter="url(#glow)"/>
+      <rect x="10" y="10" width="200" height="200" fill="url(#qrPattern)"/>
+      <rect x="10" y="10" width="50" height="50" fill="#1f031d"/>
+      <rect x="20" y="20" width="30" height="30" fill="#ffdbf3"/>
+      <rect x="160" y="10" width="50" height="50" fill="#1f031d"/>
+      <rect x="170" y="20" width="30" height="30" fill="#ffdbf3"/>
+      <rect x="10" y="160" width="50" height="50" fill="#1f031d"/>
+      <rect x="20" y="170" width="30" height="30" fill="#ffdbf3"/>
+    </g>
+
+    <!-- PIX copy/paste -->
+    <g transform="translate(310, 130)">
+      <text x="0" y="14" class="label">PIX COPIA E COLA</text>
+      <rect width="430" height="60" rx="8" fill="rgba(48,9,44,0.55)"/>
+      <text x="10" y="22" class="mono" font-size="10">00020126580014BR.GOV.BCB.PIX...</text>
+      <text x="10" y="40" class="mono" font-size="10">...abc6009SAO PAULO62070503***</text>
+
+      <rect y="80" width="430" height="48" rx="12" fill="url(#primary)"/>
+      <text x="215" y="108" class="cta-primary" text-anchor="middle">Copiar código PIX</text>
+    </g>
+
+    <text x="48" y="370" class="small">Aponte a câmera do seu app ou escaneie com o banco</text>
+  </g>
+
+  <!-- Right column - Order summary -->
+  <g transform="translate(900, 260)">
+    <rect width="460" height="560" rx="16" fill="rgba(48,9,44,0.55)"/>
+    <text x="24" y="40" class="h2">Resumo do pedido</text>
+
+    <!-- Items -->
+    <g transform="translate(24, 70)">
+      <rect width="412" height="56" rx="8" fill="rgba(48,9,44,0.55)"/>
+      <rect x="8" y="8" width="40" height="40" rx="6" fill="rgba(240,132,255,0.18)"/>
+      <text x="60" y="24" class="h2" font-size="14">500 Tokens — Startup Acme</text>
+      <text x="60" y="40" class="small">Reserva · Campanha TechBR</text>
+      <text x="395" y="32" class="kpi-strong" text-anchor="end">R$ 500</text>
+    </g>
+
+    <g transform="translate(24, 138)">
+      <rect width="412" height="56" rx="8" fill="rgba(48,9,44,0.55)"/>
+      <rect x="8" y="8" width="40" height="40" rx="6" fill="rgba(240,132,255,0.18)"/>
+      <text x="60" y="24" class="h2" font-size="14">Plano Pro — Mensal</text>
+      <text x="60" y="40" class="small">Renovação automática</text>
+      <text x="395" y="32" class="kpi-strong" text-anchor="end">R$ 99</text>
+    </g>
+
+    <g transform="translate(24, 206)">
+      <rect width="412" height="56" rx="8" fill="rgba(48,9,44,0.55)"/>
+      <rect x="8" y="8" width="40" height="40" rx="6" fill="rgba(240,132,255,0.18)"/>
+      <text x="60" y="24" class="h2" font-size="14">Selo de Verificação</text>
+      <text x="60" y="40" class="small">Validade 12 meses</text>
+      <text x="395" y="32" class="kpi-strong" text-anchor="end">R$ 890</text>
+    </g>
+
+    <!-- Coupon field -->
+    <g transform="translate(24, 290)">
+      <text x="0" y="0" class="label">CUPOM DE DESCONTO</text>
+      <rect y="14" width="290" height="44" rx="8" fill="rgba(48,9,44,0.55)"/>
+      <text x="14" y="42" class="mono">PROMO50</text>
+      <rect y="14" x="300" width="112" height="44" rx="8" fill="rgba(240,132,255,0.18)"/>
+      <text x="356" y="42" class="cta-primary" text-anchor="middle">Aplicar</text>
+    </g>
+
+    <!-- Totals -->
+    <g transform="translate(24, 380)">
+      <text x="0" y="0" class="body">Subtotal</text>
+      <text x="412" y="0" class="body" text-anchor="end">R$ 1.489,00</text>
+      <text x="0" y="22" class="body">Taxa de processamento EFI</text>
+      <text x="412" y="22" class="body" text-anchor="end">R$ 11,00</text>
+      <text x="0" y="44" class="body" fill="#34d399">Desconto (PROMO50 · 50% OFF)</text>
+      <text x="412" y="44" fill="#34d399" text-anchor="end">−R$ 750,00</text>
+
+      <line x1="0" y1="68" x2="412" y2="68" stroke="rgba(97,59,90,0.30)" stroke-width="1"/>
+      <text x="0" y="100" class="h2">Total a pagar</text>
+      <text x="412" y="100" font="800 32px Manrope" fill="url(#primary)" text-anchor="end">R$ 750,00</text>
+
+      <text x="0" y="124" class="small" fill="#936889">ou 6x de R$ 147,41 com juros de 2,99% a.m.</text>
+      <text x="0" y="142" class="small" fill="#936889">juros simples · total R$ 884,46 (PRD AC-03.1)</text>
+    </g>
+
+    <!-- Trust badges -->
+    <g transform="translate(24, 480)">
+      <rect width="130" height="50" rx="8" fill="rgba(48,9,44,0.55)"/>
+      <text x="65" y="22" font="700 12px Manrope" fill="#34d399" text-anchor="middle">PCI-DSS</text>
+      <text x="65" y="38" font="500 10px Manrope" fill="#cc9dc0" text-anchor="middle">SAQ A</text>
+
+      <rect x="140" width="130" height="50" rx="8" fill="rgba(48,9,44,0.55)"/>
+      <text x="205" y="22" font="700 12px Manrope" fill="#34d399" text-anchor="middle">mTLS</text>
+      <text x="205" y="38" font="500 10px Manrope" fill="#cc9dc0" text-anchor="middle">ativo</text>
+
+      <rect x="280" width="130" height="50" rx="8" fill="rgba(48,9,44,0.55)"/>
+      <text x="345" y="22" font="700 12px Manrope" fill="#34d399" text-anchor="middle">EFI</text>
+      <text x="345" y="38" font="500 10px Manrope" fill="#cc9dc0" text-anchor="middle">Bank</text>
+    </g>
+  </g>
+
+  <!-- Toast container (aria-live) — exemplo variant default -->
+  <g transform="translate(1100, 830)">
+    <rect width="240" height="58" rx="12" fill="rgba(48,9,44,0.92)" filter="url(#glow)"/>
+    <rect x="8" y="8" width="42" height="42" rx="8" fill="url(#primary)"/>
+    <text x="29" y="34" class="cta-primary" text-anchor="middle">i</text>
+    <text x="60" y="26" font="700 13px Manrope" fill="#ffdbf3">Cupom aplicado</text>
+    <text x="60" y="44" font="500 11px Manrope" fill="#cc9dc0">PROMO50 · 50% OFF aplicado</text>
+  </g>
+</svg>

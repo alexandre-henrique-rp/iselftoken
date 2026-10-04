@@ -1,0 +1,16 @@
+services:
+  redis:
+    image: redis:7.4-alpine
+    container_name: fintech_redis
+    restart: unless-stopped
+    command: ['redis-server', '--appendonly', 'yes']
+    ports:
+      - '6379:6379'
+    volumes:
+      - ./redis_data:/data
+    networks:
+      - iselftoken_network
+
+networks:
+  iselftoken_network:
+    external: true

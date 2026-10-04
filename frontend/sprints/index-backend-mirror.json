@@ -1,0 +1,40 @@
+{
+  "_type": "harness-sprint-index-v6",
+  "version": 1,
+  "_mirrorHeader": {
+    "_comment": "MIRROR FILE — temporariamente em frontend/sprints/index-backend-mirror.json. Após S03-planning, criar ../backendnode/sprints/index.json com este conteúdo (ajustando o campo 'project' para 'iselftoken-backend').",
+    "_finalPath": "../backendnode/sprints/index.json",
+    "_pathBlockerReason": "Hook path-boundary.ts do opencode bloqueou cross-repo writes com cwd=frontend/. Ver harness-allowlist.json."
+  },
+  "project": "iselftoken-backend",
+  "generatedAt": "2026-06-30T23:30:00-03:00",
+  "sprints": [
+    {
+      "id": "S03-backend-cnpj-alfanumerico",
+      "name": "Sprint S03 — Backend CNPJ Alfanumérico (NestJS, M3)",
+      "goal": "Adaptar backend NestJS para validar, armazenar e propagar CNPJ Alfanumérico com DV oficial RFB, fechando EXT-04 (cross-repo).",
+      "status": "pending",
+      "taskCount": 4,
+      "startedAt": null,
+      "finishedAt": null,
+      "jsonPath": "../backendnode/sprints/S03-backend-cnpj-alfanumerico.json",
+      "planPath": "../backendnode/sprints/S03-backend-cnpj-alfanumerico/SPRINT_PLAN.md",
+      "tasksDir": "../backendnode/sprints/S03-backend-cnpj-alfanumerico/tasks/",
+      "mirrorNote": "Artifacts criados em frontend/sprints/S03-backend-cnpj-alfanumerico/ (mirror) por path-blocker. Mover para backendnode/ para execução."
+    }
+  ],
+  "stats": {
+    "totalSprints": 1,
+    "byStatus": { "pending": 1, "in-progress": 0, "completed": 0 },
+    "byMilestone": { "M3": 1 },
+    "totalTasks": 4,
+    "byType": { "backend": 3, "test": 1 },
+    "totalHoursEstimated": 13
+  },
+  "nextActions": [
+    "Orchestrator: mover frontend/sprints/S03-backend-cnpj-alfanumerico/ → backendnode/sprints/",
+    "Orchestrator: criar backendnode/sprints/index.json (a partir deste mirror, com project=iselftoken-backend)",
+    "Orchestrator: confirmar antes de Fase 5 que DEBT-10 (prisma.schema.cnpj size) foi validado",
+    "Phase 5 worker backend: executar T014 → T015/T016 → T017"
+  ]
+}

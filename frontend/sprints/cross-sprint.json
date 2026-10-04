@@ -1,0 +1,220 @@
+{
+  "_type": "harness-cross-sprint-v6",
+  "version": 2,
+  "schemaVersion": "1",
+  "project": "iselftoken-frontend",
+  "generatedAt": "2026-06-30T23:30:00-03:00",
+  "updatedAt": "2026-07-13T14:00:00-03:00",
+  "scope": "S01-cnpj-alfanumerico + S02-m2-debts (M2) + S24-rodada-edit-frontend-only (M4)",
+  "flows": [
+    {
+      "id": "EXT-FLOW-S02",
+      "kind": "sprint-handoff",
+      "from": "S01/T003",
+      "to": "S02/T009",
+      "subject": "Reabertura do placeholder DV com algoritmo oficial do manual serpro.gov.br",
+      "trigger": "RFB republicou manual-dv-cnpj.pdf em jun/2026; RAG v2 atualizada.",
+      "handoffStatus": "S02/SPRINT_PLAN.md + S02.json + 3 TXXX_PROMPT.md criados; aguardando execução da Fase 5",
+      "trackingString": "pending-manual-dv-review será removido em T009"
+    },
+    {
+      "id": "EXT-FLOW-S02-TYPECHECK",
+      "kind": "technical-debt",
+      "from": "S01 (estado)",
+      "to": "S02/T008",
+      "subject": "Typecheck quebrado por Zod 4 migration incompleta (errorMap removido em 4 lugares + Resolver inference)",
+      "blockingImpact": "Saiu do commit b4f4e95c com typecheck vermelho. Não impactou testes (Vitest passou) mas bloqueia merge de novos PRs.",
+      "trackingString": "T008 fecha esta dívida (DEBT-ZOD-001)"
+    },
+    {
+      "id": "EXT-FLOW-S24",
+      "kind": "sprint-handoff",
+      "from": "M3 (sem sprint formal)",
+      "to": "S24-rodada-edit-frontend-only",
+      "subject": "Sprint frontend-only para edição de rodada — bypassa bugs conhecidos do backend PATCH /startup/{id}/rodada/{id}",
+      "trigger": "Backend NestJS continua com bugs na rota PATCH /startup/{id}/rodada/{id} (M3 não escopo cross-repo). Frontend precisa destravar UX de edição de rodada sem esperar backend. Plano aprovado: sprints/PLANO_ACAO_EDICAO_RODADA_FRONTEND_ONLY.md (commit 5f1070d, 378 LOC).",
+      "handoffStatus": "S24/SPRINT_PLAN.md + S24.json + 10 TXXX_PROMPT.md criados em frontend/sprints/S24-rodada-edit-frontend-only/; aguardando execução da Fase 5 (mock-only).",
+      "trackingString": "S24 status=planning-approved; migração para persistência real depende de S25 (backend fix) + S26 (frontend integration)"
+    }
+  ],
+  "externalDependencies": [
+    {
+      "id": "EXT-01-manual-dv-cnpj",
+      "kind": "regulatory-source",
+      "name": "Manual do Cálculo do DV do CNPJ Alfanumérico (PDF)",
+      "url": "https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/documentos-tecnicos/cnpj/manual-dv-cnpj.pdf/view",
+      "snapshot": "/tmp/opencode/manual-dv.txt",
+      "blocks": ["S01/T003 (S01) → S02/T009"],
+      "impact": "Implementação completa do validador DV (tabela de pesos do módulo 11 + sequência exata) depende da leitura do manual. RESOLVIDO em jun/2026 quando RFB republicou o PDF.",
+      "owner": "rag-curator + backend",
+      "resolution": "PDF extraído via pdftotext em /tmp/opencode/manual-dv.txt (4 páginas). Algoritmo reproduzido literalmente em RAG v2 §4.1-4.5. T009 implementa direto da fonte primária.",
+      "status": "closed-via-S02"
+    },
+    {
+      "id": "EXT-02-codigos-cnpj-zip",
+      "kind": "regulatory-source",
+      "name": "Códigos CNPJ (mapeamento letra→valor)",
+      "url": "https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/documentos-tecnicos/cnpj/codigos-cnpj.zip/view",
+      "blocks": ["monitoramento contínuo"],
+      "impact": "Tabela oficial de mapeamento letra→valor é necessária APENAS se houver caracteres explicitamente EXCLUÍDOS pelo design do algoritmo. Manual-dv não menciona exclusões; algoritmo oficial cobre os 36 chars [0-9A-Z].",
+      "owner": "rag-curator (monitorar)",
+      "resolution": "Para T009 de S02, ZIP não é bloqueante. Se publicação futura do ZIP trouxer exclusões, ajustar regex + charValue.",
+      "status": "monitoring",
+      "nonBlocking": true
+    },
+    {
+      "id": "EXT-03-simulador-oficial",
+      "kind": "test-fixture",
+      "name": "Simulador oficial de CNPJ Alfanumérico",
+      "url": "https://www.gov.br/pt-br/servicos/simulador-cnpj-alfanumerico",
+      "blocks": ["S01/T007 → S02/T010"],
+      "impact": "Geração de CNPIs válidos para fixtures de teste. Sem o Simulador, fixtures seriam inventadas e mascarariam bugs.",
+      "owner": "tester",
+      "mitigation": "T010 instrui o agente executor a (a) tentar webfetch do Simulador, OU (b) gerar deterministicamente via computeDv() usando exemplo do manual + variações (raiz com letras intercaladas, raiz toda letras, raiz toda zeros/Z como edge cases), validando cross-check com o Simulador se possível.",
+      "status": "deferred-pendency-T010"
+    },
+    {
+      "id": "EXT-04-backend-nestjs",
+      "kind": "cross-repo",
+      "name": "Backend NestJS (BACKEND_URL)",
+      "url": "../backendnode (repositório irmão, fora do escopo desta sprint)",
+      "blocks": ["S01/T006 (parcial) → produção"],
+      "impact": "O endpoint `/geral/cnpj/:cnpj` no backend NestJS consulta BrasilAPI. Hoje valida comprimento numérico. A partir de julho/2026, sem adaptação no backend, CNPJs alfanuméricos serão rejeitados em produção mesmo com frontend adaptado. Adicionalmente, pós-S02 o backend precisa validar DV alfanumérico no mesmo padrão (algoritmo §4 RAG v2).",
+      "owner": "backend team (outro repositório)",
+      "mitigation": "Frontend (S01 T006) já propaga letras. Backend precisa: (a) atualizar validador para aceitar letras no radical, (b) garantir que BrasilAPI ou proxy aceita CNPJ alfanumérico, (c) atualizar schema Prisma/typeORM para VARCHAR(14) preservar letras, (d) atualizar validador DV conforme PDF manual (mesmo algoritmo da S02/T009).",
+      "status": "pending-flag",
+      "recommendedAction": "Abrir issue no repositório backendnode ANTES de julho/2026 com link para S01 + S02 e o RAG law/cnpj-alfanumerico-in-rfb-2229-2024.md v2."
+    },
+    {
+      "id": "EXT-05-reforma-tributaria",
+      "kind": "regulatory-source (pendente confirmação)",
+      "name": "CNPJ obrigatório para pessoas físicas (Reforma Tributária)",
+      "url": "https://jornalcontabil.com.br/noticia/receita-federal-adia-exigencia-de-cnpj-de-pessoas-fisicas-para-2027/",
+      "blocks": ["futura sprint S?? depois de 15/07/2026"],
+      "impact": "Status `pending-official-confirmation` no RAG. NÃO implementar mudanças comportamentais até fonte primária RFB/CGIBS ser publicada.",
+      "owner": "rag-curator (monitorar)",
+      "mitigation": "Nenhuma task em S01 nem S02. Próxima iteração (15/07/2026) reavaliar status. Se confirmada, abrir sprint dedicada.",
+      "status": "pending",
+      "doNotImplement": true
+    },
+    {
+      "id": "EXT-07-backend-rodada-patch",
+      "kind": "cross-repo",
+      "name": "Backend NestJS — PATCH /startup/{id}/rodada/{id} (roda de captação)",
+      "url": "../backendnode (repositório irmão, fora do escopo desta sprint)",
+      "blocks": ["S24 → S25 (backend) + S26 (frontend integration)"],
+      "impact": "A rota PATCH /startup/{id}/rodada/{id} no backend NestJS tem bugs conhecidos que impedem persistência real da distribuição de recursos. S24 foi desenhada como FRONTEND-ONLY (mock via useState) para destravar UX de edição de rodada sem esperar o fix backend. Quando o backend for corrigido, criar S25 (backend) para corrigir validação + persistência, e S26 (frontend) para substituir mocks por useMutation + roundQueryOptions.",
+      "owner": "backend team (outro repositório)",
+      "mitigation": "S24 explicita no plano aprovado §1 que backend NÃO será tocado. Estado: PATCH /startup/{id}/rodada/{id} retorna 5xx intermitente ou 422 em cenários de soma=100 com decimais. Frontend (S24) entrega UX completa em modo mock; persistência real fica como débito cross-repo.",
+      "status": "pending-flag",
+      "recommendedAction": "Abrir issue no repositório backendnode com link para S24 + plano §1 + flag 'EXT-07'. Próxima iteração: priorizar fix backend como pré-requisito para S26."
+    },
+    {
+      "id": "EXT-06-zod-4-migration",
+      "kind": "technical-debt",
+      "name": "Zod 3 → Zod 4 incompatibilidade residual",
+      "scope": "app/lib/new-startup-schema.ts + app/routes/private/create-startup.tsx",
+      "blocks": ["S02/T008"],
+      "impact": "Em algum momento do projeto, o Zod foi atualizado de v3 para v4 (versão atual `^4.4.2`), mas a migração ficou incompleta: (a) 4 chamadas de `z.literal(true, { errorMap: () => ({ message: ... }) })` em `complementaryStartupSchema` em new-startup-schema.ts:226-229 usam API removida no Zod 4; (b) o uso de `.superRefine()` final em `newStartupSchema` causa divergência de tipos com `@hookform/resolvers` v5, gerando erro de `Resolver<...>` em `create-startup.tsx:83`.",
+      "owner": "frontend",
+      "mitigation": "T008 fecha ambos. Idiomático: substituir `errorMap` por `message` direto; cast tipado em `zodResolver(...) as Resolver<NewStartupFormData>` OU extrair refinamento para campos individuais.",
+      "status": "in-progress-via-S02/T008"
+    }
+  ],
+  "residualDebts": [
+    {
+      "id": "DEBT-01-vitest-setup",
+      "description": "Setup mínimo de Vitest foi entregue em S01/T007, mas pode evoluir para: coverage report no CI, hooks pre-commit, threshold global.",
+      "owner": "orchestrator + tester",
+      "nextSprint": "S03 ou housekeeping"
+    },
+    {
+      "id": "DEBT-02-agents-md-outdated",
+      "description": "AGENTS.md do projeto e de sub-pastas NÃO foi atualizado para refletir a nova API de CNPJ alfanumérico. Em particular: `app/lib/AGENTS.md` lista apenas formatCNPJ/CPF/Phone/etc, e `app/components/founder/AGENTS.md` não existe. Decisão deliberada: deixar para orchestrator decidir housekeeping separado, conforme briefing.",
+      "owner": "orchestrator",
+      "nextSprint": "housekeeping",
+      "outOfScopeOfS01": true
+    },
+    {
+      "id": "DEBT-03-dv-placeholder",
+      "description": "T003 entregou validação soft (aceita + console.warn). Quando o manual-dv-cnpj.pdf for lido, reescrever `cnpjAlfanumericoValidator` para DV completo. S02-T009 fecha esta dívida — algoritmo oficial (manual serpro.gov.br §4.1-4.5) substitui o placeholder.",
+      "owner": "frontend + rag-curator",
+      "nextSprint": "S02-T009 (in-progress-via-S02)",
+      "trackingString": "pending-manual-dv-review",
+      "trackingExpectedRemovedBy": "S02-T009"
+    },
+    {
+      "id": "DEBT-ZOD-001",
+      "description": "Typecheck quebrado por Zod 4 migration incompleta. S02-T008 fecha esta dívida.",
+      "scope": "app/lib/new-startup-schema.ts:226-229 + app/routes/private/create-startup.tsx:83",
+      "owner": "frontend",
+      "nextSprint": "S02-T008 (in-progress-via-S02)",
+      "blockingImpact": "typecheck vermelho global impede merge de novos PRs no projeto"
+    },
+    {
+      "id": "DEBT-04-backend-adaptation",
+      "description": "Backend NestJS em ../backendnode precisa adaptação análoga — não está no escopo desta sprint (frontend-only). Flagado como EXT-04. Pós-S02, o backend precisa implementar o mesmo algoritmo de DV (S02-T009).",
+      "owner": "backend team",
+      "nextSprint": "external to this repo",
+      "crossRepo": true
+    },
+    {
+      "id": "DEBT-05-hook-divergence",
+      "description": "Briefing pediu artefatos em `.harness/sprints/S01-cnpj-alfanumerico/` mas o hook `path-boundary.ts` do opencode só permite escrita em `sprints/**` (raiz). Decisão aplicada em S01: artefatos foram criados em `sprints/` (raiz). S02 segue o mesmo padrão (sprints/S02-m2-debts/). Conteúdo legado em `.harness/sprints/S01-cnpj-alfanumerico/` (5 tasks desatualizadas) deve ser apagado ou movido.",
+      "owner": "orchestrator",
+      "nextSprint": "housekeeping imediato",
+      "recommendation": "Mover `sprints/` (raiz) para `.harness/sprints/` ajustando o hook. OU atualizar AGENTS do orchestrator para padronizar `sprints/` (raiz). Nota S02: artefatos criados em sprints/S02-m2-debts/ — seguir este padrão é recomendável para sprints futuras."
+    },
+    {
+      "id": "DEBT-06-create-startup-stepper-review",
+      "description": "grep encontrou `app/components/founder/new-startup-step-4-banking-review.tsx` mas o RAG original cita-a como ponto a revisar. T005 marcou como 'sem mudança' pois delega para BankingDetails. Validar em smoke test E2E (Playwright) que o fluxo continua funcionando com CNPJ alfanumérico.",
+      "owner": "tester (smoke) + frontend (validação manual)",
+      "nextSprint": "housekeeping ou S03",
+      "recommendedFor": "Smoke E2E pós-S02 validar que o DV completo não impacta fluxo de cadastro"
+    }
+  ],
+  "riskRegister": [
+    {
+      "id": "RISK-01-regex-strict",
+      "severity": "medium",
+      "description": "Regex `^[A-Z0-9]{2}\\.[A-Z0-9]{3}\\.[A-Z0-9]{3}\\/[A-Z0-9]{4}-\\d{2}$` pode rejeitar letras/dígitos que a RFB excluiu especificamente (tabela no codigos-cnpj.zip).",
+      "mitigation": "Manual-dv não cita exclusões; algoritmo cobre os 36 chars. Monitorar EXT-02 para publicação futura."
+    },
+    {
+      "id": "RISK-02-backend-not-ready",
+      "severity": "high",
+      "description": "Backend NestJS pode não estar adaptado em julho/2026 — frontend aceita mas lookup Receita Federal falha. Pós-S02, backend precisa também implementar o algoritmo de DV oficial.",
+      "mitigation": "Flag em EXT-04. Abrir issue no repositório backend com antecedência + linkar RAG v2 §4."
+    },
+    {
+      "id": "RISK-03-legacy-systems",
+      "severity": "medium",
+      "description": "Integrações com sistemas legados (bancos, ERPs) que ainda esperam CNPJ numérico (14 dígitos) podem quebrar.",
+      "mitigation": "Manter `getOnlyDigits` exportado como `@deprecated` para usos explicitamente legados. Auditoria futura nos consumers."
+    },
+    {
+      "id": "RISK-04-DV-validation-soft",
+      "severity": "low",
+      "description": "S01 (T003) aceitava CNPJ alfanumérico com DV placeholder (soft). S02-T009 fecha isto com algoritmo oficial.",
+      "mitigation": "S02 implementa validação rígida; CNPIs com DV incorreto serão rejeitados localmente. Backend não vai mais receber CNPIs inválidos."
+    },
+    {
+      "id": "RISK-05-zod-resolver-cast-fragility",
+      "severity": "low",
+      "description": "T008 pode resolver a inferência quebrada via cast tipado (`as Resolver<...>`). Casts futuros podem mascarar regressões se o schema mudar sem atualizar o tipo.",
+      "mitigation": "Comentar inline com link para issue do @hookform/resolvers v5 + Zod 4. Se preferir, usar `.refine()` em campos individuais em vez de cast."
+    },
+    {
+      "id": "RISK-06-fixture-drift",
+      "severity": "low",
+      "description": "Fixtures T010 com DVs calculados via `computeDv()` local podem divergir do Simulador oficial se a RFB mudar o algoritmo (improvável, mas documentado).",
+      "mitigation": "Conferir DVs contra o exemplo do manual durante a task; cross-check com Simulador se webfetch viável. Fixture tem header com metodologia para reprodutibilidade."
+    }
+  ],
+  "stats": {
+    "externalDependenciesCount": 7,
+    "residualDebtsCount": 7,
+    "riskRegisterCount": 6,
+    "sprintsPlanned": ["S01-cnpj-alfanumerico", "S02-m2-debts", "S24-rodada-edit-frontend-only"]
+  }
+}

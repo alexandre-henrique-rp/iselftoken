@@ -1,0 +1,686 @@
+{
+  "schema_version": "1.0",
+  "project": "IselfToken",
+  "report_date": "09/09/2026",
+  "source": "docs/security-audit/generate_report.py",
+  "status_definitions": {
+    "open": "Issue identificada e ainda não validada como corrigida",
+    "in_progress": "Correção em andamento",
+    "resolved": "Correção implementada e validada",
+    "accepted_risk": "Risco conhecido aceito formalmente"
+  },
+  "summary": {
+    "total": 25,
+    "by_severity": {
+      "critica": 5,
+      "alta": 7,
+      "media": 6,
+      "baixa": 6,
+      "informativa": 1
+    },
+    "by_priority": {
+      "P1": 12,
+      "P2": 6,
+      "P3": 7
+    },
+    "by_category": {
+      "1": 6,
+      "2": 2,
+      "3": 4,
+      "4": 5,
+      "5": 8
+    }
+  },
+  "issues": [
+    {
+      "id": "F-02",
+      "cat": 1,
+      "cat_name": "Isolamento por userId",
+      "sev": "critica",
+      "title": "PUT /campaigns/:id/resources sem autenticacao nem checagem de owner",
+      "file": "backendnode/src/api/campaigns/campaigns.controller.ts",
+      "line": "201-214",
+      "evidence": "@Put(':id/resources') async updateResources(@Param('id') id, @Body() dto) { return this.resources.replaceAll(+id, dto.resourceAllocations); }",
+      "why": "Rota desprotegida (sem @UseGuards). Atacker anonimo pode chamar PUT /campaigns/123/resources com payload malicioso e SUBSTITUIR as alocacoes de recursos de qualquer campanha — a unica protecao eh o @Body() ser validado por DTO.",
+      "impact": "Manipulacao das alocacoes de 100% de recursos de qualquer campanha. Quebra de regra de negocio B05/CVM 88/2022. Frontend deixa de exibir informacoes confiaveis.",
+      "fix": "Adicionar @UseGuards(AuthGuard) e validar que req.user.id eh o founder da startup dona da campanha antes de replaceAll.",
+      "status": "resolved",
+      "priority": "P1",
+      "severity_label": "CRÍTICA",
+      "pdf_highlight": {
+        "color": "#B91C1C",
+        "label": "CRÍTICA"
+      },
+      "acceptance_criteria": [
+        "Teste de regressão reproduzindo o problema antes da correção",
+        "Correção implementada",
+        "Teste de regressão aprovado após a correção",
+        "Revisão manual confirma que o vetor foi fechado"
+      ]
+    },
+    {
+      "id": "F-03",
+      "cat": 1,
+      "cat_name": "Isolamento por userId",
+      "sev": "alta",
+      "title": "GET /startup/:id publico retorna email do founder (LGPD)",
+      "file": "backendnode/src/api/startup/service/startup-crud.service.ts",
+      "line": "647-685",
+      "evidence": "founder: { select: { id: true, nome: true, email: true } } (linha 658-660) — controller (startup.controller.ts:137-148) nao tem @UseGuards",
+      "why": "Rota GET /startup/:id eh publica (sem guard). O payload inclui o email do founder. Qualquer visitante anonimo consegue listar founders da plataforma e seus emails.",
+      "impact": "Violacao de LGPD: exposicao de PII (email) sem consentimento ou necessidade. Possivel alvo de phishing/scraping.",
+      "fix": "Remover `email: true` do select de founder. Se o email for necessario para CTAs, criar endpoint autenticado /api/startups/:id/contact que retorna mascarado e rate-limited.",
+      "status": "resolved",
+      "priority": "P1",
+      "severity_label": "ALTA",
+      "pdf_highlight": {
+        "color": "#EA580C",
+        "label": "ALTA"
+      },
+      "acceptance_criteria": [
+        "Teste de regressão reproduzindo o problema antes da correção",
+        "Correção implementada",
+        "Teste de regressão aprovado após a correção",
+        "Revisão manual confirma que o vetor foi fechado"
+      ]
+    },
+    {
+      "id": "F-04",
+      "cat": 1,
+      "cat_name": "Isolamento por userId",
+      "sev": "media",
+      "title": "GET /campaigns e /campaigns/:id publicos sem filtro de status",
+      "file": "backendnode/src/api/campaigns/service/campaigns-crud.service.ts",
+      "line": "20-77 / 79-156",
+      "evidence": "findAll aplica a allowlist PUBLIC_CAMPAIGN_STATUSES = ['OPEN', 'FUNDED', 'PAID_OUT']; findOne exige `id` e status nessa mesma allowlist. O endpoint administrativo protegido `/admin/compliance/campaigns` permite Compliance/Admin revisar campanhas DRAFT, PAUSED e CLOSED sem usar o catalogo publico.",
+      "why": "Endpoint publico retorna campanhas nao publicadas quando nao restringe os status. Visitantes podem ver campanhas em rascunho com dados internos.",
+      "impact": "Vazamento de informacoes de campanhas nao publicadas (incluindo dados bancarios da startup, dados de receita, projecoes).",
+      "fix": "Manter o catalogo publico restrito a OPEN, FUNDED e PAID_OUT. Para revisao administrativa de DRAFT, PAUSED e CLOSED, usar GET /admin/compliance/campaigns e GET /admin/compliance/campaigns/:id com AuthGuard + AdminGuard; os BFFs de Compliance foram migrados para essas rotas.",
+      "status": "resolved",
+      "priority": "P2",
+      "severity_label": "MÉDIA",
+      "pdf_highlight": {
+        "color": "#D97706",
+        "label": "MÉDIA"
+      },
+      "acceptance_criteria": [
+        "Teste de regressão reproduzindo o problema antes da correção",
+        "Correção implementada",
+        "Teste de regressão aprovado após a correção",
+        "Revisão manual confirma que o vetor foi fechado"
+      ]
+    },
+    {
+      "id": "F-05",
+      "cat": 1,
+      "cat_name": "Isolamento por userId",
+      "sev": "media",
+      "title": "GET /campaigns/:id/resources sem filtro de status e projecao segura",
+      "file": "backendnode/src/api/campaigns/campaigns.controller.ts",
+      "line": "188-219",
+      "evidence": "A leitura publica valida status OPEN/FUNDED/PAID_OUT e seleciona apenas categoria, percentual e descricaoCustomizada. Campanhas DRAFT/PAUSED/CLOSED usam /campaigns/:id/resources/private com AuthGuard e verificacao de owner/papel administrativo.",
+      "why": "A rota anterior consultava alocacoes de qualquer campanha e retornava o row Prisma completo, incluindo IDs e timestamps internos. Isso permitia inferir estrategia de campanhas nao publicadas.",
+      "impact": "Vazamento de estrategia de alocacao e metadados internos de campanhas para visitantes e usuarios sem ownership.",
+      "fix": "Manter a leitura publica apenas para campanhas OPEN/FUNDED/PAID_OUT com DTO minimo. Para campanhas nao publicadas, exigir AuthGuard e permitir somente o founder owner ou ADMIN, FINANCEIRO e COMPLIANCE.",
+      "status": "resolved",
+      "priority": "P2",
+      "severity_label": "MÉDIA",
+      "pdf_highlight": {
+        "color": "#D97706",
+        "label": "MÉDIA"
+      },
+      "acceptance_criteria": [
+        "Teste de regressão reproduzindo o problema antes da correção",
+        "Correção implementada",
+        "Teste de regressão aprovado após a correção",
+        "Revisão manual confirma que o vetor foi fechado"
+      ]
+    },
+    {
+      "id": "F-06",
+      "cat": 1,
+      "cat_name": "Isolamento por userId",
+      "sev": "baixa",
+      "title": "POST /payment aceita subscriptionId/investmentId/campaignId do body sem ownership",
+      "file": "backendnode/src/api/payment/payment.service.ts",
+      "line": "111-190, 1795-1840",
+      "evidence": "PaymentService.validatePaymentReferences() roda antes de payment.create() e de createCheckout(). SUBSCRIPTION consulta subscription.findFirst({ id, userId }); INVESTMENT consulta investment.findFirst({ id, userId }) e exige campaignId consistente quando informado; TOKEN_RESERVATION consulta campaign.findFirst({ id, startup: { founderId: userId } }); demais propositos rejeitam IDs relacionados. Referencias inexistentes ou de outra conta retornam REFERENCIA_PAGAMENTO_INVALIDA. A confirmacao de investimento tambem repassa payment.userId ao InvestmentsService.",
+      "why": "User A podia enviar subscriptionId, investmentId ou campaignId de B no body. Sem validar o vinculo antes da criacao, o Payment era aceito com uma referencia pertencente a outra conta ou com combinacoes inconsistentes.",
+      "impact": "Criacao de payments vinculados a recursos de outros usuarios, possibilidade de efeitos de dominio na conta errada e inconsistencias entre investimento e campanha.",
+      "fix": "Validar ownership e combinacoes por purpose no servico, antes de inserir o Payment: assinatura pertence ao pagador; investimento pertence ao pagador; campaignId de INVESTMENT apenas coincide com o investimento; TOKEN_RESERVATION exige campanha da startup do founder; propósitos sem relacionamento rejeitam IDs extras. Cobertura unitária inclui cross-user, referencias invalidas, combinacoes inconsistentes e fluxos legitimos.",
+      "status": "resolved",
+      "priority": "P3",
+      "severity_label": "BAIXA",
+      "pdf_highlight": {
+        "color": "#2563EB",
+        "label": "BAIXA"
+      },
+      "acceptance_criteria": [
+        "Teste de regressão reproduzindo o problema antes da correção",
+        "Correção implementada",
+        "Teste de regressão aprovado após a correção",
+        "Revisão manual confirma que o vetor foi fechado"
+      ]
+    },
+    {
+      "id": "F-07",
+      "cat": 1,
+      "cat_name": "Isolamento por userId",
+      "sev": "baixa",
+      "title": "GET /admin/config/fundraising e /admin/config/parameters acessiveis a qualquer user autenticado",
+      "file": "backendnode/src/api/admin/admin.controller.ts",
+      "line": "269-447; config.service.ts: public snapshot; frontend new-startup-loader.ts",
+      "evidence": "AdminConfigController agora usa @UseGuards(AuthGuard, AdminGuard) no nível da classe, protegendo GET /admin/config/fundraising e GET /admin/config/parameters, além das escritas. O wizard de founder deixou de consumir o endpoint administrativo e usa /config/fundraising, protegido por AuthGuard, que retorna somente os campos operacionais necessários, sem histórico ou metadados administrativos.",
+      "why": "Os GETs administrativos estavam acessíveis a qualquer usuário autenticado porque a classe tinha somente AuthGuard. Além do vazamento de configurações de negócio, o bloqueio direto poderia quebrar o wizard de founder, que dependia indevidamente do endpoint admin.",
+      "impact": "Usuários comuns podiam consultar taxas, limites e histórico de parâmetros administrativos. O fallback silencioso do wizard também podia usar defaults frontend divergentes do backend.",
+      "fix": "Adicionar AuthGuard + AdminGuard no nível da classe AdminConfigController e remover guards redundantes dos métodos. Criar leitura operacional autenticada em /config/fundraising com payload mínimo para founders, migrar BFF/loader/query do wizard e cobrir ADMIN/FINANCEIRO/COMPLIANCE, bloqueio de USER, contrato mínimo e propagação de 403.",
+      "status": "resolved",
+      "priority": "P3",
+      "severity_label": "BAIXA",
+      "pdf_highlight": {
+        "color": "#2563EB",
+        "label": "BAIXA"
+      },
+      "acceptance_criteria": [
+        "Teste de regressão reproduzindo o problema antes da correção",
+        "Correção implementada",
+        "Teste de regressão aprovado após a correção",
+        "Revisão manual confirma que o vetor foi fechado"
+      ]
+    },
+    {
+      "id": "F-08",
+      "cat": 2,
+      "cat_name": "Autorizacao servidor",
+      "sev": "media",
+      "title": "AdminGuard usado sem AuthGuard — rotas admin inacessiveis OU 403 fixo",
+      "file": "backendnode/src/api/payment/split/split.controller.ts",
+      "line": "35-88",
+      "evidence": "Auditoria global confirmou que a única ocorrência de @UseGuards(AdminGuard) isolado estava nos métodos create, update e deactivate do SplitController. O controller agora declara @UseGuards(AuthGuard, AdminGuard) na classe, na ordem explícita de autenticação e autorização, sem guards administrativos isolados nos métodos.",
+      "why": "AdminGuard depende de request.user populado pelo AuthGuard. Quando a autorização era declarada separadamente no método, a dependência entre os guards ficava implícita e o padrão podia causar 403 incorreto para requisições sem autenticação ou ser replicado de forma insegura.",
+      "impact": "As rotas administrativas de split passam a autenticar a sessão antes de validar ADMIN, FINANCEIRO ou COMPLIANCE, evitando bloqueio funcional de administradores válidos e mantendo USER sem autorização.",
+      "fix": "Combinar @UseGuards(AuthGuard, AdminGuard) no nível da classe SplitController e remover decorators AdminGuard redundantes dos métodos. Regressão verifica a metadata na ordem exata; testes de AdminGuard cobrem ausência de usuário, USER e os três papéis administrativos.",
+      "status": "resolved",
+      "priority": "P2",
+      "severity_label": "MÉDIA",
+      "pdf_highlight": {
+        "color": "#D97706",
+        "label": "MÉDIA"
+      },
+      "acceptance_criteria": [
+        "Teste de regressão reproduzindo o problema antes da correção",
+        "Correção implementada",
+        "Teste de regressão aprovado após a correção",
+        "Revisão manual confirma que o vetor foi fechado"
+      ]
+    },
+    {
+      "id": "F-09",
+      "cat": 2,
+      "cat_name": "Autorizacao servidor",
+      "sev": "baixa",
+      "title": "Frontend tem useUserRole()/hasRole() mas o backend eh a fonte de verdade — sem furo direto encontrado",
+      "file": "AGENTS.md; frontend/AGENTS.md; frontend/app/hooks/use-user-role.ts",
+      "line": "Frontend auth docs; use-user-role.ts:1-35",
+      "evidence": "A regra foi documentada no AGENTS.md raiz e em frontend/AGENTS.md: useUserRole()/hasRole() controlam somente affordances visuais. O hook agora declara explicitamente que nunca substitui autorização server-side; endpoints continuam protegidos por AuthGuard + AdminGuard/ComplianceGuard/FinanceRoleGuard. A regressão use-user-role.spec.ts cobre roles válidas, ausência de usuário e role desconhecida.",
+      "why": "A prática correta já estava em uso, mas o limite de segurança entre UI e backend não estava explícito na documentação nem coberto por teste do hook. Sem essa regra, uma futura tela poderia tratar o gate visual como autorização ou omitir a revalidação server-side.",
+      "impact": "Nenhum bypass imediato foi encontrado. A documentação e a regressão reduzem o risco de uma futura rota administrativa confiar em role derivada do navegador, DOM, estado local ou resposta mockada.",
+      "fix": "Documentar que o gate de UI é cosmético e que toda permissão DEVE ser revalidada no backend com sessão HTTP-only, AuthGuard e guard de domínio apropriado. Manter o hook sem responsabilidade de autorização e cobrir sua derivação de role com teste unitário.",
+      "status": "resolved",
+      "priority": "P3",
+      "severity_label": "BAIXA",
+      "pdf_highlight": {
+        "color": "#2563EB",
+        "label": "BAIXA"
+      },
+      "acceptance_criteria": [
+        "Teste de regressão reproduzindo o problema antes da correção",
+        "Correção implementada",
+        "Teste de regressão aprovado após a correção",
+        "Revisão manual confirma que o vetor foi fechado"
+      ]
+    },
+    {
+      "id": "F-10",
+      "cat": 3,
+      "cat_name": "IDOR",
+      "sev": "critica",
+      "title": "GET /tokens/:id — IDOR permite ler qualquer token pelo UUID",
+      "file": "backendnode/src/api/tokens/tokens.controller.ts; tokens.service.ts",
+      "line": "25-31; tokens.service.ts:139-190",
+      "evidence": "A implementação atual extrai req.user.id no TokensController.detail() e chama getTokenById(id, req.user.id). O TokensService aplica findFirst({ where: { id: tokenId, userId } }), fazendo Token de outra conta resultar em 404 sem payload. A regressão tokens.service.spec.ts cobre owner e cross-user; tokens.controller.spec.ts confirma o encaminhamento do userId e metadata AuthGuard. AuthGuard também tem regressão para ausência de sessionId.",
+      "why": "A evidência histórica descrevia uma consulta somente por id, que permitiria ao usuário A ler o Token do usuário B. O source atual já contém o filtro composto, mas a ausência de testes co-localizados deixava o contrato de ownership sem proteção contra regressão.",
+      "impact": "Sem o filtro, haveria vazamento do hash, valores, certificado e histórico do Token. Com a implementação atual e a regressão adicionada, UUID de outra conta é indistinguível de token inexistente no detalhe privado.",
+      "fix": "Preservar o filtro obrigatório por { id: tokenId, userId } no detalhe privado e o encaminhamento de req.user.id pelo controller. Não criar /admin/tokens/:id sem requisito de negócio; o certificado mantém regra explícita: owner ou ADMIN. Adicionar testes para owner, cross-user, AuthGuard, USER e ADMIN.",
+      "status": "resolved",
+      "priority": "P1",
+      "severity_label": "CRÍTICA",
+      "pdf_highlight": {
+        "color": "#B91C1C",
+        "label": "CRÍTICA"
+      },
+      "acceptance_criteria": [
+        "Teste de regressão reproduzindo o problema antes da correção",
+        "Correção implementada",
+        "Teste de regressão aprovado após a correção",
+        "Revisão manual confirma que o vetor foi fechado"
+      ]
+    },
+    {
+      "id": "F-11",
+      "cat": 3,
+      "cat_name": "IDOR",
+      "sev": "critica",
+      "title": "PUT /campaigns/:id/resources — IDOR permite alterar recursos de qualquer campanha",
+      "file": "backendnode/src/api/campaigns/campaigns.controller.ts; campaigns/service/campaign-resource.service.ts",
+      "line": "225-240; campaign-resource.service.ts:114-131",
+      "evidence": "A rota PUT /campaigns/:id/resources usa @UseGuards(AuthGuard), recebe req.user e encaminha a identidade ao service. CampaignResourceService.replaceAll busca startup.founderId antes da transação e permite somente o founder owner ou ADMIN; founder de outra startup, USER, FINANCEIRO e COMPLIANCE recebem NOT_OWNER sem delete/create. A regressão de controller confirma AuthGuard e encaminhamento; a regressão do service cobre owner, cross-owner, ADMIN, FINANCEIRO, COMPLIANCE, USER e campanha inexistente.",
+      "why": "A evidência histórica descrevia uma rota sem autenticação que aceitava somente o campaignId enviado pelo cliente. Isso permitiria substituir as alocações de qualquer campanha. O source atual já valida a sessão no controller e ownership no service; o finding permaneceu aberto por falta de sincronização e cobertura explícita para todos os papéis.",
+      "impact": "Sem a proteção, qualquer visitante ou founder de outra startup poderia manipular a estratégia de alocação de recursos. Com AuthGuard, ownership e teste de ausência de transação em falhas, a alteração cross-startup fica bloqueada para papéis não ADMIN.",
+      "fix": "Preservar @UseGuards(AuthGuard) no PUT, encaminhar req.user e manter a checagem founderId ou role ADMIN antes de iniciar $transaction. Cobrir anônimo via AuthGuard, owner legítimo, cross-owner, ADMIN, FINANCEIRO, COMPLIANCE, USER e campanha inexistente. Não alterar a regra de negócio atual que permite escrita cross-startup somente a ADMIN.",
+      "status": "resolved",
+      "priority": "P1",
+      "severity_label": "CRÍTICA",
+      "pdf_highlight": {
+        "color": "#B91C1C",
+        "label": "CRÍTICA"
+      },
+      "acceptance_criteria": [
+        "Teste de regressão reproduzindo o problema antes da correção",
+        "Correção implementada",
+        "Teste de regressão aprovado após a correção",
+        "Revisão manual confirma que o vetor foi fechado"
+      ]
+    },
+    {
+      "id": "F-12",
+      "cat": 3,
+      "cat_name": "IDOR",
+      "sev": "alta",
+      "title": "GET /startup/marketplace/private/:slug — sem checar se user eh founder/compliance/admin",
+      "file": "backendnode/src/api/startup/startup.controller.ts; startup.service.ts; startup-crud.service.ts",
+      "line": "109-144; 58-66; 520-668",
+      "evidence": "O endpoint owner/admin usa @UseGuards(AuthGuard), recebe req.user e chama findPrivate(slug, req.user). O StartupCrudService aplica founderId = request.user.id para founders e permite somente ADMIN, FINANCEIRO e COMPLIANCE sem esse filtro. A descoberta de investidores foi separada em /marketplace/authenticated/:slug, também protegida por AuthGuard, com payload mínimo sem id interno ou PII. Testes cobrem owner, cross-user, papéis administrativos, USER/INVESTOR, inexistente e metadata dos guards.",
+      "why": "A evidência histórica mostrava que qualquer sessão válida podia consultar qualquer slug pelo endpoint chamado private. Isso permitia acesso cross-user ao detalhe sem checagem de ownership. A correção preserva o fluxo legítimo de descoberta antes do investimento em endpoint autenticado separado e restringe a superfície private ao owner/admin no servidor.",
+      "impact": "Sem a proteção, um founder poderia consultar o detalhe privado de startup de outro founder. Com a autorização por founderId, o cross-user retorna 404 sem payload; papéis administrativos continuam podendo revisar startups, e investidores autenticados recebem somente o contrato mínimo necessário para análise e checkout.",
+      "fix": "Passar request.user ao service, filtrar Startup.founderId para o endpoint private e permitir apenas ADMIN, FINANCEIRO e COMPLIANCE como bypass administrativo. Usar endpoint autenticado separado para investidores, sem id interno, dados bancários, email, CNPJ ou documento do titular; manter preview do founder dependente do endpoint owner/admin.",
+      "status": "resolved",
+      "priority": "P1",
+      "severity_label": "ALTA",
+      "pdf_highlight": {
+        "color": "#EA580C",
+        "label": "ALTA"
+      },
+      "acceptance_criteria": [
+        "Teste de regressão reproduzindo o problema antes da correção",
+        "Correção implementada",
+        "Teste de regressão aprovado após a correção",
+        "Revisão manual confirma que o vetor foi fechado"
+      ]
+    },
+    {
+      "id": "F-13",
+      "cat": 3,
+      "cat_name": "IDOR",
+      "sev": "media",
+      "title": "GET /campaigns/:id — projeção pública expunha dados completos da campanha",
+      "file": "backendnode/src/api/campaigns/service/campaigns-crud.service.ts; campaigns.controller.ts",
+      "line": "88-157; 56-61",
+      "evidence": "O detalhe público mantém a allowlist server-side de status OPEN, FUNDED e PAID_OUT; DRAFT, PAUSED e CLOSED resultam em 404. A consulta agora usa select explícito e o mapper retorna somente id/título/status/valores públicos, deadline, startup com nome/slug/área/estágio/logo e métricas derivadas. Não são retornados investimentos individuais, tokens, hashes, CNPJ, razão social, descrição ou campos internos. A revisão administrativa continua em /admin/compliance/campaigns/:id com AuthGuard + AdminGuard. Testes cobrem projeção mínima, status não públicos e separação administrativa.",
+      "why": "A evidência histórica tratava o endpoint como capaz de retornar qualquer campanha e o registro completo. O filtro de status já existia no source atual, mas a resposta ainda fazia over-fetching com investimentos, tokens e campos sensíveis da startup. A correção preserva o detalhe público para campanhas publicadas e transforma o retorno em uma projeção explícita.",
+      "impact": "Sem a projeção, visitantes poderiam coletar linhas de investimento, tokens, hashes e dados cadastrais/operacionais de campanhas publicadas; campanhas não publicadas também poderiam ser alvo de enumeração se a allowlist regredisse. Com a consulta filtrada e o payload mínimo, o catálogo público não expõe ativos, transações individuais ou dados administrativos.",
+      "fix": "Manter a allowlist OPEN/FUNDED/PAID_OUT no detalhe público e substituir include/spread do registro por select e mapper explícitos. Remover investimentos, tokens/hashes, CNPJ, razão social, descrição e campos internos do contrato público; manter o endpoint administrativo separado para revisão completa de qualquer status.",
+      "status": "resolved",
+      "priority": "P2",
+      "severity_label": "MÉDIA",
+      "pdf_highlight": {
+        "color": "#D97706",
+        "label": "MÉDIA"
+      },
+      "acceptance_criteria": [
+        "Teste de regressão reproduzindo o problema antes da correção",
+        "Correção implementada",
+        "Teste de regressão aprovado após a correção",
+        "Revisão manual confirma que o vetor foi fechado"
+      ]
+    },
+    {
+      "id": "F-14",
+      "cat": 4,
+      "cat_name": "Segredos hardcoded",
+      "sev": "critica",
+      "title": "JWT_SECRET sem fallback e validado no bootstrap",
+      "file": "backendnode/src/auth/auth.module.ts; backendnode/src/common/config/env.schema.ts",
+      "line": "24-30; 25-33",
+      "evidence": "AuthModule injeta ConfigService e lê JWT_SECRET sem valor alternativo; envSchema exige segredo presente com no mínimo 32 caracteres e rejeita placeholders conhecidos. app.module.ts executa envSchema.parse(config) durante o bootstrap.",
+      "why": "A implementação anterior permitia inicializar a aplicação com uma chave JWT conhecida quando a variável não era configurada. A configuração atual falha de forma explícita antes de servir requisições.",
+      "impact": "O fallback previsível foi removido; a falsificação de tokens por ausência de segredo deixa de ser possível no caminho de inicialização validado.",
+      "fix": "Remover o fallback, centralizar a validação em envSchema e cobrir ausência, tamanho mínimo, vazio e placeholders com testes unitários.",
+      "status": "resolved",
+      "priority": "P1",
+      "severity_label": "CRÍTICA",
+      "pdf_highlight": {
+        "color": "#B91C1C",
+        "label": "CRÍTICA"
+      },
+      "acceptance_criteria": [
+        "Teste de regressão reproduzindo o problema antes da correção",
+        "Correção implementada",
+        "Teste de regressão aprovado após a correção",
+        "Revisão manual confirma que o vetor foi fechado"
+      ]
+    },
+    {
+      "id": "F-15",
+      "cat": 4,
+      "cat_name": "Segredos hardcoded",
+      "sev": "alta",
+      "title": "WEBHOOK_HASH_SECRET obrigatório e sem fallback hardcoded",
+      "file": "backendnode/src/api/webhook/webhook-log.service.ts; backendnode/src/common/config/env.schema.ts",
+      "line": "73-77; 35-43",
+      "evidence": "WebhookLogService usa ConfigService.getOrThrow('WEBHOOK_HASH_SECRET'); envSchema exige segredo com no mínimo 32 caracteres e rejeita placeholders conhecidos. O teste verifica HMAC-SHA256 com segredo injetado e falha quando ausente.",
+      "why": "A implementação anterior usava uma chave conhecida quando WEBHOOK_HASH_SECRET não estava configurado, permitindo correlação de PII anonimizada nos logs. O serviço agora falha sem configuração válida.",
+      "impact": "A anonimização HMAC de PII em logs de webhook não depende mais de um segredo publicado ou implícito.",
+      "fix": "Remover o fallback, separar o segredo de JWT/EFI, exigir configuração no schema e cobrir o comportamento com teste unitário.",
+      "status": "resolved",
+      "priority": "P1",
+      "severity_label": "ALTA",
+      "pdf_highlight": {
+        "color": "#EA580C",
+        "label": "ALTA"
+      },
+      "acceptance_criteria": [
+        "Teste de regressão reproduzindo o problema antes da correção",
+        "Correção implementada",
+        "Teste de regressão aprovado após a correção",
+        "Revisão manual confirma que o vetor foi fechado"
+      ]
+    },
+    {
+      "id": "F-16",
+      "cat": 4,
+      "cat_name": "Segredos hardcoded",
+      "sev": "alta",
+      "title": "Credenciais operacionais exigem rotação e secret manager",
+      "file": "backendnode/.env, backendnode/.env.prod, infra/prod/ec2-api/user-data.sh",
+      "line": "global",
+      "evidence": "Os arquivos de ambiente versionados localmente foram sanitizados e o provisionamento deixou de conter valores de AWS/SMTP/EFI/JWT; user-data lê /etc/iselftoken/ec2-api.env com permissões root-only. Não há evidência operacional de revogação/rotação dos valores que existiram fora do código nem de migração para um secret manager.",
+      "why": "Remover valores do código e exigir injeção externa reduz exposição futura, mas não invalida credenciais que possam ter sido copiadas ou comprometidas anteriormente.",
+      "impact": "AWS, SMTP e EFI permanecem dependentes de rotação coordenada com os provedores e de confirmação do armazenamento seguro em produção.",
+      "fix": "Pendente: revogar e gerar novas credenciais nos provedores, atualizar o secret manager/arquivo root-only de produção, validar o deploy e remover cópias operacionais antigas após confirmação.",
+      "status": "open",
+      "priority": "P1",
+      "severity_label": "ALTA",
+      "pdf_highlight": {
+        "color": "#EA580C",
+        "label": "ALTA"
+      },
+      "acceptance_criteria": [
+        "Teste de regressão reproduzindo o problema antes da correção",
+        "Correção implementada",
+        "Teste de regressão aprovado após a correção",
+        "Revisão manual confirma que o vetor foi fechado"
+      ]
+    },
+    {
+      "id": "F-17",
+      "cat": 4,
+      "cat_name": "Segredos hardcoded",
+      "sev": "media",
+      "title": "EFI_WEBHOOK_HMAC_SECRET depende de rotação operacional",
+      "file": "backendnode/.env, backendnode/.env.prod, infra/prod/ec2-api/user-data.sh",
+      "line": "global",
+      "evidence": "Os exemplos e o provisionamento não carregam um valor de EFI_WEBHOOK_HMAC_SECRET; o user-data exige a variável na fonte externa de secrets. A rotação no painel/provedor EFI e a confirmação de revogação do valor anterior ainda não foram executadas.",
+      "why": "A configuração deixou de publicar um valor de desenvolvimento no fluxo de provisionamento, mas a correção operacional não pode ser comprovada apenas pelo repositório.",
+      "impact": "Até a rotação confirmada, um valor antigo eventualmente compartilhado pode permitir falsificação de callbacks EFI.",
+      "fix": "Pendente: gerar HMAC forte, atualizar a configuração da EFI e da produção, revogar o valor anterior e executar teste de assinatura controlado.",
+      "status": "open",
+      "priority": "P2",
+      "severity_label": "MÉDIA",
+      "pdf_highlight": {
+        "color": "#D97706",
+        "label": "MÉDIA"
+      },
+      "acceptance_criteria": [
+        "Teste de regressão reproduzindo o problema antes da correção",
+        "Correção implementada",
+        "Teste de regressão aprovado após a correção",
+        "Revisão manual confirma que o vetor foi fechado"
+      ]
+    },
+    {
+      "id": "F-18",
+      "cat": 4,
+      "cat_name": "Segredos hardcoded",
+      "sev": "baixa",
+      "title": "VITE_EFI_PAYEE_CODE público por design (informativo)",
+      "file": "frontend/.env, frontend/.env.prod",
+      "line": "global",
+      "evidence": "VITE_EFI_PAYEE_CODE é embutido no bundle por ser uma variável pública do frontend; o payee_code não é credencial segundo o contrato da EFI. Nenhuma chave privada ou HMAC é derivada desse valor.",
+      "why": "Variáveis VITE_* são visíveis no navegador. Este achado não representa segredo exposto, mas a natureza pública deve permanecer documentada para evitar uso indevido.",
+      "impact": "Nenhum impacto de confidencialidade identificado; o código público é esperado para iniciar pagamentos destinados ao recebedor configurado.",
+      "fix": "Manter a documentação explícita de que payee_code é público e não reutilizá-lo como segredo de autenticação.",
+      "status": "open",
+      "priority": "P3",
+      "severity_label": "BAIXA",
+      "pdf_highlight": {
+        "color": "#2563EB",
+        "label": "BAIXA"
+      },
+      "acceptance_criteria": [
+        "Teste de regressão reproduzindo o problema antes da correção",
+        "Correção implementada",
+        "Teste de regressão aprovado após a correção",
+        "Revisão manual confirma que o vetor foi fechado"
+      ]
+    },
+    {
+      "id": "F-19",
+      "status": "resolved",
+      "cat": 5,
+      "cat_name": "XSS / template injection",
+      "sev": "critica",
+      "title": "Templates de email escapam dados e validam links dinâmicos",
+      "file": "backendnode/src/email/templates/verification-code.template.ts; backendnode/src/api/email-templates/email-render.service.ts",
+      "line": "12-75; 100-124",
+      "evidence": "O template de código aplica escapeHtml a nome, ação, código e validade, usa escapeSafeUrl para redirectPath e mantém href entre aspas. O renderer de templates escapa placeholders HTML, valida href/src dinâmicos e mantém texto/assunto em contexto textual.",
+      "why": "O vetor histórico combinava interpolação de dados do usuário sem escaping e redirectPath sem validação. A cadeia foi fechada nos templates hardcoded e no renderer de templates persistidos.",
+      "impact": "Scripts, handlers e javascript: URLs fornecidos nos dados não são renderizados como HTML executável nem aceitos como links dinâmicos.",
+      "fix": "Aplicar escaping contextual nos templates, validar URLs antes do escaping, usar atributos href citados e cobrir payloads XSS/URLs inseguras nos testes de renderer e templates.",
+      "priority": "P1",
+      "severity_label": "CRÍTICA",
+      "pdf_highlight": {
+        "color": "#B91C1C",
+        "label": "CRÍTICA"
+      },
+      "acceptance_criteria": [
+        "Teste de regressão reproduzindo o problema antes da correção",
+        "Correção implementada",
+        "Teste de regressão aprovado após a correção",
+        "Revisão manual confirma que o vetor foi fechado"
+      ]
+    },
+    {
+      "id": "F-20",
+      "status": "resolved",
+      "cat": 5,
+      "cat_name": "XSS / template injection",
+      "sev": "alta",
+      "title": "Templates welcome e forgot-password escapam dados do usuário",
+      "file": "backendnode/src/email/templates/welcome.template.ts, forgot-password.template.ts",
+      "line": "9-52 / 10-62",
+      "evidence": "welcomeTemplate aplica escapeHtml a nome e email; forgotPasswordTemplate aplica escapeHtml a nome, código e validade antes de montar o HTML.",
+      "why": "Os templates de boas-vindas e recuperação eram parte do mesmo vetor de interpolação HTML sem escaping identificado na auditoria.",
+      "impact": "Dados maliciosos nesses fluxos são tratados como texto, sem execução de markup ou handlers no cliente de email.",
+      "fix": "Aplicar escaping HTML contextual em todas as interpolações dinâmicas dos templates e manter regressões para payloads de markup.",
+      "priority": "P1",
+      "severity_label": "ALTA",
+      "pdf_highlight": {
+        "color": "#EA580C",
+        "label": "ALTA"
+      },
+      "acceptance_criteria": [
+        "Teste de regressão reproduzindo o problema antes da correção",
+        "Correção implementada",
+        "Teste de regressão aprovado após a correção",
+        "Revisão manual confirma que o vetor foi fechado"
+      ]
+    },
+    {
+      "id": "F-21",
+      "status": "resolved",
+      "cat": 5,
+      "cat_name": "XSS / template injection",
+      "sev": "alta",
+      "title": "EmailRenderService usa escaping contextual no HTML",
+      "file": "backendnode/src/api/email-templates/email-render.service.ts",
+      "line": "13-26; 100-124",
+      "evidence": "interpolate recebe escapeValues; render chama interpolate(..., true) para HTML e false para texto/assunto. Valores ausentes permanecem como placeholders e URLs href/src dinâmicas são validadas antes da interpolação.",
+      "why": "A função de escaping deixou de ser código morto: o renderer agora aplica o tratamento adequado ao contexto de saída.",
+      "impact": "Templates persistidos não inserem dados de usuário diretamente no HTML sem escaping; texto e assunto não recebem escaping HTML indevido.",
+      "fix": "Refatorar a interpolação para distinguir contexto HTML de texto, validar URLs dinâmicas antes do escaping e cobrir campos desconhecidos/obrigatórios.",
+      "priority": "P1",
+      "severity_label": "ALTA",
+      "pdf_highlight": {
+        "color": "#EA580C",
+        "label": "ALTA"
+      },
+      "acceptance_criteria": [
+        "Teste de regressão reproduzindo o problema antes da correção",
+        "Correção implementada",
+        "Teste de regressão aprovado após a correção",
+        "Revisão manual confirma que o vetor foi fechado"
+      ]
+    },
+    {
+      "id": "F-22",
+      "status": "resolved",
+      "cat": 5,
+      "cat_name": "XSS / template injection",
+      "sev": "alta",
+      "title": "EmailService escapa texto simples antes de convertê-lo em HTML",
+      "file": "backendnode/src/email/email.service.ts",
+      "line": "279-284",
+      "evidence": "No caso simple, o serviço usa `<p>${escapeHtml(text).replace(/\\n/g, '<br>')}</p>` e mantém o conteúdo original apenas no campo text do email.",
+      "why": "A interpolação direta de text em um parágrafo HTML permitia que callers transformassem markup em conteúdo executável.",
+      "impact": "Payloads HTML enviados como texto simples são serializados como texto no HTML do email.",
+      "fix": "Aplicar escapeHtml ao texto antes de inserir a marcação de quebra de linha e cobrir script/markup nos testes de EmailService.",
+      "priority": "P1",
+      "severity_label": "ALTA",
+      "pdf_highlight": {
+        "color": "#EA580C",
+        "label": "ALTA"
+      },
+      "acceptance_criteria": [
+        "Teste de regressão reproduzindo o problema antes da correção",
+        "Correção implementada",
+        "Teste de regressão aprovado após a correção",
+        "Revisão manual confirma que o vetor foi fechado"
+      ]
+    },
+    {
+      "id": "F-23",
+      "status": "resolved",
+      "cat": 5,
+      "cat_name": "XSS",
+      "sev": "media",
+      "title": "Previews HTML de templates usam DOMPurify",
+      "file": "frontend/app/lib/sanitize-html.ts; frontend/app/components/admin/email-templates/email-template-preview-modal.tsx; email-template-editor.tsx",
+      "line": "helper; preview modal; preview local",
+      "evidence": "sanitizeHtmlPreview usa DOMPurify.sanitize com configuração explícita de tags/atributos permitidos. O helper é aplicado tanto ao dangerouslySetInnerHTML do modal quanto ao preview local do editor.",
+      "why": "Os dois sinks frontend que renderizam HTML bruto foram tratados; não há confiança direta no HTML vindo do renderer de templates.",
+      "impact": "Markup, scripts, event handlers e protocolos perigosos são removidos antes da renderização no painel administrativo.",
+      "fix": "Adicionar DOMPurify fixado, centralizar a sanitização em helper reutilizável e cobrir os dois sinks com regressões de XSS e markup seguro.",
+      "priority": "P2",
+      "severity_label": "MÉDIA",
+      "pdf_highlight": {
+        "color": "#D97706",
+        "label": "MÉDIA"
+      },
+      "acceptance_criteria": [
+        "Teste de regressão reproduzindo o problema antes da correção",
+        "Correção implementada",
+        "Teste de regressão aprovado após a correção",
+        "Revisão manual confirma que o vetor foi fechado"
+      ]
+    },
+    {
+      "id": "F-24",
+      "status": "resolved",
+      "cat": 5,
+      "cat_name": "XSS / template injection",
+      "sev": "baixa",
+      "title": "termo-adesao-text.ts escapa placeholders dinâmicos",
+      "file": "frontend/app/lib/termo-adesao-text.ts",
+      "line": "1-45",
+      "evidence": "fill aplica escapeHtml aos campos founderName, founderCpf, startupName, startupCnpj e companyEmail antes de substituir placeholders; o texto fixo do termo permanece intacto.",
+      "why": "A função aceitava dados futuros do usuário e os inseria sem proteção contextual, criando um vetor adormecido em documento legal.",
+      "impact": "Valores dinâmicos com markup são tratados como texto no termo; a substituição futura não reabre XSS por interpolação direta.",
+      "fix": "Escapar cada valor dinâmico no contexto HTML antes da substituição e cobrir scripts, atributos e placeholders nos testes unitários.",
+      "priority": "P3",
+      "severity_label": "BAIXA",
+      "pdf_highlight": {
+        "color": "#2563EB",
+        "label": "BAIXA"
+      },
+      "acceptance_criteria": [
+        "Teste de regressão reproduzindo o problema antes da correção",
+        "Correção implementada",
+        "Teste de regressão aprovado após a correção",
+        "Revisão manual confirma que o vetor foi fechado"
+      ]
+    },
+    {
+      "id": "F-25",
+      "status": "resolved",
+      "cat": 5,
+      "cat_name": "XSS",
+      "sev": "baixa",
+      "title": "Sanitização padronizada entre transparency e email-templates",
+      "file": "frontend/app/components/transparency/*; frontend/app/lib/sanitize-html.ts; email-template-preview-modal.tsx; email-template-editor.tsx",
+      "line": "varia",
+      "evidence": "Transparency mantém rehype-sanitize para Markdown; os sinks HTML bruto de email-templates usam sanitizeHtmlPreview baseado em DOMPurify. Cada pipeline usa o sanitizer adequado ao formato de entrada.",
+      "why": "A inconsistência histórica era a ausência de sanitização nos previews HTML, não uma necessidade de substituir o pipeline Markdown existente.",
+      "impact": "Conteúdo Markdown e HTML bruto não são renderizados sem a camada de sanitização correspondente.",
+      "fix": "Preservar rehype-sanitize no Markdown e aplicar DOMPurify centralizado em todos os previews HTML bruto.",
+      "priority": "P3",
+      "severity_label": "BAIXA",
+      "pdf_highlight": {
+        "color": "#2563EB",
+        "label": "BAIXA"
+      },
+      "acceptance_criteria": [
+        "Teste de regressão reproduzindo o problema antes da correção",
+        "Correção implementada",
+        "Teste de regressão aprovado após a correção",
+        "Revisão manual confirma que o vetor foi fechado"
+      ]
+    },
+    {
+      "id": "F-26",
+      "status": "resolved",
+      "cat": 5,
+      "cat_name": "XSS",
+      "sev": "informativa",
+      "title": "Transparência usa rehype-sanitize para conteúdo Markdown",
+      "file": "frontend/app/components/transparency/*",
+      "line": "varia",
+      "evidence": "discussion-replies, post-detail e transparency-featured-report importam rehype-sanitize e o utilizam no pipeline ReactMarkdown antes de renderizar conteúdo gerado pelo usuário.",
+      "why": "Este achado é um controle positivo da auditoria e permanece válido após a adição do sanitizer específico para previews HTML bruto.",
+      "impact": "Conteúdo Markdown de posts e replies permanece mitigado contra markup e scripts não permitidos.",
+      "fix": "Nenhuma alteração necessária; manter rehype-sanitize e sua cobertura de uso nos componentes de transparência.",
+      "priority": "P3",
+      "severity_label": "INFORMATIVA",
+      "pdf_highlight": {
+        "color": "#059669",
+        "label": "INFORMATIVA"
+      },
+      "acceptance_criteria": [
+        "Teste de regressão reproduzindo o problema antes da correção",
+        "Correção implementada",
+        "Teste de regressão aprovado após a correção",
+        "Revisão manual confirma que o vetor foi fechado"
+      ]
+    }
+  ]
+}

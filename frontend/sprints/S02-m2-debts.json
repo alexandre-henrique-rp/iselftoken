@@ -1,0 +1,261 @@
+{
+  "_type": "harness-sprint-v6",
+  "version": 1,
+  "schemaVersion": "1",
+  "id": "S02-m2-debts",
+  "name": "Sprint S02 — Zod fix + DV completo (M2)",
+  "milestone": "M2",
+  "priority": "critical",
+  "status": "pending",
+  "profile": "lean",
+  "estimatedAt": "2026-06-30",
+  "regulatoryDeadline": "2026-07-01",
+  "regulatorySource": "IN RFB 2.229/2024 — vigência operacional do CNPJ Alfanumérico (julho/2026). Manual oficial do DV (PDF serpro.gov.br) republicado em junho/2026 — destrava DEBT-DV-001.",
+  "goal": "Resolver a quebra residual do typecheck Zod 4 (DEBT-ZOD-001) e substituir o validator de DV placeholder (DEBT-DV-001) pelo algoritmo oficial do manual serpro.gov.br/RFB. Atualizar a suíte de testes T007 com fixtures cujos DVs foram VALIDADOS contra o algoritmo oficial. Resultado final: typecheck verde, CNPJ alfanumérico com DV verificado na entrada do formulário de cadastro, suíte de testes ampliada.",
+  "context": {
+    "upstreamSprint": "S01-cnpj-alfanumerico",
+    "upstreamCommitHash": "b4f4e95c96729c083f01ca603cbca82aa2ad09d4",
+    "milestone": {
+      "id": "M2",
+      "name": "Zod fix + DV completo (CNPJ Alfanumérico)",
+      "status": "planning"
+    },
+    "whyNow": "S01 saiu do commit com 55 testes verdes e 87.39% de cobertura, mas o typecheck do projeto fica quebrado por erros pré-existentes no Zod 4 migration (errorMap removido em 4 lugares) e por inferência do zodResolver num schema com .superRefine() final. Adicionalmente, a RFB republicou em junho/2026 o manual oficial de cálculo do DV (PDF serpro.gov.br) — texto extraído em /tmp/opencode/manual-dv.txt — o que destrava a implementação completa do validador de DV alfanumérico (DEBT-DV-001).",
+    "ragVersion": "cnpj-alfanumerico-in-rfb-2229-2024.md v2 (2026-06-30) — §4 algoritmo oficial completo reproduzido literalmente",
+    "manualSourcePrimary": "/tmp/opencode/manual-dv.txt (snapshot literal do PDF serpro.gov.br via pdftotext, 4 páginas)"
+  },
+  "scope": {
+    "inScope": [
+      "app/lib/new-startup-schema.ts:226-229 — substituir errorMap por message direto (Zod 4)",
+      "app/routes/private/create-startup.tsx:83 — corrigir inferência do resolver afetada por .superRefine() final do schema",
+      "app/lib/new-startup-schema.ts — substituir cnpjAlfanumericoValidator placeholder por implementação REAL do DV (manual serpro.gov.br, §4.1-4.5)",
+      "app/lib/__tests__/fixtures/cnpj-alfanumerico-valid.ts — substituir DVs placeholder (00) por DVs validados contra o algoritmo do manual + variações",
+      "app/lib/__tests__/fixtures/cnpj-alfanumerico-invalid.ts (novo) — CNPJs com DV errado (1 ou 2 unidades) para testes de rejeição",
+      "app/lib/__tests__/new-startup-schema.test.ts — reescrever o teste 'pending-manual-dv-review' para novos casos (aceita DV válido, rejeita DV inválido, NÃO emite mais o warn antigo)",
+      "app/lib/__tests__/cnpj-format.test.ts — adicionar teste para getAlphanumeric reconhecendo letras"
+    ],
+    "outOfScope": [
+      "Migração do backend NestJS (escopo de outro repositório — flagado em cross-sprint.json EXT-04)",
+      "Reforma Tributária — CNPJ para PF (status pending-official-confirmation; sem tasks nesta sprint; flagado em EXT-05)",
+      "Mudanças de copy/UX além das mensagens de erro técnicas (decisão do designer)",
+      "Refactor amplo do que está funcionando em S01 — escopo é cirúrgico",
+      "Novos testes E2E Playwright (escopo do tester, fora desta sprint)",
+      "Diferenciar 5xx vs 401 do backend no layout loader (dívida residual S01 não escopo)",
+      "Mover artefatos de sprints/ (raiz) para .harness/sprints/ (housekeeping)"
+    ]
+  },
+  "ragRefs": [
+    {
+      "id": "cnpj-alfanumerico-in-rfb-2229-2024",
+      "path": ".harness/RAG/law/cnpj-alfanumerico-in-rfb-2229-2024.md",
+      "version": 2,
+      "appliesTo": [
+        "app/lib/new-startup-schema.ts",
+        "app/routes/private/create-startup.tsx",
+        "app/lib/__tests__/fixtures/cnpj-alfanumerico-valid.ts",
+        "app/lib/__tests__/fixtures/cnpj-alfanumerico-invalid.ts (novo)",
+        "app/lib/__tests__/new-startup-schema.test.ts"
+      ]
+    }
+  ],
+  "externalDependencies": [
+    {
+      "id": "EXT-01-manual-dv-cnpj",
+      "kind": "regulatory-source",
+      "name": "Manual do Cálculo do DV do CNPJ Alfanumérico (PDF)",
+      "url": "https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/documentos-tecnicos/cnpj/manual-dv-cnpj.pdf/view",
+      "snapshot": "/tmp/opencode/manual-dv.txt",
+      "blocks": ["T009"],
+      "status": "closed-via-S02",
+      "resolution": "PDF extraído em junho/2026; §4.1-4.5 do RAG v2 reproduz o algoritmo oficial (charValue = charCodeAt - 48; pesos cíclicos 2-9; módulo 11 com borda resto ≤ 1 → 0). T009 implementa o algoritmo direto do snapshot literal."
+    },
+    {
+      "id": "EXT-02-codigos-cnpj-zip",
+      "kind": "regulatory-source",
+      "name": "Códigos CNPJ (mapeamento letra→valor)",
+      "url": "https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/documentos-tecnicos/cnpj/codigos-cnpj.zip/view",
+      "blocks": [],
+      "status": "monitoring",
+      "impact": "Tabela de exclusões (se houver) não afetou T009 — manual-dv não menciona exclusões; algoritmo funciona para os 36 caracteres [0-9A-Z] (RAG §4.5 item 1)."
+    },
+    {
+      "id": "EXT-03-simulador-oficial",
+      "kind": "test-fixture",
+      "name": "Simulador oficial de CNPJ Alfanumérico",
+      "url": "https://www.gov.br/pt-br/servicos/simulador-cnpj-alfanumerico",
+      "blocks": ["T010"],
+      "status": "deferred-pendency-T010",
+      "impact": "Fixtures de T010 idealmente vêm do Simulador. Plano secundário (recomendado pelo briefing): usar exemplo literal do manual (12.ABC.345/01DE → DV 3,5) + variações de CNPJ numérico legado (com DV=0 em pelo menos 3) — coberto deterministicamente pelo algoritmo.",
+      "mitigation": "Plano T010: gerar fixtures localmente via computeDv() e validar contra o Simulador se acessível via webfetch durante a task."
+    }
+  ],
+  "filesAffected": [
+    "app/lib/new-startup-schema.ts (modificado em T008 + T009)",
+    "app/routes/private/create-startup.tsx (modificado em T008)",
+    "app/lib/__tests__/fixtures/cnpj-alfanumerico-valid.ts (modificado em T010)",
+    "app/lib/__tests__/fixtures/cnpj-alfanumerico-invalid.ts (novo em T010)",
+    "app/lib/__tests__/new-startup-schema.test.ts (modificado em T010)",
+    "app/lib/__tests__/cnpj-format.test.ts (estendido em T010 — opcional)"
+  ],
+  "tasks": [
+    {
+      "id": "T008",
+      "title": "Zod 3→4 migration (errorMap removido + Resolver inference)",
+      "type": "frontend",
+      "owner": "frontend",
+      "dependencies": [],
+      "estimatedEffort": 1,
+      "status": "pending",
+      "scope": "Substituir `errorMap: () => ({ message: \"...\" })` por `message: \"...\"` em 4 chamadas de `z.literal(true, ...)` no schema `complementaryStartupSchema` (new-startup-schema.ts:226-229). Investigar e corrigir o erro de inferência do Resolver em create-startup.tsx:83 (sintoma típico: RHF v5+ `@hookform/resolvers` + Zod 4 + `.superRefine()` final produz ZodEffects cujo tipo de input/output diverge do esperado pelo Resolver). Solução canônica: cast tipado em `zodResolver(...) as Resolver<NewStartupFormData>` OU extrair o refinamento final para `.refine(...)` em campos individuais. Verificação final: `npm run typecheck` retorna 0 erros.",
+      "expectedArtifacts": [
+        "app/lib/new-startup-schema.ts:226-229 modificado (4 chamadas)",
+        "app/routes/private/create-startup.tsx:83 modificado (resolver com cast ou refinamento extraído)",
+        "git log com mensagem descritiva tipo 'fix(s02): zod 4 migration — errorMap removido + Resolver inference'"
+      ],
+      "specRefs": [
+        "RAG: law/cnpj-alfanumerico-in-rfb-2229-2024.md §3.1 (regulatory priority)",
+        "Zod v4 changelog — errorMap removido em favor de message/error diretos",
+        "@hookform/resolvers v5 release notes — mudança de inferência com ZodEffects"
+      ],
+      "acceptanceCriteria": [
+        "`npm run typecheck` retorna 0 erros após T008",
+        "4 lugares com `z.literal(true, { message: \"...\" })` (sem errorMap) — confirmado por `grep -n 'errorMap' app/` retornar vazio",
+        "create-startup.tsx compila sem `as any` (apenas casts tipados permitidos: `as Resolver<NewStartupFormData>`)",
+        "ZERO regressão funcional: CNPJ legado (`12.345.678/0001-90`) continua aceito no useForm"
+      ]
+    },
+    {
+      "id": "T009",
+      "title": "DV completo do CNPJ Alfanumérico (manual serpro.gov.br §4.1-4.5)",
+      "type": "frontend",
+      "owner": "frontend",
+      "dependencies": ["T008"],
+      "estimatedEffort": 4,
+      "status": "pending",
+      "scope": "Substituir `cnpjAlfanumericoValidator` (placeholder + soft-warn) em app/lib/new-startup-schema.ts pela implementação completa do algoritmo do DV oficial. Helper `charValue(ch)` retorna `ch.toUpperCase().charCodeAt(0) - 48`. Helper `computeDv(radical12: string)` retorna os 2 DVs concatenados (`'35'` para o exemplo `12.ABC.345/01DE`). Validação em 3 etapas: (1) regex `^[A-Z0-9]{2}\\.[A-Z0-9]{3}\\.[A-Z0-9]{3}\\/[A-Z0-9]{4}-\\d{2}$` (já presente, validar redundância); (2) calcular DV esperado do radical; (3) comparar com os 2 últimos caracteres. Aceitar sem warn se bater; rejeitar com `ctx.addIssue` (Zod ZodIssueCode.custom) e mensagem PT-BR distinta ('Dígito verificador incorreto') se não bater. Backward compatibility: CNPJ numérico legado passa pelo mesmo cálculo (não diferenciar branch). LGPD: console.warn aceita mas usar SHA-256 hash + masked (não CNPJ em claro). **Remover** a string `pending-manual-dv-review` do arquivo. **Atualizar JSDoc** do validator explicando algoritmo em alto nível + linkar ao RAG v2 §4.",
+      "expectedArtifacts": [
+        "app/lib/new-startup-schema.ts:14-60 modificado — helper charValue, computeDv, validator reescrito",
+        "Comentário `// pending-manual-dv-review` REMOVIDO do arquivo (grep retorna vazio)",
+        "JSDoc do `cnpjAlfanumericoValidator` reescrito em PT-BR com referência ao manual serpro.gov.br"
+      ],
+      "specRefs": [
+        "RAG: law/cnpj-alfanumerico-in-rfb-2229-2024.md §4.1-4.5 (algoritmo oficial)",
+        "Manual PDF: /tmp/opencode/manual-dv.txt (snapshot literal da fonte primária)"
+      ],
+      "acceptanceCriteria": [
+        "`grep -n 'pending-manual-dv-review' app/` retorna vazio",
+        "`npm run typecheck` continua verde após T009 (T008 já entregou typecheck verde)",
+        "Exemplo do manual (`12.ABC.345/01DE`) tem DV1=3, DV2=5 — confirmar via teste inline ou print",
+        "Validator emite `ctx.addIssue({ code: 'custom', path: ['cnpj'], message: 'Dígito verificador incorreto' })` quando DV não bate",
+        "CNPJ numérico legado com DV válido (ex.: `11.222.333/0001-81` — verificar algoritmo) aceita sem erro",
+        "CNPJ numérico legado com DV inválido rejeitado com mesma mensagem",
+        "Nenhuma referência a `pending-manual-dv-review` em código de produção",
+        "JSDoc do validator menciona os 3 passos (charValue, pesos cíclicos 2-9, módulo 11) e linka ao manual PDF"
+      ]
+    },
+    {
+      "id": "T010",
+      "title": "Atualizar testes T007 — fixtures com DVs validados + cobertura ≥80% em new-startup-schema.ts",
+      "type": "test",
+      "owner": "tester",
+      "dependencies": ["T009"],
+      "estimatedEffort": 3,
+      "status": "pending",
+      "scope": "Substituir fixtures placeholder `CNPJ_ALFANUMERICO_RAW` (DVs `00`) por CNPIs cujos DVs foram VALIDADOS contra o algoritmo do manual. Mínimo: (a) 3 CNPIs cujas raízes sejam variações representativas (1 letra, várias letras intercaladas, raiz só dígitos), com DVs calculados e conferidos manualmente; (b) 3 CNPIs numéricos legados com DV=0 (edge case do algoritmo), se aplicável, e 2+ com DV>0. Criar `app/lib/__tests__/fixtures/cnpj-alfanumerico-invalid.ts` (NOVO) com 3+ CNPJs propositalmente com DV errado (1 ou 2 dígitos modificados em relação ao legítimo) para teste de rejeição. Reescrever `new-startup-schema.test.ts`: substituir o teste 'cnpjAlfanumericoValidator deve emitir console.warn para CNPJ alfanumérico' por: 'CNPJ alfanumérico com DV válido é aceito sem warn', 'CNPJ alfanumérico com DV inválido é rejeitado com mensagem específica', 'cnpjAlfanumericoValidator não emite mais o warn `pending-manual-dv-review` em CNPJ válido'. Adicionar em `cnpj-format.test.ts` (se desejar): teste para `getAlphanumeric` reconhecendo letras (já coberto, mas reforçar). Mocks: `vi.spyOn(console, 'warn').mockImplementation(() => {})` em beforeEach. Assertions: zero `expect(cnpj).toBe(<literal-CNPJ>)` com CNPJ real. **LGPD**: fixtures usam APENAS CNPIs gerados pelo exemplo do manual, pelo algoritmo determinístico local ou pelo Simulador oficial (se acessível via webfetch durante a task — caso contrário documentar a pendência no header da fixture e seguir adiante).",
+      "expectedArtifacts": [
+        "app/lib/__tests__/fixtures/cnpj-alfanumerico-valid.ts modificado — DVs reais calculados",
+        "app/lib/__tests__/fixtures/cnpj-alfanumerico-invalid.ts NOVO — CNPIs com DV errado",
+        "app/lib/__tests__/new-startup-schema.test.ts modificado — 3+ novos casos (aceita/rejeita DV válido/inválido, sem warn)",
+        "(Opcional) app/lib/__tests__/cnpj-format.test.ts estendido",
+        "(Opcional) git log: 'test(s02): fixtures com DV calculado + testes de aceita/rejeita'"
+      ],
+      "specRefs": [
+        "RAG: law/cnpj-alfanumerico-in-rfb-2229-2024.md §4.5 item 4 (validação cruzada em testes)",
+        "Manual PDF: /tmp/opencode/manual-dv.txt (algoritmo para cálculo dos DVs usados nas fixtures)"
+      ],
+      "acceptanceCriteria": [
+        "`npm run test -- test/vitest.config.ts --coverage` passa com cobertura reportada em app/lib/new-startup-schema.ts ≥80% (linhas E funções)",
+        "Suíte completa em `npm run test` sem erros (sem regressão dos 55 testes prévios)",
+        "ZERO menção a `pending-manual-dv-review` em arquivos de teste (grep `grep -n 'pending-manual-dv-review' app/lib/__tests__/` retorna vazio)",
+        "Fixture `cnpj-alfanumerico-invalid.ts` exporta no mínimo 3 CNPJs com DV errado",
+        "Fixture `cnpj-alfanumerico-valid.ts` exporta no mínimo 3 CNPJs alfanuméricos E 3 numéricos legados com DVs calculados (não mais `00` placeholder)",
+        "Teste novo existe: 'CNPJ alfanumérico com DV inválido é rejeitado' com `expect(result.success).toBe(false)` + `expect(error).toMatchObject({ message: '... incorreto' })`",
+        "Teste novo existe: 'cnpjAlfanumericoValidator não emite mais warn pending-manual-dv-review' — verifica que `console.warn` NÃO foi chamado com essa string",
+        "ZERO `expect(cnpj).toBe('XX.XXX.XXX/XXXX-YY')` com CNPJ real (LGPD — apenas DVs do manual + CNPJs públicos do Simulador)",
+        "Todos os testes que esperam warn em `cnpjAlfanumericoValidator` foram desativados/mockados/removidos — código de teste silencia `console.warn` em `beforeEach` global"
+      ]
+    }
+  ],
+  "acceptanceCriteria": [
+    "100% do escopo declarado em 'inScope' mapeado para as 3 tasks",
+    "`npm run typecheck` retorna 0 erros (DEBT-ZOD-001 fechado)",
+    "Algoritmo de DV implementado segue LITERALMENTE o manual /tmp/opencode/manual-dv.txt e §4.1-4.5 do RAG v2 (DEBT-DV-001 fechado)",
+    "`grep -rn 'pending-manual-dv-review' app/` retorna vazio (legado removido)",
+    "Cobertura reportada em app/lib/new-startup-schema.ts ≥80% (linhas E funções)",
+    "55+ testes prévios continuam verdes + testes novos adicionados",
+    "ZERO regressão: cadastro de startup (S01) continua funcionando com CNPJ legado válido",
+    "Sprints S01 e S02 coexistem em sprints/ (não há delete de S01)",
+    "AGENTS.md de app/lib/ atualizado de forma refletindo a API alfanumérica completa — opcional nesta sprint; pode ser housekeeping S03"
+  ],
+  "dependencies": {
+    "external": [
+      {
+        "name": "manual-dv-cnpj.pdf",
+        "url": "https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/documentos-tecnicos/cnpj/manual-dv-cnpj.pdf/view",
+        "kind": "regulatory-source",
+        "status": "closed-via-S02",
+        "blocks": "T009 — implementação completa do validador DV (resolvido)"
+      },
+      {
+        "name": "codigos-cnpj.zip",
+        "url": "https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/documentos-tecnicos/cnpj/codigos-cnpj.zip/view",
+        "kind": "regulatory-source",
+        "status": "monitoring",
+        "impact": "Não-bloqueante para T009 — manual-dv não menciona exclusões; algoritmo completo funciona para os 36 caracteres [0-9A-Z]"
+      },
+      {
+        "name": "Simulador oficial",
+        "url": "https://www.gov.br/pt-br/servicos/simulador-cnpj-alfanumerico",
+        "kind": "test-fixture",
+        "status": "deferred-pendency-T010",
+        "recommendedAction": "Em T010, tentar webfetch do Simulador. Se falhar, gerar fixtures via computeDv() local e validar contra os do manual."
+      },
+      {
+        "name": "backend NestJS (BACKEND_URL)",
+        "url": "../backendnode (repositório irmão, fora do escopo desta sprint)",
+        "kind": "cross-repo",
+        "blocks": "Lookup Receita Federal no backend precisa aceitar letras",
+        "status": "monitoring"
+      }
+    ]
+  },
+  "residualDebtsToClean": ["DEBT-ZOD-001", "DEBT-DV-001"],
+  "guardrails": [
+    "Não inventar tabela de mapeamento letra→valor — usar SOMENTE `charCodeAt(0) - 48` (RAG §4.1)",
+    "Não logar CNPJ em claro no console (LGPD — se logar, usar SHA-256 hash + masked)",
+    "Não armazenar fixtures com CNPJs reais — apenas DVs do manual ou gerados pelo Simulador oficial",
+    "Não hard-codar a flag `pending-manual-dv-review` em código de produção (RAG §6 Antipadrão original)",
+    "Não usar `as any` em TypeScript — prefer `as Resolver<TForm>` tipado em T008",
+    "Não misturar letras minúsculas no storage — sempre uppercase antes de calcular DV",
+    "Não diferenciar branch numérico-legado vs alfanumérico no cálculo do DV — algoritmo é único (RAG §6 Antipatrão 3)",
+    "Não deletar nem sobrescrever a S01 — coexistência em sprints/",
+    "Não tocar .harness/state.json nem .harness/events.jsonl (boundary do escopo de planejamento)"
+  ],
+  "stats": {
+    "totalTasks": 3,
+    "byType": { "frontend": 2, "test": 1 },
+    "totalHours": 8,
+    "crossSprintFlows": 0,
+    "specCoverage": "100%",
+    "blockers": 0,
+    "debtsClosing": 2,
+    "upstreamCommitHash": "b4f4e95c96729c083f01ca603cbca82aa2ad09d4"
+  },
+  "ordering": {
+    "T008_first": true,
+    "T009_after_T008": true,
+    "T010_after_T009": true,
+    "rationale": "T009 depende do typecheck verde (T008). T010 depende da API final do validator (T009).",
+    "executionDiagram": "T008 ─→ T009 ─→ T010 (sequencial estrito)"
+  }
+}

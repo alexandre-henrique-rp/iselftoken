@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>iSelfToken Checkout</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-container": "#41004d",
+                        "primary-dim": "#c500e6",
+                        "primary-fixed": "#ea6bff",
+                        "background": "#1f031d",
+                        "on-surface-variant": "#cc9dc0",
+                        "on-error": "#490013",
+                        "surface-container": "#30092c",
+                        "error-container": "#a70138",
+                        "on-secondary-fixed-variant": "#832d79",
+                        "inverse-primary": "#a200be",
+                        "on-primary": "#540063",
+                        "tertiary-fixed-dim": "#fc7e67",
+                        "on-tertiary": "#640e03",
+                        "secondary": "#f893e6",
+                        "secondary-fixed-dim": "#ffa7ed",
+                        "primary-container": "#ea6bff",
+                        "tertiary-container": "#fc7e67",
+                        "outline-variant": "#613b5a",
+                        "surface-container-high": "#380e33",
+                        "on-background": "#ffdbf3",
+                        "error": "#ff6e84",
+                        "on-primary-fixed-variant": "#50005f",
+                        "surface-bright": "#4a1844",
+                        "primary": "#f084ff",
+                        "on-tertiary-fixed": "#380200",
+                        "inverse-surface": "#fff7f9",
+                        "on-secondary-container": "#ffbbef",
+                        "surface-dim": "#1f031d",
+                        "primary-fixed-dim": "#e44fff",
+                        "surface-container-lowest": "#000000",
+                        "surface-container-highest": "#41133b",
+                        "on-secondary-fixed": "#60095a",
+                        "surface-variant": "#41133b",
+                        "on-error-container": "#ffb2b9",
+                        "on-primary-fixed": "#000000",
+                        "outline": "#936889",
+                        "surface": "#1f031d",
+                        "error-dim": "#d73357",
+                        "secondary-container": "#77226f",
+                        "surface-tint": "#f084ff",
+                        "on-secondary": "#610a5b",
+                        "tertiary": "#ff937f",
+                        "surface-container-low": "#270524",
+                        "tertiary-fixed": "#ff937f",
+                        "on-surface": "#ffdbf3",
+                        "on-tertiary-container": "#510500",
+                        "secondary-dim": "#e986d8",
+                        "on-tertiary-fixed-variant": "#70180a",
+                        "secondary-fixed": "#ffbdef",
+                        "tertiary-dim": "#f57963",
+                        "inverse-on-surface": "#704867"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "display": ["Manrope"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Manrope', sans-serif; }
+        .bg-kinetic-gradient {
+            background: linear-gradient(135deg, #f084ff 0%, #ea6bff 100%);
+        }
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 15rem;
+            opacity: 0.03;
+            color: #f084ff;
+            pointer-events: none;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen relative overflow-x-hidden selection:bg-primary/30 selection:text-primary-fixed">
+<!-- Kinetic Watermark -->
+<div class="watermark font-display tracking-tighter">CHECKOUT</div>
+<!-- Mobile Header (Transactional - No Global Nav Shells as per guidelines) -->
+<header class="sticky top-0 z-50 bg-surface/80 backdrop-blur-md px-6 py-4 flex items-center justify-between border-b border-surface-container-low">
+<button class="text-on-surface hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<div class="text-xl font-headline font-black tracking-tighter text-primary">iSelfToken</div>
+<div class="w-6"></div> <!-- Balancer -->
+</header>
+<main class="px-6 py-8 flex flex-col gap-8 max-w-lg mx-auto relative z-10">
+<!-- Order Summary -->
+<section class="flex flex-col gap-4">
+<h2 class="text-2xl font-headline font-bold text-on-surface mb-2">Order Summary</h2>
+<div class="bg-surface-container rounded-lg p-4 flex flex-col gap-4 shadow-[0px_24px_48px_rgba(84,0,99,0.15)]">
+<!-- Item 1 -->
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-lg bg-surface-variant flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="hub">hub</span>
+</div>
+<div>
+<p class="font-bold text-sm text-on-surface">Token Nexus AI</p>
+<p class="text-xs text-on-surface-variant">Qty: 1</p>
+</div>
+</div>
+<p class="font-bold text-primary">R$ 1.250,00</p>
+</div>
+<!-- Item 2 -->
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-lg bg-surface-variant flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="rocket_launch">rocket_launch</span>
+</div>
+<div>
+<p class="font-bold text-sm text-on-surface">Startup Pack Pro</p>
+<p class="text-xs text-on-surface-variant">Qty: 1</p>
+</div>
+</div>
+<p class="font-bold text-primary">R$ 800,00</p>
+</div>
+<!-- Item 3 -->
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-lg bg-surface-variant flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="support_agent">support_agent</span>
+</div>
+<div>
+<p class="font-bold text-sm text-on-surface">Consultoria KYC</p>
+<p class="text-xs text-on-surface-variant">Qty: 2</p>
+</div>
+</div>
+<p class="font-bold text-primary">R$ 600,00</p>
+</div>
+</div>
+<!-- Discount -->
+<div class="flex gap-2 mt-2">
+<input class="flex-1 bg-surface-container-high border-none rounded-lg px-4 py-3 text-sm text-on-surface placeholder:text-on-surface-variant focus:ring-1 focus:ring-primary focus:outline-none" placeholder="Discount Coupon" type="text"/>
+<button class="bg-surface-variant text-primary font-bold text-sm px-4 rounded-lg hover:bg-surface-container-high transition-colors">Apply</button>
+</div>
+</section>
+<!-- Payment Method -->
+<section class="flex flex-col gap-4 mt-4">
+<h2 class="text-2xl font-headline font-bold text-on-surface">Payment Method</h2>
+<div class="flex gap-4">
+<button class="flex-1 bg-primary/10 border border-primary rounded-lg py-4 flex flex-col items-center justify-center gap-2 text-primary hover:bg-primary/20 transition-colors">
+<span class="material-symbols-outlined text-3xl" data-icon="credit_card">credit_card</span>
+<span class="text-sm font-bold">Credit Card</span>
+</button>
+<button class="flex-1 bg-surface-container rounded-lg py-4 flex flex-col items-center justify-center gap-2 text-on-surface-variant hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-3xl" data-icon="qr_code_scanner">qr_code_scanner</span>
+<span class="text-sm font-bold">PIX</span>
+</button>
+</div>
+<!-- Card Form -->
+<div class="bg-surface-container rounded-lg p-5 flex flex-col gap-4 mt-2">
+<div class="flex flex-col gap-1">
+<label class="text-xs text-on-surface-variant font-bold uppercase tracking-wider">Card Number</label>
+<div class="relative">
+<input class="w-full bg-surface-container-high border-none border-b-2 border-transparent focus:border-primary rounded-t-lg px-4 py-3 text-on-surface focus:ring-0 transition-colors" placeholder="0000 0000 0000 0000" type="text"/>
+<span class="material-symbols-outlined absolute right-3 top-3 text-on-surface-variant" data-icon="credit_card">credit_card</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<label class="text-xs text-on-surface-variant font-bold uppercase tracking-wider">Name on Card</label>
+<input class="w-full bg-surface-container-high border-none border-b-2 border-transparent focus:border-primary rounded-t-lg px-4 py-3 text-on-surface focus:ring-0 transition-colors" placeholder="John Doe" type="text"/>
+</div>
+<div class="flex gap-4">
+<div class="flex flex-col gap-1 flex-1">
+<label class="text-xs text-on-surface-variant font-bold uppercase tracking-wider">Expiry</label>
+<input class="w-full bg-surface-container-high border-none border-b-2 border-transparent focus:border-primary rounded-t-lg px-4 py-3 text-on-surface focus:ring-0 transition-colors" placeholder="MM/YY" type="text"/>
+</div>
+<div class="flex flex-col gap-1 flex-1">
+<label class="text-xs text-on-surface-variant font-bold uppercase tracking-wider">CVV</label>
+<input class="w-full bg-surface-container-high border-none border-b-2 border-transparent focus:border-primary rounded-t-lg px-4 py-3 text-on-surface focus:ring-0 transition-colors" placeholder="123" type="text"/>
+</div>
+</div>
+<div class="flex flex-col gap-1 mt-2">
+<label class="text-xs text-on-surface-variant font-bold uppercase tracking-wider">Installments</label>
+<select class="w-full bg-surface-container-high border-none border-b-2 border-transparent focus:border-primary rounded-t-lg px-4 py-3 text-on-surface focus:ring-0 transition-colors appearance-none">
+<option>1x R$ 2.650,00</option>
+<option>2x R$ 1.325,00 (Sem juros)</option>
+<option>3x R$ 883,33 (Sem juros)</option>
+</select>
+</div>
+</div>
+</section>
+<!-- Total & CTA -->
+<section class="mt-8 flex flex-col gap-6">
+<div class="flex justify-between items-end border-t border-surface-container-low pt-6">
+<span class="text-on-surface-variant text-sm">Total</span>
+<span class="text-3xl font-headline font-black text-primary tracking-tight">R$ 2.650,00</span>
+</div>
+<button class="w-full bg-kinetic-gradient text-on-primary-fixed font-bold text-lg py-4 rounded-full shadow-[0px_12px_24px_rgba(240,132,255,0.3)] hover:scale-[0.98] transition-transform flex items-center justify-center gap-2">
+                FINALIZAR PAGAMENTO
+                <span class="material-symbols-outlined" data-icon="lock">lock</span>
+</button>
+<!-- Security Badges -->
+<div class="flex justify-center gap-6 text-on-surface-variant/50 pt-4 pb-8">
+<div class="flex flex-col items-center gap-1">
+<span class="material-symbols-outlined text-2xl" data-icon="verified_user">verified_user</span>
+<span class="text-[10px] uppercase font-bold tracking-widest">SSL Secure</span>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="material-symbols-outlined text-2xl" data-icon="enhanced_encryption">enhanced_encryption</span>
+<span class="text-[10px] uppercase font-bold tracking-widest">Encrypted</span>
+</div>
+</div>
+</section>
+</main>
+</body></html>
